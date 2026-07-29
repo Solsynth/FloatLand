@@ -5,11 +5,11 @@
     </h1>
 
     <!-- Profile Header Preview with Images -->
-    <div class="card bg-base-100 shadow-sm">
+    <section class="settings-panel overflow-hidden">
       <div class="relative">
         <!-- Background Image -->
         <div
-          class="aspect-16/7 bg-base-200 rounded-t-2xl overflow-hidden cursor-pointer group"
+          class="settings-profile-cover aspect-16/7 bg-base-200 overflow-hidden cursor-pointer group"
           @click="triggerBackgroundUpload"
         >
           <img
@@ -83,11 +83,11 @@
         <h2 class="text-lg font-semibold">{{ displayName }}</h2>
         <p class="text-sm text-base-content/60">@{{ user?.name }}</p>
       </div>
-    </div>
+    </section>
 
     <!-- Basic Info Form -->
-    <div class="card bg-base-100 shadow-sm">
-      <div class="card-body">
+    <section class="settings-panel">
+      <div class="settings-panel__body">
         <h2 class="card-title text-lg mb-4">{{ t("settings.basicInfo") }}</h2>
 
         <div class="space-y-4">
@@ -158,11 +158,11 @@
           </div>
         </div>
       </div>
-    </div>
+    </section>
 
     <!-- Profile Details Form -->
-    <div class="card bg-base-100 shadow-sm">
-      <div class="card-body">
+    <section class="settings-panel">
+      <div class="settings-panel__body">
         <h2 class="card-title text-lg mb-4">
           {{ t("settings.profileDetails") }}
         </h2>
@@ -346,7 +346,7 @@
           </div>
         </div>
       </div>
-    </div>
+    </section>
   </div>
 </template>
 

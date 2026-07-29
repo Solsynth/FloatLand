@@ -1,17 +1,15 @@
 <template>
   <NuxtLayout name="app">
-    <div class="grid min-w-0 xl:grid-cols-[minmax(0,1fr)_20rem] xl:gap-x-6">
+    <div class="feed-layout">
       <!-- Main Content -->
       <div class="min-w-0">
         <!-- Feed shell: continuous list like Flutter explore -->
-        <div
-          class="overflow-hidden border-y border-base-300/80 bg-base-100 sm:rounded-xl sm:border"
-        >
+        <div class="feed-stream">
           <!-- Compose -->
           <button
             v-if="isAuthenticated"
             type="button"
-            class="flex w-full items-center gap-3 border-b border-base-300/80 px-4 py-3 text-left transition-colors hover:bg-base-200/35"
+            class="feed-compose"
             @click="openCompose"
           >
             <div v-if="userAvatar" class="avatar shrink-0">
@@ -110,7 +108,7 @@
           <!-- Footer / infinite scroll -->
           <div
             ref="loadMoreSentinel"
-            class="flex min-h-14 flex-col items-center justify-center gap-2 border-t border-base-300/80 px-4 py-4"
+          class="feed-footer"
           >
             <div
               v-if="fetchingMore"
@@ -139,7 +137,7 @@
       </div>
 
       <!-- Right Sidebar (20rem rail) -->
-      <aside class="hidden w-full self-start sticky top-4 xl:block">
+      <aside class="feed-sidebar">
         <RightSidebar />
       </aside>
     </div>

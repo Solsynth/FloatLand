@@ -1,9 +1,9 @@
 <template>
   <section
     v-if="items.length > 0"
-    class="bg-base-200/45"
+    class="feed-insert"
   >
-    <div class="flex items-center gap-2 px-4 pb-1 pt-3">
+    <div class="feed-insert__header">
       <component :is="titleIcon" class="h-3.5 w-3.5 text-base-content/55" />
       <h3 class="text-xs font-semibold tracking-wide text-base-content/65">
         {{ title }}
@@ -24,7 +24,7 @@
     <!-- Multi-item carousel -->
     <div
       v-else
-      class="flex gap-2.5 overflow-x-auto px-3 pb-3 pt-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+      class="flex gap-3 overflow-x-auto px-4 pb-4 pt-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
     >
       <div
         v-for="(item, idx) in items"

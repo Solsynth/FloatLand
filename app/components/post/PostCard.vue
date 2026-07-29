@@ -238,7 +238,7 @@
       <!-- Article type header (only in list view) -->
       <div
         v-if="isArticle && !isDetail"
-        class="mt-2 rounded-box bg-base-200/40 overflow-hidden"
+        class="mt-2 overflow-hidden rounded-lg border border-base-300/70 bg-base-200/40"
       >
         <NuxtLink
           :to="`/posts/${post.id}`"
@@ -338,7 +338,7 @@
           <button
             v-if="getEmbedType(embed) === 'link'"
             type="button"
-            class="card w-full cursor-pointer bg-base-200/40 text-left transition-shadow hover:shadow-sm"
+            class="w-full cursor-pointer overflow-hidden rounded-lg border border-base-300/70 bg-base-200/40 text-left transition-colors hover:bg-base-200/65"
             @click.stop="openExternal(getEmbedUrl(embed)!)"
           >
             <div
@@ -392,9 +392,9 @@
           <!-- Poll Embed -->
           <div
             v-else-if="getEmbedType(embed) === 'poll'"
-            class="card bg-base-200/40"
+            class="rounded-lg border border-base-300/70 bg-base-200/40"
           >
-            <div class="card-body p-3">
+            <div class="p-3">
               <div class="flex items-center gap-2 text-sm font-medium">
                 <IconVote class="h-4 w-4" /> Poll
               </div>
@@ -472,7 +472,7 @@
 
         <div
           class="flex items-center gap-0.5 p-0.5"
-          :class="isFeed ? 'rounded-lg bg-base-200/70' : 'rounded-xl bg-base-200'"
+          :class="isFeed ? 'border border-base-300/70 bg-base-200/70' : 'rounded-lg border border-base-300 bg-base-200'"
         >
           <button
             class="btn px-2 btn-ghost btn-xs hover:bg-success/20 hover:text-success"
@@ -559,7 +559,7 @@ const isFeed = computed(() => props.variant === "feed");
 
 const rootClass = computed(() => {
   if (isFeed.value) {
-    return "block transition-colors duration-150 hover:bg-base-200/40";
+    return "feed-post";
   }
   if (props.embedded) {
     return "card bg-base-200 transition-shadow";

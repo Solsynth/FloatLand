@@ -30,7 +30,7 @@
       <!-- Header Section -->
       <section class="relative overflow-hidden px-4 pt-4 lg:px-6">
         <div
-          class="h-40 w-full bg-base-200 sm:h-52 rounded-2xl overflow-hidden"
+          class="h-40 w-full overflow-hidden rounded-box bg-base-200 sm:h-52"
         >
           <img
             v-if="backgroundUrl"
@@ -52,7 +52,7 @@
             </div>
             <div v-else class="avatar avatar-placeholder">
               <div
-                class="h-24 w-24 rounded-3xl bg-primary text-primary-content ring ring-base-300 ring-offset-2 ring-offset-base-100 sm:h-28 sm:w-28"
+                class="h-24 w-24 rounded-box bg-primary text-primary-content ring ring-base-300 ring-offset-2 ring-offset-base-100 sm:h-28 sm:w-28"
               >
                 <span class="text-2xl font-semibold">
                   {{ getInitials(displayName) }}
@@ -81,7 +81,7 @@
             <div v-if="publisher.type === 0 && publisher.account" class="mt-2">
               <NuxtLink
                 :to="`/@${publisher.account.name}`"
-                class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-secondary/10 hover:bg-secondary/20 text-sm transition-colors"
+                class="inline-flex items-center gap-2 rounded-box bg-primary/10 px-3 py-1.5 text-sm text-primary transition-colors hover:bg-primary/15"
               >
                 <IconUser class="w-4 h-4" />
                 <span> Belongs to @{{ publisher.account.name }} </span>
@@ -105,7 +105,7 @@
               </button>
               <button
                 v-else-if="subStatus?.isPending"
-                class="btn btn-outline"
+                class="btn bg-base-200"
                 :disabled="isSubscribing"
                 @click="unsubscribe"
               >
@@ -149,7 +149,7 @@
               </template>
             </template>
 
-            <button class="btn btn-outline btn-square" @click="shareProfile">
+            <button class="btn btn-ghost btn-square bg-base-200" @click="shareProfile">
               <IconShare2 class="w-4 h-4" />
             </button>
           </div>
@@ -367,13 +367,13 @@
                 Stats
               </h3>
               <div class="grid grid-cols-2 gap-4">
-                <div class="text-center p-3 rounded-xl bg-base-200">
+                <div class="rounded-box bg-base-200 p-3 text-center">
                   <div class="text-2xl font-bold">
                     {{ totalPosts.toLocaleString() }}
                   </div>
                   <div class="text-xs text-base-content/60">Posts</div>
                 </div>
-                <div class="text-center p-3 rounded-xl bg-base-200">
+                <div class="rounded-box bg-base-200 p-3 text-center">
                   <div class="text-2xl font-bold">
                     {{ pinnedPosts.length }}
                   </div>

@@ -19,13 +19,13 @@
       </div>
 
       <template v-else>
-        <div class="rounded-xl bg-base-100 border border-base-300/50 p-5 mb-4">
+        <div class="mb-4 rounded-box bg-base-100 p-5">
           <h1 class="text-xl font-bold tracking-tight">{{ ticket.title }}</h1>
           <div class="flex flex-wrap items-center gap-1.5 mt-3">
             <span class="badge badge-sm" :class="ticketStatusBadgeClass(ticket.status)">
               {{ statusLabel(ticket.status) }}
             </span>
-            <span class="badge badge-sm badge-outline">{{ typeLabel(ticket.type) }}</span>
+            <span class="badge badge-sm bg-base-200">{{ typeLabel(ticket.type) }}</span>
             <span class="badge badge-sm" :class="ticketPriorityBadgeClass(ticket.priority)">
               {{ priorityLabel(ticket.priority) }}
             </span>
@@ -68,7 +68,7 @@
 
         <div
           v-if="isWaiting"
-          class="rounded-xl bg-warning/10 border border-warning/25 p-4 mb-4 text-sm"
+          class="mb-4 rounded-box bg-warning/10 p-4 text-sm"
         >
           {{ t('tickets.waitingNotice') }}
         </div>
@@ -78,10 +78,10 @@
           <div
             v-for="msg in sortedMessages"
             :key="msg.id"
-            class="rounded-xl border p-4"
+            class="rounded-box p-4"
             :class="isMine(msg)
-              ? 'bg-primary/5 border-primary/15 ml-4 sm:ml-12'
-              : 'bg-base-100 border-base-300/50 mr-4 sm:mr-12'"
+              ? 'ml-4 bg-primary/10 sm:ml-12'
+              : 'mr-4 bg-base-100 sm:mr-12'"
           >
             <div class="flex items-center justify-between gap-2 mb-2">
               <span class="text-xs font-semibold">

@@ -1,7 +1,7 @@
 <template>
   <NuxtLink
     :to="`/realms/${realm.slug}`"
-    class="group block overflow-hidden rounded-xl border border-base-300/80 bg-base-100 transition-colors hover:border-base-300 hover:bg-base-200/30"
+    class="group block overflow-hidden rounded-box bg-base-100 transition-colors hover:bg-base-200"
   >
     <!-- Banner + overlapping avatar (Flutter RealmListTile card) -->
     <div class="relative aspect-[16/7] w-full bg-base-200">

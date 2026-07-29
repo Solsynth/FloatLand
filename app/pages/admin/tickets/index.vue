@@ -32,7 +32,7 @@
     <!-- Filters -->
     <AdminCard class="mb-6">
       <div class="flex flex-wrap gap-2">
-        <select v-model="filters.status" class="select select-sm bg-base-200/60 border-0 rounded-xl" @change="reload">
+        <select v-model="filters.status" class="select select-sm rounded-box border-0 bg-base-200" @change="reload">
           <option value="">All statuses</option>
           <option :value="0">Open</option>
           <option :value="1">In progress</option>
@@ -41,7 +41,7 @@
           <option :value="4">Waiting for customer</option>
           <option :value="5">Needs more information</option>
         </select>
-        <select v-model="filters.type" class="select select-sm bg-base-200/60 border-0 rounded-xl" @change="reload">
+        <select v-model="filters.type" class="select select-sm rounded-box border-0 bg-base-200" @change="reload">
           <option value="">All types</option>
           <option :value="0">Support</option>
           <option :value="1">Bug report</option>
@@ -49,7 +49,7 @@
           <option :value="3">Billing</option>
           <option :value="4">Other</option>
         </select>
-        <select v-model="filters.priority" class="select select-sm bg-base-200/60 border-0 rounded-xl" @change="reload">
+        <select v-model="filters.priority" class="select select-sm rounded-box border-0 bg-base-200" @change="reload">
           <option value="">All priorities</option>
           <option :value="0">Low</option>
           <option :value="1">Medium</option>
@@ -60,14 +60,14 @@
           v-model="filters.creatorId"
           type="text"
           placeholder="Creator ID..."
-          class="input input-sm bg-base-200/60 border-0 rounded-xl w-44 font-mono"
+          class="input input-sm w-44 rounded-box border-0 bg-base-200 font-mono"
           @keyup.enter="reload"
         />
         <input
           v-model="filters.assigneeId"
           type="text"
           placeholder="Assignee ID..."
-          class="input input-sm bg-base-200/60 border-0 rounded-xl w-44 font-mono"
+          class="input input-sm w-44 rounded-box border-0 bg-base-200 font-mono"
           @keyup.enter="reload"
         />
         <button class="btn btn-sm btn-primary" @click="reload">Filter</button>
@@ -146,7 +146,7 @@
         <p class="text-base-content/50">No tickets found</p>
       </div>
 
-      <div v-if="hasMore || total > pageSize" class="flex items-center justify-between px-5 py-3 border-t border-base-300/20">
+      <div v-if="hasMore || total > pageSize" class="flex items-center justify-between px-5 py-3">
         <span class="text-xs text-base-content/40">
           Showing {{ offset + 1 }}–{{ Math.min(offset + pageSize, total || offset + tickets.length) }}
           <template v-if="total"> of {{ total }}</template>

@@ -15,7 +15,7 @@
       <!-- Folder tree -->
       <div class="mb-4">
         <p class="text-sm text-base-content/60 mb-2">{{ t('drive.selectDestination') }}:</p>
-        <div class="border border-base-300 rounded-lg max-h-60 overflow-y-auto">
+        <div class="max-h-60 overflow-y-auto rounded-box bg-base-200 p-1">
           <div
             v-for="folder in availableFolders"
             :key="folder.id"

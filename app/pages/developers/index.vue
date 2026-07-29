@@ -12,7 +12,7 @@
             <!-- Developer List -->
             <div v-if="developers.length > 0" class="space-y-1">
               <NuxtLink v-for="dev in developers" :key="dev.id" :to="`/developers/${dev.publisher?.name}`"
-                class="flex items-center gap-4 rounded-xl p-3 transition-colors hover:bg-base-200">
+                class="flex items-center gap-4 rounded-box p-3 transition-colors hover:bg-base-200">
                 <div class="avatar">
                   <div class="w-10 rounded-full">
                     <img v-if="dev.publisher?.picture?.id" :src="getFileUrl(dev.publisher?.picture?.id)!"
@@ -37,10 +37,10 @@
               <p class="text-base-content/60 mb-4">{{ t('developer.noDevelopers') }}</p>
             </div>
 
-            <div class="divider my-1" />
+            <div class="h-2" />
 
             <!-- Enroll Developer -->
-            <button class="flex w-full items-center gap-4 rounded-xl p-3 transition-colors hover:bg-base-200"
+            <button class="flex w-full items-center gap-4 rounded-box p-3 transition-colors hover:bg-base-200"
               @click="openEnrollModal">
               <div class="avatar avatar-placeholder">
                 <div class="w-10 rounded-full bg-primary text-primary-content">
@@ -65,7 +65,7 @@
         </div>
         <div v-else class="space-y-2">
           <button v-for="pub in managedPublishers" :key="pub.id"
-            class="flex w-full items-center gap-3 rounded-lg p-3 transition-colors hover:bg-base-200"
+            class="flex w-full items-center gap-3 rounded-box p-3 transition-colors hover:bg-base-200"
             @click="handleEnroll(pub.name)">
             <div class="avatar">
               <div class="w-9 rounded-full">

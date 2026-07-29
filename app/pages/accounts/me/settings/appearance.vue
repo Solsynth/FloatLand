@@ -3,19 +3,19 @@
     <h1 class="text-2xl font-bold mb-6 pt-4">{{ t("appearance.title") }}</h1>
 
     <!-- Theme -->
-    <div class="card bg-base-100 shadow-sm">
-      <div class="card-body">
+    <section class="settings-panel">
+      <div class="settings-panel__body">
         <h2 class="card-title text-lg mb-4">
           {{ t("appearance.theme.heading") }}
         </h2>
 
         <div class="grid grid-cols-3 gap-3">
           <button
-            class="p-4 rounded-xl border-2 transition-all flex flex-col items-center gap-2"
+            class="settings-choice flex flex-col items-center gap-2 p-4"
             :class="
               theme === 'light'
-                ? 'border-primary bg-primary/10'
-                : 'border-base-300 hover:border-base-400'
+                ? 'settings-choice--active'
+                : ''
             "
             @click="setTheme('light')"
           >
@@ -23,11 +23,11 @@
             <span class="text-sm">{{ t("appearance.theme.light") }}</span>
           </button>
           <button
-            class="p-4 rounded-xl border-2 transition-all flex flex-col items-center gap-2"
+            class="settings-choice flex flex-col items-center gap-2 p-4"
             :class="
               theme === 'dark'
-                ? 'border-primary bg-primary/10'
-                : 'border-base-300 hover:border-base-400'
+                ? 'settings-choice--active'
+                : ''
             "
             @click="setTheme('dark')"
           >
@@ -35,11 +35,11 @@
             <span class="text-sm">{{ t("appearance.theme.dark") }}</span>
           </button>
           <button
-            class="p-4 rounded-xl border-2 transition-all flex flex-col items-center gap-2"
+            class="settings-choice flex flex-col items-center gap-2 p-4"
             :class="
               theme === 'system'
-                ? 'border-primary bg-primary/10'
-                : 'border-base-300 hover:border-base-400'
+                ? 'settings-choice--active'
+                : ''
             "
             @click="setTheme('system')"
           >
@@ -48,11 +48,11 @@
           </button>
         </div>
       </div>
-    </div>
+    </section>
 
     <!-- Language -->
-    <div class="card bg-base-100 shadow-sm">
-      <div class="card-body">
+    <section class="settings-panel">
+      <div class="settings-panel__body">
         <h2 class="card-title text-lg mb-1">
           {{ t("appearance.language.heading") }}
         </h2>
@@ -64,11 +64,11 @@
           <button
             v-for="loc in availableLocales"
             :key="loc.code"
-            class="p-4 rounded-xl border-2 transition-all flex items-center gap-3 text-left"
+            class="settings-choice flex items-center gap-3 p-4 text-left"
             :class="
               loc.code === locale
-                ? 'border-primary bg-primary/10'
-                : 'border-base-300 hover:border-base-400'
+                ? 'settings-choice--active'
+                : ''
             "
             @click="switchLocale(loc.code)"
           >
@@ -81,11 +81,11 @@
           </button>
         </div>
       </div>
-    </div>
+    </section>
 
     <!-- Font Size -->
-    <div class="card bg-base-100 shadow-sm">
-      <div class="card-body">
+    <section class="settings-panel">
+      <div class="settings-panel__body">
         <h2 class="card-title text-lg mb-4">
           {{ t("appearance.fontSize.heading") }}
         </h2>
@@ -109,11 +109,11 @@
           </p>
         </fieldset>
       </div>
-    </div>
+    </section>
 
     <!-- Display Options -->
-    <div class="card bg-base-100 shadow-sm">
-      <div class="card-body">
+    <section class="settings-panel">
+      <div class="settings-panel__body">
         <h2 class="card-title text-lg mb-4">
           {{ t("appearance.display.heading") }}
         </h2>
@@ -139,7 +139,7 @@
           </div>
         </div>
       </div>
-    </div>
+    </section>
 
     <div class="flex gap-2">
       <button

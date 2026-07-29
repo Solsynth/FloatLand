@@ -49,11 +49,11 @@
             </div>
             <div class="rounded-xl bg-base-200/60 border border-base-300/40 px-4 py-3">
               <div class="text-xs text-base-content/45 mb-1">{{ t('developer.projects.title') }}</div>
-              <div class="text-2xl font-bold text-secondary tabular-nums">{{ stats.totalProjects ?? 0 }}</div>
+              <div class="text-2xl font-bold text-primary tabular-nums">{{ stats.totalProjects ?? 0 }}</div>
             </div>
             <div class="rounded-xl bg-base-200/60 border border-base-300/40 px-4 py-3">
               <div class="text-xs text-base-content/45 mb-1">{{ t('developer.bots.title') }}</div>
-              <div class="text-2xl font-bold text-accent tabular-nums">{{ stats.totalBots ?? 0 }}</div>
+              <div class="text-2xl font-bold text-primary tabular-nums">{{ stats.totalBots ?? 0 }}</div>
             </div>
           </div>
           <div v-else class="flex justify-center py-4">

@@ -3,7 +3,7 @@
     <AlertDialogPortal>
       <AlertDialogOverlay class="fixed inset-0 bg-black/40 z-50" />
       <AlertDialogContent
-        class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 bg-base-100 rounded-2xl shadow-xl w-[90vw] max-w-md p-6"
+        class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 bg-base-100 rounded-box shadow-sm w-[90vw] max-w-md p-6"
       >
         <AlertDialogTitle class="text-lg font-semibold mb-2">
           {{ title }}

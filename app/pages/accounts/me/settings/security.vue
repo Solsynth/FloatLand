@@ -62,7 +62,7 @@
                     <div
                         v-for="contact in contacts"
                         :key="contact.id"
-                        class="flex items-center justify-between gap-3 p-4 bg-base-200 rounded-xl"
+                        class="flex items-center justify-between gap-3 p-4 bg-base-200 rounded-box"
                     >
                         <div class="min-w-0">
                             <p class="font-medium truncate" :class="{ 'line-through opacity-60': !contact.verifiedAt }">
@@ -153,7 +153,7 @@
                     <div
                         v-for="conn in connections"
                         :key="conn.id"
-                        class="flex items-center justify-between gap-3 p-4 bg-base-200 rounded-xl"
+                        class="flex items-center justify-between gap-3 p-4 bg-base-200 rounded-box"
                     >
                         <div class="min-w-0">
                             <p class="font-medium">{{ conn.provider }}</p>
@@ -205,11 +205,11 @@
 
                 <div
                     v-if="passkeyFactor"
-                    class="flex items-center justify-between p-3 bg-base-200 rounded-xl mb-4"
+                    class="flex items-center justify-between p-3 bg-base-200 rounded-box mb-4"
                 >
                     <div class="flex items-center gap-3">
                         <div
-                            class="w-10 h-10 rounded-lg flex items-center justify-center"
+                            class="w-10 h-10 rounded-box flex items-center justify-center"
                             :class="passkeyFactor.enabledAt ? 'bg-primary text-primary-content' : 'bg-base-300 text-base-content/50'"
                         >
                             <IconFingerprint class="w-5 h-5" />
@@ -265,10 +265,10 @@
                     <div
                         v-for="passkey in passkeys"
                         :key="passkey.id"
-                        class="flex items-center justify-between p-4 bg-base-200 rounded-xl gap-3"
+                        class="flex items-center justify-between p-4 bg-base-200 rounded-box gap-3"
                     >
                         <div class="flex items-center gap-3 min-w-0">
-                            <div class="w-10 h-10 rounded-lg bg-primary text-primary-content flex items-center justify-center shrink-0">
+                            <div class="w-10 h-10 rounded-box bg-primary text-primary-content flex items-center justify-center shrink-0">
                                 <IconKey class="w-5 h-5" />
                             </div>
                             <div class="min-w-0">
@@ -335,11 +335,11 @@
                     <div
                         v-for="factor in nonPasskeyFactors"
                         :key="factor.id"
-                        class="flex items-center justify-between p-4 bg-base-200 rounded-xl"
+                        class="flex items-center justify-between p-4 bg-base-200 rounded-box"
                     >
                         <div class="flex items-center gap-3">
                             <div
-                                class="w-10 h-10 rounded-lg flex items-center justify-center"
+                                class="w-10 h-10 rounded-box flex items-center justify-center"
                                 :class="factor.enabledAt ? 'bg-primary text-primary-content' : 'bg-base-300 text-base-content/50'"
                             >
                                 <component
@@ -474,11 +474,11 @@
                          <div
                              v-for="device in devices"
                              :key="device.deviceId"
-                             class="p-4 bg-base-200 rounded-xl cursor-pointer hover:bg-base-300 transition-colors"
+                             class="p-4 bg-base-200 rounded-box cursor-pointer hover:bg-base-300 transition-colors"
                              @click="showDeviceDetail(device)"
                          >
                              <div class="flex items-center gap-3">
-                                 <div class="w-10 h-10 rounded-lg bg-primary text-primary-content flex items-center justify-center">
+                                 <div class="w-10 h-10 rounded-box bg-primary text-primary-content flex items-center justify-center">
                                      <component :is="getPlatformIcon(device.platform)" class="w-5 h-5" />
                                  </div>
                                  <div class="flex-1 min-w-0">
@@ -547,11 +547,11 @@
                         <div
                             v-for="session in filteredSessions"
                             :key="session.id"
-                            class="p-4 bg-base-200 rounded-xl"
+                            class="p-4 bg-base-200 rounded-box"
                         >
                             <div class="flex items-start gap-3">
                                 <div
-                                    class="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
+                                    class="w-10 h-10 rounded-box flex items-center justify-center shrink-0"
                                     :class="session.isCurrent ? 'bg-primary text-primary-content' : 'bg-base-300 text-base-content/50'"
                                 >
                                     <component :is="getSessionTypeIcon(session.type)" class="w-5 h-5" />
@@ -708,7 +708,7 @@
     <dialog class="modal" :class="{ 'modal-open': showRecoveryCode }">
         <div class="modal-box max-w-md">
             <div class="text-center mb-6">
-                <div class="w-16 h-16 bg-primary text-primary-content rounded-full flex items-center justify-center mx-auto mb-4">
+                <div class="w-16 h-16 bg-primary text-primary-content rounded-box flex items-center justify-center mx-auto mb-4">
                     <IconKeyRound class="w-8 h-8" />
                 </div>
                 <h3 class="font-bold text-lg">{{ t('settings.recoveryCodeCreated') }}</h3>
@@ -720,7 +720,7 @@
 
             <div
                 v-if="recoveryCode"
-                class="bg-base-200 p-4 rounded-lg mb-6"
+                class="bg-base-200 p-4 rounded-box mb-6"
             >
                 <code class="text-lg font-mono block text-center break-all">{{ recoveryCode }}</code>
             </div>
@@ -745,7 +745,7 @@
             </div>
 
             <div class="flex items-center gap-3 mb-6">
-                <div class="w-12 h-12 rounded-xl bg-primary text-primary-content flex items-center justify-center">
+                <div class="w-12 h-12 rounded-box bg-primary text-primary-content flex items-center justify-center">
                     <component :is="getPlatformIcon(selectedDevice.platform)" class="w-6 h-6" />
                 </div>
                 <div>
@@ -756,19 +756,19 @@
             </div>
 
             <div class="grid grid-cols-2 gap-3 mb-6">
-                <div class="bg-base-200 p-3 rounded-lg">
+                <div class="bg-base-200 p-3 rounded-box">
                     <p class="text-xs text-base-content/60">{{ t('settings.deviceId') }}</p>
                     <p class="font-mono text-sm truncate">{{ selectedDevice.deviceId.slice(0, 12) }}</p>
                 </div>
-                <div class="bg-base-200 p-3 rounded-lg">
+                <div class="bg-base-200 p-3 rounded-box">
                     <p class="text-xs text-base-content/60">{{ t('settings.activeSessionsCount') }}</p>
                     <p class="font-semibold">{{ selectedDevice.sessions?.length ?? 0 }}</p>
                 </div>
-                <div class="bg-base-200 p-3 rounded-lg">
+                <div class="bg-base-200 p-3 rounded-box">
                     <p class="text-xs text-base-content/60">{{ t('settings.firstSeen') }}</p>
                     <p class="text-sm">{{ selectedDevice.sessions?.length ? formatDate(selectedDevice.sessions[0]!.createdAt) : '-' }}</p>
                 </div>
-                <div class="bg-base-200 p-3 rounded-lg">
+                <div class="bg-base-200 p-3 rounded-box">
                     <p class="text-xs text-base-content/60">{{ t('settings.lastActive') }}</p>
                     <p class="text-sm">{{ selectedDevice.sessions?.length ? formatDate(selectedDevice.sessions[0]!.lastGrantedAt) : '-' }}</p>
                 </div>
@@ -779,7 +779,7 @@
                 <div
                     v-for="session in selectedDevice.sessions"
                     :key="session.id"
-                    class="p-3 bg-base-200 rounded-lg"
+                    class="p-3 bg-base-200 rounded-box"
                 >
                     <div class="flex items-center gap-2">
                         <component :is="getSessionTypeIcon(session.type)" class="w-4 h-4" />

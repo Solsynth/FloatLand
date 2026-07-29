@@ -14,35 +14,35 @@
         <span class="loading loading-spinner loading-md" />
       </div>
       <div v-else-if="stats" class="grid grid-cols-2 sm:grid-cols-5 gap-4">
-        <div class="bg-base-200/60 rounded-xl p-3 text-center">
-          <div class="text-2xl font-bold text-success">{{ stats.hitRatio ? (stats.hitRatio * 100).toFixed(1) + '%' : '0%' }}</div>
+        <div class="rounded-box bg-base-200 p-3 text-center">
+          <div class="text-2xl font-bold text-primary">{{ stats.hitRatio ? (stats.hitRatio * 100).toFixed(1) + '%' : '0%' }}</div>
           <div class="text-xs text-base-content/40 mt-1">Hit Ratio</div>
         </div>
-        <div class="bg-base-200/60 rounded-xl p-3 text-center">
+        <div class="rounded-box bg-base-200 p-3 text-center">
           <div class="text-2xl font-bold">{{ stats.keyspaceHits }}</div>
           <div class="text-xs text-base-content/40 mt-1">Keyspace Hits</div>
         </div>
-        <div class="bg-base-200/60 rounded-xl p-3 text-center">
+        <div class="rounded-box bg-base-200 p-3 text-center">
           <div class="text-2xl font-bold">{{ stats.keyspaceMisses }}</div>
           <div class="text-xs text-base-content/40 mt-1">Keyspace Misses</div>
         </div>
-        <div class="bg-base-200/60 rounded-xl p-3 text-center">
+        <div class="rounded-box bg-base-200 p-3 text-center">
           <div class="text-2xl font-bold">{{ formatBytes(stats.usedMemoryBytes) }}</div>
           <div class="text-xs text-base-content/40 mt-1">Memory Used</div>
         </div>
-        <div class="bg-base-200/60 rounded-xl p-3 text-center">
+        <div class="rounded-box bg-base-200 p-3 text-center">
           <div class="text-2xl font-bold">{{ stats.connectedClients }}</div>
           <div class="text-xs text-base-content/40 mt-1">Connections</div>
         </div>
-        <div class="bg-base-200/60 rounded-xl p-3 text-center">
+        <div class="rounded-box bg-base-200 p-3 text-center">
           <div class="text-2xl font-bold">{{ stats.totalCommandsProcessed }}</div>
           <div class="text-xs text-base-content/40 mt-1">Commands</div>
         </div>
-        <div class="bg-base-200/60 rounded-xl p-3 text-center">
+        <div class="rounded-box bg-base-200 p-3 text-center">
           <div class="text-2xl font-bold">{{ stats.evictedKeys }}</div>
           <div class="text-xs text-base-content/40 mt-1">Evicted</div>
         </div>
-        <div class="bg-base-200/60 rounded-xl p-3 text-center">
+        <div class="rounded-box bg-base-200 p-3 text-center">
           <div class="text-2xl font-bold">{{ stats.expiredKeys }}</div>
           <div class="text-xs text-base-content/40 mt-1">Expired</div>
         </div>
@@ -64,7 +64,7 @@
             v-model="clearKey"
             type="text"
             placeholder="auth:session:abc123..."
-            class="input input-sm flex-1 bg-base-200/60 border-0 rounded-xl"
+            class="input input-sm flex-1 rounded-box border-0 bg-base-200"
           />
           <button class="btn btn-sm btn-primary" :disabled="keyLoading || !clearKey" @click="handleClearKey">
             {{ keyLoading ? '...' : 'Clear' }}
@@ -86,7 +86,7 @@
             v-model="clearGroup"
             type="text"
             placeholder="auth:account_sessions:id"
-            class="input input-sm flex-1 bg-base-200/60 border-0 rounded-xl"
+            class="input input-sm flex-1 rounded-box border-0 bg-base-200"
           />
           <button class="btn btn-sm btn-primary" :disabled="groupLoading || !clearGroup" @click="handleClearGroup">
             {{ groupLoading ? '...' : 'Clear' }}
@@ -109,7 +109,7 @@
           v-model="inspectGroup"
           type="text"
           placeholder="Group name..."
-          class="input input-sm flex-1 bg-base-200/60 border-0 rounded-xl"
+          class="input input-sm flex-1 rounded-box border-0 bg-base-200"
           @keyup.enter="handleInspectGroup"
         />
         <button class="btn btn-sm btn-primary" :disabled="inspectLoading" @click="handleInspectGroup">
@@ -122,7 +122,7 @@
           <span class="font-mono text-xs">{{ groupInfo.group }}</span>
           <span class="badge badge-xs">{{ groupInfo.count }} keys</span>
         </div>
-        <div class="bg-base-300/20 rounded-xl p-3 max-h-48 overflow-y-auto">
+        <div class="max-h-48 overflow-y-auto rounded-box bg-base-200 p-3">
           <div v-for="key in groupInfo.keys" :key="key" class="text-xs font-mono text-base-content/60 py-0.5">
             {{ key }}
           </div>
@@ -131,7 +131,7 @@
     </AdminCard>
 
     <!-- Clear All (danger) -->
-    <AdminCard class="mt-6 border-error/20">
+    <AdminCard class="mt-6">
       <div class="flex items-center justify-between">
         <div>
           <h3 class="text-sm font-semibold text-error">Clear All Cache</h3>

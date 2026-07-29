@@ -4,7 +4,7 @@
     <DrawerPortal>
       <DrawerOverlay class="fixed inset-0 bg-black/40 z-50" />
       <DrawerContent
-        class="fixed bottom-0 left-0 right-0 mx-auto z-50 bg-base-100 rounded-t-2xl max-h-[80vh] flex flex-col max-w-lg"
+        class="fixed bottom-0 left-0 right-0 z-50 mx-auto flex max-h-[80vh] max-w-lg flex-col rounded-t-box bg-base-100"
       >
         <!-- Drag handle -->
         <div class="flex justify-center pt-3 pb-2">
@@ -21,7 +21,7 @@
 
         <!-- Main Tabs (Upload / Browse) -->
         <TabsRoot v-model="activeTab" class="flex-1 flex flex-col min-h-0">
-          <TabsList class="tabs tabs-boxed mx-5 mb-3">
+          <TabsList class="tabs mx-5 mb-3 bg-base-200">
             <TabsTrigger value="upload" class="tab" :class="{ 'tab-active': activeTab === 'upload' }">
               <IconUpload class="w-4 h-4 mr-1.5" />
               {{ t('cloudFilePicker.upload') }}
@@ -37,8 +37,8 @@
             <div class="space-y-4">
               <!-- Drop zone -->
               <div
-                class="border-2 border-dashed border-base-300 rounded-xl p-8 text-center transition-colors cursor-pointer hover:border-primary hover:bg-primary/5"
-                :class="{ 'border-primary bg-primary/10': isDragging }"
+                class="cursor-pointer rounded-box bg-base-200 p-8 text-center transition-colors hover:bg-primary/5"
+                :class="{ 'bg-primary/10': isDragging }"
                 @dragover.prevent="isDragging = true"
                 @dragleave.prevent="isDragging = false"
                 @drop.prevent="handleDrop"
@@ -73,7 +73,7 @@
                   <div
                     v-for="(file, idx) in selectedFiles"
                     :key="idx"
-                    class="relative group rounded-lg overflow-hidden border border-base-300 aspect-square"
+                    class="group relative aspect-square overflow-hidden rounded-box bg-base-200"
                   >
                     <img v-if="file.preview" :src="file.preview" class="w-full h-full object-cover" >
                     <div v-else class="w-full h-full flex items-center justify-center bg-base-200">
@@ -108,7 +108,7 @@
                       </div>
                     </div>
 
-                    <div class="absolute bottom-0 inset-x-0 bg-linear-to-t from-black/70 to-transparent p-2">
+                    <div class="absolute inset-x-0 bottom-0 bg-black/60 p-2">
                       <p class="text-xs text-white truncate">{{ file.file.name }}</p>
                     </div>
                   </div>
@@ -180,7 +180,7 @@
         <dialog ref="cropperDialog" class="modal modal-bottom sm:modal-middle">
           <div class="modal-box max-w-2xl">
             <h3 class="font-bold text-lg mb-4">{{ t('cloudFilePicker.cropImage') }}</h3>
-            <div class="aspect-square bg-base-300 rounded-lg overflow-hidden">
+            <div class="aspect-square overflow-hidden rounded-box bg-base-300">
               <VueCropper
                 v-if="cropperImageSrc"
                 ref="cropperRef"

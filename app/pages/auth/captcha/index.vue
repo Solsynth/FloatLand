@@ -1,8 +1,8 @@
 <template>
-	<div class="min-h-screen bg-base-200 flex items-center justify-center px-4">
-		<div class="w-full max-w-lg rounded-3xl border border-base-300/70 bg-base-100/90 p-6 text-center shadow-2xl backdrop-blur-xl">
+	<div class="auth-page">
+		<div class="auth-panel auth-panel--compact text-center">
 			<div class="mb-4 flex flex-col items-center gap-3">
-				<div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/15 text-primary">
+				<div class="auth-status-icon bg-primary/15 text-primary">
 					<IconShieldCheck class="w-5 h-5" />
 				</div>
 				<div>

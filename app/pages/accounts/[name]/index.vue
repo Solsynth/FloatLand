@@ -30,7 +30,7 @@
       <!-- Header Section -->
       <section class="relative overflow-hidden px-4 pt-4 lg:px-6">
         <div
-          class="h-40 w-full bg-base-200 sm:h-52 rounded-2xl overflow-hidden"
+          class="h-40 w-full overflow-hidden rounded-box bg-base-200 sm:h-52"
         >
           <img
             v-if="backgroundUrl"
@@ -52,7 +52,7 @@
             </div>
             <div v-else class="avatar avatar-placeholder">
               <div
-                class="h-24 w-24 rounded-3xl bg-primary text-primary-content ring ring-base-300 ring-offset-2 ring-offset-base-100 sm:h-28 sm:w-28 sm:mb-8"
+                class="h-24 w-24 rounded-box bg-primary text-primary-content ring ring-base-300 ring-offset-2 ring-offset-base-100 sm:h-28 sm:w-28 sm:mb-8"
               >
                 <span class="text-2xl font-semibold">
                   {{ getInitials(displayName) }}
@@ -105,7 +105,7 @@
               </button>
               <button
                 v-if="relationship?.isBlocked"
-                class="btn btn-outline gap-2"
+                class="btn bg-base-200 gap-2"
                 :disabled="isActionLoading"
                 @click="unblock"
               >
@@ -141,13 +141,13 @@
               </NuxtLink>
             </template>
 
-            <button class="btn btn-outline btn-square" @click="shareProfile">
+            <button class="btn btn-ghost btn-square bg-base-200" @click="shareProfile">
               <IconShare2 class="w-4 h-4" />
             </button>
 
             <button
               v-if="isAuthenticated && !isCurrentUser"
-              class="btn btn-error btn-outline btn-square"
+              class="btn btn-ghost btn-square text-error"
               @click="reportUser"
             >
               <IconFlag class="w-4 h-4" />
@@ -226,7 +226,7 @@
             <div v-if="timelineItems.length > 0" class="py-2 text-center">
               <button
                 v-if="hasMoreTimeline"
-                class="btn btn-outline btn-sm"
+                class="btn btn-ghost btn-sm bg-base-200"
                 :disabled="isLoadingTimeline"
                 @click="loadMoreTimeline"
               >
@@ -275,10 +275,10 @@
             </div>
           </div>
 
-          <div v-if="botDeveloper?.publisher" class="card bg-secondary/5">
+          <div v-if="botDeveloper?.publisher" class="card bg-base-200">
             <div class="card-body p-4">
               <div class="flex items-center gap-2">
-                <IconBot class="w-4 h-4 text-secondary shrink-0" />
+                <IconBot class="w-4 h-4 text-primary shrink-0" />
                 <span class="text-sm">
                   Automated by
                   <NuxtLink
@@ -298,7 +298,7 @@
             <div class="card-body p-4">
               <div class="flex items-center gap-3">
                 <div
-                  class="w-10 h-10 rounded-lg bg-error/10 flex items-center justify-center shrink-0"
+                  class="w-10 h-10 rounded-box bg-error/10 flex items-center justify-center shrink-0"
                 >
                   <IconAlertTriangle class="w-5 h-5 text-error" />
                 </div>

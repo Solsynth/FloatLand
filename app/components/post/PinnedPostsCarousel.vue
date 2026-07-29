@@ -10,7 +10,7 @@
 
             <div class="relative">
                 <!-- Page View -->
-                <div class="overflow-hidden rounded-xl">
+                <div class="overflow-hidden rounded-box">
                     <div
                         class="flex transition-transform duration-300 ease-out"
                         :style="{
@@ -55,14 +55,14 @@
                 <!-- Navigation Arrows -->
                 <button
                     v-if="posts.length > 1 && currentPage > 0"
-                    class="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 btn btn-circle btn-sm btn-ghost bg-base-100/80 backdrop-blur"
+                    class="absolute left-0 top-1/2 -translate-x-2 -translate-y-1/2 btn btn-circle btn-ghost btn-sm bg-base-100"
                     @click="prevPage"
                 >
                     <IconChevronLeft class="w-4 h-4" />
                 </button>
                 <button
                     v-if="posts.length > 1 && currentPage < posts.length - 1"
-                    class="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 btn btn-circle btn-sm btn-ghost bg-base-100/80 backdrop-blur"
+                    class="absolute right-0 top-1/2 translate-x-2 -translate-y-1/2 btn btn-circle btn-ghost btn-sm bg-base-100"
                     @click="nextPage"
                 >
                     <IconChevronRight class="w-4 h-4" />

@@ -5,7 +5,7 @@
     <div class="min-w-0">
     <!-- Mobile Header -->
     <div class="lg:hidden sticky z-10 -mx-4 -mt-4 top-14 mb-2">
-      <div class="flex items-center gap-3 border-b border-base-300 bg-base-100/95 pl-4 pr-4 py-3 backdrop-blur">
+      <div class="flex items-center gap-3 bg-base-100 px-4 py-3">
         <button class="btn btn-circle btn-ghost btn-sm" @click="handleBack">
           <IconArrowLeft class="w-5 h-5" />
         </button>
@@ -38,7 +38,7 @@
                 <span class="text-base-content/40">{{ t('surveys.endedAt') }} {{ formatDate(survey.endedAt) }}</span>
               </div>
 
-              <div class="divider" />
+              <div class="h-3" />
 
               <div class="space-y-4">
                 <div v-for="q in survey.questions" :key="q.id" class="space-y-1">
@@ -47,7 +47,7 @@
                 </div>
               </div>
             </div>
-            <div class="card-footer flex gap-2 px-6 py-3 border-t border-base-300/50">
+            <div class="card-footer flex gap-2 px-6 py-3">
               <button class="btn btn-ghost btn-sm" @click="editing = true">
                 <IconEdit class="w-4 h-4" /> {{ t('common.edit') }}
               </button>
@@ -114,8 +114,8 @@
                   <label
                     v-for="opt in q.options"
                     :key="opt.id"
-                    class="flex items-center gap-3 p-2 rounded-lg border border-base-300/50 cursor-pointer hover:bg-base-200/50 transition-colors"
-                    :class="{ 'border-primary bg-primary/5': answers[q.id] === opt.id }"
+                    class="flex cursor-pointer items-center gap-3 rounded-box bg-base-200 p-2 transition-colors hover:bg-base-300"
+                    :class="{ 'bg-primary/10': answers[q.id] === opt.id }"
                   >
                     <input
                       type="radio"
@@ -134,8 +134,8 @@
                   <label
                     v-for="opt in q.options"
                     :key="opt.id"
-                    class="flex items-center gap-3 p-2 rounded-lg border border-base-300/50 cursor-pointer hover:bg-base-200/50 transition-colors"
-                    :class="{ 'border-primary bg-primary/5': (answers[q.id] || []).includes(opt.id) }"
+                    class="flex cursor-pointer items-center gap-3 rounded-box bg-base-200 p-2 transition-colors hover:bg-base-300"
+                    :class="{ 'bg-primary/10': (answers[q.id] || []).includes(opt.id) }"
                   >
                     <input
                       type="checkbox"
@@ -151,8 +151,8 @@
                 <!-- Yes/No -->
                 <div v-if="q.type === 2" class="flex gap-4">
                   <label
-                    class="flex items-center gap-2 p-3 rounded-lg border border-base-300/50 cursor-pointer hover:bg-base-200/50 transition-colors flex-1 justify-center"
-                    :class="{ 'border-primary bg-primary/5': answers[q.id] === true }"
+                    class="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-box bg-base-200 p-3 transition-colors hover:bg-base-300"
+                    :class="{ 'bg-primary/10': answers[q.id] === true }"
                   >
                     <input
                       type="radio"
@@ -165,8 +165,8 @@
                     <span class="text-sm font-medium">{{ t('surveys.yes') }}</span>
                   </label>
                   <label
-                    class="flex items-center gap-2 p-3 rounded-lg border border-base-300/50 cursor-pointer hover:bg-base-200/50 transition-colors flex-1 justify-center"
-                    :class="{ 'border-primary bg-primary/5': answers[q.id] === false }"
+                    class="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-box bg-base-200 p-3 transition-colors hover:bg-base-300"
+                    :class="{ 'bg-primary/10': answers[q.id] === false }"
                   >
                     <input
                       type="radio"

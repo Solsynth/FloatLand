@@ -1,5 +1,5 @@
 <template>
-    <div class="card bg-linear-to-br from-primary/10 to-base-200">
+    <div class="card bg-base-100">
         <div class="card-body p-4">
             <div class="flex items-center justify-between mb-2">
                 <div class="flex items-center gap-2">
@@ -13,9 +13,9 @@
                 </span>
             </div>
 
-            <div class="relative h-2 bg-base-300 rounded-full overflow-hidden">
+            <div class="relative h-2 overflow-hidden rounded-box bg-base-300">
                 <div
-                    class="absolute inset-y-0 left-0 bg-primary rounded-full transition-all duration-500"
+                    class="absolute inset-y-0 left-0 rounded-box bg-primary transition-all duration-200"
                     :style="{ width: `${progress * 100}%` }"
                 />
             </div>

@@ -36,7 +36,7 @@
 					<!-- Profile Header -->
 					<section class="relative overflow-hidden">
 						<div
-							class="h-32 w-full bg-base-200 sm:h-40 rounded-2xl overflow-hidden"
+							class="h-32 w-full overflow-hidden rounded-box bg-base-200 sm:h-40"
 						>
 							<img
 								v-if="backgroundUrl"
@@ -61,7 +61,7 @@
 								</div>
 								<div v-else class="avatar avatar-placeholder">
 									<div
-										class="h-20 w-20 rounded-2xl bg-primary text-primary-content ring ring-base-300 ring-offset-2 ring-offset-base-100 sm:h-24 sm:w-24"
+										class="h-20 w-20 rounded-box bg-primary text-primary-content ring ring-base-300 ring-offset-2 ring-offset-base-100 sm:h-24 sm:w-24"
 									>
                                         <span class="text-xl font-semibold">
                                             {{ getInitials(displayName) }}
@@ -124,7 +124,7 @@
 							<div class="card-body p-2">
 								<NuxtLink
 									:to="`/accounts/${authStore.user.name}`"
-									class="flex items-center gap-3 p-3 rounded-xl hover:bg-base-200 transition-colors"
+									class="flex items-center gap-3 p-3 rounded-box hover:bg-base-200 transition-colors"
 								>
 									<IconUser
 										class="w-5 h-5 text-base-content/70"
@@ -139,7 +139,7 @@
 
 								<NuxtLink
 									to="/accounts/me/settings"
-									class="flex items-center gap-3 p-3 rounded-xl hover:bg-base-200 transition-colors"
+									class="flex items-center gap-3 p-3 rounded-box hover:bg-base-200 transition-colors"
 								>
 									<IconSettings
 										class="w-5 h-5 text-base-content/70"
@@ -157,7 +157,7 @@
 							<div class="card-body p-2">
 							<NuxtLink
 								to="/accounts/me/wallet"
-								class="flex items-center gap-3 p-3 rounded-xl hover:bg-base-200 transition-colors"
+								class="flex items-center gap-3 p-3 rounded-box hover:bg-base-200 transition-colors"
 							>
 								<IconCreditCard
 									class="w-5 h-5 text-base-content/70"
@@ -172,7 +172,7 @@
 								href="https://api.solian.app/passport/accounts/me/passbook/member"
 								target="_blank"
 								rel="noopener"
-								class="flex items-center gap-3 p-3 rounded-xl hover:bg-base-200 transition-colors"
+								class="flex items-center gap-3 p-3 rounded-box hover:bg-base-200 transition-colors"
 							>
 								<IconWallet
 									class="w-5 h-5 text-base-content/70"
@@ -185,7 +185,7 @@
 
 								<NuxtLink
 									to="/accounts/me/badges"
-									class="flex items-center gap-3 p-3 rounded-xl hover:bg-base-200 transition-colors"
+									class="flex items-center gap-3 p-3 rounded-box hover:bg-base-200 transition-colors"
 								>
 									<IconMedal
 										class="w-5 h-5 text-base-content/70"
@@ -198,7 +198,7 @@
 
 								<NuxtLink
 									to="/accounts/me/relationships"
-									class="flex items-center gap-3 p-3 rounded-xl hover:bg-base-200 transition-colors"
+									class="flex items-center gap-3 p-3 rounded-box hover:bg-base-200 transition-colors"
 								>
 									<IconUsers
 										class="w-5 h-5 text-base-content/70"
@@ -211,7 +211,7 @@
 
 								<NuxtLink
 									to="/accounts/me/notifications"
-									class="flex items-center gap-3 p-3 rounded-xl hover:bg-base-200 transition-colors"
+									class="flex items-center gap-3 p-3 rounded-box hover:bg-base-200 transition-colors"
 								>
 									<IconBell
 										class="w-5 h-5 text-base-content/70"
@@ -235,7 +235,7 @@
 							<div class="card-body p-2">
 								<NuxtLink
 									to="/settings"
-									class="flex items-center gap-3 p-3 rounded-xl hover:bg-base-200 transition-colors"
+									class="flex items-center gap-3 p-3 rounded-box hover:bg-base-200 transition-colors"
 								>
 									<IconSettings
 										class="w-5 h-5 text-base-content/70"
@@ -247,7 +247,7 @@
 								</NuxtLink>
 
 								<button
-									class="flex items-center gap-3 p-3 rounded-xl hover:bg-base-200 transition-colors w-full text-left"
+									class="flex w-full items-center gap-3 rounded-box p-3 text-left transition-colors hover:bg-base-200"
 									@click="showLogoutConfirm = true"
 								>
 									<IconLogOut class="w-5 h-5 text-error" />

@@ -17,14 +17,14 @@
       </div>
     </div>
 
-    <div class="flex h-[calc(100vh-8rem)] overflow-hidden rounded-xl border border-base-300 bg-base-100 lg:h-[calc(100vh-2rem)]">
+    <div class="flex h-[calc(100vh-8rem)] overflow-hidden rounded-box bg-base-100 lg:h-[calc(100vh-2rem)]">
       <!-- Left: Chat Rooms List -->
       <div
-        class="flex w-full flex-col border-r border-base-300 lg:w-80 xl:w-96"
+        class="flex w-full flex-col bg-base-200/70 lg:w-80 xl:w-96"
         :class="{ 'hidden lg:flex': selectedRoomId }"
       >
         <!-- Rooms Header -->
-        <div class="flex items-center justify-between border-b border-base-300 px-4 py-3">
+        <div class="flex items-center justify-between px-4 py-3">
           <h2 class="text-lg font-bold">{{ t('chat.title') }}</h2>
           <button
             class="btn btn-ghost btn-sm"
@@ -41,7 +41,7 @@
         <!-- Unread summary -->
         <div
           v-if="unreadCount > 0"
-          class="flex items-center justify-between border-b border-base-300 bg-primary/5 px-4 py-2"
+          class="mx-3 mb-2 flex items-center justify-between rounded-box bg-primary/10 px-3 py-2"
         >
           <span class="text-xs text-primary">
             {{ t('chat.unreadRooms', { count: unreadCount }) }}
@@ -111,7 +111,7 @@
         <!-- Room selected -->
         <template v-else>
           <!-- Chat Header -->
-          <div class="flex items-center gap-3 border-b border-base-300 px-4 py-3">
+          <div class="flex items-center gap-3 px-4 py-3">
             <!-- Back button (mobile only) -->
             <button
               class="btn btn-ghost btn-circle btn-sm lg:hidden"

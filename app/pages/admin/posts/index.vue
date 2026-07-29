@@ -24,12 +24,12 @@
             v-model="searchQuery"
             type="text"
             placeholder="Search posts by title, description, or content..."
-            class="input input-sm w-full pl-9 bg-base-200/60 border-0 rounded-xl"
+            class="input input-sm w-full rounded-box border-0 bg-base-200 pl-9"
             @keyup.enter="handleSearch"
           />
         </div>
         <div class="flex flex-wrap gap-2">
-          <select v-model="filters.visibility" class="select select-sm bg-base-200/60 border-0 rounded-xl" @change="handleSearch">
+          <select v-model="filters.visibility" class="select select-sm rounded-box border-0 bg-base-200" @change="handleSearch">
             <option value="">All Visibility</option>
             <option value="public">Public</option>
             <option value="friends">Friends</option>
@@ -38,7 +38,7 @@
             <option value="close_friends_only">Close Friends</option>
             <option value="quiet_public">Quiet Public</option>
           </select>
-          <select v-model="filters.shadowbanReason" class="select select-sm bg-base-200/60 border-0 rounded-xl" @change="handleSearch">
+          <select v-model="filters.shadowbanReason" class="select select-sm rounded-box border-0 bg-base-200" @change="handleSearch">
             <option value="">All Shadowban</option>
             <option value="spam">Spam</option>
             <option value="advertising">Advertising</option>
@@ -48,12 +48,12 @@
             <option value="illegal">Illegal</option>
             <option value="other">Other</option>
           </select>
-          <select v-model="filters.locked" class="select select-sm bg-base-200/60 border-0 rounded-xl" @change="handleSearch">
+          <select v-model="filters.locked" class="select select-sm rounded-box border-0 bg-base-200" @change="handleSearch">
             <option value="">Any Lock</option>
             <option value="true">Locked</option>
             <option value="false">Unlocked</option>
           </select>
-          <select v-model="filters.drafted" class="select select-sm bg-base-200/60 border-0 rounded-xl" @change="handleSearch">
+          <select v-model="filters.drafted" class="select select-sm rounded-box border-0 bg-base-200" @change="handleSearch">
             <option value="">Any Draft</option>
             <option value="true">Drafts</option>
             <option value="false">Published only</option>
@@ -62,14 +62,14 @@
             v-model="filters.publisherId"
             type="text"
             placeholder="Publisher ID..."
-            class="input input-sm bg-base-200/60 border-0 rounded-xl w-40"
+            class="input input-sm w-40 rounded-box border-0 bg-base-200"
             @keyup.enter="handleSearch"
           />
           <input
             v-model="filters.realmId"
             type="text"
             placeholder="Realm ID..."
-            class="input input-sm bg-base-200/60 border-0 rounded-xl w-40"
+            class="input input-sm w-40 rounded-box border-0 bg-base-200"
             @keyup.enter="handleSearch"
           />
           <button class="btn btn-sm btn-primary" @click="handleSearch">
@@ -170,7 +170,7 @@
         <p class="text-xs text-base-content/30">Try adjusting your search or filters</p>
       </div>
 
-      <div v-if="hasMore || total > pageSize" class="flex items-center justify-between px-5 py-3 border-t border-base-300/20">
+      <div v-if="hasMore || total > pageSize" class="flex items-center justify-between px-5 py-3">
         <span class="text-xs text-base-content/40">
           Showing {{ offset + 1 }}–{{ Math.min(offset + pageSize, total) }} of {{ total || 'many' }}
         </span>

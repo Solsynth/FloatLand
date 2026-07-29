@@ -1,6 +1,6 @@
 <template>
   <NuxtLayout name="app">
-    <div class="grid min-w-0 xl:grid-cols-[minmax(0,1fr)_20rem] xl:gap-x-6">
+    <div class="feed-layout">
       <!-- Main Content -->
       <div class="space-y-4 min-w-0">
         <div class="flex items-center justify-between">
@@ -8,18 +8,18 @@
         </div>
 
         <!-- Tabs -->
-        <div class="tabs tabs-boxed bg-base-200">
+        <div class="search-tabs">
           <button
-            class="tab"
-            :class="{ 'tab-active': activeTab === 'categories' }"
+            class="search-tabs__item"
+            :class="{ 'search-tabs__item--active': activeTab === 'categories' }"
             @click="activeTab = 'categories'"
           >
             <IconFolder class="w-4 h-4 mr-2" />
             Categories
           </button>
           <button
-            class="tab"
-            :class="{ 'tab-active': activeTab === 'tags' }"
+            class="search-tabs__item"
+            :class="{ 'search-tabs__item--active': activeTab === 'tags' }"
             @click="activeTab = 'tags'"
           >
             <IconTag class="w-4 h-4 mr-2" />
@@ -43,15 +43,14 @@
               v-for="category in categories"
               :key="category.id"
               :to="`/categories/${category.slug}`"
-              class="card bg-base-100 hover:bg-base-200 transition-colors cursor-pointer"
+              class="search-result-row cursor-pointer"
             >
               <div class="card-body p-4">
                 <div class="flex items-center gap-3">
                   <div
-                    class="w-10 h-10 rounded-lg flex items-center justify-center"
-                    :style="{ backgroundColor: category.color || '#6366f1' }"
+                    class="flex h-10 w-10 items-center justify-center rounded-lg bg-base-200 text-primary"
                   >
-                    <IconFolder class="w-5 h-5 text-white" />
+                    <IconFolder class="w-5 h-5" />
                   </div>
                   <div class="flex-1 min-w-0">
                     <h3 class="font-semibold truncate">{{ category.name }}</h3>
@@ -114,7 +113,7 @@
       </div>
 
       <!-- Right Sidebar (Desktop only) -->
-      <aside class="hidden w-full self-start sticky top-4 xl:block">
+      <aside class="feed-sidebar">
         <RightSidebar />
       </aside>
     </div>

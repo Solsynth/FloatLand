@@ -1,6 +1,6 @@
 <template>
   <button
-    class="flex w-full items-start gap-3 rounded-xl p-3 text-left transition-colors hover:bg-base-200"
+    class="flex w-full items-start gap-3 rounded-box p-3 text-left transition-colors hover:bg-base-200"
     :class="{ 'bg-primary/5': !notification.viewedAt }"
     @click="handleClick"
   >

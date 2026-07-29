@@ -1,15 +1,13 @@
 <template>
-	<div class="min-h-screen flex flex-col items-center justify-center px-4 py-8 relative overflow-hidden">
-		<div class="fixed inset-0 -z-10 bg-base-200" />
-
-		<div class="w-full max-w-md rounded-3xl shadow-2xl overflow-hidden border border-base-300/30 bg-base-100/95 backdrop-blur-sm p-6 md:p-8">
+	<div class="auth-page">
+		<div class="auth-panel auth-panel--compact">
 			<ConfuseSpinner v-if="loading" message="Loading..." />
 
 			<template v-else-if="status">
 				<!-- Pending: show approval UI -->
 				<template v-if="status.status === 'pending'">
 					<div class="flex flex-col items-center text-center mb-6">
-						<div class="w-14 h-14 rounded-2xl bg-primary/15 flex items-center justify-center mb-3">
+						<div class="auth-status-icon bg-primary/15 text-primary">
 							<IconPlug class="w-7 h-7 text-primary" />
 						</div>
 						<h1 class="text-2xl font-bold">Device Authorization</h1>
@@ -23,12 +21,12 @@
 						<span>{{ error }}</span>
 					</div>
 
-					<div class="rounded-2xl border border-base-300 bg-base-200/60 p-4 mb-4">
+					<div class="auth-detail-block mb-4">
 						<p class="text-xs text-base-content/50 mb-2">User Code</p>
 						<p class="text-2xl font-mono font-bold tracking-wider">{{ status.userCode }}</p>
 					</div>
 
-					<div class="rounded-2xl border border-base-300 bg-base-200/60 p-4 mb-6">
+					<div class="auth-detail-block mb-6">
 						<p class="mb-3 text-sm font-semibold flex items-center gap-2">
 							<IconShield class="w-4 h-4 text-primary" />
 							Requested permissions
@@ -59,7 +57,7 @@
 				<!-- Already approved/declined/expired -->
 				<div v-else class="flex flex-col items-center justify-center py-8 text-center">
 					<div
-						class="w-16 h-16 rounded-full flex items-center justify-center mb-4"
+						class="auth-status-icon mb-4"
 						:class="{
 							'bg-success/20': status.status === 'approved',
 							'bg-error/20': status.status === 'declined' || status.status === 'expired',
@@ -79,7 +77,7 @@
 
 			<!-- Error state -->
 			<div v-else class="flex flex-col items-center justify-center py-8 text-center">
-				<div class="w-16 h-16 rounded-full bg-error/20 flex items-center justify-center mb-4">
+				<div class="auth-status-icon mb-4 bg-error/20">
 					<IconAlertCircle class="w-8 h-8 text-error" />
 				</div>
 				<h2 class="text-xl font-bold">Invalid Code</h2>

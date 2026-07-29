@@ -9,8 +9,8 @@
     </p>
 
     <!-- Notification Topics -->
-    <div class="card bg-base-100 shadow-sm">
-      <div class="card-body">
+    <section class="settings-panel">
+      <div class="settings-panel__body">
         <div class="flex items-center justify-between mb-4 gap-2 flex-wrap">
           <h2 class="card-title text-lg">
             {{ t("settings.notificationTopics") }}
@@ -47,7 +47,7 @@
           <div
             v-for="topic in topics"
             :key="topic.topic"
-            class="flex items-center justify-between gap-3 p-4 bg-base-200 rounded-xl"
+            class="settings-row"
           >
             <div class="min-w-0">
               <p class="font-medium">{{ topicLabel(topic) }}</p>
@@ -66,7 +66,7 @@
           </div>
         </div>
       </div>
-    </div>
+    </section>
 
     <!-- Add Custom Topic Modal -->
     <dialog class="modal" :class="{ 'modal-open': showAddTopic }">

@@ -15,12 +15,12 @@
       </div>
       <div class="stat bg-base-100 rounded-box shadow-sm">
         <div class="stat-title">{{ t('merchant.totalSettled') }}</div>
-        <div class="stat-value text-secondary text-2xl">{{ overview?.totalSettled ?? 0 }}</div>
+        <div class="stat-value text-primary text-2xl">{{ overview?.totalSettled ?? 0 }}</div>
         <div class="stat-desc text-base-content/40">{{ t('merchant.allTime') }}</div>
       </div>
       <div class="stat bg-base-100 rounded-box shadow-sm">
         <div class="stat-title">{{ t('merchant.activeAds') }}</div>
-        <div class="stat-value text-accent text-2xl">{{ adStats.filter(a => a.isCurrentlyPlaced).length }}</div>
+        <div class="stat-value text-primary text-2xl">{{ adStats.filter(a => a.isCurrentlyPlaced).length }}</div>
         <div class="stat-desc text-base-content/40">{{ t('merchant.sponsoredPosts') }}</div>
       </div>
     </div>
@@ -35,7 +35,7 @@
             <div
               v-for="(data, currency) in overview?.pending"
               :key="currency"
-              class="flex items-center justify-between py-1 border-b border-base-200 last:border-0"
+              class="flex items-center justify-between rounded-box bg-base-200 px-2 py-1"
             >
               <span class="text-sm font-medium text-base-content/70">{{ currency }}</span>
               <div class="text-right">
@@ -64,7 +64,7 @@
             <div
               v-for="ad in adStats.slice(0, 5)"
               :key="ad.postId"
-              class="flex items-center justify-between py-1 border-b border-base-200 last:border-0"
+              class="flex items-center justify-between rounded-box bg-base-200 px-2 py-1"
             >
               <div class="min-w-0 flex-1">
                 <div class="truncate text-sm font-medium">{{ ad.title || ad.slug || ad.postId.slice(0, 8) }}</div>

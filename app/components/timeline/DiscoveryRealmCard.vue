@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex h-full flex-col rounded-xl border border-base-300/70 bg-base-100 p-3 transition-colors hover:border-base-300"
+    class="feed-discovery-card flex h-full flex-col p-3"
   >
     <div class="flex items-center gap-2.5">
       <div v-if="realmPictureUrl" class="avatar shrink-0">

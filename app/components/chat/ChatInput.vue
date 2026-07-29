@@ -1,5 +1,5 @@
 <template>
-  <div class="border-t border-base-300 bg-base-100">
+  <div class="bg-base-100">
     <!-- Reply / Forward / Edit indicator bar -->
     <Transition
       enter-active-class="transition-all duration-200 ease-out"
@@ -11,7 +11,7 @@
     >
       <div
         v-if="replyTo || forwardTo || editTo"
-        class="flex items-center gap-2 border-b border-base-300 bg-base-200/50 px-4 py-2"
+        class="mx-3 mb-2 flex items-center gap-2 rounded-box bg-base-200 px-3 py-2"
       >
         <!-- Action icon -->
         <component
@@ -50,13 +50,13 @@
     >
       <div
         v-if="attachments.length > 0"
-        class="overflow-hidden border-b border-base-300"
+        class="overflow-hidden"
       >
         <div class="flex gap-2 overflow-x-auto px-4 py-2">
           <div
             v-for="(file, index) in attachments"
             :key="file.id"
-            class="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg border border-base-300 bg-base-200"
+            class="relative h-20 w-20 shrink-0 overflow-hidden rounded-box bg-base-200"
           >
             <!-- Preview -->
             <img

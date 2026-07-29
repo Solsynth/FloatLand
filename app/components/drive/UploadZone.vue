@@ -12,7 +12,7 @@
     <Transition name="fade">
       <div
         v-if="isDragging"
-        class="absolute inset-0 z-50 flex items-center justify-center bg-primary/10 border-2 border-dashed border-primary rounded-xl backdrop-blur-sm"
+        class="absolute inset-0 z-50 flex items-center justify-center rounded-box bg-base-100/95 shadow-sm"
       >
         <div class="flex flex-col items-center gap-3">
           <div class="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center">

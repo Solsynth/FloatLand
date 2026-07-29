@@ -1,17 +1,17 @@
 <template>
 	<div class="min-h-screen bg-base-200 flex items-center justify-center px-4 py-8">
-		<div class="w-full max-w-4xl rounded-3xl shadow-2xl backdrop-blur-xl overflow-hidden">
+		<div class="w-full max-w-4xl overflow-hidden rounded-box bg-base-100 shadow-sm">
 			<div class="grid md:grid-cols-[0.95fr_1.05fr]">
 				<!-- Left Column: Branding -->
 				<section
-					class="flex flex-col justify-between gap-4 rounded-t-3xl bg-base-100/50 p-6 backdrop-blur-2xl md:rounded-l-3xl md:rounded-tr-none md:p-8"
+					class="flex flex-col justify-between gap-4 bg-base-200 p-6 md:p-8"
 				>
 					<div class="flex flex-col gap-4">
-						<div class="w-12 h-12 rounded-xl bg-warning/20 flex items-center justify-center">
-							<IconWand2 class="w-6 h-6 text-warning" />
+						<div class="flex h-12 w-12 items-center justify-center rounded-box bg-primary/10">
+							<IconWand2 class="w-6 h-6 text-primary" />
 						</div>
 						<div>
-							<p class="text-xs font-semibold tracking-[0.2em] text-base-content/70 uppercase">
+							<p class="text-xs font-semibold text-base-content/70">
 								Magic Spell
 							</p>
 						</div>
@@ -29,7 +29,7 @@
 				</section>
 
 				<!-- Right Column: Spell Content -->
-				<section class="rounded-b-2xl bg-base-100/90 p-6 md:rounded-r-2xl md:rounded-bl-none md:p-8 min-h-96 flex flex-col justify-between">
+				<section class="flex min-h-96 flex-col justify-between bg-base-100 p-6 md:p-8">
 					<!-- Loading State -->
 					<div v-if="loading" class="flex flex-col items-center justify-center py-16">
 						<ConfuseSpinner message="Loading spell..." />

@@ -3,7 +3,7 @@
         <label
             v-for="factor in availableFactors"
             :key="factor.id"
-            class="flex items-center gap-3 rounded-lg border border-base-300 p-3 transition-colors"
+            class="auth-choice"
             :class="{
                 'border-primary bg-primary/5': selectedFactor?.id === factor.id,
                 'cursor-pointer hover:border-base-content/20 hover:bg-base-200/60': !isBlacklisted(factor.id) && selectedFactor?.id !== factor.id,

@@ -1,7 +1,7 @@
 <template>
-  <div class="rounded-box border border-warning/30 bg-warning/10 p-6 sm:p-8">
+  <div class="rounded-box bg-warning/10 p-6 sm:p-8">
     <div class="flex flex-col sm:flex-row sm:items-start gap-4">
-      <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-warning/20 text-warning">
+      <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-box bg-warning/20 text-warning">
         <IconWallet class="h-6 w-6" />
       </div>
       <div class="min-w-0 flex-1">

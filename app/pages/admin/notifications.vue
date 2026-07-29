@@ -3,17 +3,17 @@
     <AdminPageHeader title="Notifications" description="Send push notifications to accounts" />
 
     <TabsRoot v-model="activeTab" default-value="send">
-      <TabsList class="flex border-b border-base-200 mb-6">
+      <TabsList class="mb-6 flex gap-1 rounded-box bg-base-200 p-1">
         <TabsTrigger
           value="send"
-          class="flex items-center gap-2 px-4 py-3 text-sm font-medium text-base-content/60 border-b-2 border-transparent transition-colors hover:text-base-content data-[state=active]:text-primary data-[state=active]:border-primary"
+          class="flex items-center gap-2 rounded-box px-4 py-2 text-sm font-medium text-base-content/60 transition-colors hover:text-base-content data-[state=active]:bg-base-100 data-[state=active]:text-primary"
         >
           <IconSend class="w-4 h-4" />
           Send
         </TabsTrigger>
         <TabsTrigger
           value="observability"
-          class="flex items-center gap-2 px-4 py-3 text-sm font-medium text-base-content/60 border-b-2 border-transparent transition-colors hover:text-base-content data-[state=active]:text-primary data-[state=active]:border-primary"
+          class="flex items-center gap-2 rounded-box px-4 py-2 text-sm font-medium text-base-content/60 transition-colors hover:text-base-content data-[state=active]:bg-base-100 data-[state=active]:text-primary"
         >
           <IconActivity class="w-4 h-4" />
           Observability
@@ -29,10 +29,10 @@
                 <!-- Targeting -->
                 <div>
                   <label class="label label-text text-sm font-medium">Target Mode</label>
-                  <div class="flex gap-2 rounded-xl bg-base-200/70 p-1">
+                  <div class="flex gap-2 rounded-box bg-base-200 p-1">
                     <button
                       type="button"
-                      class="flex-1 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all"
+                      class="flex-1 rounded-box px-3 py-1.5 text-xs font-semibold transition-colors"
                       :class="targetMode === 'accounts' ? 'bg-base-100 text-primary shadow-sm' : 'text-base-content/50'"
                       @click="targetMode = 'accounts'"
                     >
@@ -40,7 +40,7 @@
                     </button>
                     <button
                       type="button"
-                      class="flex-1 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all"
+                      class="flex-1 rounded-box px-3 py-1.5 text-xs font-semibold transition-colors"
                       :class="targetMode === 'broadcast' ? 'bg-base-100 text-primary shadow-sm' : 'text-base-content/50'"
                       @click="targetMode = 'broadcast'"
                     >
@@ -66,7 +66,7 @@
                   </div>
                   <button
                     type="button"
-                    class="btn btn-sm btn-outline w-full"
+                    class="btn btn-sm w-full bg-base-200"
                     @click="openAccountPicker"
                   >
                     <IconUsers class="w-4 h-4" />
@@ -77,32 +77,32 @@
                 <!-- Notification Content -->
                 <div>
                   <label class="label label-text text-sm font-medium">Topic</label>
-                  <input v-model="form.topic" type="text" class="input input-sm w-full bg-base-200/60 border-0 rounded-xl" placeholder="admin.notice" />
+                  <input v-model="form.topic" type="text" class="input input-sm w-full rounded-box border-0 bg-base-200" placeholder="admin.notice" />
                 </div>
                 <div>
                   <label class="label label-text text-sm font-medium">Title</label>
-                  <input v-model="form.title" type="text" class="input input-sm w-full bg-base-200/60 border-0 rounded-xl" placeholder="Notification title" />
+                  <input v-model="form.title" type="text" class="input input-sm w-full rounded-box border-0 bg-base-200" placeholder="Notification title" />
                 </div>
                 <div>
                   <label class="label label-text text-sm font-medium">Subtitle</label>
-                  <input v-model="form.subtitle" type="text" class="input input-sm w-full bg-base-200/60 border-0 rounded-xl" placeholder="Optional subtitle" />
+                  <input v-model="form.subtitle" type="text" class="input input-sm w-full rounded-box border-0 bg-base-200" placeholder="Optional subtitle" />
                 </div>
                 <div>
                   <label class="label label-text text-sm font-medium">Body</label>
                   <textarea
                     v-model="form.body"
-                    class="textarea textarea-sm w-full bg-base-200/60 border-0 rounded-xl"
+                    class="textarea textarea-sm w-full rounded-box border-0 bg-base-200"
                     rows="3"
                     placeholder="Notification body..."
                   />
                 </div>
                 <div>
                   <label class="label label-text text-sm font-medium">Action URI</label>
-                  <input v-model="form.actionUri" type="text" class="input input-sm w-full bg-base-200/60 border-0 rounded-xl" placeholder="solian://path/to/content" />
+                  <input v-model="form.actionUri" type="text" class="input input-sm w-full rounded-box border-0 bg-base-200" placeholder="solian://path/to/content" />
                 </div>
                 <div>
                   <label class="label label-text text-sm font-medium">Push Type</label>
-                  <input v-model="form.pushType" type="text" class="input input-sm w-full bg-base-200/60 border-0 rounded-xl" placeholder="alert" />
+                  <input v-model="form.pushType" type="text" class="input input-sm w-full rounded-box border-0 bg-base-200" placeholder="alert" />
                   <p class="text-xs text-base-content/40 mt-1">e.g. alert — forwarded on the Ring push path</p>
                 </div>
                 <div>
@@ -112,7 +112,7 @@
                   </label>
                   <textarea
                     v-model="metaJson"
-                    class="textarea textarea-sm w-full text-sm font-mono bg-base-200/60 border-0 rounded-xl"
+                    class="textarea textarea-sm w-full rounded-box border-0 bg-base-200 text-sm font-mono"
                     rows="3"
                     placeholder='{ "category": "maintenance" }'
                   />
@@ -141,7 +141,7 @@
                 </button>
 
                 <!-- Result -->
-                <div v-if="result" class="rounded-xl bg-success/5 border border-success/20 p-3">
+                <div v-if="result" class="rounded-box bg-success/10 p-3">
                   <p class="text-sm text-success font-medium">Delivered successfully</p>
                   <p class="text-xs text-base-content/60 mt-1">
                     Requested: {{ result.requested }} • Sent: {{ result.sent }} • Skipped: {{ result.skipped }}
@@ -174,12 +174,12 @@
         <div class="space-y-6">
           <!-- Range controls -->
           <div class="flex flex-wrap items-end gap-3">
-            <div class="flex gap-1 rounded-xl bg-base-200/70 p-1">
+            <div class="flex gap-1 rounded-box bg-base-200 p-1">
               <button
                 v-for="preset in rangePresets"
                 :key="preset.days"
                 type="button"
-                class="rounded-lg px-3 py-1.5 text-xs font-semibold transition-all"
+                class="rounded-box px-3 py-1.5 text-xs font-semibold transition-colors"
                 :class="obsRangeDays === preset.days ? 'bg-base-100 text-primary shadow-sm' : 'text-base-content/50'"
                 @click="setObsRangeDays(preset.days)"
               >

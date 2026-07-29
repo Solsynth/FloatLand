@@ -164,21 +164,21 @@ const borderClasses = computed(() => {
   if (props.isReply) {
     return 'border-primary/40'
   }
-  return 'border-secondary/40'
+  return 'border-primary/40'
 })
 
 const contentClasses = computed(() => {
   if (props.isReply) {
     return 'bg-primary/10'
   }
-  return 'bg-secondary/10'
+  return 'bg-primary/10'
 })
 
 const loadingClasses = computed(() => {
   if (props.isReply) {
     return 'bg-primary/5 text-primary/70'
   }
-  return 'bg-secondary/5 text-secondary/70'
+  return 'bg-primary/5 text-primary/70'
 })
 
 // Click handler - jump to quoted message

@@ -15,7 +15,7 @@
                 v-for="pub in managedPublishers"
                 :key="pub.id"
                 :to="`/merchants/${pub.name}`"
-                class="flex items-center gap-4 rounded-xl p-3 transition-colors hover:bg-base-200"
+                class="flex items-center gap-4 rounded-box p-3 transition-colors hover:bg-base-200"
               >
                 <div class="avatar">
                   <div class="w-10 rounded-full">

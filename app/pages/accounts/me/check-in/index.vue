@@ -128,7 +128,7 @@
       v-if="isCheckingIn"
       class="fixed inset-0 z-50 flex items-center justify-center bg-base-100/90"
     >
-      <div class="card bg-base-100 shadow-xl max-w-sm mx-4">
+      <div class="card mx-4 max-w-sm bg-base-100 shadow-sm">
         <div class="card-body items-center text-center gap-4 p-6">
           <img
             src="/images/michan/checking-in.webp"

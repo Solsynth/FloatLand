@@ -99,7 +99,7 @@ function gradeColor(grade: string): string {
   if (!grade) return 'text-base-content/60'
   if (grade.startsWith('S')) return 'text-primary'
   if (grade.startsWith('A')) return 'text-primary'
-  if (grade.startsWith('B')) return 'text-secondary'
+  if (grade.startsWith('B')) return 'text-primary'
   if (grade === 'D') return 'text-error'
   return 'text-base-content/60'
 }

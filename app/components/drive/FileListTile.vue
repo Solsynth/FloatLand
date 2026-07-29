@@ -1,7 +1,7 @@
 <template>
   <div
     class="flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors cursor-pointer hover:bg-base-200 group"
-    :class="{ 'bg-primary/10 border border-primary/30': isSelected }"
+    :class="{ 'bg-primary/10': isSelected }"
     @click="handleClick"
     @contextmenu.prevent="$emit('contextmenu', $event)"
   >
@@ -27,9 +27,9 @@
         class="w-10 h-10 rounded-lg object-cover"
         alt=""
       />
-      <IconFileVideo v-else-if="isVideo" class="w-5 h-5 text-secondary" />
-      <IconFileAudio v-else-if="isAudio" class="w-5 h-5 text-accent" />
-      <IconFileText v-else-if="isText" class="w-5 h-5 text-info" />
+      <IconFileVideo v-else-if="isVideo" class="w-5 h-5 text-primary" />
+      <IconFileAudio v-else-if="isAudio" class="w-5 h-5 text-primary" />
+      <IconFileText v-else-if="isText" class="w-5 h-5 text-primary" />
       <IconFile v-else class="w-5 h-5 text-base-content/50" />
     </div>
 
@@ -68,7 +68,7 @@
         </DropdownMenuTrigger>
         <DropdownMenuPortal>
           <DropdownMenuContent
-            class="min-w-[180px] bg-base-100 rounded-lg p-1 shadow-lg border border-base-300 z-50"
+            class="z-50 min-w-[180px] rounded-box bg-base-100 p-1 shadow-sm"
             :side-offset="5"
             align="end"
           >
@@ -170,9 +170,9 @@ const fileUrl = computed(() => getFileUrl(props.file.id) || "#");
 
 const iconBgClass = computed(() => {
   if (props.file.isFolder) return "bg-primary/10";
-  if (isImage.value) return "bg-secondary/10";
-  if (isVideo.value) return "bg-accent/10";
-  if (isAudio.value) return "bg-info/10";
+  if (isImage.value) return "bg-primary/10";
+  if (isVideo.value) return "bg-primary/10";
+  if (isAudio.value) return "bg-primary/10";
   return "bg-base-200";
 });
 

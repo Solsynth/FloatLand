@@ -1,16 +1,16 @@
 <template>
   <div
-    class="rounded-xl bg-base-100 border border-base-300/50 shadow-sm"
+    class="rounded-box bg-base-100 shadow-sm"
     :class="[
       hoverable
-        ? 'transition-colors duration-150 hover:border-base-300 hover:shadow cursor-pointer'
+        ? 'cursor-pointer transition-colors duration-150 hover:bg-base-200'
         : '',
     ]"
   >
     <!-- Header -->
     <div
       v-if="$slots.header || $slots.actions || title"
-      class="flex items-center justify-between gap-3 border-b border-base-300/40"
+      class="flex items-center justify-between gap-3 bg-base-200/60"
       :class="[compact ? 'px-4 py-3' : 'px-5 py-3.5']"
     >
       <div v-if="title" class="min-w-0">
@@ -38,7 +38,7 @@
     <!-- Footer -->
     <div
       v-if="$slots.footer"
-      class="border-t border-base-300/40 bg-base-200/30"
+      class="bg-base-200"
       :class="[compact ? 'px-4 py-3' : 'px-5 py-3.5']"
     >
       <slot name="footer" />

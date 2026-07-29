@@ -10,7 +10,7 @@
             </h3>
         </div>
         <div class="card bg-base-100">
-            <div class="divide-y divide-base-300">
+            <div class="space-y-1">
                 <FortuneItem
                     v-for="item in fortuneItems"
                     :key="item.label"

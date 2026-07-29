@@ -9,11 +9,11 @@
         </div>
         <div class="stat bg-base-100 rounded-box shadow-sm">
           <div class="stat-title">{{ t('merchant.totalImpressions') }}</div>
-          <div class="stat-value text-secondary text-2xl">{{ totalImpressions }}</div>
+          <div class="stat-value text-primary text-2xl">{{ totalImpressions }}</div>
         </div>
         <div class="stat bg-base-100 rounded-box shadow-sm">
           <div class="stat-title">{{ t('merchant.currentlyPlaced') }}</div>
-          <div class="stat-value text-accent text-2xl">{{ liveCount }}</div>
+          <div class="stat-value text-primary text-2xl">{{ liveCount }}</div>
         </div>
       </div>
 

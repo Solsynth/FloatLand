@@ -1,12 +1,12 @@
 <template>
   <div
-    class="rounded-xl bg-base-100/60 backdrop-blur-xl border border-base-300/30 shadow-sm p-5 transition-all hover:shadow-md hover:border-base-300/60"
+    class="rounded-box bg-base-100 p-5 shadow-sm transition-colors hover:bg-base-200"
     :class="clickable ? 'cursor-pointer' : ''"
     @click="$emit('click')"
   >
     <div class="flex items-start justify-between">
       <div class="space-y-1 min-w-0">
-        <p class="text-xs font-medium uppercase tracking-wider text-base-content/40 truncate">
+        <p class="truncate text-xs font-medium text-base-content/50">
           {{ label }}
         </p>
         <p class="text-2xl font-bold tracking-tight text-base-content">
@@ -24,7 +24,7 @@
       </div>
       <div
         v-if="icon"
-        class="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center"
+        class="flex h-10 w-10 shrink-0 items-center justify-center rounded-box"
         :class="iconBg"
       >
         <component :is="icon" class="w-5 h-5" :class="iconColor" />
@@ -58,8 +58,8 @@ defineEmits<{
 const iconBg = computed(() => {
   const map: Record<string, string> = {
     primary: 'bg-primary/10',
-    secondary: 'bg-secondary/10',
-    accent: 'bg-accent/10',
+    secondary: 'bg-primary/10',
+    accent: 'bg-primary/10',
     info: 'bg-info/10',
     success: 'bg-success/10',
     warning: 'bg-warning/10',
@@ -71,8 +71,8 @@ const iconBg = computed(() => {
 const iconColor = computed(() => {
   const map: Record<string, string> = {
     primary: 'text-primary',
-    secondary: 'text-secondary',
-    accent: 'text-accent',
+    secondary: 'text-primary',
+    accent: 'text-primary',
     info: 'text-info',
     success: 'text-success',
     warning: 'text-warning',

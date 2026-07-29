@@ -23,7 +23,7 @@
             </div>
             <div v-else class="avatar avatar-placeholder">
               <div
-                class="w-16 h-16 rounded-2xl bg-primary text-primary-content flex items-center justify-center text-xl font-bold ring-4 ring-base-100"
+                class="w-16 h-16 rounded-box bg-primary text-primary-content flex items-center justify-center text-xl font-bold ring-4 ring-base-100"
               >
                 {{ getInitials(displayName) }}
               </div>
@@ -51,7 +51,7 @@
         <!-- Verification Badge -->
         <div
           v-if="publisher.verification"
-          class="flex items-center gap-2 p-2 rounded-lg bg-primary/10 text-primary text-sm"
+          class="flex items-center gap-2 p-2 rounded-box bg-primary/10 text-primary text-sm"
         >
           <IconShieldCheck class="w-4 h-4" />
           <span class="font-medium">{{ publisher.verification.title }}</span>

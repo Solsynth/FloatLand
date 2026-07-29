@@ -4,7 +4,7 @@
       <DrawerPortal>
         <DrawerOverlay class="fixed inset-0 z-50 bg-black/40" />
         <DrawerContent
-          class="fixed bottom-0 left-0 right-0 z-50 mx-auto flex h-[min(88vh,720px)] max-w-2xl flex-col rounded-t-2xl border border-base-300/60 bg-base-100 shadow-xl outline-none"
+          class="fixed bottom-0 left-0 right-0 z-50 mx-auto flex h-[min(88vh,720px)] max-w-2xl flex-col rounded-t-box bg-base-100 shadow-sm outline-none"
         >
           <!-- Drag handle -->
           <div class="flex justify-center pb-1 pt-3">
@@ -13,7 +13,7 @@
 
           <!-- Header -->
           <div
-            class="flex items-center justify-between gap-2 border-b border-base-200 px-3 py-2 sm:px-4"
+            class="flex items-center justify-between gap-2 bg-base-200/70 px-3 py-2 sm:px-4"
           >
             <div class="flex min-w-0 items-center gap-2">
               <button
@@ -71,7 +71,7 @@
           <!-- Context banners -->
           <div
             v-if="originalPost"
-            class="flex items-center gap-2 border-b border-primary/20 bg-primary/10 px-4 py-2 text-sm text-primary"
+            class="flex items-center gap-2 bg-primary/10 px-4 py-2 text-sm text-primary"
           >
             <IconPencil class="h-4 w-4 shrink-0" />
             <span class="font-medium">{{ t('compose.editing') }}</span>
@@ -80,7 +80,7 @@
           <button
             v-if="replyingTo"
             type="button"
-            class="flex w-full items-start gap-2 border-b border-base-200 bg-base-200/40 px-4 py-2.5 text-left transition-colors hover:bg-base-200/70"
+            class="flex w-full items-start gap-2 bg-base-200/40 px-4 py-2.5 text-left transition-colors hover:bg-base-200/70"
             @click="openReferencePost(replyingTo)"
           >
             <IconReply class="mt-0.5 h-4 w-4 shrink-0 text-base-content/60" />
@@ -118,7 +118,7 @@
           <button
             v-if="forwardingTo"
             type="button"
-            class="flex w-full items-start gap-2 border-b border-base-200 bg-base-200/40 px-4 py-2.5 text-left transition-colors hover:bg-base-200/70"
+            class="flex w-full items-start gap-2 bg-base-200/40 px-4 py-2.5 text-left transition-colors hover:bg-base-200/70"
             @click="openReferencePost(forwardingTo)"
           >
             <IconForward class="mt-0.5 h-4 w-4 shrink-0 text-base-content/60" />
@@ -137,7 +137,7 @@
                     />
                     <div
                       v-else
-                      class="flex h-full w-full items-center justify-center bg-secondary/15 text-[10px] text-secondary"
+                      class="flex h-full w-full items-center justify-center bg-primary/10 text-[10px] text-primary"
                     >
                       {{ getInitials(publisherDisplayName(forwardingTo.publisher)) }}
                     </div>
@@ -206,7 +206,7 @@
                   <!-- Publisher dropdown -->
                   <div
                     v-if="publisherPickerOpen"
-                    class="absolute left-0 top-12 z-20 w-56 overflow-hidden rounded-xl border border-base-300 bg-base-100 shadow-lg"
+                    class="absolute left-0 top-12 z-20 w-56 overflow-hidden rounded-box bg-base-100 shadow-sm"
                     @click.stop
                   >
                     <button
@@ -302,7 +302,7 @@
                     <!-- Autocomplete dropdown -->
                     <div
                       v-if="autocompleteOpen && autocompleteItems.length > 0"
-                      class="absolute left-0 right-0 top-full z-30 mt-1 max-h-48 overflow-y-auto rounded-lg border border-base-300 bg-base-100 shadow-lg"
+                      class="absolute left-0 right-0 top-full z-30 mt-1 max-h-48 overflow-y-auto rounded-box bg-base-100 shadow-sm"
                     >
                       <button
                         v-for="(item, idx) in autocompleteItems"
@@ -382,7 +382,7 @@
 
           <!-- Toolbar -->
           <div
-            class="border-t border-base-200 bg-base-100/95 px-2 py-2 sm:px-3"
+            class="bg-base-200/70 px-2 py-2 sm:px-3"
           >
             <div class="flex items-center gap-0.5">
               <div class="flex min-w-0 flex-1 items-center gap-0.5 overflow-x-auto">
@@ -399,7 +399,7 @@
                   </button>
                   <div
                     v-if="attachMenuOpen"
-                    class="absolute bottom-full left-0 z-30 mb-2 w-44 overflow-hidden rounded-xl border border-base-300 bg-base-100 py-1 shadow-lg"
+                    class="absolute bottom-full left-0 z-30 mb-2 w-44 overflow-hidden rounded-box bg-base-100 py-1 shadow-sm"
                     @click.stop
                   >
                     <button
@@ -556,7 +556,7 @@
       <DrawerPortal>
         <DrawerOverlay class="fixed inset-0 z-[60] bg-black/40" />
         <DrawerContent
-          class="fixed bottom-0 left-0 right-0 z-[60] mx-auto flex max-h-[75vh] max-w-md flex-col rounded-t-2xl border border-base-300/60 bg-base-100 outline-none"
+          class="fixed bottom-0 left-0 right-0 z-[60] mx-auto flex max-h-[75vh] max-w-md flex-col rounded-t-box bg-base-100 shadow-sm outline-none"
         >
           <div class="flex justify-center pb-1 pt-3">
             <div class="h-1 w-10 rounded-full bg-base-content/20" />
@@ -581,11 +581,11 @@
               <div class="grid grid-cols-2 gap-2">
                 <button
                   type="button"
-                  class="flex items-center gap-2 rounded-lg border px-3 py-2.5 text-left text-sm transition-colors"
+                  class="flex items-center gap-2 rounded-box bg-base-200/70 px-3 py-2.5 text-left text-sm transition-colors"
                   :class="
                     visibility === 0
-                      ? 'border-primary bg-primary/10 text-primary'
-                      : 'border-base-300 hover:bg-base-200'
+                      ? 'bg-primary/10 text-primary'
+                      : 'hover:bg-base-300'
                   "
                   @click="visibility = 0; markDirty()"
                 >
@@ -594,11 +594,11 @@
                 </button>
                 <button
                   type="button"
-                  class="flex items-center gap-2 rounded-lg border px-3 py-2.5 text-left text-sm transition-colors"
+                  class="flex items-center gap-2 rounded-box bg-base-200/70 px-3 py-2.5 text-left text-sm transition-colors"
                   :class="
                     visibility === 1
-                      ? 'border-primary bg-primary/10 text-primary'
-                      : 'border-base-300 hover:bg-base-200'
+                      ? 'bg-primary/10 text-primary'
+                      : 'hover:bg-base-300'
                   "
                   @click="visibility = 1; markDirty()"
                 >
@@ -607,11 +607,11 @@
                 </button>
                 <button
                   type="button"
-                  class="flex items-center gap-2 rounded-lg border px-3 py-2.5 text-left text-sm transition-colors"
+                  class="flex items-center gap-2 rounded-box bg-base-200/70 px-3 py-2.5 text-left text-sm transition-colors"
                   :class="
                     visibility === 2
-                      ? 'border-primary bg-primary/10 text-primary'
-                      : 'border-base-300 hover:bg-base-200'
+                      ? 'bg-primary/10 text-primary'
+                      : 'hover:bg-base-300'
                   "
                   @click="visibility = 2; markDirty()"
                 >
@@ -620,11 +620,11 @@
                 </button>
                 <button
                   type="button"
-                  class="flex items-center gap-2 rounded-lg border px-3 py-2.5 text-left text-sm transition-colors"
+                  class="flex items-center gap-2 rounded-box bg-base-200/70 px-3 py-2.5 text-left text-sm transition-colors"
                   :class="
                     visibility === 3
-                      ? 'border-primary bg-primary/10 text-primary'
-                      : 'border-base-300 hover:bg-base-200'
+                      ? 'bg-primary/10 text-primary'
+                      : 'hover:bg-base-300'
                   "
                   @click="visibility = 3; markDirty()"
                 >
@@ -677,7 +677,7 @@
                 {{ t('compose.tags') }}
               </label>
               <div
-                class="flex min-h-10 flex-wrap items-center gap-1.5 rounded-lg border border-base-300 px-2 py-1.5"
+                class="flex min-h-10 flex-wrap items-center gap-1.5 rounded-box bg-base-200/70 px-2 py-1.5"
               >
                 <span
                   v-for="tag in tags"
@@ -706,7 +706,7 @@
               </div>
               <div
                 v-if="tagSuggestions.length > 0"
-                class="mt-1 max-h-36 overflow-y-auto rounded-lg border border-base-300 bg-base-100 shadow-sm"
+                class="mt-1 max-h-36 overflow-y-auto rounded-box bg-base-100 shadow-sm"
               >
                 <button
                   v-for="s in tagSuggestions"
@@ -742,8 +742,8 @@
                   class="badge badge-lg gap-1 border px-2.5 py-3 text-xs font-normal transition-colors"
                   :class="
                     isCategorySelected(cat)
-                      ? 'badge-primary border-primary'
-                      : 'badge-ghost border-base-300 hover:border-base-content/20'
+                      ? 'badge-primary'
+                      : 'badge-ghost hover:bg-base-200'
                   "
                   @click="toggleCategory(cat)"
                 >
@@ -804,7 +804,7 @@
       <DrawerPortal>
         <DrawerOverlay class="fixed inset-0 z-[60] bg-black/40" />
         <DrawerContent
-          class="fixed bottom-0 left-0 right-0 z-[60] mx-auto flex max-h-[70vh] max-w-md flex-col rounded-t-2xl border border-base-300/60 bg-base-100 outline-none"
+          class="fixed bottom-0 left-0 right-0 z-[60] mx-auto flex max-h-[70vh] max-w-md flex-col rounded-t-box bg-base-100 shadow-sm outline-none"
         >
           <div class="flex justify-center pb-1 pt-3">
             <div class="h-1 w-10 rounded-full bg-base-content/20" />
@@ -843,7 +843,7 @@
               <div
                 v-for="draft in filteredDrafts"
                 :key="draft.id"
-                class="group flex items-start gap-2 rounded-xl px-3 py-2.5 transition-colors hover:bg-base-200"
+                class="group flex items-start gap-2 rounded-box px-3 py-2.5 transition-colors hover:bg-base-200"
               >
                 <button
                   type="button"
@@ -880,7 +880,7 @@
 
           <div
             v-if="filteredDrafts.length > 0"
-            class="border-t border-base-200 px-5 py-3"
+            class="bg-base-200/70 px-5 py-3"
           >
             <button
               type="button"

@@ -107,7 +107,7 @@
       <!-- Recycled banner -->
       <div
         v-if="state.recycled"
-        class="flex items-center gap-3 px-6 py-2 bg-warning/5 border-y border-warning/10 shrink-0"
+        class="mx-4 flex shrink-0 items-center gap-3 rounded-box bg-warning/10 px-4 py-2"
       >
         <IconAlertTriangle class="w-4 h-4 text-warning" />
         <span class="text-sm text-base-content/70">{{ t("drive.recycledBanner") }}</span>

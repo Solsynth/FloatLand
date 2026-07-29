@@ -1,12 +1,12 @@
 <template>
-  <div class="flex w-full flex-col gap-6">
+  <div class="flex w-full flex-col gap-5">
     <!-- Search -->
     <div class="relative">
       <input
         v-model="searchQuery"
         type="text"
         :placeholder="t('common.search')"
-        class="input w-full bg-base-100 shadow-sm border-0 focus:bg-base-100 focus:shadow-md focus:outline-none"
+        class="rail-search input w-full"
         @keyup.enter="handleSearch"
       />
       <button
@@ -21,8 +21,8 @@
     <CheckInWidget v-if="isAuthenticated" />
 
     <!-- Categories -->
-    <div v-if="categories.length > 0" class="card bg-base-100 shadow-sm">
-      <div class="card-body p-4">
+    <section v-if="categories.length > 0" class="right-rail-section">
+      <div class="p-4">
         <div class="flex items-center justify-between mb-3">
           <h3 class="text-sm font-semibold text-base-content/70">{{ t("sidebar.categories") }}</h3>
           <NuxtLink
@@ -37,23 +37,22 @@
             v-for="category in categories.slice(0, 5)"
             :key="category.id"
             :to="`/categories/${category.slug}`"
-            class="flex items-center gap-2 p-2 rounded-lg hover:bg-base-200 transition-colors"
+            class="flex items-center gap-2 rounded-md p-2 transition-colors hover:bg-base-200"
           >
             <div
-              class="w-6 h-6 rounded flex items-center justify-center"
-              :style="{ backgroundColor: category.color || '#6366f1' }"
+              class="flex h-6 w-6 items-center justify-center rounded-md bg-base-200 text-primary"
             >
-              <IconFolder class="w-3 h-3 text-white" />
+              <IconFolder class="h-3 w-3" />
             </div>
             <span class="text-sm truncate">{{ category.name }}</span>
           </NuxtLink>
         </div>
       </div>
-    </div>
+    </section>
 
     <!-- Tags -->
-    <div v-if="tags.length > 0" class="card bg-base-100 shadow-sm">
-      <div class="card-body p-4">
+    <section v-if="tags.length > 0" class="right-rail-section">
+      <div class="p-4">
         <div class="flex items-center justify-between mb-3">
           <h3 class="text-sm font-semibold text-base-content/70">{{ t("sidebar.tags") }}</h3>
           <NuxtLink
@@ -74,7 +73,7 @@
           </NuxtLink>
         </div>
       </div>
-    </div>
+    </section>
 
     <!-- Legal Footer -->
     <div class="px-2 text-xs leading-relaxed text-base-content/40">

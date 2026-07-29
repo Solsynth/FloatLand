@@ -12,7 +12,7 @@
       :key="i"
       :src="src"
       alt=""
-      class="block w-full h-auto rounded-xl"
+      class="block w-full h-auto rounded-box"
     />
   </div>
 
@@ -38,9 +38,7 @@
       class="absolute inset-0 w-full overflow-hidden"
     >
       <img :src="backgroundSrc" alt="" class="h-full w-full object-cover" />
-      <div
-        class="absolute inset-0 bg-linear-to-b from-black/10 to-base-100/80"
-      />
+      <div class="absolute inset-0 bg-base-100/80" />
     </div>
     <div
       class="relative w-full space-y-1"
@@ -75,7 +73,7 @@
       v-if="imageSrc"
       :src="imageSrc"
       alt=""
-      class="w-20 h-20 object-cover shrink-0 rounded-l-xl"
+      class="w-20 h-20 object-cover shrink-0 rounded-box"
     />
     <div class="min-w-0 flex-1 py-3 pr-4" :class="imageSrc ? '' : 'pl-4'">
       <p class="text-xs font-semibold text-primary">{{ fields[0]?.label }}</p>
@@ -102,12 +100,12 @@
         v-if="imageSrc"
         :src="imageSrc"
         alt=""
-        class="w-36 max-w-full aspect-square object-cover rounded-xl"
+        class="w-36 max-w-full aspect-square object-cover rounded-box"
       />
       <div
         v-for="field in fields"
         :key="field.name"
-        class="min-w-[8rem] max-w-[14rem] p-3 rounded-xl bg-base-200/50"
+        class="min-w-[8rem] max-w-[14rem] p-3 rounded-box bg-base-200/50"
       >
         <p class="text-xs text-base-content/50">{{ field.label }}</p>
         <p class="text-base font-semibold mt-1">
@@ -135,7 +133,7 @@
         v-else
         class="absolute inset-0 bg-base-200"
       />
-      <div class="absolute inset-0 bg-linear-to-b from-black/10 to-black/30" />
+      <div class="absolute inset-0 bg-black/20" />
       <img
         v-if="imageSrc"
         :src="imageSrc"

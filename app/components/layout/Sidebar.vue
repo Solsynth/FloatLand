@@ -1,15 +1,15 @@
 <template>
     <aside
-        class="flex h-full flex-col items-stretch py-4 transition-all duration-300 ease-in-out"
+        class="main-sidebar"
         :class="collapsed ? 'px-2' : 'px-4'"
     >
         <!-- Logo -->
         <div
-            class="mb-6 flex px-2 transition-all duration-300"
-            :class="collapsed ? 'justify-center' : 'justify-end'"
+            class="mb-6 flex px-2"
+            :class="collapsed ? 'justify-center' : 'justify-start'"
         >
             <NuxtLink to="/" class="text-2xl font-bold text-primary">
-                <img src="/favicon.png" alt="Logo" class="h-12 w-12" />
+                <img src="/favicon.png" alt="Solar Network" class="h-9 w-9" />
             </NuxtLink>
         </div>
 
@@ -19,19 +19,16 @@
                 v-for="item in navItems"
                 :key="item.href"
                 :to="item.href"
-                class="group relative flex items-center gap-4 rounded-xl py-3 transition-all duration-300 hover:bg-base-200"
-                :class="collapsed ? 'justify-center px-3' : 'justify-end px-4'"
+                class="main-nav-item"
+                :class="[
+                    collapsed ? 'justify-center px-3' : 'px-3',
+                    isNavActive(item.href) ? 'main-nav-item--active' : '',
+                ]"
             >
-                <span
-                    v-if="!collapsed"
-                    class="text-lg font-medium transition-all duration-300 group-hover:text-primary"
-                >
-                    {{ item.label }}
-                </span>
                 <div class="relative">
                     <component
                         :is="item.icon"
-                        class="h-6 w-6 shrink-0 transition-colors group-hover:text-primary"
+                        class="h-5 w-5 shrink-0"
                     />
                     <span
                         v-if="item.badge"
@@ -40,6 +37,12 @@
                         {{ item.badge > 99 ? "99+" : item.badge }}
                     </span>
                 </div>
+                <span
+                    v-if="!collapsed"
+                    class="text-sm font-semibold"
+                >
+                    {{ item.label }}
+                </span>
             </NuxtLink>
 
             <!-- Backstage dropdown (creator / developer / merchant / admin) -->
@@ -50,29 +53,28 @@
                 <button
                     tabindex="0"
                     type="button"
-                    class="group relative flex w-full items-center gap-4 rounded-xl py-3 transition-all duration-300 hover:bg-base-200"
+                    class="main-nav-item relative w-full"
                     :class="[
-                        collapsed ? 'justify-center px-3' : 'justify-end px-4',
-                        isBackstageActive ? 'bg-base-200 text-primary' : '',
+                        collapsed ? 'justify-center px-3' : 'px-3',
+                        isBackstageActive ? 'main-nav-item--active' : '',
                     ]"
                     aria-haspopup="menu"
                     :aria-label="backstageLabel"
                 >
+                    <component
+                        :is="backstageEntry.icon"
+                        class="h-5 w-5 shrink-0"
+                    />
                     <span
                         v-if="!collapsed"
-                        class="text-lg font-medium transition-all duration-300 group-hover:text-primary"
+                        class="text-sm font-semibold"
                     >
                         {{ backstageLabel }}
                     </span>
-                    <component
-                        :is="backstageEntry.icon"
-                        class="h-6 w-6 shrink-0 transition-colors group-hover:text-primary"
-                        :class="isBackstageActive ? 'text-primary' : ''"
-                    />
                 </button>
                 <ul
                     tabindex="0"
-                    class="dropdown-content menu z-50 w-52 rounded-box border border-base-300 bg-base-100 p-2 shadow"
+                    class="main-sidebar-menu dropdown-content menu z-50 w-52 p-2"
                     :class="collapsed ? 'ms-2' : 'mt-1'"
                 >
                     <li v-for="item in backstageNavItems" :key="item.href">
@@ -140,7 +142,7 @@
                 class="dropdown dropdown-end dropdown-top w-full"
             >
                 <button
-                    class="flex w-full items-center gap-3 rounded-xl p-3 transition-all duration-300 hover:bg-base-200"
+                    class="main-sidebar-profile"
                 >
                     <div v-if="avatarUrl" class="avatar shrink-0">
                         <div class="w-10 rounded-full">
@@ -169,7 +171,7 @@
                     </div>
                 </button>
                 <ul
-                    class="dropdown-content menu mb-2 w-52 rounded-box bg-base-100 p-2 shadow"
+                class="main-sidebar-menu dropdown-content menu mb-2 w-52 p-2"
                 >
                     <li>
                         <NuxtLink to="/accounts/me">
@@ -183,7 +185,6 @@
                             {{ t("nav.settings") }}
                         </NuxtLink>
                     </li>
-                    <li class="my-1 border-t border-base-300" />
                     <li>
                         <button @click="handleLogout">
                             <IconLogOut class="w-4.5" />
@@ -195,7 +196,7 @@
             <NuxtLink
                 v-else
                 to="/auth/login"
-                class="flex w-full items-center gap-3 rounded-xl p-3 transition-all duration-300 hover:bg-base-200"
+                class="main-sidebar-profile"
             >
                 <div class="avatar avatar-placeholder shrink-0">
                     <div
@@ -283,5 +284,9 @@ const fallbackInitials = computed(() =>
 function handleLogout() {
     logout();
     navigateTo("/");
+}
+
+function isNavActive(href: string) {
+    return route.path === href || (href !== "/" && route.path.startsWith(`${href}/`));
 }
 </script>

@@ -5,7 +5,7 @@
     :class="animateClass"
   >
     <div
-      class="flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium shadow-lg backdrop-blur-sm"
+      class="flex items-center gap-2 rounded-box px-4 py-2 text-sm font-medium shadow-sm"
       :class="statusClasses"
     >
       <span class="relative flex h-2.5 w-2.5">
@@ -22,7 +22,7 @@
       <span>{{ statusText }}</span>
       <button
         v-if="status === 'disconnected' || status === 'error'"
-        class="ml-1 rounded-full bg-white/20 px-2 py-0.5 text-xs hover:bg-white/30"
+        class="ml-1 rounded-box bg-white/20 px-2 py-0.5 text-xs hover:bg-white/30"
         @click="handleReconnect"
       >
         {{ t('ws.reconnect') }}

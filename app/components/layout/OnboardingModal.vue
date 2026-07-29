@@ -8,7 +8,7 @@
 
             <!-- Content -->
             <DialogContent
-                class="onboarding-content fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[95vw] max-w-2xl bg-base-100 rounded-2xl shadow-xl overflow-hidden outline-none"
+                class="onboarding-content fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[95vw] max-w-2xl bg-base-100 rounded-box shadow-sm overflow-hidden outline-none"
                 @close-auto-focus.prevent
                 @interact-outside.prevent
             >
@@ -19,10 +19,7 @@
                         alt="Solar Network"
                         class="w-full h-full object-cover"
                     />
-                    <!-- Gradient overlay -->
-                    <div
-                        class="absolute inset-0 bg-linear-to-t from-black/80 via-black/40 to-transparent"
-                    />
+                    <div class="absolute inset-0 bg-black/25" />
 
                     <!-- Close button -->
                     <DialogClose
@@ -62,19 +59,19 @@
 
                     <Transition
                         mode="out-in"
-                        enter-active-class="transition-all duration-300 ease-out"
-                        leave-active-class="transition-all duration-200 ease-in"
-                        enter-from-class="opacity-0 translate-x-8"
-                        enter-to-class="opacity-100 translate-x-0"
-                        leave-from-class="opacity-100 translate-x-0"
-                        leave-to-class="opacity-0 -translate-x-8"
+                        enter-active-class="transition-opacity duration-200 ease-out"
+                        leave-active-class="transition-opacity duration-150 ease-in"
+                        enter-from-class="opacity-0"
+                        enter-to-class="opacity-100"
+                        leave-from-class="opacity-100"
+                        leave-to-class="opacity-0"
                     >
                         <div :key="`step-${currentStep}`">
                             <!-- Step 1: Solar Network -->
                             <div v-if="currentStep === 1">
                                 <div class="flex items-center gap-2 mb-1">
                                     <div
-                                        class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center"
+                                        class="w-8 h-8 rounded-box bg-primary/10 flex items-center justify-center"
                                     >
                                         <IconSun class="w-4 h-4 text-primary" />
                                     </div>
@@ -93,10 +90,10 @@
                             <div v-if="currentStep === 2">
                                 <div class="flex items-center gap-2 mb-1">
                                     <div
-                                        class="w-8 h-8 rounded-lg bg-secondary/10 flex items-center justify-center"
+                                        class="w-8 h-8 rounded-box bg-primary/10 flex items-center justify-center"
                                     >
                                         <IconSmartphone
-                                            class="w-4 h-4 text-secondary"
+                                            class="w-4 h-4 text-primary"
                                         />
                                     </div>
                                     <h3 class="font-bold text-lg">
@@ -114,10 +111,10 @@
                             <div v-if="currentStep === 3">
                                 <div class="flex items-center gap-2 mb-1">
                                     <div
-                                        class="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center"
+                                        class="w-8 h-8 rounded-box bg-primary/10 flex items-center justify-center"
                                     >
                                         <IconGlobe
-                                            class="w-4 h-4 text-accent"
+                                            class="w-4 h-4 text-primary"
                                         />
                                     </div>
                                     <h3 class="font-bold text-lg">
@@ -137,7 +134,7 @@
 
                     <!-- Navigation -->
                     <div
-                        class="flex items-center justify-between mt-6 pt-4 border-t border-base-200"
+                        class="flex items-center justify-between mt-6 bg-base-200/60 p-3 rounded-box"
                     >
                         <button
                             v-if="currentStep > 1"

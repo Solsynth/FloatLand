@@ -16,7 +16,7 @@
       <button
         v-for="file in files"
         :key="file.id"
-        class="group relative rounded-lg overflow-hidden border border-base-300 aspect-square text-left transition-all hover:border-primary hover:shadow-md"
+        class="group relative rounded-box overflow-hidden bg-base-200 aspect-square text-left transition-colors hover:bg-base-300"
         @click="$emit('select', file)"
       >
         <!-- Image preview -->
@@ -42,7 +42,7 @@
         </div>
 
         <!-- File info -->
-        <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 to-transparent p-2">
+        <div class="absolute bottom-0 inset-x-0 bg-neutral/85 p-2">
           <p class="text-xs text-white truncate">{{ file.name }}</p>
           <p class="text-[10px] text-white/60">{{ formatFileSize(file.size) }}</p>
         </div>

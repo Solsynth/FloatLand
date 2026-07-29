@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex h-full flex-col overflow-hidden rounded-xl border border-base-300/70 bg-base-100"
+    class="feed-discovery-card flex h-full flex-col overflow-hidden"
   >
     <div class="min-h-0 flex-1 overflow-hidden">
       <PostCard

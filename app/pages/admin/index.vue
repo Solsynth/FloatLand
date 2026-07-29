@@ -47,7 +47,7 @@
 
     <!-- Activity metrics -->
     <AdminCard class="mb-6" no-padding>
-      <div class="flex items-center justify-between gap-3 px-5 py-3 border-b border-base-300/20">
+      <div class="flex items-center justify-between gap-3 px-5 py-3">
         <div class="flex items-center gap-3">
           <IconActivity class="w-4 h-4 text-primary" />
           <span class="text-sm font-semibold">Account Activity</span>
@@ -83,7 +83,7 @@
     <!-- Service breakdowns -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
       <AdminCard v-for="panel in servicePanels" :key="panel.title" no-padding>
-        <div class="flex items-center gap-3 px-5 py-3 border-b border-base-300/20">
+        <div class="flex items-center gap-3 px-5 py-3">
           <component :is="panel.icon" class="w-4 h-4" :class="panel.iconClass" />
           <span class="text-sm font-semibold">{{ panel.title }}</span>
         </div>
@@ -106,12 +106,12 @@
       <AdminCard
         v-for="section in sections"
         :key="section.href"
-        class="group cursor-pointer hover:border-primary/20 transition-all"
+        class="group cursor-pointer transition-colors hover:bg-base-200"
         @click="go(section.href)"
       >
         <div class="flex items-start justify-between">
           <div class="flex items-center gap-3">
-            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+            <div class="flex h-10 w-10 items-center justify-center rounded-box bg-primary/10">
               <component :is="section.icon" class="w-5 h-5 text-primary" />
             </div>
             <div>
@@ -126,7 +126,7 @@
 
     <!-- Cache Stats Quick View -->
     <AdminCard v-if="cacheStats" no-padding>
-      <div class="flex items-center gap-3 px-5 py-3 border-b border-base-300/20">
+      <div class="flex items-center gap-3 px-5 py-3">
         <IconDatabase class="w-4 h-4 text-primary" />
         <span class="text-sm font-semibold">Cache Status</span>
       </div>

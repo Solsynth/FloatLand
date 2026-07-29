@@ -1,8 +1,8 @@
 <template>
-  <div class="min-h-screen bg-base-200 flex items-center justify-center px-4">
-    <div class="card bg-base-100 shadow-xl max-w-md w-full">
-      <div class="card-body items-center text-center">
-        <div class="w-16 h-16 rounded-full bg-success/10 flex items-center justify-center mb-4">
+  <div class="auth-page">
+    <div class="auth-panel auth-panel--compact">
+      <div class="items-center text-center">
+        <div class="auth-status-icon mb-4 bg-success/10">
           <IconCheck class="w-8 h-8 text-success" />
         </div>
         <h2 class="text-2xl font-bold">Welcome Back!</h2>

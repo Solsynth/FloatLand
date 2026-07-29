@@ -12,11 +12,11 @@
             </div>
             <div class="stat bg-base-200 rounded-box">
               <div class="stat-title">{{ t('developer.projects.title') }}</div>
-              <div class="stat-value text-secondary">{{ projects.length }}</div>
+              <div class="stat-value text-primary">{{ projects.length }}</div>
             </div>
             <div class="stat bg-base-200 rounded-box">
               <div class="stat-title">{{ t('developer.bots.title') }}</div>
-              <div class="stat-value text-accent">{{ stats.totalBots ?? 0 }}</div>
+              <div class="stat-value text-primary">{{ stats.totalBots ?? 0 }}</div>
             </div>
           </div>
         </div>
@@ -42,13 +42,13 @@
               <div
                 v-for="project in projects"
                 :key="project.id"
-                class="flex items-center gap-4 rounded-xl p-3 transition-colors hover:bg-base-200"
+                class="flex items-center gap-4 rounded-box p-3 transition-colors hover:bg-base-200"
               >
                 <NuxtLink
                   :to="`/developers/${pubName}/projects/${project.id}`"
                   class="flex items-center gap-4 flex-1 min-w-0"
                 >
-                  <div class="flex h-10 w-10 items-center justify-center rounded-full bg-secondary text-secondary-content">
+                  <div class="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-content">
                     <IconFolder class="w-5 h-5" />
                   </div>
                   <div class="min-w-0 flex-1">

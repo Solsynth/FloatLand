@@ -1,5 +1,5 @@
 <template>
-  <div class="relative rounded-lg overflow-hidden bg-base-300" :class="{ 'cursor-pointer': props.clickable }" @click="handleClick">
+  <div class="relative overflow-hidden rounded-box bg-base-300" :class="{ 'cursor-pointer': props.clickable }" @click="handleClick">
     <!-- Image -->
     <template v-if="isImage">
       <img
@@ -27,10 +27,10 @@
         <!-- Play button overlay -->
         <div class="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/30 transition-colors">
           <div class="flex flex-col items-center gap-2">
-            <div class="w-14 h-14 rounded-full bg-black/50 flex items-center justify-center backdrop-blur-sm">
+            <div class="flex h-14 w-14 items-center justify-center rounded-full bg-black/50">
               <IconPlay class="w-7 h-7 text-white ml-0.5" />
             </div>
-            <span class="text-xs text-white/80 font-medium px-2 py-0.5 rounded bg-black/40 truncate max-w-[200px]">
+            <span class="max-w-[200px] truncate rounded-box bg-black/40 px-2 py-0.5 text-xs font-medium text-white/80">
               {{ attachment.name }}
             </span>
           </div>

@@ -2,7 +2,7 @@
   <div class="min-h-screen bg-base-200">
     <div class="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 py-16">
       <div class="w-full max-w-md">
-        <div class="card bg-base-100 shadow-xl">
+        <div class="card bg-base-100 shadow-sm">
           <div class="card-body">
             <slot />
           </div>

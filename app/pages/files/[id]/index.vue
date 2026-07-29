@@ -27,7 +27,7 @@
       class="fixed inset-0 z-50 flex flex-col bg-black/95"
     >
       <div
-        class="flex items-center justify-between border-b border-white/10 px-4 py-3"
+        class="flex items-center justify-between px-4 py-3"
       >
         <button
           class="btn btn-circle btn-sm text-white btn-ghost"
@@ -98,7 +98,7 @@
     <div class="min-h-screen bg-base-100">
       <!-- Top bar -->
       <div
-        class="sticky top-0 z-10 border-b border-base-300 bg-base-100/95 backdrop-blur"
+        class="sticky top-0 z-10 bg-base-100"
       >
         <div
           class="mx-auto flex max-w-5xl items-center justify-between px-4 py-3"
@@ -230,7 +230,7 @@
               <!-- Audio -->
               <div v-else-if="isAudio" class="w-full max-w-md">
                 <div
-                  class="bg-base-200 rounded-xl p-8 flex flex-col items-center gap-4"
+                  class="flex flex-col items-center gap-4 rounded-box bg-base-200 p-8"
                 >
                   <div
                     class="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center"
@@ -243,7 +243,7 @@
               </div>
               <!-- Text -->
               <div v-else-if="isText" class="w-full max-w-3xl">
-                <div class="bg-base-200 rounded-xl p-6">
+                <div class="rounded-box bg-base-200 p-6">
                   <pre
                     class="text-sm whitespace-pre-wrap break-words font-mono"
                     >{{ textContent }}</pre
@@ -313,7 +313,7 @@
         <Transition name="slide">
           <div
             v-if="showInfo"
-            class="fixed top-[57px] right-0 bottom-0 w-80 border-l border-t border-base-300 bg-base-100 overflow-y-auto hidden lg:block z-30"
+            class="fixed top-[57px] right-0 bottom-0 z-30 hidden w-80 overflow-y-auto bg-base-100 lg:block"
           >
             <div class="p-4">
               <div class="flex items-center justify-between mb-4">

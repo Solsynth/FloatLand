@@ -17,11 +17,11 @@
             v-model="searchQuery"
             type="text"
             placeholder="Search categories..."
-            class="input input-sm w-full pl-9 bg-base-200/60 border-0 rounded-xl"
+            class="input input-sm w-full rounded-box border-0 bg-base-200 pl-9"
             @keyup.enter="handleSearch"
           />
         </div>
-        <select v-model="order" class="select select-sm bg-base-200/60 border-0 rounded-xl" @change="handleSearch">
+        <select v-model="order" class="select select-sm rounded-box border-0 bg-base-200" @change="handleSearch">
           <option value="">Recently updated</option>
           <option value="usage">Most used</option>
           <option value="name">Name A–Z</option>
@@ -80,7 +80,7 @@
         <p class="text-base-content/50 mb-1">No categories found</p>
       </div>
 
-      <div v-if="total > pageSize" class="flex items-center justify-between px-5 py-3 border-t border-base-300/20">
+      <div v-if="total > pageSize" class="flex items-center justify-between px-5 py-3">
         <span class="text-xs text-base-content/40">
           Showing {{ offset + 1 }}–{{ Math.min(offset + pageSize, total) }} of {{ total }}
         </span>
@@ -99,15 +99,15 @@
       <div class="space-y-4">
         <label class="form-control">
           <span class="label-text text-xs mb-1">Slug</span>
-          <input v-model="form.slug" class="input input-sm bg-base-200/60 border-0 rounded-xl" :disabled="!!editing" placeholder="tech" />
+          <input v-model="form.slug" class="input input-sm rounded-box border-0 bg-base-200" :disabled="!!editing" placeholder="tech" />
         </label>
         <label v-if="editing" class="form-control">
           <span class="label-text text-xs mb-1">New slug (optional rename)</span>
-          <input v-model="form.newSlug" class="input input-sm bg-base-200/60 border-0 rounded-xl" placeholder="technology" />
+          <input v-model="form.newSlug" class="input input-sm rounded-box border-0 bg-base-200" placeholder="technology" />
         </label>
         <label class="form-control">
           <span class="label-text text-xs mb-1">Name</span>
-          <input v-model="form.name" class="input input-sm bg-base-200/60 border-0 rounded-xl" placeholder="Technology" />
+          <input v-model="form.name" class="input input-sm rounded-box border-0 bg-base-200" placeholder="Technology" />
         </label>
         <button class="btn btn-sm btn-primary w-full" :disabled="saving || !form.slug" @click="save">
           {{ saving ? 'Saving...' : editing ? 'Save changes' : 'Create category' }}

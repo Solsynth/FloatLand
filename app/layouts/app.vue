@@ -1,16 +1,16 @@
 <template>
   <div class="min-h-screen bg-base-200">
-    <div class="app-shell mx-auto max-w-7xl lg:px-4">
+    <div class="app-shell mx-auto max-w-7xl">
       <!-- Desktop Layout -->
       <div
-        class="hidden lg:grid lg:gap-4 transition-all duration-300 ease-in-out"
+        class="hidden lg:grid lg:gap-6 lg:px-4"
         :class="
           collapsed
             ? 'lg:grid-cols-[5rem_1fr]'
             : 'lg:grid-cols-[16rem_1fr]'
         "
       >
-        <aside class="sticky top-4 max-h-[calc(100vh-2rem)] overflow-y-auto">
+        <aside class="app-sidebar">
           <Sidebar />
         </aside>
         <main class="min-h-screen py-4">
@@ -22,7 +22,7 @@
       <div class="lg:hidden flex flex-col min-h-screen">
         <!-- Mobile Header -->
         <header
-          class="fixed top-0 left-0 right-0 z-50 border-b border-base-300 bg-base-100/95 backdrop-blur"
+          class="fixed top-0 left-0 right-0 z-50 bg-base-100 shadow-sm"
         >
           <div class="mx-auto max-w-2xl px-4">
             <div class="flex h-14 items-center justify-between">
@@ -49,7 +49,7 @@
                 <!-- Dropdown Menu -->
                 <div
                   v-if="menuOpen"
-                  class="absolute top-full right-0 z-50 mt-2 w-56 rounded-xl border border-base-300 bg-base-100 py-2 shadow-lg"
+                  class="app-mobile-menu absolute top-full right-0 z-50 mt-2 w-56 py-2"
                 >
                   <template v-if="isAuthenticated && user">
                     <NuxtLink
@@ -98,8 +98,7 @@
                       </NuxtLink>
                     </div>
 
-                    <div class="divider my-1" />
-                    <div class="mb-1 border-b border-base-200 px-4 py-3">
+                    <div class="mt-2 px-4 py-3">
                       <div class="flex items-center gap-3">
                         <div v-if="avatarUrl" class="avatar">
                           <div class="w-9 rounded-full">
@@ -218,7 +217,7 @@
 
       <!-- Floating Compose Button (Mobile) -->
       <button
-        class="btn btn-circle btn-primary fixed right-6 bottom-6 z-40 w-14 h-14 shadow-lg lg:hidden"
+        class="btn btn-circle btn-primary fixed right-5 bottom-5 z-40 h-12 w-12 shadow-sm lg:hidden"
         @click="openCompose"
       >
         <IconPlus class="w-6 h-6" />

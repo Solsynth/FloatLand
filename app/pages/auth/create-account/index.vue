@@ -1,14 +1,14 @@
 <template>
-	<div class="min-h-screen bg-base-200 flex items-center justify-center px-4 py-10">
-		<div class="w-full max-w-3xl overflow-hidden rounded-xl border border-base-300 bg-base-100 shadow-sm">
+	<div class="auth-page">
+		<div class="auth-panel auth-panel--split">
 			<div class="grid md:grid-cols-2">
 				<!-- Brand rail -->
-				<aside class="flex flex-col justify-between gap-6 border-b border-base-300 bg-base-200/50 p-6 md:border-b-0 md:border-r">
+				<aside class="auth-rail">
 					<div>
 						<img
 							src="/favicon.png"
 							alt="Solar Network"
-							class="h-9 w-9 rounded-lg"
+							class="auth-brand-mark"
 						>
 						<p class="mt-5 text-xs text-base-content/50">
 							{{ t("auth.createAccount.step", { step: stepIndex }) }}
@@ -47,7 +47,7 @@
 				</aside>
 
 				<!-- Form panel -->
-				<section class="flex min-h-80 flex-col p-6 md:p-8">
+				<section class="auth-main">
 					<div
 						v-if="error"
 						class="alert alert-error mb-4 text-sm"

@@ -10,7 +10,7 @@
             v-model="searchQuery"
             type="text"
             placeholder="Search collections or publishers..."
-            class="input input-sm w-full pl-9 bg-base-200/60 border-0 rounded-xl"
+            class="input input-sm w-full rounded-box border-0 bg-base-200 pl-9"
             @keyup.enter="handleSearch"
           />
         </div>
@@ -18,7 +18,7 @@
           v-model="publisherId"
           type="text"
           placeholder="Publisher ID..."
-          class="input input-sm bg-base-200/60 border-0 rounded-xl w-48 font-mono"
+          class="input input-sm w-48 rounded-box border-0 bg-base-200 font-mono"
           @keyup.enter="handleSearch"
         />
         <button class="btn btn-sm btn-primary" @click="handleSearch">
@@ -85,7 +85,7 @@
         <p class="text-base-content/50 mb-1">No collections found</p>
       </div>
 
-      <div v-if="total > pageSize" class="flex items-center justify-between px-5 py-3 border-t border-base-300/20">
+      <div v-if="total > pageSize" class="flex items-center justify-between px-5 py-3">
         <span class="text-xs text-base-content/40">
           Showing {{ offset + 1 }}–{{ Math.min(offset + pageSize, total) }} of {{ total }}
         </span>
@@ -104,11 +104,11 @@
       <div class="space-y-4">
         <label class="form-control">
           <span class="label-text text-xs mb-1">Name</span>
-          <input v-model="form.name" class="input input-sm bg-base-200/60 border-0 rounded-xl" />
+          <input v-model="form.name" class="input input-sm rounded-box border-0 bg-base-200" />
         </label>
         <label class="form-control">
           <span class="label-text text-xs mb-1">Description</span>
-          <textarea v-model="form.description" class="textarea textarea-sm bg-base-200/60 border-0 rounded-xl" rows="4" />
+          <textarea v-model="form.description" class="textarea textarea-sm rounded-box border-0 bg-base-200" rows="4" />
         </label>
         <button class="btn btn-sm btn-primary w-full" :disabled="saving" @click="save">
           {{ saving ? 'Saving...' : 'Save changes' }}

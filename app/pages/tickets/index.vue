@@ -16,7 +16,7 @@
       <div class="flex flex-wrap gap-2 mb-4">
         <select
           v-model="statusFilter"
-          class="select select-sm bg-base-200/60 border-0 rounded-xl"
+          class="select select-sm rounded-box border-0 bg-base-200"
           @change="reload"
         >
           <option value="">{{ t('tickets.allStatuses') }}</option>
@@ -50,7 +50,7 @@
           v-for="ticket in tickets"
           :key="ticket.id"
           :to="`/tickets/${ticket.id}`"
-          class="block rounded-xl bg-base-100 border border-base-300/50 p-4 hover:border-primary/30 transition-colors"
+          class="block rounded-box bg-base-100 p-4 transition-colors hover:bg-base-200"
         >
           <div class="flex items-start justify-between gap-3">
             <div class="min-w-0 flex-1">
@@ -59,7 +59,7 @@
                 <span class="badge badge-xs" :class="ticketStatusBadgeClass(ticket.status)">
                   {{ statusLabel(ticket.status) }}
                 </span>
-                <span class="badge badge-xs badge-outline">
+                <span class="badge badge-xs bg-base-200">
                   {{ typeLabel(ticket.type) }}
                 </span>
                 <span class="badge badge-xs" :class="ticketPriorityBadgeClass(ticket.priority)">
@@ -90,8 +90,8 @@
       class="fixed inset-0 z-50 flex justify-end"
     >
       <div class="absolute inset-0 bg-black/40" @click="createOpen = false" />
-      <div class="relative w-full max-w-md bg-base-100 h-full shadow-xl overflow-y-auto border-l border-base-300/50">
-        <div class="flex items-center justify-between px-5 py-4 border-b border-base-300/40">
+      <div class="relative h-full w-full max-w-md overflow-y-auto bg-base-100 shadow-lg">
+        <div class="flex items-center justify-between px-5 py-4">
           <h3 class="text-sm font-semibold">{{ t('tickets.newTicket') }}</h3>
           <button class="btn btn-ghost btn-circle btn-sm" @click="createOpen = false">
             <IconX class="w-4 h-4" />
@@ -103,7 +103,7 @@
             <input
               v-model="form.title"
               type="text"
-              class="input input-sm w-full bg-base-200/60 border-0 rounded-xl mt-1"
+              class="input input-sm mt-1 w-full rounded-box border-0 bg-base-200"
               :placeholder="t('tickets.form.titlePlaceholder')"
               minlength="3"
               maxlength="256"
@@ -112,7 +112,7 @@
           </div>
           <div>
             <label class="text-xs text-base-content/50">{{ t('tickets.form.type') }}</label>
-            <select v-model.number="form.type" class="select select-sm w-full bg-base-200/60 border-0 rounded-xl mt-1">
+            <select v-model.number="form.type" class="select select-sm mt-1 w-full rounded-box border-0 bg-base-200">
               <option :value="0">{{ t('tickets.type.support') }}</option>
               <option :value="1">{{ t('tickets.type.bug') }}</option>
               <option :value="2">{{ t('tickets.type.feature') }}</option>
@@ -122,7 +122,7 @@
           </div>
           <div>
             <label class="text-xs text-base-content/50">{{ t('tickets.form.priority') }}</label>
-            <select v-model.number="form.priority" class="select select-sm w-full bg-base-200/60 border-0 rounded-xl mt-1">
+            <select v-model.number="form.priority" class="select select-sm mt-1 w-full rounded-box border-0 bg-base-200">
               <option :value="0">{{ t('tickets.priority.low') }}</option>
               <option :value="1">{{ t('tickets.priority.medium') }}</option>
               <option :value="2">{{ t('tickets.priority.high') }}</option>
@@ -133,7 +133,7 @@
             <label class="text-xs text-base-content/50">{{ t('tickets.form.content') }}</label>
             <textarea
               v-model="form.content"
-              class="textarea textarea-sm w-full bg-base-200/60 border-0 rounded-xl mt-1"
+              class="textarea textarea-sm mt-1 w-full rounded-box border-0 bg-base-200"
               rows="6"
               maxlength="16384"
               :placeholder="t('tickets.form.contentPlaceholder')"
@@ -144,7 +144,7 @@
             <label class="text-xs text-base-content/50">{{ t('tickets.form.resources') }}</label>
             <textarea
               v-model="resourcesText"
-              class="textarea textarea-sm w-full bg-base-200/60 border-0 rounded-xl mt-1 font-mono text-xs"
+              class="textarea textarea-sm mt-1 w-full rounded-box border-0 bg-base-200 font-mono text-xs"
               rows="3"
               :placeholder="t('tickets.form.resourcesPlaceholder')"
             />

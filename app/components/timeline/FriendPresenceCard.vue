@@ -9,7 +9,7 @@
         loading="lazy"
         @error="handleSteamImageError"
       />
-      <div class="absolute inset-0 bg-gradient-to-t from-base-100 via-base-100/40 to-transparent" />
+      <div class="absolute inset-0 bg-base-100/35" />
     </div>
 
     <div class="flex gap-3" :class="bodyClass">
@@ -159,7 +159,7 @@ const props = withDefaults(
 const isFeed = computed(() => props.variant === "feed");
 const rootClass = computed(() =>
   isFeed.value
-    ? "overflow-hidden transition-colors duration-150 hover:bg-base-200/40"
+    ? "feed-post overflow-hidden"
     : "card overflow-hidden bg-base-100 shadow-sm",
 );
 const bodyClass = computed(() => (isFeed.value ? "px-4 py-3" : "card-body p-3"));

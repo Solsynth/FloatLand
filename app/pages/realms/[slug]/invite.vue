@@ -3,7 +3,7 @@
     <!-- Not Found State -->
     <div
       v-if="notFound"
-      class="w-full max-w-md rounded-3xl border border-base-300/70 bg-base-100/90 p-8 text-center shadow-2xl backdrop-blur-xl"
+      class="w-full max-w-md rounded-box bg-base-100 p-8 text-center shadow-sm"
     >
       <IconUsers class="mx-auto text-base-content/50 w-9 h-9" />
       <h1 class="mt-3 text-xl font-black">{{ t("realms.notFound") }}</h1>
@@ -12,7 +12,7 @@
     <!-- Error State -->
     <div
       v-else-if="!realm"
-      class="w-full max-w-md rounded-3xl border border-base-300/70 bg-base-100/90 p-8 shadow-2xl backdrop-blur-xl"
+      class="w-full max-w-md rounded-box bg-base-100 p-8 shadow-sm"
     >
       <div class="alert alert-error">
         <span>{{ error || t("realms.failedToLoadInvite") }}</span>
@@ -22,7 +22,7 @@
     <!-- Invite Card -->
     <div
       v-else
-      class="w-full max-w-lg overflow-hidden rounded-3xl border border-base-300/70 bg-base-100/95 shadow-2xl backdrop-blur-xl"
+      class="w-full max-w-lg overflow-hidden rounded-box bg-base-100 shadow-sm"
     >
       <!-- Banner -->
       <div class="h-28 w-full bg-base-200">
@@ -45,14 +45,14 @@
         <div class="mb-6 flex items-center gap-3">
           <div v-if="avatarUrl" class="avatar">
             <div
-              class="h-14 w-14 rounded-2xl ring ring-base-300 ring-offset-2 ring-offset-base-100"
+              class="h-14 w-14 rounded-box ring ring-base-300 ring-offset-2 ring-offset-base-100"
             >
               <img :src="avatarUrl" :alt="realm.name" />
             </div>
           </div>
           <div v-else class="avatar avatar-placeholder">
             <div
-              class="h-14 w-14 rounded-2xl bg-primary text-primary-content ring ring-base-300 ring-offset-2 ring-offset-base-100"
+              class="h-14 w-14 rounded-box bg-primary text-primary-content ring ring-base-300 ring-offset-2 ring-offset-base-100"
             >
               <span class="text-base font-semibold">{{
                 getInitials(realm.name)

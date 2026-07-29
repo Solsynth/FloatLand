@@ -42,7 +42,7 @@
     <div class="lg:hidden flex flex-col min-h-screen">
       <!-- Mobile Header -->
       <header
-        class="fixed top-0 left-0 right-0 z-50 border-b border-base-300/50 bg-base-100/95 backdrop-blur-md"
+        class="fixed top-0 left-0 right-0 z-50 border-b border-base-300 bg-base-100"
       >
         <div class="flex h-14 items-center justify-between px-4">
           <NuxtLink to="/developers" class="btn btn-circle btn-ghost btn-sm">
@@ -74,7 +74,7 @@
       <Transition name="drawer-slide">
         <div
           v-if="mobileMenuOpen"
-          class="fixed right-0 top-14 bottom-0 z-50 w-72 bg-base-100 overflow-y-auto shadow-xl border-l border-base-300/50 scrollbar-none"
+          class="fixed right-0 top-14 bottom-0 z-50 w-72 overflow-y-auto border-l border-base-300 bg-base-100 shadow-sm scrollbar-none"
           @click.stop
         >
           <DeveloperSidebar @navigate="mobileMenuOpen = false" />

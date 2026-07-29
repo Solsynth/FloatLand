@@ -81,7 +81,7 @@
                 v-for="item in navItems"
                 :key="item.href"
                 :to="item.href"
-                class="flex items-center gap-4 rounded-xl p-4 transition-colors hover:bg-base-200"
+                class="flex items-center gap-4 rounded-box p-4 transition-colors hover:bg-base-200"
               >
                 <component
                   :is="item.icon"
@@ -301,7 +301,7 @@ const ratingTextColor = computed(() => {
   if (!grade) return "text-base-content";
   if (grade.startsWith("S")) return "text-primary";
   if (grade.startsWith("A")) return "text-primary";
-  if (grade.startsWith("B")) return "text-secondary";
+  if (grade.startsWith("B")) return "text-primary";
   if (grade === "D") return "text-error";
   return "text-base-content/60";
 });
@@ -311,7 +311,7 @@ const ratingCardBg = computed(() => {
   if (!grade) return "bg-base-100";
   if (grade.startsWith("S")) return "bg-primary/10";
   if (grade.startsWith("A")) return "bg-primary/10";
-  if (grade.startsWith("B")) return "bg-secondary/10";
+  if (grade.startsWith("B")) return "bg-primary/10";
   if (grade === "D") return "bg-error/10";
   return "bg-base-100";
 });

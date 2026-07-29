@@ -34,7 +34,7 @@
 
       <!-- Status bar -->
       <div
-        class="grid grid-cols-[1fr_auto_1fr] items-center px-4 py-2 border-t border-base-300 bg-base-100"
+        class="grid grid-cols-[1fr_auto_1fr] items-center bg-base-100 px-4 py-2"
       >
         <!-- Branding -->
         <NuxtLink to="/drive" class="flex items-center gap-2 justify-self-start">

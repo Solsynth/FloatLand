@@ -1,7 +1,7 @@
 <template>
   <Transition name="slide-up">
     <div v-if="uploads.length > 0" class="fixed bottom-20 right-6 z-50 w-80">
-      <div class="bg-base-100 rounded-xl shadow-lg border border-base-300 overflow-hidden">
+      <div class="bg-base-100 rounded-box shadow-sm overflow-hidden">
         <div class="flex items-center justify-between px-4 py-2 bg-base-200">
           <span class="text-sm font-medium">
             {{ t('drive.uploading') }} ({{ uploads.length }})
@@ -14,19 +14,19 @@
             <IconX class="w-3.5 h-3.5" />
           </button>
         </div>
-        <div class="max-h-60 overflow-y-auto">
+        <div class="max-h-60 space-y-1 overflow-y-auto p-1">
           <div
             v-for="upload in uploads"
             :key="upload.id"
-            class="px-4 py-2 border-t border-base-200 first:border-t-0"
+            class="rounded-box px-3 py-2"
           >
             <div class="flex items-center gap-3">
               <div class="flex-1 min-w-0">
                 <p class="text-xs font-medium truncate">{{ upload.name }}</p>
                 <div class="flex items-center gap-2 mt-1">
-                  <div class="flex-1 h-1.5 bg-base-300 rounded-full overflow-hidden">
+                  <div class="flex-1 h-1.5 bg-base-300 rounded-box overflow-hidden">
                     <div
-                      class="h-full rounded-full transition-all duration-300"
+                      class="h-full rounded-box transition-all duration-200"
                       :class="getProgressColor(upload.status)"
                       :style="{ width: `${upload.progress}%` }"
                     />
@@ -82,13 +82,7 @@ function getProgressColor(status: UploadItem['status']) {
 
 <style scoped>
 .slide-up-enter-active,
-.slide-up-leave-active {
-  transition: transform 0.3s ease, opacity 0.3s ease;
-}
-
+.slide-up-leave-active { transition: opacity 150ms ease; }
 .slide-up-enter-from,
-.slide-up-leave-to {
-  transform: translateY(20px);
-  opacity: 0;
-}
+.slide-up-leave-to { opacity: 0; }
 </style>

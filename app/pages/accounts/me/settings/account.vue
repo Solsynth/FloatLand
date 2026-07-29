@@ -5,8 +5,8 @@
     </h1>
 
     <!-- Quick links (Island activity section) -->
-    <div class="card bg-base-100 shadow-sm">
-      <div class="card-body">
+    <section class="settings-panel">
+      <div class="settings-panel__body">
         <h2 class="card-title text-lg mb-2">{{ t("settings.related") }}</h2>
         <p class="text-sm text-base-content/60 mb-4">
           {{ t("settings.relatedDescription") }}
@@ -29,11 +29,11 @@
           </NuxtLink>
         </div>
       </div>
-    </div>
+    </section>
 
     <!-- Danger zone -->
-    <div class="card bg-base-100 shadow-sm border border-error/30">
-      <div class="card-body">
+    <section class="settings-panel">
+      <div class="settings-panel__body">
         <h2 class="card-title text-lg text-error mb-2">
           {{ t("settings.dangerZone") }}
         </h2>
@@ -41,7 +41,7 @@
           {{ t("settings.accountDeletionDescription") }}
         </p>
 
-        <div class="rounded-xl bg-error/5 border border-error/20 p-4 space-y-3">
+        <div class="settings-danger-row">
           <div>
             <p class="font-medium">{{ t("settings.accountDeletion") }}</p>
             <p class="text-sm text-base-content/60">
@@ -58,7 +58,7 @@
           </button>
         </div>
       </div>
-    </div>
+    </section>
 
     <!-- Delete confirmation modal -->
     <dialog class="modal" :class="{ 'modal-open': confirmDelete }">

@@ -144,7 +144,7 @@
             <div class="flex flex-wrap gap-2">
               <span
                 v-if="payloadBool(item.payload, 'show_joined', true)"
-                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-base-200/70 text-sm"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-box bg-base-200/70 text-sm"
               >
                 <IconCalendarDays class="w-3.5 h-3.5 text-base-content/50" />
                 Joined {{ formatDateShort(account.createdAt) }}
@@ -156,13 +156,13 @@
                 "
               >
                 <span
-                  class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-base-200/70 text-sm"
+                  class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-box bg-base-200/70 text-sm"
                 >
                   <IconCake class="w-3.5 h-3.5 text-base-content/50" />
                   {{ formatDateShort(account.profile.birthday) }}
                 </span>
                 <span
-                  class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-base-200/70 text-sm"
+                  class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-box bg-base-200/70 text-sm"
                 >
                   <IconTimer class="w-3.5 h-3.5 text-base-content/50" />
                   {{ getAge(account.profile.birthday) }} yrs
@@ -170,7 +170,7 @@
               </template>
               <span
                 v-if="account.profile?.timeZone"
-                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-base-200/70 text-sm"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-box bg-base-200/70 text-sm"
               >
                 <IconClock class="w-3.5 h-3.5 text-base-content/50" />
                 {{ account.profile.timeZone }}
@@ -192,18 +192,13 @@
             </div>
             <div class="flex items-center gap-3">
               <div
-                class="w-14 h-14 rounded-2xl flex items-center justify-center"
-                :class="creditsLevelBg(account.profile?.socialCreditsLevel)"
+                class="w-14 h-14 rounded-box bg-primary/15 flex items-center justify-center"
               >
-                <IconStar
-                  class="w-7 h-7"
-                  :class="creditsLevelText(account.profile?.socialCreditsLevel)"
-                />
+                <IconStar class="w-7 h-7 text-primary" />
               </div>
               <div>
                 <p
-                  class="text-2xl font-bold"
-                  :class="creditsLevelText(account.profile?.socialCreditsLevel)"
+                  class="text-2xl font-bold text-primary"
                 >
                   {{ (account.profile?.socialCredits ?? 0).toFixed(2) }}
                 </p>
@@ -228,7 +223,7 @@
             </div>
             <div class="flex items-center gap-3">
               <div
-                class="w-14 h-14 rounded-2xl bg-primary/15 flex items-center justify-center"
+                class="w-14 h-14 rounded-box bg-primary/15 flex items-center justify-center"
               >
                 <span class="text-xl font-bold text-primary">
                   {{ account.profile?.level ?? 0 }}
@@ -616,32 +611,6 @@ function getCreditsLevelLabel(level?: number) {
       return "Excellent";
     default:
       return "Unknown";
-  }
-}
-
-function creditsLevelText(level?: number) {
-  switch (level) {
-    case -1:
-      return "text-error";
-    case 1:
-      return "text-success";
-    case 2:
-      return "text-warning";
-    default:
-      return "text-primary";
-  }
-}
-
-function creditsLevelBg(level?: number) {
-  switch (level) {
-    case -1:
-      return "bg-error/15";
-    case 1:
-      return "bg-success/15";
-    case 2:
-      return "bg-warning/15";
-    default:
-      return "bg-primary/15";
   }
 }
 

@@ -3,7 +3,7 @@
 		<!-- Mobile Header -->
 		<div class="lg:hidden sticky z-10 mb-4 -mx-4 -mt-4 top-14">
 			<div
-				class="flex items-center gap-4 border-b border-base-300 bg-base-100/95 pl-6 pr-4 py-3 backdrop-blur"
+				class="flex items-center gap-4 bg-base-100 pl-6 pr-4 py-3"
 			>
 				<button class="btn -ml-2 btn-circle btn-ghost btn-sm" @click="handleBack">
 					<IconArrowLeft class="w-5 h-5" />

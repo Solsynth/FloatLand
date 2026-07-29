@@ -18,13 +18,13 @@
             v-model="searchQuery"
             type="text"
             placeholder="Search accounts by name or nickname..."
-            class="input input-sm w-full pl-9 bg-base-200/60 border-0 rounded-xl"
+            class="input input-sm w-full rounded-box border-0 bg-base-200 pl-9"
             @keyup.enter="handleSearch"
           />
         </div>
         <select
           v-model="orderBy"
-          class="select select-sm bg-base-200/60 border-0 rounded-xl"
+          class="select select-sm rounded-box border-0 bg-base-200"
           @change="handleSearch"
         >
           <option value="created_at_desc">Newest first</option>
@@ -204,7 +204,7 @@
       </div>
 
       <!-- Pagination -->
-      <div v-if="hasMore || totalAccounts > pageSize" class="flex items-center justify-between px-5 py-3 border-t border-base-300/20">
+      <div v-if="hasMore || totalAccounts > pageSize" class="flex items-center justify-between px-5 py-3">
         <span class="text-xs text-base-content/40">
           Showing {{ offset + 1 }}–{{ Math.min(offset + pageSize, totalAccounts) }} of {{ totalAccounts || 'many' }}
         </span>

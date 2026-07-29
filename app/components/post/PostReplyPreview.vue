@@ -2,7 +2,7 @@
   <div
     ref="containerRef"
     v-if="totalReplies > 0"
-    class="rounded-xl border border-base-300 bg-base-200/30 overflow-hidden"
+    class="rounded-box bg-base-200/50 overflow-hidden"
   >
     <!-- Header -->
     <div class="px-3 py-2 flex items-center justify-between">
@@ -74,11 +74,11 @@
     </div>
 
     <!-- Nested reply list -->
-    <div v-else class="divide-y divide-base-300/50">
+    <div v-else class="space-y-1 p-1">
       <div
         v-for="node in displayReplyNodes"
         :key="node.reply.id"
-        class="px-3 py-2 hover:bg-base-200/50 cursor-pointer transition-colors"
+        class="rounded-box px-3 py-2 hover:bg-base-100/70 cursor-pointer transition-colors"
         :style="{ paddingLeft: `${12 + node.depth * 18}px` }"
         @click.stop="navigateToPost(node.reply.id)"
       >
@@ -159,7 +159,7 @@
                 <span>{{ node.reply.repliesCount || 0 }}</span>
               </button>
               <button
-                class="flex items-center gap-1 hover:text-success transition-colors"
+                class="flex items-center gap-1 hover:text-primary transition-colors"
                 @click.stop="handleBoostReply(node.reply)"
               >
                 <IconRepeat2 class="h-3 w-3" />

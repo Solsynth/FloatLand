@@ -13,7 +13,7 @@
           <div class="flex items-center gap-2">
             <div
               v-if="auth.isAuthenticated.value && realms.length > 0"
-              class="join border border-base-300/80"
+              class="join rounded-box bg-base-200 p-0.5"
             >
               <button
                 type="button"
@@ -49,7 +49,7 @@
         <!-- Auth required -->
         <div
           v-if="requiresAuth || !auth.isAuthenticated.value"
-          class="overflow-hidden rounded-xl border border-base-300/80 bg-base-100"
+          class="overflow-hidden rounded-box bg-base-100"
         >
           <div class="flex flex-col items-center gap-3 px-4 py-14 text-center">
             <div
@@ -81,7 +81,7 @@
         <!-- Error -->
         <div
           v-else-if="error"
-          class="flex flex-col items-center gap-3 rounded-xl border border-error/20 bg-base-100 px-4 py-12 text-center"
+          class="flex flex-col items-center gap-3 rounded-box bg-base-100 px-4 py-12 text-center"
         >
           <IconAlertCircle class="h-5 w-5 text-error" />
           <p class="text-sm text-base-content/70">{{ error }}</p>
@@ -90,7 +90,7 @@
         <!-- Realms list shell -->
         <div
           v-else-if="realms.length > 0"
-          class="overflow-hidden border-y border-base-300/80 bg-base-100 sm:rounded-xl sm:border"
+          class="overflow-hidden rounded-box bg-base-100"
         >
           <!-- Card grid -->
           <div
@@ -105,7 +105,7 @@
           </div>
 
           <!-- Compact list (Flutter RealmTile) -->
-          <div v-else class="divide-y divide-base-300/80">
+          <div v-else class="space-y-2 p-3 sm:p-4">
             <RealmListRow
               v-for="realm in realms"
               :key="realm.id"
@@ -117,7 +117,7 @@
         <!-- Empty -->
         <div
           v-else
-          class="overflow-hidden rounded-xl border border-base-300/80 bg-base-100"
+          class="overflow-hidden rounded-box bg-base-100"
         >
           <div class="flex flex-col items-center gap-3 px-4 py-14 text-center">
             <div

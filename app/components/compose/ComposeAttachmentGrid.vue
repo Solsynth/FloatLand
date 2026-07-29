@@ -5,7 +5,7 @@
       <div
         v-for="(attachment, index) in attachments"
         :key="attachment.id"
-        class="relative group rounded-lg overflow-hidden border border-base-300 bg-base-200"
+        class="relative group rounded-box overflow-hidden bg-base-200"
         :class="{ 'col-span-2 sm:col-span-2': isLargeAttachment(attachment) }"
       >
         <!-- Image Preview -->
@@ -104,7 +104,7 @@
 
         <!-- Audio Preview -->
         <template v-else-if="isAudio(attachment)">
-          <div class="aspect-video relative bg-linear-to-br from-primary/20 to-secondary/20 flex flex-col items-center justify-center p-4">
+          <div class="aspect-video relative bg-base-200 flex flex-col items-center justify-center p-4">
             <IconMusic class="w-10 h-10 text-primary mb-2" />
             <p class="text-xs text-center text-base-content/70 truncate w-full">{{ getFileName(attachment) }}</p>
             <p class="text-xs text-base-content/50">{{ formatFileSize(attachment.file.size) }}</p>

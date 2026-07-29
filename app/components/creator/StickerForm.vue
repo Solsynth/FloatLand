@@ -7,8 +7,8 @@
       class="mb-5"
     >
       <!-- Image Upload -->
-      <div class="flex items-start gap-4 mb-5 p-4 rounded-xl bg-base-200/50 border border-dashed border-base-300/50">
-        <div class="w-20 h-20 rounded-xl bg-base-200 overflow-hidden shrink-0 border border-base-300/40">
+      <div class="flex items-start gap-4 mb-5 p-4 rounded-box bg-base-200/50">
+        <div class="w-20 h-20 rounded-box bg-base-200 overflow-hidden shrink-0">
           <img
             v-if="imageUrl"
             :src="imageUrl"

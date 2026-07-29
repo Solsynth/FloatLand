@@ -1,7 +1,6 @@
 <template>
-  <div class="min-h-screen bg-base-200 flex items-center justify-center px-4">
-    <div class="card bg-base-100 shadow-xl max-w-md w-full">
-      <div class="card-body">
+  <div class="auth-page">
+    <div class="auth-panel auth-panel--compact">
         <ConfuseSpinner v-if="loading" message="Processing login..." />
         <template v-else-if="success">
           <div class="text-center">
@@ -13,7 +12,6 @@
           <IconAlertCircle class="w-4 h-4" />
           <span>Failed to process login. Please try again.</span>
         </div>
-      </div>
     </div>
   </div>
 </template>

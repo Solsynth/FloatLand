@@ -41,7 +41,7 @@
         </button>
 
         <!-- Counter -->
-        <div class="absolute bottom-6 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-black/60 rounded-full text-sm text-white/90 font-medium backdrop-blur-sm">
+        <div class="absolute bottom-6 left-1/2 -translate-x-1/2 rounded-box bg-black/60 px-4 py-1.5 text-sm font-medium text-white/90">
           {{ state.currentIndex + 1 }} / {{ state.attachments.length }}
         </div>
       </div>

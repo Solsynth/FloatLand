@@ -1,6 +1,6 @@
 <template>
   <NuxtLayout name="app">
-    <div class="grid min-w-0 xl:grid-cols-[minmax(0,1fr)_20rem] xl:gap-x-6">
+    <div class="feed-layout">
       <!-- Main Content -->
       <div class="space-y-4 min-w-0">
         <!-- Search Bar -->
@@ -11,7 +11,7 @@
             v-model="searchQuery"
             type="text"
             :placeholder="t('search.placeholder')"
-            class="input-bordered input w-full bg-base-200/50 focus:bg-base-100 pl-10 pr-10"
+            class="rail-search input w-full pl-10 pr-10"
             @input="onInput"
             @keyup.enter="onSubmit"
           >
@@ -25,12 +25,12 @@
         </div>
 
         <!-- Mode Switcher -->
-        <div class="flex gap-2 bg-base-100 p-1 rounded-full">
+        <div class="search-tabs">
           <button
             v-for="tab in tabs"
             :key="tab.key"
-            class="flex-1 flex items-center justify-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-colors"
-            :class="activeTab === tab.key ? 'bg-primary text-primary-content' : 'text-base-content/60 hover:bg-base-200'"
+            class="search-tabs__item"
+            :class="activeTab === tab.key ? 'search-tabs__item--active' : ''"
             @click="activeTab = tab.key as SearchTab"
           >
             <component :is="tab.icon" class="w-4 h-4" />
@@ -88,7 +88,7 @@
               v-for="result in allAccountResults"
               :key="`${result.type}-${result.data.id || result.data.name}`"
               :to="result.type === 'publisher' ? `/publishers/${result.data.name}` : `/accounts/${result.data.name}`"
-              class="flex items-center gap-3 p-3 bg-base-100 rounded-xl hover:bg-base-200/50 transition-colors group"
+              class="search-result-row group"
             >
               <!-- Avatar -->
               <div class="shrink-0">
@@ -150,7 +150,7 @@
       </div>
 
       <!-- Right Sidebar (Desktop only) -->
-      <aside class="hidden w-full self-start sticky top-4 xl:block">
+      <aside class="feed-sidebar">
         <RightSidebar />
       </aside>
     </div>

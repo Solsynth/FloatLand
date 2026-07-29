@@ -20,8 +20,8 @@
     </div>
 
     <template v-else>
-      <div class="card bg-base-100 shadow-sm">
-        <div class="card-body">
+      <section class="settings-panel">
+        <div class="settings-panel__body">
           <h2 class="card-title text-lg mb-4">
             {{ t("settings.defaultPublishers") }}
           </h2>
@@ -116,7 +116,7 @@
             </div>
           </div>
         </div>
-      </div>
+      </section>
     </template>
   </div>
 </template>

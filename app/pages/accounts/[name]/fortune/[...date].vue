@@ -46,7 +46,7 @@
                         <!-- Date Header -->
                         <div class="flex items-center gap-3">
                             <div
-                                class="w-12 h-12 rounded-xl flex items-center justify-center bg-primary text-primary-content"
+                                class="w-12 h-12 rounded-box flex items-center justify-center bg-primary text-primary-content"
                             >
                                 <span class="text-xl font-bold">
                                     {{ selectedDay.dayOfMonth }}
@@ -208,7 +208,7 @@
                                     <div
                                         v-else
                                         role="button"
-                                        class="cursor-pointer aspect-square flex flex-col items-center justify-center gap-0.5 rounded-lg transition-colors select-none"
+                                        class="cursor-pointer aspect-square flex flex-col items-center justify-center gap-0.5 rounded-box transition-colors select-none"
                                         :class="{
                                             'bg-primary text-primary-content': cell.isSelected,
                                             'bg-primary/10': cell.isToday && !cell.isSelected,
@@ -227,11 +227,10 @@
                                         </span>
                                         <span
                                             v-if="cell.levelLabel"
-                                            class="text-[9px] font-semibold leading-none"
+                                            class="text-[9px] font-semibold leading-none text-primary"
                                             :class="{
                                                 'text-primary-content/80': cell.isSelected,
                                             }"
-                                            :style="!cell.isSelected ? { color: getLevelColor(cell.level!) } : {}"
                                         >
                                             {{ cell.levelLabel }}
                                         </span>
@@ -321,7 +320,7 @@
                                     <div
                                         v-else
                                         role="button"
-                                        class="cursor-pointer aspect-square flex flex-col items-center justify-center gap-0.5 rounded-lg transition-colors select-none"
+                                        class="cursor-pointer aspect-square flex flex-col items-center justify-center gap-0.5 rounded-box transition-colors select-none"
                                         :class="{
                                             'bg-primary text-primary-content': cell.isSelected,
                                             'bg-primary/10': cell.isToday && !cell.isSelected,
@@ -340,11 +339,10 @@
                                         </span>
                                         <span
                                             v-if="cell.levelLabel"
-                                            class="text-[9px] font-semibold leading-none"
+                                            class="text-[9px] font-semibold leading-none text-primary"
                                             :class="{
                                                 'text-primary-content/80': cell.isSelected,
                                             }"
-                                            :style="!cell.isSelected ? { color: getLevelColor(cell.level!) } : {}"
                                         >
                                             {{ cell.levelLabel }}
                                         </span>
@@ -454,19 +452,6 @@ const levelShortLabels: Record<number, string> = {
     4: "Great",
     5: "Lucky",
 };
-
-const levelColors: Record<number, string> = {
-    0: "#7A587D",
-    1: "#79709C",
-    2: "#8DB7EF",
-    3: "#FEDE81",
-    4: "#E04A46",
-    5: "#FFB7C0",
-};
-
-function getLevelColor(level: number): string {
-    return levelColors[level] ?? "#8DB7EF";
-}
 
 const startDayOfWeek = computed(() => new Date(year.value, month.value - 1, 1).getDay());
 

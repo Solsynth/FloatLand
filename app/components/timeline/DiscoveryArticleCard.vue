@@ -1,7 +1,7 @@
 <template>
   <button
     type="button"
-    class="flex h-full w-full flex-col overflow-hidden rounded-xl border border-base-300/70 bg-base-100 text-left transition-colors hover:border-base-300"
+    class="feed-discovery-card flex h-full w-full flex-col overflow-hidden text-left"
     @click="openArticle"
   >
     <div

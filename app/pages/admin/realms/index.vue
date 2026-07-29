@@ -10,22 +10,22 @@
             v-model="searchQuery"
             type="text"
             placeholder="Search realms by slug, name, or description..."
-            class="input input-sm w-full pl-9 bg-base-200/60 border-0 rounded-xl"
+            class="input input-sm w-full rounded-box border-0 bg-base-200 pl-9"
             @keyup.enter="handleSearch"
           />
         </div>
         <div class="flex flex-wrap gap-2">
-          <select v-model="filters.isPublic" class="select select-sm bg-base-200/60 border-0 rounded-xl" @change="handleSearch">
+          <select v-model="filters.isPublic" class="select select-sm rounded-box border-0 bg-base-200" @change="handleSearch">
             <option value="">Any visibility</option>
             <option value="true">Public</option>
             <option value="false">Private</option>
           </select>
-          <select v-model="filters.isCommunity" class="select select-sm bg-base-200/60 border-0 rounded-xl" @change="handleSearch">
+          <select v-model="filters.isCommunity" class="select select-sm rounded-box border-0 bg-base-200" @change="handleSearch">
             <option value="">Any type</option>
             <option value="true">Community</option>
             <option value="false">Invite-only</option>
           </select>
-          <select v-model="filters.verified" class="select select-sm bg-base-200/60 border-0 rounded-xl" @change="handleSearch">
+          <select v-model="filters.verified" class="select select-sm rounded-box border-0 bg-base-200" @change="handleSearch">
             <option value="">Any verification</option>
             <option value="true">Verified</option>
             <option value="false">Unverified</option>
@@ -82,7 +82,7 @@
                 <div class="flex flex-wrap gap-1">
                   <span v-if="realm.isPublic" class="badge badge-success badge-xs">Public</span>
                   <span v-else class="badge badge-ghost badge-xs">Private</span>
-                  <span v-if="realm.isCommunity" class="badge badge-info badge-xs">Community</span>
+                  <span v-if="realm.isCommunity" class="badge badge-primary badge-xs">Community</span>
                   <span v-if="realm.verification" class="badge badge-success badge-xs">Verified</span>
                 </div>
               </td>
@@ -105,7 +105,7 @@
         <p class="text-base-content/50 mb-1">No realms found</p>
       </div>
 
-      <div v-if="total > pageSize" class="flex items-center justify-between px-5 py-3 border-t border-base-300/20">
+      <div v-if="total > pageSize" class="flex items-center justify-between px-5 py-3">
         <span class="text-xs text-base-content/40">
           Showing {{ offset + 1 }}–{{ Math.min(offset + pageSize, total) }} of {{ total }}
         </span>

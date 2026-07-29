@@ -1,42 +1,13 @@
 <template>
-	<div class="min-h-screen flex flex-col items-center justify-center px-4 py-8 relative overflow-hidden">
-		<!-- Full-page blurred background -->
-		<div
-			v-if="backgroundUrl"
-			class="fixed inset-0 -z-10 bg-cover bg-center scale-110"
-			:style="`background-image: url('${backgroundUrl}')`"
-		/>
-		<div
-			class="fixed inset-0 -z-10 backdrop-blur-3xl bg-base-200/60"
-			:class="{ 'bg-base-200': !backgroundUrl }"
-		/>
-
-		<div class="w-full max-w-4xl rounded-3xl shadow-2xl overflow-hidden border border-base-300/30">
+	<div class="auth-page auth-page--authorization">
+		<div class="auth-panel auth-panel--authorization">
 			<div class="grid md:grid-cols-[1fr_1.1fr]">
 				<!-- Left Column: Branding & App -->
 				<section
-					class="relative flex flex-col justify-between gap-6 rounded-t-3xl p-6 md:rounded-l-3xl md:rounded-tr-none md:p-8 overflow-hidden"
-					:style="leftStyle"
+				class="auth-rail auth-authorization__rail"
 				>
-					<!-- Left background layer -->
-					<div
-						v-if="backgroundUrl"
-						class="absolute inset-0 -z-10 bg-cover bg-center opacity-40"
-						:style="`background-image: url('${backgroundUrl}')`"
-					/>
-					<div
-						v-if="backgroundUrl"
-						class="absolute inset-0 -z-10 bg-gradient-to-b from-base-100/80 via-base-100/60 to-base-100/90"
-					/>
-					<div v-else class="absolute inset-0 -z-10 bg-base-100/80 backdrop-blur-2xl" />
-
 					<div class="flex flex-col gap-5">
-						<img src="/favicon.png" alt="Solar Network" class="h-10 w-10 rounded-full opacity-80">
-						<div>
-							<p class="text-xs font-semibold tracking-[0.2em] text-base-content/60 uppercase">
-								Authorization Request
-							</p>
-						</div>
+						<img src="/favicon.png" alt="Solar Network" class="auth-brand-mark">
 						<div>
 							<h1 class="text-3xl leading-tight font-black">Grant Access</h1>
 							<p class="text-sm text-base-content/60 mt-2">
@@ -48,7 +19,7 @@
 					<!-- User Account Info -->
 					<div
 						v-if="auth.user.value"
-						class="flex items-center gap-3 p-4 bg-base-200/40 rounded-2xl border border-base-300/30 backdrop-blur-sm"
+						class="auth-detail-block flex items-center gap-3"
 					>
 						<div class="avatar">
 							<div class="w-11 h-11 rounded-full overflow-hidden">
@@ -78,7 +49,7 @@
 				</section>
 
 				<!-- Right Column: Permissions & Actions -->
-				<section class="rounded-b-2xl bg-base-100/95 backdrop-blur-sm p-6 md:rounded-r-2xl md:rounded-bl-none md:p-8 min-h-96 flex flex-col justify-between">
+				<section class="auth-main min-h-96 justify-between">
 					<ConfuseSpinner v-if="loading" message="Authorizing..." />
 
 					<template v-else-if="clientInfo">
@@ -95,7 +66,7 @@
 							<!-- App Info Summary -->
 							<div class="flex flex-col items-start text-center mb-6">
 								<div class="avatar mb-2">
-									<div class="w-11 h-11 rounded-2xl overflow-hidden ring-2 ring-base-300/30">
+									<div class="w-11 h-11 overflow-hidden rounded-md border border-base-300">
 										<img
 											v-if="clientPictureUrl"
 											:src="clientPictureUrl"
@@ -119,7 +90,7 @@
 							</div>
 
 							<!-- Permissions -->
-							<div class="rounded-2xl border border-base-300 bg-base-200/60 p-4">
+							<div class="auth-detail-block">
 								<p class="mb-3 text-sm font-semibold flex items-center gap-2">
 									<IconShield class="w-4 h-4 text-primary" />
 									Requested permissions
@@ -192,7 +163,7 @@
 			</div>
 		</div>
 
-		<div class="w-full max-w-4xl mt-4 flex justify-between">
+		<div class="auth-authorization__utilities">
 			<DialogRoot v-model:open="showAppLinkDialog">
 				<DialogTrigger class="btn btn-ghost btn-sm text-base-content/60">
 					<IconExternalLink class="w-4 h-4" />
@@ -200,7 +171,7 @@
 				</DialogTrigger>
 				<DialogPortal>
 					<DialogOverlay class="fixed inset-0 bg-black/50 z-50" />
-					<DialogContent class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[calc(100%-2rem)] max-w-xs bg-base-100 rounded-2xl shadow-xl p-6 flex flex-col items-center gap-4">
+					<DialogContent class="fixed top-1/2 left-1/2 z-50 flex w-[calc(100%-2rem)] max-w-xs -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-4 rounded-box bg-base-100 p-6 shadow-sm">
 						<DialogTitle class="text-lg font-bold">Open in App</DialogTitle>
 						<DialogDescription class="text-sm text-base-content/50 text-center">
 							Scan the QR code or tap below to open in the Solar Network app.
@@ -302,17 +273,6 @@ const userAvatarUrl = computed(() => {
 const clientPictureUrl = computed(() => {
 	const fileId = clientInfo.value?.picture?.id;
 	return fileId ? `https://api.solian.app/drive/files/${fileId}` : null;
-});
-
-const backgroundUrl = computed(() => {
-	const fileId = clientInfo.value?.background?.id;
-	return fileId ? `https://api.solian.app/drive/files/${fileId}` : null;
-});
-
-// Left column style: tinted with app background
-const leftStyle = computed(() => {
-	if (!backgroundUrl.value) return {};
-	return {};
 });
 
 // User-friendly scope labels

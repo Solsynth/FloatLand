@@ -5,7 +5,7 @@
         <div v-else-if="!wallets || wallets.length === 0" class="mx-auto max-w-md p-6">
             <div class="card bg-base-100 shadow-sm">
                 <div class="card-body items-center text-center gap-6 py-12">
-                    <div class="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center">
+                    <div class="flex h-20 w-20 items-center justify-center rounded-box bg-primary/10">
                         <IconWallet class="text-primary w-10 h-10" />
                     </div>
                     <div>
@@ -56,11 +56,10 @@
                                 <div
                                     tabindex="0"
                                     role="button"
-                                    class="flex items-center gap-3 p-2 rounded-xl cursor-pointer hover:bg-base-200/50 transition-colors"
+                                    class="flex cursor-pointer items-center gap-3 rounded-box p-2 transition-colors hover:bg-base-200/50"
                                 >
                                     <div
-                                        class="w-10 h-10 rounded-xl flex items-center justify-center"
-                                        :class="selectedWallet?.realmId ? 'bg-secondary/10 text-secondary' : 'bg-primary/10 text-primary'"
+                                        class="flex h-10 w-10 items-center justify-center rounded-box bg-primary/10 text-primary"
                                     >
                                         <IconBuilding v-if="selectedWallet?.realmId" class="w-5 h-5" />
                                         <IconStar v-else-if="selectedWallet?.isPrimary" class="w-5 h-5" />
@@ -86,7 +85,7 @@
                                 </div>
                                 <ul
                                     tabindex="0"
-                                    class="dropdown-content menu bg-base-100 rounded-box z-10 w-full p-2 shadow-lg border border-base-200 mt-2 max-h-60 overflow-auto"
+                                    class="dropdown-content menu z-10 mt-2 max-h-60 w-full overflow-auto rounded-box bg-base-200 p-2 shadow-sm"
                                 >
                                     <li v-for="w in wallets" :key="w.id">
                                         <button
@@ -95,8 +94,7 @@
                                             @click="selectedWalletId = w.id"
                                         >
                                             <div
-                                                class="w-8 h-8 rounded-lg flex items-center justify-center"
-                                                :class="w.realmId ? 'bg-secondary/10 text-secondary' : 'bg-primary/10 text-primary'"
+                                                class="flex h-8 w-8 items-center justify-center rounded-box bg-primary/10 text-primary"
                                             >
                                                 <IconBuilding v-if="w.realmId" class="w-4 h-4" />
                                                 <IconStar v-else-if="w.isPrimary" class="w-4 h-4" />
@@ -133,7 +131,7 @@
                     </div>
 
                     <!-- Balance Card -->
-                    <div class="card bg-linear-to-br from-primary via-primary to-primary/80 text-primary-content shadow-md">
+                    <div class="card bg-primary text-primary-content shadow-sm">
                         <div class="card-body">
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center gap-2">
@@ -155,7 +153,7 @@
                                         <IconMoreVertical class="w-4 h-4" />
                                     </button>
                                     <ul
-                                        class="dropdown-content menu menu-sm bg-base-100 text-base-content rounded-box z-1 w-48 p-2 shadow-lg border border-base-200 mt-2"
+                                        class="dropdown-content menu menu-sm z-1 mt-2 w-48 rounded-box bg-base-200 p-2 text-base-content shadow-sm"
                                     >
                                         <li>
                                             <button @click="isBalanceVisible = !isBalanceVisible">
@@ -206,13 +204,13 @@
                                 <!-- Currency Selector -->
                                 <div class="dropdown">
                                     <button
-                                        class="badge badge-lg bg-white/20 text-white border-white/30 hover:bg-white/30 gap-1 cursor-pointer backdrop-blur-sm"
+                                        class="badge badge-lg cursor-pointer gap-1 border-0 bg-white/20 text-white hover:bg-white/30"
                                     >
                                         {{ formatCurrency(selectedCurrency) }}
                                         <IconChevronDown class="w-3 h-3" />
                                     </button>
                                     <ul
-                                        class="dropdown-content menu menu-sm bg-base-100 text-base-content rounded-box z-1 w-32 p-2 shadow-lg border border-base-200 mt-2"
+                                        class="dropdown-content menu menu-sm z-1 mt-2 w-32 rounded-box bg-base-200 p-2 text-base-content shadow-sm"
                                     >
                                         <li
                                             v-for="pocket in allPockets"
@@ -964,7 +962,7 @@
                     <!-- Amount Header -->
                     <div class="text-center py-4">
                         <div
-                            class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4"
+                            class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-box"
                             :class="
                                 isIncome(selectedTransaction)
                                     ? 'bg-success/10 text-success'

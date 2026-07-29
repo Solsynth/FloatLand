@@ -34,7 +34,7 @@
                 v-for="pub in managedPublishers"
                 :key="pub.id"
                 :to="`/creators/${pub.name}`"
-                class="flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors duration-150 hover:bg-base-200"
+                class="flex items-center gap-3 rounded-box px-3 py-2.5 transition-colors duration-150 hover:bg-base-200"
               >
                 <div class="avatar shrink-0">
                   <div class="w-10 rounded-full">
@@ -69,16 +69,16 @@
               </p>
             </div>
 
-            <div class="divider my-1 mx-3" />
+            <div class="h-2" />
 
             <!-- Invites -->
             <NuxtLink
               to="/creators"
-              class="flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors duration-150 hover:bg-base-200"
+              class="flex items-center gap-3 rounded-box px-3 py-2.5 transition-colors duration-150 hover:bg-base-200"
             >
               <div class="avatar avatar-placeholder shrink-0">
                 <div
-                  class="w-10 rounded-full bg-secondary/15 text-secondary"
+                  class="w-10 rounded-full bg-primary/10 text-primary"
                 >
                   <IconMail class="w-5 h-5" />
                 </div>
@@ -95,7 +95,7 @@
             <!-- Create Publisher -->
             <button
               type="button"
-              class="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 transition-colors duration-150 hover:bg-base-200"
+              class="flex w-full items-center gap-3 rounded-box px-3 py-2.5 transition-colors duration-150 hover:bg-base-200"
               @click="openCreateModal"
             >
               <div class="avatar avatar-placeholder shrink-0">
@@ -125,7 +125,7 @@
           <div
             v-for="invite in invites"
             :key="invite.id"
-            class="flex items-center gap-3 rounded-xl px-3 py-2.5 bg-base-200/60 border border-base-300/40"
+            class="flex items-center gap-3 rounded-box bg-base-200 px-3 py-2.5"
           >
             <div class="avatar shrink-0">
               <div class="w-9 rounded-full">
@@ -190,7 +190,7 @@
     </div>
 
     <template #rightbar>
-      <div class="min-h-full bg-base-100 border-l border-base-300/40 p-5">
+      <div class="min-h-full bg-base-100 p-5">
         <h3 class="font-semibold text-sm mb-2">{{ t("creator.title") }}</h3>
         <p class="text-xs text-base-content/55 leading-relaxed">
           {{ t("creator.quota.info") }}

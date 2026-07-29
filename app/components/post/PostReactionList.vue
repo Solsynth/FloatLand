@@ -6,14 +6,14 @@
     <!-- Add reaction button (client-only to avoid Teleport to body SSR issues) -->
     <ClientOnly>
       <PopoverRoot v-if="showAddButton" v-model:open="showReactionPicker">
-        <PopoverTrigger class="btn btn-glass btn-xs gap-1 h-7 px-2">
+        <PopoverTrigger class="btn btn-ghost btn-xs gap-1 h-7 px-2">
           <IconSmilePlus class="h-3.5 w-3.5" />
           <span class="text-xs">React</span>
         </PopoverTrigger>
 
         <PopoverPortal>
           <PopoverContent
-            class="bg-base-100 rounded-2xl border border-base-300 shadow-xl p-4 z-50"
+            class="bg-base-100 rounded-box shadow-sm p-3 z-50"
             :side-offset="8"
             align="center"
             :collision-padding="16"
@@ -22,7 +22,7 @@
               <button
                 v-for="emoji in availableReactions"
                 :key="emoji.symbol"
-                class="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-base-200 transition-colors"
+                class="flex flex-col items-center gap-2 p-3 rounded-box hover:bg-base-200 transition-colors"
                 @click.stop="addReaction(emoji.symbol)"
               >
                 <img
@@ -44,11 +44,11 @@
     <button
       v-for="reaction in displayReactions"
       :key="reaction.symbol"
-      class="inline-flex items-center gap-1 h-7 px-2 rounded-full text-xs font-medium transition-colors"
+      class="inline-flex items-center gap-1 h-7 px-2 rounded-box text-xs font-medium transition-colors"
       :class="
         reaction.userReacted
-          ? 'bg-primary/20 text-primary border border-primary/30'
-          : 'bg-base-200 text-base-content/70 border border-base-300 hover:bg-base-300'
+          ? 'bg-primary/15 text-primary'
+          : 'bg-base-200 text-base-content/70 hover:bg-base-300'
       "
       @click.stop="toggleReaction(reaction)"
     >
@@ -67,7 +67,7 @@
     <!-- More reactions indicator -->
     <button
       v-if="reactions.length > maxVisible"
-      class="inline-flex items-center h-7 px-2 rounded-full text-xs font-medium bg-base-200 text-base-content/70 border border-base-300 hover:bg-base-300"
+      class="inline-flex items-center h-7 px-2 rounded-box text-xs font-medium bg-base-200 text-base-content/70 hover:bg-base-300"
       @click.stop="showAll = !showAll"
     >
       +{{ reactions.length - maxVisible }}

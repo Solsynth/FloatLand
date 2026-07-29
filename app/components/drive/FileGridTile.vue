@@ -1,7 +1,7 @@
 <template>
   <div
-    class="rounded-xl border border-base-300 overflow-hidden transition-all cursor-pointer hover:shadow-md hover:border-primary/30 group"
-    :class="{ 'border-primary/50 bg-primary/5': isSelected }"
+    class="rounded-box bg-base-100 overflow-hidden transition-colors cursor-pointer hover:bg-base-200 group"
+    :class="{ 'bg-primary/5': isSelected }"
     @click="handleClick"
     @contextmenu.prevent="$emit('contextmenu', $event)"
   >
@@ -55,11 +55,11 @@
       </div>
       <!-- Audio -->
       <div v-else-if="isAudio" class="flex flex-col items-center gap-2">
-        <IconFileAudio class="w-12 h-12 text-accent" />
+        <IconFileAudio class="w-12 h-12 text-primary" />
       </div>
       <!-- Text -->
       <div v-else-if="isText" class="flex flex-col items-center gap-2">
-        <IconFileText class="w-12 h-12 text-info" />
+        <IconFileText class="w-12 h-12 text-primary" />
       </div>
       <!-- Generic file -->
       <div v-else class="flex flex-col items-center gap-2">
@@ -88,7 +88,7 @@
           </DropdownMenuTrigger>
           <DropdownMenuPortal>
             <DropdownMenuContent
-              class="min-w-[180px] bg-base-100 rounded-lg p-1 shadow-lg border border-base-300 z-50"
+              class="min-w-[180px] bg-base-100 rounded-box p-1 shadow-sm z-50"
               :side-offset="5"
               align="end"
             >
@@ -115,9 +115,8 @@
                 <IconDownload class="w-4 h-4" />
                 {{ t("drive.download") }}
               </DropdownMenuItem>
-              <DropdownMenuSeparator class="h-px bg-base-300 my-1" />
               <DropdownMenuItem
-                class="flex items-center gap-2 px-2 py-1.5 text-sm rounded cursor-pointer hover:bg-error/10 text-error outline-none"
+                class="mt-1 flex items-center gap-2 px-2 py-1.5 text-sm rounded-box cursor-pointer hover:bg-error/10 text-error outline-none"
                 @select="$emit('delete')"
               >
                 <IconTrash class="w-4 h-4" />
@@ -149,7 +148,6 @@ import {
   DropdownMenuItem,
   DropdownMenuPortal,
   DropdownMenuRoot,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "reka-ui";
 

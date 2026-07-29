@@ -79,7 +79,7 @@
       <!-- Attachments (above content bubble) -->
       <div
         v-if="hasAttachments"
-        class="mb-1 overflow-hidden rounded-xl"
+        class="mb-1 overflow-hidden rounded-box"
         :class="isOwn ? 'ml-auto' : 'mr-auto'"
         style="max-width: 400px; min-width: 200px;"
       >
@@ -92,7 +92,7 @@
       <!-- Content bubble -->
       <div
         v-if="message.content || message.deletedAt"
-        class="rounded-2xl px-3 py-1.5 text-sm"
+        class="rounded-box px-3 py-1.5 text-sm"
         :class="bubbleClasses"
       >
         <!-- Deleted message -->

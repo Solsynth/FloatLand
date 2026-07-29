@@ -4,7 +4,7 @@
     <Transition name="fade">
       <div
         v-if="drawerOpen"
-        class="fixed inset-0 z-[9998] bg-black/40 backdrop-blur-sm"
+        class="fixed inset-0 z-[9998] bg-black/40"
         @click="closeDrawer"
       />
     </Transition>
@@ -13,10 +13,10 @@
     <Transition name="slide-right">
       <div
         v-if="drawerOpen"
-        class="fixed top-0 right-0 z-[9999] flex h-full w-full flex-col border-l border-base-300 bg-base-100 shadow-2xl sm:w-[28rem] md:w-[32rem]"
+        class="fixed top-0 right-0 z-[9999] flex h-full w-full flex-col bg-base-100 shadow-sm sm:w-[28rem] md:w-[32rem]"
       >
         <!-- Header -->
-        <div class="flex items-center justify-between border-b border-base-300 px-4 py-3">
+        <div class="flex items-center justify-between bg-base-200 px-4 py-3">
           <h2 class="text-lg font-bold">
             {{ t('notifications.title') }}
           </h2>
@@ -75,7 +75,7 @@
           </div>
 
           <!-- Notification items -->
-          <div v-else class="divide-y divide-base-300/50">
+          <div v-else>
             <NotificationItem
               v-for="notification in notifications"
               :key="notification.id"

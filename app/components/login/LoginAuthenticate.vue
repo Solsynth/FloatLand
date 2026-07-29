@@ -41,7 +41,7 @@
                     ref="inputRef"
                     :type="isPassword ? 'password' : 'text'"
                     :placeholder="inputPlaceholder"
-                    class="input input-bordered w-full"
+                    class="input input-bordered auth-input w-full"
                     :value="modelValue"
                     :autocomplete="isPassword ? 'current-password' : 'one-time-code'"
                     :disabled="submitting"

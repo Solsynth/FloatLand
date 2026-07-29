@@ -1,5 +1,5 @@
 <template>
-  <header class="sticky top-0 z-30 bg-base-100/90 backdrop-blur-md border-b border-base-300/50">
+  <header class="sticky top-0 z-30 border-b border-base-300 bg-base-100">
     <div class="flex items-center h-14 px-4 lg:px-6">
       <!-- Left: Breadcrumbs + Page Title -->
       <div class="flex items-center gap-2.5 min-w-0">

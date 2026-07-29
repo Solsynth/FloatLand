@@ -1,8 +1,8 @@
 <template>
-  <div v-if="posts.length > 0 || loading || error" class="bg-base-100">
+  <div v-if="posts.length > 0 || loading || error" class="feed-featured">
     <!-- Header -->
     <div
-      class="flex h-11 cursor-pointer select-none items-center gap-2 px-4"
+      class="feed-insert__header cursor-pointer select-none"
       @click="toggleCollapse"
     >
       <IconSparkles class="h-3.5 w-3.5 shrink-0 text-primary" />
@@ -46,7 +46,7 @@
       class="overflow-hidden transition-[max-height] duration-200 ease-out"
       :style="{ maxHeight: contentHeight }"
     >
-      <div class="px-2 pb-3">
+      <div class="px-4 pb-4">
         <div v-if="loading" class="flex items-center justify-center py-8">
           <span class="loading loading-spinner loading-sm text-base-content/40" />
         </div>
@@ -59,7 +59,7 @@
         </div>
 
         <div v-else class="relative">
-          <div class="overflow-hidden rounded-lg bg-base-200/40">
+          <div class="overflow-hidden rounded-lg border border-base-300/70 bg-base-200/40">
             <div
               class="flex transition-transform duration-200 ease-out"
               :style="{ transform: `translateX(-${currentPage * 100}%)` }"

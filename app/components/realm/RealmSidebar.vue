@@ -5,7 +5,7 @@
       class="flex gap-2 overflow-x-auto pb-1 xl:hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
     >
       <div
-        class="w-40 shrink-0 rounded-xl border border-primary/20 bg-primary/5 p-3"
+        class="w-40 shrink-0 rounded-box bg-primary/5 p-3"
       >
         <div class="mb-1.5 flex items-center gap-1.5">
           <IconRocket class="h-3.5 w-3.5 text-primary" />
@@ -30,7 +30,7 @@
 
       <NuxtLink
         :to="`/realms/${realmSlug}/members`"
-        class="flex w-28 shrink-0 flex-col items-center justify-center rounded-xl border border-base-300/80 bg-base-100 p-3 transition-colors hover:bg-base-200/40"
+        class="flex w-28 shrink-0 flex-col items-center justify-center rounded-box bg-base-100 p-3 transition-colors hover:bg-base-200"
       >
         <IconUsers class="mb-1 h-5 w-5 text-base-content/55" />
         <span class="text-xs font-medium">{{ t("realms.membersLink") }}</span>
@@ -39,7 +39,7 @@
       <button
         v-if="isMember"
         type="button"
-        class="flex w-28 shrink-0 flex-col items-center justify-center rounded-xl border border-base-300/80 bg-base-100 p-3 transition-colors hover:bg-base-200/40"
+        class="flex w-28 shrink-0 flex-col items-center justify-center rounded-box bg-base-100 p-3 transition-colors hover:bg-base-200"
         @click="copyInviteLink"
       >
         <IconLink class="mb-1 h-5 w-5 text-base-content/55" />
@@ -51,9 +51,9 @@
     <div class="hidden space-y-3 xl:block">
       <!-- Boost -->
       <div
-        class="overflow-hidden rounded-xl border border-base-300/80 bg-base-100"
+        class="overflow-hidden rounded-box bg-base-100"
       >
-        <div class="border-b border-base-300/80 px-3 py-2.5">
+        <div class="bg-base-200/70 px-3 py-2.5">
           <div class="flex items-center gap-2">
             <IconRocket class="h-4 w-4 text-primary" />
             <h3 class="text-sm font-semibold">{{ t("realms.boostStatus") }}</h3>
@@ -115,13 +115,13 @@
       <!-- Leaderboard -->
       <div
         v-if="leaderboard.length > 0"
-        class="overflow-hidden rounded-xl border border-base-300/80 bg-base-100"
+        class="overflow-hidden rounded-box bg-base-100"
       >
         <div
-          class="flex items-center justify-between border-b border-base-300/80 px-3 py-2.5"
+          class="flex items-center justify-between bg-base-200/70 px-3 py-2.5"
         >
           <div class="flex items-center gap-2">
-            <IconTrophy class="h-4 w-4 text-warning" />
+            <IconTrophy class="h-4 w-4 text-primary" />
             <h3 class="text-sm font-semibold">{{ t("realms.topBoosters") }}</h3>
           </div>
           <NuxtLink
@@ -131,11 +131,11 @@
             {{ t("realms.viewAll") }}
           </NuxtLink>
         </div>
-        <div class="divide-y divide-base-300/60">
+        <div class="space-y-1 p-1">
           <div
             v-for="(entry, index) in leaderboard.slice(0, 5)"
             :key="entry.accountId"
-            class="flex items-center gap-2.5 px-3 py-2"
+            class="flex items-center gap-2.5 rounded-box px-2 py-2"
           >
             <span
               class="w-5 text-center text-xs font-bold text-base-content/35"
@@ -174,15 +174,15 @@
 
       <!-- Quick links -->
       <div
-        class="overflow-hidden rounded-xl border border-base-300/80 bg-base-100"
+        class="overflow-hidden rounded-box bg-base-100"
       >
-        <div class="border-b border-base-300/80 px-3 py-2.5">
+        <div class="bg-base-200/70 px-3 py-2.5">
           <h3 class="text-sm font-semibold">{{ t("realms.quickLinks") }}</h3>
         </div>
         <div class="p-1.5">
           <NuxtLink
             :to="`/realms/${realmSlug}/members`"
-            class="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm transition-colors hover:bg-base-200/50"
+            class="flex items-center gap-2.5 rounded-box px-2.5 py-2 text-sm transition-colors hover:bg-base-200"
           >
             <IconUsers class="h-4 w-4 text-base-content/50" />
             {{ t("realms.membersLink") }}
@@ -190,7 +190,7 @@
           <NuxtLink
             v-if="isMember"
             :to="`/realms/${realmSlug}/settings`"
-            class="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm transition-colors hover:bg-base-200/50"
+            class="flex items-center gap-2.5 rounded-box px-2.5 py-2 text-sm transition-colors hover:bg-base-200"
           >
             <IconSettings class="h-4 w-4 text-base-content/50" />
             {{ t("realms.settings") }}
@@ -198,7 +198,7 @@
           <button
             v-if="isMember"
             type="button"
-            class="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm transition-colors hover:bg-base-200/50"
+            class="flex w-full items-center gap-2.5 rounded-box px-2.5 py-2 text-left text-sm transition-colors hover:bg-base-200"
             @click="copyInviteLink"
           >
             <IconLink class="h-4 w-4 text-base-content/50" />
@@ -210,15 +210,15 @@
       <!-- My identity -->
       <div
         v-if="membership"
-        class="overflow-hidden rounded-xl border border-base-300/80 bg-base-100"
+        class="overflow-hidden rounded-box bg-base-100"
       >
-        <div class="border-b border-base-300/80 px-3 py-2.5">
+        <div class="bg-base-200/70 px-3 py-2.5">
           <h3 class="text-sm font-semibold">{{ t("realms.myIdentity") }}</h3>
         </div>
         <div class="p-3">
           <div class="flex items-start gap-2.5">
             <div class="avatar shrink-0">
-              <div class="h-9 w-9 rounded-lg">
+              <div class="h-9 w-9 rounded-box">
                 <img
                   v-if="auth.user.value?.profile?.picture?.id"
                   :src="getFileUrl(auth.user.value.profile.picture.id)!"
@@ -279,7 +279,7 @@
           <NuxtLink
             v-if="isMember"
             :to="`/realms/${realmSlug}/identity`"
-            class="btn btn-ghost btn-xs mt-3 w-full border border-base-300/70"
+            class="btn btn-ghost btn-xs mt-3 w-full"
           >
             <IconPencil class="h-3 w-3" />
             {{ t("realms.editIdentity") }}
@@ -290,7 +290,7 @@
 
     <div
       v-if="showCopied"
-      class="fixed bottom-4 right-4 z-50 rounded-lg bg-success px-3 py-2 text-sm text-success-content shadow-md"
+      class="fixed bottom-4 right-4 z-50 rounded-box bg-success px-3 py-2 text-sm text-success-content shadow-sm"
     >
       {{ t("realms.inviteLinkCopied") }}
     </div>

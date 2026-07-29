@@ -6,13 +6,13 @@
 
     <ContextMenuPortal>
       <ContextMenuContent
-        class="z-[100] min-w-[180px] rounded-xl border border-base-300 bg-base-100 p-1.5 shadow-xl"
+        class="z-[100] min-w-[180px] rounded-box bg-base-100 p-1.5 shadow-sm"
         :side-offset="5"
       >
         <!-- Reply -->
         <ContextMenuItem
           v-if="!isOwn"
-          class="flex items-center gap-2 rounded-lg px-2.5 py-2 text-sm outline-none cursor-pointer hover:bg-base-200 data-[highlighted]:bg-base-200"
+          class="flex items-center gap-2 rounded-box px-2.5 py-2 text-sm outline-none cursor-pointer hover:bg-base-200 data-[highlighted]:bg-base-200"
           @select="handleAction('reply')"
         >
           <IconReply class="h-4 w-4 text-base-content/70" />
@@ -21,7 +21,7 @@
 
         <!-- Forward -->
         <ContextMenuItem
-          class="flex items-center gap-2 rounded-lg px-2.5 py-2 text-sm outline-none cursor-pointer hover:bg-base-200 data-[highlighted]:bg-base-200"
+          class="flex items-center gap-2 rounded-box px-2.5 py-2 text-sm outline-none cursor-pointer hover:bg-base-200 data-[highlighted]:bg-base-200"
           @select="handleAction('forward')"
         >
           <IconForward class="h-4 w-4 text-base-content/70" />
@@ -31,7 +31,7 @@
         <!-- Copy Text -->
         <ContextMenuItem
           v-if="message.content"
-          class="flex items-center gap-2 rounded-lg px-2.5 py-2 text-sm outline-none cursor-pointer hover:bg-base-200 data-[highlighted]:bg-base-200"
+          class="flex items-center gap-2 rounded-box px-2.5 py-2 text-sm outline-none cursor-pointer hover:bg-base-200 data-[highlighted]:bg-base-200"
           @select="handleAction('copy')"
         >
           <IconCopy class="h-4 w-4 text-base-content/70" />
@@ -41,22 +41,17 @@
         <!-- Pin/Unpin -->
         <ContextMenuItem
           v-if="canPin"
-          class="flex items-center gap-2 rounded-lg px-2.5 py-2 text-sm outline-none cursor-pointer hover:bg-base-200 data-[highlighted]:bg-base-200"
+          class="flex items-center gap-2 rounded-box px-2.5 py-2 text-sm outline-none cursor-pointer hover:bg-base-200 data-[highlighted]:bg-base-200"
           @select="handleAction('pin')"
         >
           <IconPin class="h-4 w-4 text-base-content/70" />
           <span>{{ t('chat.actionPin') }}</span>
         </ContextMenuItem>
 
-        <ContextMenuSeparator
-          v-if="isOwn"
-          class="my-1 h-px bg-base-300"
-        />
-
         <!-- Edit (only own messages) -->
         <ContextMenuItem
           v-if="isOwn && canEdit"
-          class="flex items-center gap-2 rounded-lg px-2.5 py-2 text-sm outline-none cursor-pointer hover:bg-base-200 data-[highlighted]:bg-base-200"
+          class="flex items-center gap-2 rounded-box px-2.5 py-2 text-sm outline-none cursor-pointer hover:bg-base-200 data-[highlighted]:bg-base-200"
           @select="handleAction('edit')"
         >
           <IconEdit class="h-4 w-4 text-base-content/70" />
@@ -66,7 +61,7 @@
         <!-- Delete (only own messages) -->
         <ContextMenuItem
           v-if="isOwn"
-          class="flex items-center gap-2 rounded-lg px-2.5 py-2 text-sm outline-none cursor-pointer hover:bg-error/10 data-[highlighted]:bg-error/10 text-error"
+          class="mt-1 flex items-center gap-2 rounded-box px-2.5 py-2 text-sm outline-none cursor-pointer hover:bg-error/10 data-[highlighted]:bg-error/10 text-error"
           @select="handleAction('delete')"
         >
           <IconTrash class="h-4 w-4" />
@@ -76,7 +71,7 @@
         <!-- Report (only others' messages) -->
         <ContextMenuItem
           v-if="!isOwn"
-          class="flex items-center gap-2 rounded-lg px-2.5 py-2 text-sm outline-none cursor-pointer hover:bg-warning/10 data-[highlighted]:bg-warning/10 text-warning"
+          class="flex items-center gap-2 rounded-box px-2.5 py-2 text-sm outline-none cursor-pointer hover:bg-warning/10 data-[highlighted]:bg-warning/10 text-warning"
           @select="handleAction('report')"
         >
           <IconFlag class="h-4 w-4" />
@@ -93,7 +88,6 @@ import {
   ContextMenuItem,
   ContextMenuPortal,
   ContextMenuRoot,
-  ContextMenuSeparator,
   ContextMenuTrigger,
 } from 'reka-ui'
 import {

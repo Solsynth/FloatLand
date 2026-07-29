@@ -75,7 +75,7 @@
           </span>
           <span
             v-if="status.isAutomated"
-            class="rounded-md bg-accent/15 px-1.5 py-0.5 text-[11px] font-medium text-accent"
+            class="rounded-box bg-primary/10 px-1.5 py-0.5 text-[11px] font-medium text-primary"
           >
             {{ t("status.bot") }}
           </span>
@@ -107,7 +107,7 @@ const props = withDefaults(
 const isFeed = computed(() => props.variant === "feed");
 const rootClass = computed(() =>
   isFeed.value
-    ? "transition-colors duration-150 hover:bg-base-200/40"
+    ? "feed-post"
     : "card bg-base-100 shadow-sm",
 );
 const bodyClass = computed(() => (isFeed.value ? "px-4 py-3" : "card-body p-3"));

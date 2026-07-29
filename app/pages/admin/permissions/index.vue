@@ -19,7 +19,7 @@
               v-model="groupQuery"
               type="text"
               placeholder="Search groups..."
-              class="input input-sm w-full pl-9 bg-base-200/60 border-0 rounded-xl"
+              class="input input-sm w-full rounded-box border-0 bg-base-200 pl-9"
               @keyup.enter="loadGroups"
             />
           </div>
@@ -33,7 +33,7 @@
           v-for="group in groups"
           :key="group.id"
           class="cursor-pointer transition-all"
-          :class="selectedGroupId === group.id ? 'border-primary/40 ring-1 ring-primary/20' : 'hover:border-primary/20'"
+          :class="selectedGroupId === group.id ? 'bg-primary/10 ring-1 ring-primary/20' : 'hover:bg-base-200'"
           @click="selectGroup(group.id)"
         >
           <div class="flex items-start justify-between gap-2">
@@ -164,7 +164,7 @@
               v-model="actorQuery"
               type="text"
               placeholder="account:uuid or actor string..."
-              class="input input-sm flex-1 bg-base-200/60 border-0 rounded-xl font-mono"
+              class="input input-sm flex-1 rounded-box border-0 bg-base-200 font-mono"
               @keyup.enter="loadActor"
             />
             <button class="btn btn-sm btn-primary" :disabled="actorLoading" @click="loadActor">
@@ -231,7 +231,7 @@
           <input
             v-model="createKey"
             type="text"
-            class="input input-sm w-full bg-base-200/60 border-0 rounded-xl font-mono"
+            class="input input-sm w-full rounded-box border-0 bg-base-200 font-mono"
             placeholder="moderators"
             required
           />
@@ -250,7 +250,7 @@
           <input
             v-model="renameKey"
             type="text"
-            class="input input-sm w-full bg-base-200/60 border-0 rounded-xl font-mono"
+            class="input input-sm w-full rounded-box border-0 bg-base-200 font-mono"
             required
           />
         </div>
@@ -268,7 +268,7 @@
           <input
             v-model="nodeForm.key"
             type="text"
-            class="input input-sm w-full bg-base-200/60 border-0 rounded-xl font-mono"
+            class="input input-sm w-full rounded-box border-0 bg-base-200 font-mono"
             placeholder="posts.moderate"
             required
           />
@@ -278,13 +278,13 @@
           <input
             v-model="nodeForm.valueText"
             type="text"
-            class="input input-sm w-full bg-base-200/60 border-0 rounded-xl font-mono"
+            class="input input-sm w-full rounded-box border-0 bg-base-200 font-mono"
             placeholder="true"
           />
         </div>
         <div>
           <label class="text-xs text-base-content/50">Expires at (optional)</label>
-          <input v-model="nodeForm.expiredAt" type="datetime-local" class="input input-sm w-full bg-base-200/60 border-0 rounded-xl" />
+          <input v-model="nodeForm.expiredAt" type="datetime-local" class="input input-sm w-full rounded-box border-0 bg-base-200" />
         </div>
         <button class="btn btn-sm btn-primary w-full" :disabled="saving">
           {{ saving ? 'Saving...' : 'Upsert Node' }}
@@ -300,7 +300,7 @@
           <input
             v-model="memberForm.actor"
             type="text"
-            class="input input-sm w-full bg-base-200/60 border-0 rounded-xl font-mono"
+            class="input input-sm w-full rounded-box border-0 bg-base-200 font-mono"
             placeholder="account:550e8400-..."
             required
           />
@@ -308,7 +308,7 @@
         </div>
         <div>
           <label class="text-xs text-base-content/50">Expires at (optional)</label>
-          <input v-model="memberForm.expiredAt" type="datetime-local" class="input input-sm w-full bg-base-200/60 border-0 rounded-xl" />
+          <input v-model="memberForm.expiredAt" type="datetime-local" class="input input-sm w-full rounded-box border-0 bg-base-200" />
         </div>
         <button class="btn btn-sm btn-primary w-full" :disabled="saving">
           {{ saving ? 'Saving...' : 'Add Member' }}

@@ -9,7 +9,7 @@
       <!-- Background Image -->
       <div class="relative mb-14">
         <div
-          class="aspect-[16/7] rounded-xl overflow-hidden bg-base-200 cursor-pointer border border-dashed border-base-300/60 hover:border-primary/40 transition-colors duration-150 group"
+          class="aspect-[16/7] rounded-box overflow-hidden bg-base-200 cursor-pointer hover:bg-base-300 transition-colors duration-150 group"
           @click="pickBackground"
         >
           <img
@@ -71,7 +71,7 @@
             <span v-if="!publisher" class="text-error">*</span>
           </legend>
           <div class="join w-full">
-            <span class="join-item btn btn-disabled bg-base-200 border-base-300/60">@</span>
+            <span class="join-item btn btn-disabled bg-base-200">@</span>
             <input
               v-model="form.name"
               type="text"

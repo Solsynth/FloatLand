@@ -1,6 +1,6 @@
 <template>
   <div class="dropdown" :class="{ 'dropdown-end': dropdownEnd }">
-    <label tabindex="0" class="flex items-center gap-3 rounded-xl px-3 py-2.5 transition-all cursor-pointer hover:bg-base-200/80 border border-transparent hover:border-base-300/50" :class="{ 'w-full': fullWidth }">
+    <label tabindex="0" class="flex items-center gap-3 rounded-box px-3 py-2.5 transition-colors cursor-pointer hover:bg-base-200/80" :class="{ 'w-full': fullWidth }">
       <div class="avatar">
         <div class="w-8 rounded-full">
           <img
@@ -24,7 +24,7 @@
     </label>
     <ul
       tabindex="0"
-      class="dropdown-content menu z-[1] w-full min-w-[220px] rounded-xl bg-base-100 p-2 shadow-lg border border-base-300/50 mt-1"
+      class="dropdown-content menu z-[1] w-full min-w-[220px] rounded-box bg-base-100 p-2 shadow-sm mt-1"
     >
       <li v-if="modelValue">
         <button @click="$emit('update:modelValue', null)" class="flex items-center gap-3">
@@ -32,7 +32,6 @@
           <span>{{ clearLabel }}</span>
         </button>
       </li>
-      <li v-if="modelValue" class="divider my-1 h-px" />
       <li v-for="pub in publishers" :key="pub.id">
         <button
           class="flex items-center gap-3"
@@ -58,7 +57,7 @@
             <div class="truncate text-sm">{{ getNick(pub) || getName(pub) }}</div>
             <div class="truncate text-[11px] text-base-content/40">@{{ getName(pub) }}</div>
           </div>
-          <IconCheck v-if="modelValue?.id === pub.id" class="w-4 h-4 ml-auto text-success" />
+          <IconCheck v-if="modelValue?.id === pub.id" class="w-4 h-4 ml-auto text-primary" />
         </button>
       </li>
       <li v-if="publishers.length === 0" class="px-3 py-2 text-sm text-base-content/50">

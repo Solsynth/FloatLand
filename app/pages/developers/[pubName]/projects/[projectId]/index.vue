@@ -63,7 +63,7 @@
                   <div class="avatar">
                     <div class="w-8 rounded-full">
                       <img v-if="getFileUrl(app.picture?.id)" :src="getFileUrl(app.picture?.id)!" :alt="app.name" />
-                      <div v-else class="flex h-8 w-8 items-center justify-center rounded-full bg-accent text-accent-content text-xs font-bold">
+                      <div v-else class="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-content text-xs font-bold">
                         {{ app.name?.slice(0, 2).toUpperCase() }}
                       </div>
                     </div>

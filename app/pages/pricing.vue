@@ -2,12 +2,12 @@
     <NuxtLayout name="app">
         <div class="w-full max-w-7xl mx-auto">
             <div
-                class="card bg-base-100/88 shadow-xl backdrop-blur-xl"
+                class="card bg-base-100"
             >
                 <div class="card-body gap-6 p-5 md:p-8">
                     <!-- Header -->
                     <div
-                        class="flex flex-col gap-3 border-b border-base-300 pb-5"
+                        class="flex flex-col gap-3 bg-base-200/60 p-4 rounded-box"
                     >
                         <div
                             class="flex items-center gap-2 text-sm text-base-content/60"
@@ -60,7 +60,7 @@
                                         </h2>
                                     </div>
                                     <div
-                                        :class="`rounded-box bg-base-200 p-3 ${tier.accent}`"
+                                        class="rounded-box bg-primary/10 p-3 text-primary"
                                     >
                                         <component
                                             :is="tier.iconComponent"
@@ -77,7 +77,7 @@
 
                                 <div class="grid gap-3 sm:grid-cols-2">
                                     <div
-                                        class="rounded-box border border-base-300 bg-base-200/60 p-3"
+                                        class="rounded-box bg-base-200/60 p-3"
                                     >
                                     <div
                                         class="text-xs font-semibold text-base-content/45"
@@ -91,7 +91,7 @@
                                     </div>
                                 </div>
                                 <div
-                                    class="rounded-box border border-base-300 bg-base-200/60 p-3"
+                                    class="rounded-box bg-base-200/60 p-3"
                                 >
                                     <div
                                         class="text-xs font-semibold text-base-content/45"
@@ -105,7 +105,7 @@
                                     </div>
                                 </div>
                                 <div
-                                    class="rounded-box border border-base-300 bg-base-200/60 p-3 sm:col-span-2"
+                                    class="rounded-box bg-base-200/60 p-3 sm:col-span-2"
                                 >
                                     <div
                                         class="text-xs font-semibold text-base-content/45"
@@ -127,7 +127,7 @@
                                         class="flex items-start gap-3 text-sm text-base-content/80"
                                     >
                                         <IconBadgeCheck
-                                            class="mt-0.5 h-4 w-4 shrink-0 text-success"
+                                            class="mt-0.5 h-4 w-4 shrink-0 text-primary"
                                         />
                                         <span>{{ feature }}</span>
                                     </li>
@@ -136,7 +136,7 @@
                                 <div class="mt-auto card-actions">
                                     <NuxtLink
                                         to="/auth/login"
-                                        :class="`btn w-full ${tier.ctaClass}`"
+                                        class="btn btn-primary w-full"
                                     >
                                         {{ t('pricing.choose', { name: tier.name }) }}
                                     </NuxtLink>
@@ -227,8 +227,6 @@ interface Tier {
     levelBoost: string;
     usernameStyle: string;
     iconComponent: typeof IconSparkles;
-    accent: string;
-    ctaClass: string;
     features: string[];
 }
 
@@ -248,8 +246,6 @@ const tiers: Tier[] = [
         levelBoost: "1.5x leveling boost",
         usernameStyle: "Limited username colors",
         iconComponent: IconSparkles,
-        accent: "text-primary",
-        ctaClass: "btn-primary",
         features: [
             "5GB cloud storage",
             "Limited username color options",
@@ -268,8 +264,6 @@ const tiers: Tier[] = [
         levelBoost: "2x leveling boost",
         usernameStyle: "Unlimited username colors",
         iconComponent: IconRocket,
-        accent: "text-secondary",
-        ctaClass: "btn-secondary",
         features: [
             "Everything in Stellar",
             "10GB cloud storage",
@@ -287,14 +281,12 @@ const tiers: Tier[] = [
             "Everything in Nova, with the largest storage tier and the most room to scale out your setup.",
         storage: "15GB cloud storage",
         levelBoost: "2.5x leveling boost",
-        usernameStyle: "Unlimited username colors with gradients",
+        usernameStyle: "Unlimited username color options",
         iconComponent: IconStars,
-        accent: "text-accent",
-        ctaClass: "btn-accent",
         features: [
             "Everything in Nova",
             "15GB cloud storage",
-            "Unlimited username colors with gradient support",
+            "Unlimited username color options",
             "Publisher quota: base 2, becomes 3 at level 30+, plus 2 per perk level",
             "Bot quota: base 0, then 1 at level 30, 2 at level 60, 3 at level 90, plus 1 per perk level",
             "Realm quota: same as bot quota",
@@ -312,7 +304,7 @@ const comparisonRows: ComparisonRow[] = [
     {
         label: "Username color",
         iconComponent: IconPalette,
-        values: ["Limited", "Unlimited", "Unlimited + gradient"],
+        values: ["Limited", "Unlimited", "Unlimited"],
     },
     {
         label: "Translation",

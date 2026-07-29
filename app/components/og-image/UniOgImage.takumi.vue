@@ -87,7 +87,7 @@ const optimizedBackgroundImage = computed(() => {
           v-if="optimizedIconImage"
           :src="optimizedIconImage"
           :alt="title"
-          class="rounded-2xl"
+          class="rounded-box"
           style="width: 120px; height: 120px;"
         />
         <img

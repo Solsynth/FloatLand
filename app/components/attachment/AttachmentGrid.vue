@@ -3,7 +3,7 @@
 		<!-- Single attachment -->
 		<div v-if="attachments.length === 1" class="single-attachment">
 			<div
-				class="relative overflow-hidden rounded-xl cursor-pointer"
+				class="relative overflow-hidden rounded-box cursor-pointer"
 				:style="singleAttachmentStyle"
 				@click.prevent.stop="openViewer(0)"
 			>
@@ -26,7 +26,7 @@
 				<div
 					v-for="(attachment, index) in displayAttachments"
 					:key="attachment.id"
-					class="shrink-0 snap-start relative overflow-hidden rounded-xl cursor-pointer"
+					class="shrink-0 snap-start relative overflow-hidden rounded-box cursor-pointer"
 					:style="getItemStyle(attachment)"
 					@click.prevent.stop="openViewer(index)"
 				>
@@ -39,7 +39,7 @@
 					<!-- Counter overlay for images -->
 					<div
 						v-if="isImageAttachment(attachment)"
-						class="absolute bottom-2 left-2 px-2 py-0.5 bg-black/60 rounded-full text-xs text-white font-medium backdrop-blur-sm"
+						class="absolute bottom-2 left-2 rounded-box bg-black/60 px-2 py-0.5 text-xs font-medium text-white"
 					>
 						{{ index + 1 }}/{{ attachments.length }}
 					</div>
@@ -49,14 +49,14 @@
 			<!-- Scroll arrows (desktop hover) -->
 			<button
 				v-if="canScrollLeft"
-				class="absolute left-2 top-1/2 -translate-y-1/2 btn btn-circle btn-sm bg-black/50 border-none text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-black/70 backdrop-blur-sm"
+				class="absolute left-2 top-1/2 -translate-y-1/2 btn btn-circle btn-sm border-none bg-black/50 text-white opacity-0 transition-opacity duration-200 hover:bg-black/70 group-hover:opacity-100"
 				@click.prevent.stop="scrollBy(-1)"
 			>
 				<IconChevronLeft class="w-4 h-4" />
 			</button>
 			<button
 				v-if="canScrollRight"
-				class="absolute right-2 top-1/2 -translate-y-1/2 btn btn-circle btn-sm bg-black/50 border-none text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-black/70 backdrop-blur-sm"
+				class="absolute right-2 top-1/2 -translate-y-1/2 btn btn-circle btn-sm border-none bg-black/50 text-white opacity-0 transition-opacity duration-200 hover:bg-black/70 group-hover:opacity-100"
 				@click.prevent.stop="scrollBy(1)"
 			>
 				<IconChevronRight class="w-4 h-4" />
@@ -106,7 +106,7 @@
 							playsinline
 							@click.stop
 						/>
-						<div class="absolute bottom-6 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-black/60 rounded-full text-sm text-white/90 font-medium backdrop-blur-sm">
+						<div class="absolute bottom-6 left-1/2 -translate-x-1/2 rounded-box bg-black/60 px-4 py-1.5 text-sm font-medium text-white/90">
 							{{ mediaViewerAttachment.name }}
 						</div>
 					</div>

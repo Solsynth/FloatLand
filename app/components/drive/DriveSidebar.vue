@@ -1,7 +1,7 @@
 <template>
-  <aside class="flex h-full flex-col bg-base-100/60 backdrop-blur-2xl border-r border-base-300/50">
+  <aside class="flex h-full flex-col bg-base-100">
     <!-- Logo -->
-    <div class="flex items-center gap-3 px-5 py-5 border-b border-base-300/30">
+    <div class="flex items-center gap-3 px-5 py-5">
       <NuxtLink to="/" class="shrink-0">
         <img src="/favicon.png" alt="Logo" class="h-9 w-9" />
       </NuxtLink>
@@ -24,7 +24,7 @@
         </p>
         <NuxtLink
           to="/drive"
-          class="group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all"
+          class="group flex items-center gap-3 rounded-box px-3 py-2.5 text-sm font-medium transition-colors"
           :class="isRootActive
             ? 'bg-primary/10 text-primary shadow-sm'
             : 'text-base-content/70 hover:bg-base-200/80 hover:text-base-content'"
@@ -37,7 +37,7 @@
         </NuxtLink>
         <NuxtLink
           to="/drive/recent"
-          class="group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all"
+          class="group flex items-center gap-3 rounded-box px-3 py-2.5 text-sm font-medium transition-colors"
           :class="isRecentActive
             ? 'bg-primary/10 text-primary shadow-sm'
             : 'text-base-content/70 hover:bg-base-200/80 hover:text-base-content'"
@@ -57,7 +57,7 @@
         </p>
         <NuxtLink
           to="/drive/trash"
-          class="group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all"
+          class="group flex items-center gap-3 rounded-box px-3 py-2.5 text-sm font-medium transition-colors"
           :class="isTrashActive
             ? 'bg-primary/10 text-primary shadow-sm'
             : 'text-base-content/70 hover:bg-base-200/80 hover:text-base-content'"
@@ -72,15 +72,15 @@
     </nav>
 
     <!-- Storage Bar -->
-    <div class="border-t border-base-300/30">
+    <div class="mt-2">
       <StorageBar :usage="usage" @details="$emit('storageDetails')" />
     </div>
 
     <!-- User Profile -->
-    <div class="px-3 pb-4 pt-2 border-t border-base-300/30">
+    <div class="px-3 pb-4 pt-2">
       <div v-if="isAuthenticated && user" class="dropdown dropdown-end dropdown-top w-full">
         <button
-          class="flex items-center gap-3 w-full rounded-xl px-3 py-2.5 transition-all hover:bg-base-200/80"
+          class="flex w-full items-center gap-3 rounded-box px-3 py-2.5 transition-colors hover:bg-base-200/80"
         >
           <div v-if="avatarUrl" class="avatar">
             <div class="w-8 rounded-full">
@@ -98,7 +98,7 @@
           </div>
           <IconChevronUp class="w-3.5 h-3.5 shrink-0 text-base-content/30" />
         </button>
-        <ul class="dropdown-content menu mb-2 w-full min-w-[200px] rounded-xl bg-base-100 p-2 shadow-lg border border-base-300/50">
+        <ul class="dropdown-content menu mb-2 w-full min-w-[200px] rounded-box bg-base-200 p-2 shadow-sm">
           <li>
             <NuxtLink to="/accounts/me" class="flex items-center gap-3">
               <IconUser class="w-4 h-4" />
@@ -111,7 +111,6 @@
               {{ t("nav.settings") }}
             </NuxtLink>
           </li>
-          <li class="divider my-1 h-px" />
           <li>
             <button @click="handleLogout" class="flex items-center gap-3 text-error">
               <IconLogOut class="w-4 h-4" />
@@ -123,7 +122,7 @@
       <NuxtLink
         v-else
         to="/auth/login"
-        class="flex items-center gap-3 rounded-xl px-3 py-2.5 transition-all hover:bg-base-200/80"
+        class="flex items-center gap-3 rounded-box px-3 py-2.5 transition-colors hover:bg-base-200/80"
       >
         <div class="avatar avatar-placeholder">
           <div class="w-8 rounded-full bg-base-300 text-base-content/60">

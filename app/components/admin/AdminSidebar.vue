@@ -1,7 +1,7 @@
 <template>
-  <aside class="flex h-full flex-col bg-base-100 border-r border-base-300/60">
+  <aside class="flex h-full flex-col bg-base-100">
     <!-- Logo -->
-    <div class="flex items-center gap-3 px-4 h-14 border-b border-base-300/40 shrink-0">
+    <div class="flex h-14 shrink-0 items-center gap-3 px-4">
       <NuxtLink to="/" class="shrink-0">
         <img src="/favicon.png" alt="Logo" class="h-8 w-8" />
       </NuxtLink>
@@ -20,7 +20,7 @@
 
     <!-- Portal Toggle (only when a publisher is selected) -->
     <div v-if="isPublisherSelected && showPortalToggle" class="px-3 pt-3 pb-1">
-      <div class="flex rounded-lg bg-base-200 p-0.5 border border-base-300/40">
+      <div class="flex rounded-box bg-base-200 p-0.5">
         <button
           type="button"
           class="inline-flex items-center justify-center gap-1.5 rounded-md py-1.5 text-xs font-semibold transition-all duration-150"
@@ -71,7 +71,7 @@
       <!-- Enroll Prompt -->
       <div
         v-if="showEnrollPrompt"
-        class="mt-2 rounded-lg bg-warning/10 border border-warning/25 p-3"
+        class="mt-2 rounded-box bg-warning/10 p-3"
       >
         <div class="flex items-start gap-2">
           <IconAlertTriangle class="w-4 h-4 text-warning shrink-0 mt-0.5" />
@@ -110,7 +110,7 @@
       <div class="dropdown dropdown-end w-full">
         <label
           tabindex="0"
-          class="flex items-center gap-2.5 w-full rounded-lg px-2.5 py-2 cursor-pointer border border-base-300/50 bg-base-200/40 hover:bg-base-200 hover:border-base-300 transition-colors duration-150"
+          class="flex w-full cursor-pointer items-center gap-2.5 rounded-box bg-base-200 px-2.5 py-2 transition-colors duration-150 hover:bg-base-300"
         >
           <div class="avatar shrink-0">
             <div class="w-8 rounded-full">
@@ -142,7 +142,7 @@
         </label>
         <ul
           tabindex="0"
-          class="dropdown-content menu z-[1] w-full min-w-[220px] rounded-lg bg-base-100 p-1.5 shadow-md border border-base-300/50 mt-1"
+          class="dropdown-content menu z-[1] mt-1 w-full min-w-[220px] rounded-box bg-base-200 p-1.5 shadow-sm"
         >
           <li v-if="currentOrg">
             <button type="button" class="flex items-center gap-2.5 rounded-md" @click="handleClearSelection">
@@ -150,7 +150,6 @@
               <span>{{ clearLabel }}</span>
             </button>
           </li>
-          <li v-if="currentOrg" class="divider my-1 h-px" />
           <li v-for="org in organizations" :key="org.id">
             <NuxtLink
               :to="getOrgLink(org)"
@@ -197,17 +196,12 @@
             v-for="item in group.items"
             :key="item.href"
             :to="item.href"
-            class="group relative flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium transition-colors duration-150"
+            class="group flex items-center gap-2.5 rounded-box px-2.5 py-2 text-sm font-medium transition-colors duration-150"
             :class="isActiveRoute(item.href)
               ? 'bg-primary/10 text-primary'
               : 'text-base-content/65 hover:bg-base-200 hover:text-base-content'"
             @click="handleNavigate"
           >
-            <span
-              v-if="isActiveRoute(item.href)"
-              class="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-full bg-primary"
-              aria-hidden="true"
-            />
             <component
               :is="item.icon"
               class="w-[18px] h-[18px] shrink-0 transition-colors duration-150"
@@ -227,11 +221,11 @@
     </nav>
 
     <!-- User Profile -->
-    <div class="px-3 pb-3 pt-2 border-t border-base-300/40 mt-auto shrink-0">
+    <div class="mt-auto shrink-0 px-3 pb-3 pt-2">
       <div v-if="isAuthenticated && user" class="dropdown dropdown-end dropdown-top w-full">
         <button
           type="button"
-          class="flex items-center gap-2.5 w-full rounded-lg px-2.5 py-2 transition-colors duration-150 hover:bg-base-200"
+          class="flex w-full items-center gap-2.5 rounded-box px-2.5 py-2 transition-colors duration-150 hover:bg-base-200"
         >
           <div v-if="avatarUrl" class="avatar shrink-0">
             <div class="w-8 rounded-full">
@@ -249,7 +243,7 @@
           </div>
           <IconChevronUp class="w-3.5 h-3.5 shrink-0 text-base-content/30" />
         </button>
-        <ul class="dropdown-content menu mb-1.5 w-full min-w-[200px] rounded-lg bg-base-100 p-1.5 shadow-md border border-base-300/50">
+        <ul class="dropdown-content menu mb-1.5 w-full min-w-[200px] rounded-box bg-base-200 p-1.5 shadow-sm">
           <li>
             <NuxtLink to="/accounts/me" class="flex items-center gap-2.5 rounded-md">
               <IconUser class="w-4 h-4" />
@@ -262,7 +256,6 @@
               {{ t('nav.settings') }}
             </NuxtLink>
           </li>
-          <li class="divider my-1 h-px" />
           <li>
             <button type="button" class="flex items-center gap-2.5 rounded-md text-error" @click="handleLogout">
               <IconLogOut class="w-4 h-4" />
@@ -274,7 +267,7 @@
       <NuxtLink
         v-else
         to="/auth/login"
-        class="flex items-center gap-2.5 rounded-lg px-2.5 py-2 transition-colors duration-150 hover:bg-base-200"
+        class="flex items-center gap-2.5 rounded-box px-2.5 py-2 transition-colors duration-150 hover:bg-base-200"
       >
         <div class="avatar avatar-placeholder shrink-0">
           <div class="w-8 rounded-full bg-base-200 text-base-content/55">

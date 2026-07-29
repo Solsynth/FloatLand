@@ -194,7 +194,7 @@ function statusIcon(status: DomainVerificationStatus) {
 
 function statusTextColor(status: DomainVerificationStatus) {
   const colors: Record<string, string> = {
-    pending: 'text-secondary',
+    pending: 'text-primary',
     verified: 'text-success',
     failed: 'text-error',
     revoked: 'text-base-content/40',

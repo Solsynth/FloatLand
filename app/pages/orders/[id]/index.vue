@@ -20,7 +20,7 @@
                     </DialogTrigger>
                     <DialogPortal>
                         <DialogOverlay class="fixed inset-0 bg-black/50 z-50" />
-                        <DialogContent class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[calc(100%-2rem)] max-w-xs bg-base-100 rounded-2xl shadow-xl p-6 flex flex-col items-center gap-4">
+                        <DialogContent class="fixed top-1/2 left-1/2 z-50 flex w-[calc(100%-2rem)] max-w-xs -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-4 rounded-box bg-base-100 p-6 shadow-sm">
                             <DialogTitle class="text-lg font-bold">Open in App</DialogTitle>
                             <DialogDescription class="text-sm text-base-content/50 text-center">
                                 Scan the QR code or tap below to open in the Solar Network app.
@@ -28,7 +28,7 @@
                             <img
                                 :src="`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(appDeepLink)}`"
                                 alt="QR Code"
-                                class="w-48 h-48 rounded-xl"
+                                class="h-48 w-48 rounded-box"
                             />
                             <a
                                 :href="appDeepLink"
@@ -79,7 +79,7 @@
                     :style="`background-image: url('${merchantBgUrl}')`"
                 />
                 <div
-                    class="absolute inset-0 -z-10 backdrop-blur-xl bg-base-100/70"
+                    class="absolute inset-0 -z-10 bg-base-100"
                 />
                 <div class="card-body p-5">
                     <!-- Publisher info (default) -->
@@ -132,7 +132,7 @@
                     <!-- App info (toggled) -->
                     <div v-else class="flex items-center gap-4">
                         <div
-                            class="w-14 h-14 rounded-xl bg-base-200 overflow-hidden shrink-0 flex items-center justify-center ring-2 ring-base-100"
+                            class="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-box bg-base-200 ring-2 ring-base-100"
                         >
                             <img
                                 v-if="appIconUrl"
@@ -209,7 +209,7 @@
                             <div class="flex items-center gap-3 min-w-0">
                                 <!-- Product image or fallback icon -->
                                 <div
-                                    class="w-10 h-10 rounded-xl bg-base-200 overflow-hidden shrink-0 flex items-center justify-center"
+                                    class="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-box bg-base-200"
                                 >
                                     <img
                                         v-if="findProduct(item)?.picture?.id"
@@ -262,7 +262,7 @@
 
                     <!-- Total -->
                     <div
-                        class="flex items-center justify-between pt-4 mt-4 border-t border-base-200"
+                        class="mt-4 flex items-center justify-between rounded-box bg-base-200 px-3 py-3"
                     >
                         <span class="font-semibold text-sm">Total</span>
                         <span class="text-xl font-black">
@@ -460,7 +460,7 @@
                 <DialogPortal>
                     <DialogOverlay class="fixed inset-0 bg-black/50 z-50" />
                     <DialogContent
-                        class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[calc(100%-2rem)] max-w-sm bg-base-100 rounded-2xl shadow-xl p-6 space-y-5"
+                        class="fixed top-1/2 left-1/2 z-50 w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 -translate-y-1/2 space-y-5 rounded-box bg-base-100 p-6 shadow-sm"
                     >
                         <DialogTitle class="text-center font-bold text-lg">
                             Enter PIN

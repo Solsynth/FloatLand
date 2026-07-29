@@ -3,17 +3,17 @@
     <AdminPageHeader title="Emails" description="Send and schedule HTML emails to accounts" />
 
     <TabsRoot v-model="activeTab" default-value="compose">
-      <TabsList class="flex border-b border-base-200 mb-6 overflow-x-auto">
+      <TabsList class="mb-6 flex gap-1 overflow-x-auto rounded-box bg-base-200 p-1">
         <TabsTrigger
           value="compose"
-          class="flex items-center gap-2 px-4 py-3 text-sm font-medium text-base-content/60 border-b-2 border-transparent transition-colors hover:text-base-content data-[state=active]:text-primary data-[state=active]:border-primary shrink-0"
+          class="flex shrink-0 items-center gap-2 rounded-box px-4 py-2 text-sm font-medium text-base-content/60 transition-colors hover:text-base-content data-[state=active]:bg-base-100 data-[state=active]:text-primary"
         >
           <IconSend class="w-4 h-4" />
           Compose
         </TabsTrigger>
         <TabsTrigger
           value="plans"
-          class="flex items-center gap-2 px-4 py-3 text-sm font-medium text-base-content/60 border-b-2 border-transparent transition-colors hover:text-base-content data-[state=active]:text-primary data-[state=active]:border-primary shrink-0"
+          class="flex shrink-0 items-center gap-2 rounded-box px-4 py-2 text-sm font-medium text-base-content/60 transition-colors hover:text-base-content data-[state=active]:bg-base-100 data-[state=active]:text-primary"
           @click="loadPlans"
         >
           <IconCalendarClock class="w-4 h-4" />
@@ -21,14 +21,14 @@
         </TabsTrigger>
         <TabsTrigger
           value="export"
-          class="flex items-center gap-2 px-4 py-3 text-sm font-medium text-base-content/60 border-b-2 border-transparent transition-colors hover:text-base-content data-[state=active]:text-primary data-[state=active]:border-primary shrink-0"
+          class="flex shrink-0 items-center gap-2 rounded-box px-4 py-2 text-sm font-medium text-base-content/60 transition-colors hover:text-base-content data-[state=active]:bg-base-100 data-[state=active]:text-primary"
         >
           <IconDownload class="w-4 h-4" />
           Export
         </TabsTrigger>
         <TabsTrigger
           value="observability"
-          class="flex items-center gap-2 px-4 py-3 text-sm font-medium text-base-content/60 border-b-2 border-transparent transition-colors hover:text-base-content data-[state=active]:text-primary data-[state=active]:border-primary shrink-0"
+          class="flex shrink-0 items-center gap-2 rounded-box px-4 py-2 text-sm font-medium text-base-content/60 transition-colors hover:text-base-content data-[state=active]:bg-base-100 data-[state=active]:text-primary"
         >
           <IconActivity class="w-4 h-4" />
           Observability
@@ -44,7 +44,7 @@
                 <!-- Targeting -->
                 <div>
                   <label class="label label-text text-sm font-medium">Target Mode</label>
-                  <div class="flex gap-2 rounded-xl bg-base-200/70 p-1">
+                  <div class="flex gap-2 rounded-box bg-base-200 p-1">
                     <button
                       type="button"
                       class="flex-1 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all"
@@ -91,7 +91,7 @@
                 <!-- Compose Mode Toggle -->
                 <div>
                   <label class="label label-text text-sm font-medium">Compose Mode</label>
-                  <div class="flex gap-2 rounded-xl bg-base-200/70 p-1">
+                  <div class="flex gap-2 rounded-box bg-base-200 p-1">
                     <button
                       type="button"
                       class="flex-1 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all"
@@ -119,7 +119,7 @@
                     <label class="label label-text text-sm font-medium">Email Template</label>
                     <select
                       v-model="templateState.name"
-                      class="select select-sm w-full bg-base-200/60 border-0 rounded-xl"
+                      class="select select-sm w-full rounded-box border-0 bg-base-200"
                     >
                       <option value="" disabled>Select a template...</option>
                       <option v-for="t in availableTemplates" :key="t.name" :value="t.name">
@@ -135,7 +135,7 @@
                     <label class="label label-text text-sm font-medium">Template Props (JSON)</label>
                     <textarea
                       v-model="templateState.propsJson"
-                      class="textarea textarea-sm w-full text-sm font-mono bg-base-200/60 border-0 rounded-xl"
+                      class="textarea textarea-sm w-full rounded-box border-0 bg-base-200 text-sm font-mono"
                       rows="6"
                       placeholder='{ "userName": "John", "confirmationUrl": "https://..." }'
                     />
@@ -164,7 +164,7 @@
                     <label class="label label-text text-sm font-medium">HTML Body</label>
                     <textarea
                       v-model="form.htmlBody"
-                      class="textarea textarea-sm w-full text-sm font-mono bg-base-200/60 border-0 rounded-xl"
+                      class="textarea textarea-sm w-full rounded-box border-0 bg-base-200 text-sm font-mono"
                       rows="10"
                       placeholder="<html><body>...</body></html>"
                     />
@@ -178,7 +178,7 @@
                   <input
                     v-model="form.subject"
                     type="text"
-                    class="input input-sm w-full bg-base-200/60 border-0 rounded-xl"
+                    class="input input-sm w-full rounded-box border-0 bg-base-200"
                     placeholder="Email subject"
                   />
                 </div>
@@ -193,7 +193,7 @@
                 </button>
 
                 <!-- Result -->
-                <div v-if="result" class="rounded-xl bg-success/5 border border-success/20 p-3">
+                <div v-if="result" class="rounded-box bg-success/10 p-3">
                   <p class="text-sm text-success font-medium">Delivered successfully</p>
                   <p class="text-xs text-base-content/60 mt-1">
                     Requested: {{ result.requested }} &middot; Resolved: {{ result.resolved }} &middot; Sent: {{ result.sent }} &middot; Skipped: {{ result.skipped }}
@@ -227,7 +227,7 @@
               <form class="space-y-4" @submit.prevent="handleExportEmails">
                 <div>
                   <label class="label label-text text-sm font-medium">Target Mode</label>
-                  <div class="flex gap-2 rounded-xl bg-base-200/70 p-1">
+                  <div class="flex gap-2 rounded-box bg-base-200 p-1">
                     <button
                       type="button"
                       class="flex-1 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all"
@@ -289,7 +289,7 @@
             <AdminCard title="CSV Format">
               <div class="space-y-2 text-sm text-base-content/60">
                 <p>Exports primary (or first) email contact per account as UTF-8 CSV with BOM.</p>
-                <pre class="text-xs bg-base-200/60 rounded-xl p-3 font-mono overflow-x-auto">EmailAddr,UserName
+                <pre class="overflow-x-auto rounded-box bg-base-200 p-3 text-xs font-mono">EmailAddr,UserName
 test1@abc.com,张三
 test2@abc.com,李四</pre>
                 <ul class="list-disc list-inside text-xs space-y-1 ml-2">
@@ -306,7 +306,7 @@ test2@abc.com,李四</pre>
       <TabsContent value="observability">
         <div class="space-y-6">
           <div class="flex flex-wrap items-end gap-3">
-            <div class="flex gap-1 rounded-xl bg-base-200/70 p-1">
+            <div class="flex gap-1 rounded-box bg-base-200 p-1">
               <button
                 v-for="preset in rangePresets"
                 :key="preset.days"
@@ -458,7 +458,7 @@ test2@abc.com,李四</pre>
           <div class="flex items-center gap-3">
             <select
               v-model="planFilter.status"
-              class="select select-sm w-36 bg-base-200/60 border-0 rounded-xl"
+              class="select select-sm w-36 rounded-box border-0 bg-base-200"
               @change="reloadPlans"
             >
               <option :value="undefined">All Status</option>
@@ -580,7 +580,7 @@ test2@abc.com,李四</pre>
           <!-- Pagination -->
           <div
             v-if="planTotal > 0"
-            class="flex items-center justify-between px-5 py-3 border-t border-base-300/20"
+            class="flex items-center justify-between px-5 py-3"
           >
             <span class="text-xs text-base-content/40">
               Showing {{ planOffset + 1 }}–{{ Math.min(planOffset + planPageSize, planTotal) }} of {{ planTotal }}

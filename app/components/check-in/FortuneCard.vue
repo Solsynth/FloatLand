@@ -1,18 +1,14 @@
 <template>
     <div
-        class="card overflow-hidden"
-        :style="{
-            background: `linear-gradient(135deg, ${levelColor}18, ${levelColor}0a)`,
-        }"
+        class="card bg-base-100 overflow-hidden"
     >
         <div class="card-body p-5 gap-5">
             <!-- Art Image -->
             <div
                 v-if="artAsset"
-                class="relative rounded-2xl overflow-hidden"
+                class="relative rounded-box overflow-hidden"
                 :style="{ backgroundColor: artBackdrop }"
             >
-                <div class="absolute inset-0 bg-gradient-to-b from-white/5 to-black/10" />
                 <div class="relative p-3.5">
                     <div class="aspect-square">
                         <img
@@ -22,7 +18,6 @@
                         >
                     </div>
                 </div>
-                <div class="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/20 to-transparent" />
             </div>
 
             <!-- Seal Header -->
@@ -35,22 +30,22 @@
                         农<br>历
                     </span>
                     <span
-                        class="text-3xl font-black"
-                        :style="{ fontFamily: serifFont, color: levelColor }"
+                        class="text-3xl font-black text-primary"
+                        :style="{ fontFamily: serifFont }"
                     >
                         {{ lunarMonth }}
                     </span>
                     <span
-                        class="text-base font-bold pb-1"
-                        :style="{ fontFamily: serifFont, color: levelColor }"
+                        class="text-base font-bold pb-1 text-primary"
+                        :style="{ fontFamily: serifFont }"
                     >
                         月
                     </span>
                 </div>
                 <div class="text-right">
                     <span
-                        class="text-3xl font-black"
-                        :style="{ fontFamily: serifFont, color: levelColor }"
+                        class="text-3xl font-black text-primary"
+                        :style="{ fontFamily: serifFont }"
                     >
                         {{ levelLabel }}
                     </span>
@@ -104,15 +99,6 @@ const props = withDefaults(defineProps<Props>(), {
 
 const serifFont = "'Noto Serif', 'Noto Serif SC', serif";
 
-const levelColors: Record<number, string> = {
-    0: "#7A587D",
-    1: "#79709C",
-    2: "#8DB7EF",
-    3: "#FEDE81",
-    4: "#E04A46",
-    5: "#FFB7C0",
-};
-
 const levelLabels: Record<number, string> = {
     0: "Terrible",
     1: "Bad",
@@ -140,7 +126,6 @@ const artBackdropColors: Record<number, string> = {
     5: "#FFB7C0",
 };
 
-const levelColor = computed(() => levelColors[props.level] ?? "#8DB7EF");
 const levelLabel = computed(() => levelLabels[props.level] ?? "Fortune");
 const artAsset = computed(() => artAssets[props.level] ?? null);
 const artBackdrop = computed(() => artBackdropColors[props.level] ?? "#8DB7EF");
