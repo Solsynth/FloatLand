@@ -108,7 +108,7 @@
           <!-- Footer / infinite scroll -->
           <div
             ref="loadMoreSentinel"
-          class="feed-footer"
+            class="feed-footer"
           >
             <div
               v-if="fetchingMore"
@@ -265,6 +265,18 @@ async function fetchTimelinePage(
 
 const sentinelVisible = ref(false);
 
+function loadMoreIfSentinelVisible() {
+  if (
+    sentinelVisible.value &&
+    hasMore.value &&
+    !fetchingMore.value &&
+    timelineEvents.value.length > 0 &&
+    cursor.value
+  ) {
+    void loadMore();
+  }
+}
+
 async function loadMore() {
   if (!hasMore.value || fetchingMore.value || !cursor.value) return;
   fetchingMore.value = true;
@@ -308,17 +320,18 @@ useIntersectionObserver(
   loadMoreSentinel,
   ([{ isIntersecting }]) => {
     sentinelVisible.value = isIntersecting;
-    if (
-      isIntersecting &&
-      hasMore.value &&
-      !fetchingMore.value &&
-      timelineEvents.value.length > 0 &&
-      cursor.value
-    ) {
-      loadMore();
-    }
+    loadMoreIfSentinelVisible();
   },
   { rootMargin: "240px" },
+);
+
+// The sentinel can be in view while the initial page is still loading. In
+// that case IntersectionObserver does not fire again when the events render,
+// so re-check once the list changes.
+watch(
+  [sentinelVisible, () => timelineEvents.value.length],
+  loadMoreIfSentinelVisible,
+  { flush: "post" },
 );
 
 function handleBoost(_post: Post) {}

@@ -1,7 +1,5 @@
 <template>
-  <article
-    :class="rootClass"
-  >
+  <article :class="rootClass">
     <div :class="bodyClass">
       <!-- Reference Post (Reply/Forward) -->
       <div v-if="showReference && hasReference" class="mb-2">
@@ -66,7 +64,9 @@
             <!-- Author info -->
             <div class="flex items-center gap-2 mb-1 min-h-7">
               <AccountName
-                :account="referencePost.publisher.account || referencePost.publisher"
+                :account="
+                  referencePost.publisher.account || referencePost.publisher
+                "
                 :text-override="getDisplayName(referencePost.publisher)"
                 size="sm"
                 hide-verification-mark
@@ -189,9 +189,7 @@
             tabindex="-1"
             @click.stop
           >
-            <ul
-              class="menu w-48 rounded-box bg-base-100 shadow-lg"
-            >
+            <ul class="menu w-48 rounded-box bg-base-100 shadow-lg">
               <li v-if="isAuthor">
                 <button @click.stop="handleEdit">
                   <IconPencil class="h-4 w-4" /> Edit
@@ -406,7 +404,6 @@
               </div>
             </div>
           </div>
-
         </div>
       </div>
 
@@ -458,7 +455,9 @@
             @click.stop="handleReply"
           >
             <IconMessageCircle class="h-4 w-4" />
-            <span class="text-xs tabular-nums">{{ formatNumber(post.repliesCount) }}</span>
+            <span class="text-xs tabular-nums">{{
+              formatNumber(post.repliesCount)
+            }}</span>
           </button>
           <button
             class="btn gap-1.5 btn-ghost btn-sm text-base-content/60 hover:bg-success/10 hover:text-success"
@@ -466,30 +465,9 @@
             @click.stop="handleBoost"
           >
             <IconRepeat2 class="h-4 w-4" />
-            <span class="text-xs tabular-nums">{{ formatNumber(post.boostCount) }}</span>
-          </button>
-        </div>
-
-        <div
-          class="flex items-center gap-0.5 p-0.5"
-          :class="isFeed ? 'border border-base-300/70 bg-base-200/70' : 'rounded-lg border border-base-300 bg-base-200'"
-        >
-          <button
-            class="btn px-2 btn-ghost btn-xs hover:bg-success/20 hover:text-success"
-            :class="{ 'text-success': hasUpvoted }"
-            @click.stop="handleUpvote"
-          >
-            <IconArrowBigUp class="h-5 w-5" />
-          </button>
-          <span class="min-w-[1.5ch] text-center text-sm font-medium tabular-nums">
-            {{ formatNumber(netScore) }}
-          </span>
-          <button
-            class="btn px-2 btn-ghost btn-xs hover:bg-error/20 hover:text-error"
-            :class="{ 'text-error': hasDownvoted }"
-            @click.stop="handleDownvote"
-          >
-            <IconArrowBigDown class="h-5 w-5" />
+            <span class="text-xs tabular-nums">{{
+              formatNumber(post.boostCount)
+            }}</span>
           </button>
         </div>
       </div>
@@ -504,8 +482,6 @@ import { renderMarkdown } from "~/utils/markdown";
 import {
   IconMessageCircle,
   IconRepeat2,
-  IconArrowBigUp,
-  IconArrowBigDown,
   IconMoreHorizontal,
   IconShare,
   IconFlag,
@@ -523,8 +499,6 @@ import {
   IconTrash,
   IconExternalLink,
   IconVote,
-  IconRadio,
-  IconBadgeCheck,
   IconUsers,
   IconEyeOff,
   IconLock,
@@ -583,8 +557,12 @@ const { user } = auth;
 const { $toast } = useNuxtApp();
 
 // Local optimistic reaction state
-const localReactionsCount = ref<Record<string, number>>({ ...props.post.reactionsCount });
-const localReactionsMade = ref<Record<string, boolean>>({ ...(props.post.reactionsMade || {}) });
+const localReactionsCount = ref<Record<string, number>>({
+  ...props.post.reactionsCount,
+});
+const localReactionsMade = ref<Record<string, boolean>>({
+  ...(props.post.reactionsMade || {}),
+});
 
 // Sync from props when they change (e.g. after parent refreshes)
 watch(
@@ -621,7 +599,7 @@ const thumbnailUrl = computed(() => {
 
 // Content
 const displayContent = computed(() => {
-  const content = props.post.content ?? '';
+  const content = props.post.content ?? "";
   return props.post.isTruncated ? `${content}...` : content;
 });
 const renderedContent = computed(() => renderMarkdown(displayContent.value));
@@ -654,7 +632,7 @@ const hasReference = computed(() => Boolean(referencePost.value));
 const referenceIsReply = computed(() => Boolean(props.post.repliedPost));
 const renderedReferenceContent = computed(() => {
   if (!referencePost.value) return "";
-  const content = referencePost.value.content ?? '';
+  const content = referencePost.value.content ?? "";
   const displayContent = referencePost.value.isTruncated
     ? `${content}...`
     : content;
@@ -926,7 +904,7 @@ async function handleReact(symbol: string, attitude: number) {
   try {
     const { reactToPost } = await import("~/utils/api");
     await reactToPost(props.post.id, symbol, attitude);
-    $toast.success('Reaction sent!');
+    $toast.success("Reaction sent!");
   } catch (e) {
     // Revert on failure
     localReactionsCount.value = {
@@ -935,21 +913,25 @@ async function handleReact(symbol: string, attitude: number) {
     };
     localReactionsMade.value = { ...localReactionsMade.value, [symbol]: false };
     console.error("Failed to react:", e);
-    $toast.error('Failed to send reaction');
+    $toast.error("Failed to send reaction");
   }
 }
 
 async function handleRemoveReaction(symbol: string) {
   // Optimistic update
-  const updatedCount = Math.max(0, (localReactionsCount.value[symbol] || 1) - 1);
+  const updatedCount = Math.max(
+    0,
+    (localReactionsCount.value[symbol] || 1) - 1,
+  );
   const { [symbol]: _, ...restCounts } = localReactionsCount.value;
-  localReactionsCount.value = updatedCount > 0 ? { ...restCounts, [symbol]: updatedCount } : restCounts;
+  localReactionsCount.value =
+    updatedCount > 0 ? { ...restCounts, [symbol]: updatedCount } : restCounts;
   localReactionsMade.value = { ...localReactionsMade.value, [symbol]: false };
 
   try {
     const { removeReaction } = await import("~/utils/api");
     await removeReaction(props.post.id, symbol);
-    $toast.success('Reaction removed!');
+    $toast.success("Reaction removed!");
   } catch (e) {
     // Revert on failure
     localReactionsCount.value = {
@@ -958,7 +940,7 @@ async function handleRemoveReaction(symbol: string) {
     };
     localReactionsMade.value = { ...localReactionsMade.value, [symbol]: true };
     console.error("Failed to remove reaction:", e);
-    $toast.error('Failed to remove reaction');
+    $toast.error("Failed to remove reaction");
   }
 }
 

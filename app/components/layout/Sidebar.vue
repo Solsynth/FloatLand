@@ -92,8 +92,8 @@
 
         <!-- Bottom Section: User Profile -->
         <div
-            class="mt-auto flex flex-col items-end gap-2"
-            :class="collapsed ? 'px-0' : 'px-2'"
+            class="mt-auto flex flex-col gap-2"
+            :class="collapsed ? 'items-center px-0' : 'items-end px-2'"
         >
             <!-- Toggle Button + Notification Bell Row (expanded) -->
             <div
@@ -143,6 +143,7 @@
             >
                 <button
                     class="main-sidebar-profile"
+                    :class="collapsed ? 'justify-center' : ''"
                 >
                     <div v-if="avatarUrl" class="avatar shrink-0">
                         <div class="w-10 rounded-full">
@@ -197,6 +198,7 @@
                 v-else
                 to="/auth/login"
                 class="main-sidebar-profile"
+                :class="collapsed ? 'justify-center' : ''"
             >
                 <div class="avatar avatar-placeholder shrink-0">
                     <div
