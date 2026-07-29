@@ -707,13 +707,15 @@ export async function getCaptchaConfig(): Promise<CaptchaConfig> {
   return safeJsonParse<CaptchaConfig>(response);
 }
 
-export async function getAuthorizeClientInfo(query: URLSearchParams): Promise<{
+export interface AuthorizeClientInfo {
   clientName?: string;
   homeUri?: string;
   picture?: { id?: string };
   background?: { id?: string };
   scopes?: string[];
-}> {
+}
+
+export async function getAuthorizeClientInfo(query: URLSearchParams): Promise<AuthorizeClientInfo> {
   const response = await apiFetch(
     `/padlock/auth/open/authorize?${query.toString()}`,
     { skipAuth: true },
@@ -3315,6 +3317,8 @@ export async function removeReactionFromMessage(
 export interface DeviceCodeStatus {
   userCode: string;
   clientId: string;
+  clientName?: string;
+  picture?: { id?: string };
   scopes: string[];
   status: "pending" | "approved" | "declined" | "expired";
   expiresAt: string;

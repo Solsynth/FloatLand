@@ -14,6 +14,28 @@
 						<p class="text-sm text-base-content/60 mt-1">
 							A device is requesting access to your account
 						</p>
+						<div class="mt-4 flex items-center gap-3 text-left">
+							<div class="avatar">
+								<div class="w-11 h-11 overflow-hidden rounded-md border border-base-300">
+									<img
+										v-if="clientPictureUrl"
+										:src="clientPictureUrl"
+										loading="lazy"
+										class="w-full h-full object-cover"
+									>
+									<div
+										v-else
+										class="w-full h-full flex items-center justify-center bg-primary/15 text-primary"
+									>
+										<IconPlug class="w-5 h-5" />
+									</div>
+								</div>
+							</div>
+							<div class="min-w-0">
+								<p class="font-bold text-base truncate">{{ clientInfo?.clientName || status.clientName || status.clientId }}</p>
+								<p class="text-sm text-base-content/50">wants access to your account</p>
+							</div>
+						</div>
 					</div>
 
 					<div v-if="error" class="alert alert-error text-sm mb-4">
@@ -99,6 +121,7 @@ import {
 	IconX,
 	IconShield,
 } from '#components';
+import type { AuthorizeClientInfo } from '~/utils/api';
 
 definePageMeta({
 	layout: false,
@@ -120,10 +143,18 @@ const error = ref<string | null>(null);
 const status = ref<{
 	userCode: string;
 	clientId: string;
+	clientName?: string;
+	picture?: { id?: string };
 	scopes: string[];
 	status: string;
 	expiresAt: string;
 } | null>(null);
+const clientInfo = ref<AuthorizeClientInfo | null>(null);
+
+const clientPictureUrl = computed(() => {
+	const fileId = clientInfo.value?.picture?.id || status.value?.picture?.id;
+	return fileId ? `https://api.solian.app/drive/files/${fileId}` : null;
+});
 
 const scopeLabels: Record<string, string> = {
 	openid: 'Read your Solarpass profile',
@@ -145,8 +176,15 @@ async function loadStatus() {
 	}
 
 	try {
-		const { getDeviceCodeStatus } = await import('~/utils/api');
+		const { getAuthorizeClientInfo, getDeviceCodeStatus } = await import('~/utils/api');
 		status.value = await getDeviceCodeStatus(code);
+		try {
+			clientInfo.value = await getAuthorizeClientInfo(
+				new URLSearchParams({ client_id: status.value.clientId }),
+			);
+		} catch (e) {
+			console.warn('Failed to load device client info:', e);
+		}
 	} catch (e) {
 		console.error('Failed to load device code:', e);
 		error.value = e instanceof Error ? e.message : 'Failed to load device code';

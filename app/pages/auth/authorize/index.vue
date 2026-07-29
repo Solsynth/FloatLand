@@ -64,8 +64,8 @@
 							</div>
 
 							<!-- App Info Summary -->
-							<div class="flex flex-col items-start text-center mb-6">
-								<div class="avatar mb-2">
+							<div class="flex flex-col items-start text-left mb-6">
+								<div class="avatar self-start mb-2">
 									<div class="w-11 h-11 overflow-hidden rounded-md border border-base-300">
 										<img
 											v-if="clientPictureUrl"

@@ -7,7 +7,7 @@
 
         <template v-else-if="order">
             <!-- Brand header -->
-            <div class="flex items-center justify-between gap-2 mb-6 pt-2">
+            <div class="mb-5 flex items-center justify-between gap-2 border-b border-base-200 pb-4 pt-2">
                 <div class="w-20" />
                 <div class="flex items-center gap-2">
                     <img src="/favicon.png" class="w-8 h-8" />
@@ -46,7 +46,7 @@
             </div>
 
             <!-- Error alert -->
-            <div v-if="payError" class="alert alert-error mb-4 shadow-md">
+            <div v-if="payError" class="alert alert-error alert-outline mb-4">
                 <IconAlertTriangle class="w-5 h-5 shrink-0" />
                 <span>{{ payError }}</span>
                 <button
@@ -58,7 +58,7 @@
             </div>
 
             <!-- Success banner -->
-            <div v-if="isPaid" class="alert alert-success mb-4 shadow-md">
+            <div v-if="isPaid" class="alert alert-success alert-outline mb-4">
                 <IconCheck class="w-5 h-5 shrink-0" />
                 <div>
                     <span class="font-bold">Payment Successful</span>
@@ -70,7 +70,7 @@
 
             <!-- Merchant header -->
             <div
-                class="card bg-base-100 shadow-md mb-4 overflow-hidden relative"
+                class="card relative mb-4 overflow-hidden border border-base-200 bg-base-100 shadow-sm"
             >
                 <!-- Full-width background banner (blurred) -->
                 <div
@@ -81,7 +81,7 @@
                 <div
                     class="absolute inset-0 -z-10 bg-base-100"
                 />
-                <div class="card-body p-5">
+                <div class="card-body p-4 sm:p-5">
                     <!-- Publisher info (default) -->
                     <div v-if="!showAppInfo" class="flex items-center gap-4">
                         <div
@@ -172,7 +172,7 @@
 
                     <!-- Toggle button -->
                     <button
-                        class="btn btn-ghost btn-xs w-full mt-3 gap-1.5 text-base-content/50"
+                        class="btn btn-ghost btn-xs mt-3 w-full gap-1.5 border-t border-base-200 text-base-content/60"
                         @click="showAppInfo = !showAppInfo"
                     >
                         {{
@@ -185,8 +185,8 @@
             </div>
 
             <!-- Items card -->
-            <div class="card bg-base-100 shadow-md mb-4">
-                <div class="card-body p-5">
+            <div class="card mb-4 border border-base-200 bg-base-100 shadow-sm">
+                <div class="card-body p-4 sm:p-5">
                     <!-- Order title -->
                     <div class="mb-4">
                         <h2 class="text-lg font-bold">
@@ -200,11 +200,11 @@
                         Items
                     </h2>
 
-                    <div class="space-y-3">
+                    <div class="divide-y divide-base-200">
                         <div
                             v-for="(item, i) in order.items"
                             :key="i"
-                            class="flex items-center justify-between gap-3"
+                            class="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0"
                         >
                             <div class="flex items-center gap-3 min-w-0">
                                 <!-- Product image or fallback icon -->
@@ -262,7 +262,7 @@
 
                     <!-- Total -->
                     <div
-                        class="mt-4 flex items-center justify-between rounded-box bg-base-200 px-3 py-3"
+                        class="mt-5 flex items-baseline justify-between border-t border-base-200 pt-4"
                     >
                         <span class="font-semibold text-sm">Total</span>
                         <span class="text-xl font-black">
@@ -277,7 +277,7 @@
             <AccordionRoot
                 type="single"
                 collapsible
-                class="card bg-base-100 shadow-md mb-4 overflow-hidden"
+                class="card mb-4 overflow-hidden border border-base-200 bg-base-100 shadow-sm"
             >
                 <AccordionItem value="details">
                     <AccordionHeader>
@@ -396,9 +396,9 @@
             <!-- Payment card (unpaid only) -->
             <div
                 v-if="order.status === WalletOrderStatus.Unpaid && !isExpired"
-                class="card bg-base-100 shadow-md"
+                class="card border border-base-200 bg-base-100 shadow-sm"
             >
-                <div class="card-body p-5 space-y-4">
+                <div class="card-body space-y-4 p-4 sm:p-5">
                     <!-- Wallet selector -->
                     <div v-if="wallets.length > 1" class="form-control">
                         <label class="label py-1">
@@ -470,6 +470,7 @@
                         </p>
                         <PinInputRoot
                             v-model="pinDigits"
+                            mask
                             class="pin-input-root"
                             otp
                             type="number"
@@ -478,7 +479,7 @@
                                 v-for="(_, i) in 6"
                                 :key="i"
                                 :index="i"
-                                class="w-12 h-14 rounded-xl border border-base-content/20 bg-base-100 text-center text-xl font-bold text-base-content outline-none transition-colors focus:border-primary focus:bg-primary/5"
+                                class="h-14 w-12 rounded-lg border border-base-content/20 bg-base-100 text-center text-xl font-bold text-base-content outline-none transition-colors focus:border-primary focus:bg-primary/5"
                             />
                         </PinInputRoot>
                         <p
@@ -513,7 +514,7 @@
             </DialogRoot>
         </template>
 
-        <div v-else class="card bg-base-100 shadow-md mt-6">
+        <div v-else class="card mt-6 border border-base-200 bg-base-100 shadow-sm">
             <div class="card-body items-center text-center gap-3 p-8">
                 <IconAlertTriangle class="w-10 h-10 text-warning/50" />
                 <p class="text-sm text-base-content/60">Order not found</p>
@@ -581,7 +582,11 @@ const pinStatus = ref<WalletPinStatus | null>(null);
 const showPinDialog = ref(false);
 const showAppInfo = ref(false);
 
-const { data: order, status: orderStatus } = await useAsyncData(
+const {
+    data: order,
+    status: orderStatus,
+    refresh: refreshOrder,
+} = await useAsyncData(
     () => `order-${orderId.value}`,
     () => getOrder(orderId.value),
     { watch: [orderId], default: () => null },
@@ -802,17 +807,50 @@ function copyId() {
     if (order.value) navigator.clipboard.writeText(order.value.id);
 }
 
+function retainOrderDisplayData(
+    next: WalletOrder,
+    previous: WalletOrder | null,
+): WalletOrder {
+    if (!previous) return next;
+
+    // The payment endpoint currently returns a compact order payload. Keep the
+    // display data that was loaded with the order until a later response has it.
+    return {
+        ...previous,
+        ...next,
+        app: next.app ?? previous.app,
+        developer: next.developer ?? previous.developer,
+        items: next.items?.length ? next.items : previous.items,
+    };
+}
+
 async function handlePay() {
-    if (!order.value || pinCode.value.length < 6) return;
+    if (!order.value) return;
+    if (pinStatus.value?.validationRequired && pinCode.value.length < 6) return;
     paying.value = true;
     payError.value = "";
     try {
+        const previousOrder = order.value;
         const updated = await payOrder(
             order.value.id,
             pinCode.value,
             selectedWalletId.value || undefined,
         );
-        order.value = updated;
+        order.value = retainOrderDisplayData(updated, previousOrder);
+
+        // Refresh the canonical status without allowing a compact response to
+        // erase app, developer, or item information from the receipt.
+        const displayedOrder = order.value;
+        try {
+            await refreshOrder();
+            if (order.value) {
+                order.value = retainOrderDisplayData(order.value, displayedOrder);
+            }
+        } catch {
+            // Payment has already succeeded; the optimistic response is enough
+            // to show the receipt if the follow-up read is temporarily unavailable.
+        }
+
         pinDigits.value = [];
         showPinDialog.value = false;
     } catch (e: any) {
