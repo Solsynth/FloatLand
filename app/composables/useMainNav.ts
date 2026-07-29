@@ -1,6 +1,7 @@
 import {
   IconCompass,
   IconBuilding,
+  IconBriefcaseBusiness,
   IconHardDrive,
   IconMessageSquare,
   IconPalette,
@@ -32,6 +33,12 @@ export function useMainNav() {
   const navItems = computed<NavItem[]>(() => [
     { icon: IconCompass, labelKey: "nav.explore", href: "/" },
     { icon: IconBuilding, labelKey: "nav.realms", href: "/realms" },
+    {
+      icon: IconBriefcaseBusiness,
+      labelKey: "nav.workspaces",
+      href: "/workspaces",
+      requiresAuth: true,
+    },
     { icon: IconHardDrive, labelKey: "nav.drive", href: "/drive" },
     {
       icon: IconMessageSquare,

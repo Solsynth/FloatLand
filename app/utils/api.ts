@@ -52,6 +52,7 @@ import type {
   RealmInvite,
   RealmChatRoom,
 } from "~/types/realm";
+import type { Workspace, WorkspaceMember, WorkspacePlanOrder, WorkspacePlanStatus } from "~/types/workspace";
 
 import { snakeToCamel, camelToSnake } from "~/utils/case";
 import {
@@ -1994,6 +1995,38 @@ export async function createDirectChat(accountId: string): Promise<unknown> {
 }
 
 // Realm API
+// Workspace API — served by WattEngine Valve, separate from Realm APIs.
+export async function fetchWorkspaces(): Promise<Workspace[]> {
+  return fetchJson<Workspace[]>("/valve/workspaces");
+}
+
+export async function createWorkspace(payload: {
+  slug: string;
+  name: string;
+  description?: string;
+  type: number;
+}): Promise<Workspace> {
+  return fetchJson<Workspace>("/valve/workspaces", {
+    method: "POST",
+    body: JSON.stringify(camelToSnake(payload)),
+  });
+}
+
+export async function fetchWorkspaceMembers(slug: string): Promise<WorkspaceMember[]> {
+  return fetchJson<WorkspaceMember[]>(`/valve/workspaces/${encodeURIComponent(slug)}/members`);
+}
+
+export async function fetchWorkspacePlanStatus(slug: string): Promise<WorkspacePlanStatus> {
+  return fetchJson<WorkspacePlanStatus>(`/valve/workspaces/${encodeURIComponent(slug)}/plan/status`);
+}
+
+export async function subscribeWorkspacePlan(slug: string, plan: number): Promise<WorkspacePlanOrder> {
+  return fetchJson<WorkspacePlanOrder>(`/valve/workspaces/${encodeURIComponent(slug)}/plan/subscribe`, {
+    method: "POST",
+    body: JSON.stringify({ plan }),
+  });
+}
+
 export async function fetchRealms(): Promise<Realm[]> {
   const response = await apiFetch("/passport/realms");
   const data = await safeJsonParse<Realm[]>(response);
