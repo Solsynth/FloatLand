@@ -229,6 +229,19 @@
     "verifiedBy": "认证方",
     "loadingActivity": "正在加载动态..."
   },
+  "activation": {
+    "title": "账户激活",
+    "description": "完成剩余要求以解锁你的账户。",
+    "activeMessage": "你的账户已激活。以下是已完成的激活要求。",
+    "verifyContact": "验证联系方式",
+    "verifyContactHint": "使用我们发送的验证链接。",
+    "complete": "已完成",
+    "passed": "已通过",
+    "required": "激活前必须完成",
+    "notAvailable": "当前不可用",
+    "takeTest": "参加测试",
+    "testsBypassed": "邀请已豁免测试要求。"
+  },
   "chat": {
     "title": "聊天",
     "unnamedRoom": "未命名房间",
@@ -944,7 +957,35 @@
     "confirmTitle": "提交试卷？",
     "confirmDesc": "确定要提交你的试卷吗？提交后无法修改答案。",
     "cancel": "取消",
-    "submitConfirm": "提交"
+    "submitConfirm": "提交",
+    "result": {
+      "title": "测试结果",
+      "score": "得分：",
+      "status": "状态：",
+      "answerReview": "答题回顾",
+      "correct": "正确",
+      "incorrect": "错误",
+      "awaitingReview": "等待审核",
+      "answerRecorded": "答案已记录",
+      "notAnswered": "未作答",
+      "yourAnswer": "你的答案：",
+      "reviewerNote": "审核备注：",
+      "noAnswer": "无答案",
+      "backToTests": "返回测试",
+      "viewActivationProgress": "查看激活进度",
+      "statusInProgress": "进行中",
+      "statusPendingReview": "待审核",
+      "statusPassed": "已通过",
+      "statusFailed": "未通过",
+      "statusExpired": "已过期",
+      "statusUnknown": "未知",
+      "messagePendingReview": "你的答案正在等待人工审核。",
+      "messageTrialCompleted": "模拟测试已完成，不影响你的账户。",
+      "messagePassed": "你已通过此测试。",
+      "messageFailed": "此尝试未达到及格分数。",
+      "messageExpired": "此尝试在提交前已过期。",
+      "messageRecorded": "你的答题已记录。"
+    }
   },
   "search": {
     "placeholder": "搜索...",

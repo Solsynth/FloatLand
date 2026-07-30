@@ -751,6 +751,7 @@ export interface AdminTest {
   maxAttempts?: number | null
   attemptPeriodDays: number
   timeLimitSeconds?: number | null
+  rewardExperience?: number | null
   grantedPermissionGroupKey?: string | null
   config: Record<string, unknown>
   questionGroups: AdminTestQuestionGroupAssignment[]

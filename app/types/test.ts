@@ -17,7 +17,7 @@ export interface ActivationProgress {
 
 export interface ParticipantChoice { id: string; content: string; config: Record<string, unknown> }
 export interface ParticipantQuestion { id: string; content: string; type: 0 | 1 | 2; difficulty: number; points: number; config: Record<string, unknown>; choices: ParticipantChoice[] }
-export interface ParticipantTest { key: string; title: string; description?: string; timeLimitSeconds?: number; questions: ParticipantQuestion[] }
+export interface ParticipantTest { key: string; title: string; description?: string; timeLimitSeconds?: number; rewardExperience?: number | null; questions: ParticipantQuestion[] }
 export interface ParticipantAttempt {
   id: string
   key?: string

@@ -145,7 +145,7 @@
                         v-if="isTrial"
                         class="btn btn-primary"
                         :class="{ loading: submitting }"
-                        :disabled="submitting || remainingSeconds === 0"
+                        :disabled="submitting || !canSubmit"
                         @click="submit()"
                     >
                         {{ t("tests.submit") }}
@@ -154,7 +154,7 @@
                         <button
                             class="btn btn-primary"
                             :class="{ loading: submitting }"
-                            :disabled="submitting || remainingSeconds === 0"
+                            :disabled="submitting || !canSubmit"
                             @click="showConfirm = true"
                             type="button"
                         >
@@ -238,6 +238,8 @@ import {
     AlertDialogTitle,
 } from "reka-ui";
 
+definePageMeta({ layout: "minimal" });
+
 const attemptId = useRoute().params.attemptId as string;
 const { t } = useI18n();
 const attempt = ref<ParticipantAttempt | null>(null);
@@ -249,9 +251,11 @@ const now = ref<number | null>(null);
 const timerRef = ref<HTMLElement | null>(null);
 const showStickyTimer = ref(false);
 const showConfirm = ref(false);
+const autoSubmitted = ref(false);
 const violations = reactive<{ type: string; time: string }[]>([]);
 const violationCount = computed(() => violations.length);
 const isTrial = computed(() => attempt.value?.isTrial ?? false);
+const submitGraceSeconds = 10;
 let countdownTimer: ReturnType<typeof setInterval> | undefined;
 const remainingSeconds = computed(() => {
     if (!attempt.value?.deadlineAt || now.value === null) return null;
@@ -260,6 +264,21 @@ const remainingSeconds = computed(() => {
         Math.ceil(
             (new Date(attempt.value.deadlineAt).getTime() - now.value) / 1000,
         ),
+    );
+});
+watch(remainingSeconds, (seconds) => {
+    if (seconds !== null && seconds <= 0 && !autoSubmitted.value) {
+        autoSubmitted.value = true;
+        submit();
+    }
+});
+
+const canSubmit = computed(() => {
+    if (!attempt.value?.deadlineAt || now.value === null) return true;
+    return (
+        new Date(attempt.value.deadlineAt).getTime() +
+            submitGraceSeconds * 1000 >
+        now.value
     );
 });
 
@@ -275,7 +294,7 @@ try {
 }
 
 async function submit() {
-    if (!attempt.value || submitting.value) return;
+    if (!attempt.value || submitting.value || !canSubmit.value) return;
     submitting.value = true;
     try {
         await apiFetch(`/passport/tests/attempts/${attempt.value.id}/submit`, {
@@ -338,10 +357,6 @@ onBeforeUnmount(() => {
     document.removeEventListener("visibilitychange", handleVisibilityChange);
     window.removeEventListener("blur", handleWindowBlur);
 });
-
-definePageMeta({
-  layout: "minimal"
-})
 </script>
 
 <style scoped>

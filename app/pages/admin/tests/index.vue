@@ -228,6 +228,22 @@
                                             placeholder="No limit"
                                         />
                                     </fieldset>
+                                    <fieldset class="fieldset">
+                                        <legend class="fieldset-legend">
+                                            Completion experience
+                                        </legend>
+                                        <input
+                                            v-model.number="form.rewardExperience"
+                                            type="number"
+                                            min="1"
+                                            step="1"
+                                            class="input input-sm"
+                                            placeholder="No reward"
+                                        />
+                                        <p class="label">
+                                            Granted once after a non-trial attempt is fully graded.
+                                        </p>
+                                    </fieldset>
                                     <fieldset class="fieldset md:col-span-2">
                                         <legend class="fieldset-legend">
                                             Grant permission group after passing
@@ -508,6 +524,7 @@ function newTest(): AdminTest {
         maxAttempts: null,
         attemptPeriodDays: 365,
         timeLimitSeconds: null,
+        rewardExperience: null,
         grantedPermissionGroupKey: null,
         config: {},
         questionGroups: [],
@@ -537,6 +554,7 @@ function testPayload(test: AdminTest): AdminTest {
         maxAttempts: optionalNumber(test.maxAttempts),
         attemptPeriodDays: optionalNumber(test.attemptPeriodDays),
         timeLimitSeconds: optionalNumber(test.timeLimitSeconds),
+        rewardExperience: optionalNumber(test.rewardExperience),
         randomQuestionCount: test.shuffleQuestions
             ? optionalNumber(test.randomQuestionCount)
             : null,

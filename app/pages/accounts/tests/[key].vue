@@ -8,6 +8,7 @@
         <p v-if="test.description" class="mt-2 whitespace-pre-wrap text-sm text-base-content/65">{{ test.description }}</p>
         <dl class="mt-5 space-y-2 text-sm">
           <div v-if="test.timeLimitSeconds"><dt class="inline text-base-content/60">Time limit: </dt><dd class="inline">{{ Math.ceil(test.timeLimitSeconds / 60) }} minutes</dd></div>
+          <div v-if="test.rewardExperience"><dt class="inline text-base-content/60">Completion reward: </dt><dd class="inline">{{ test.rewardExperience }} XP</dd></div>
           <div><dt class="inline text-base-content/60">Questions: </dt><dd class="inline">Selected when you start the attempt.</dd></div>
         </dl>
         <div class="mt-6 flex justify-end"><button class="btn btn-primary" :disabled="starting" @click="start">{{ starting ? 'Starting…' : 'Start test' }}</button></div>
