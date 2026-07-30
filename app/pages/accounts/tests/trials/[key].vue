@@ -3,7 +3,7 @@
         <main class="mx-auto max-w-2xl px-4 py-6">
             <NuxtLink to="/accounts/tests" class="btn btn-ghost btn-sm mb-4">
                 <ArrowLeftIcon class="w-4 h-4" />
-                Back
+                {{ t("common.back") }}
             </NuxtLink>
             <div v-if="pending" class="flex justify-center py-16">
                 <span class="loading loading-spinner loading-lg" />
@@ -16,17 +16,14 @@
                 >
                     {{ trial.description }}
                 </p>
-                <p class="mt-5 text-sm text-base-content/60">
-                    This is a trial. Its result does not affect account
-                    activation, permissions, or retry limits.
-                </p>
+                <p class="mt-5 text-sm text-base-content/60">{{ t("tests.trialDescription") }}</p>
                 <div class="mt-6 flex justify-end">
                     <button
                         class="btn btn-primary"
                         :disabled="starting"
                         @click="start"
                     >
-                        {{ starting ? "Starting…" : "Start trial" }}
+                        {{ starting ? t("tests.starting") : t("tests.startTrial") }}
                     </button>
                 </div>
             </div>
@@ -38,6 +35,7 @@
 import { ArrowLeft as ArrowLeftIcon } from "@lucide/vue";
 import type { ParticipantAttempt, ParticipantTest } from "~/types/test";
 
+const { t } = useI18n();
 const key = useRoute().params.key as string;
 const trial = ref<ParticipantTest | null>(null);
 const pending = ref(true);

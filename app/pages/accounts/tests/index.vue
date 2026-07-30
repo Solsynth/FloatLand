@@ -1,2 +1,40 @@
-<template><NuxtLayout name="app"><main class="mx-auto max-w-4xl px-4 py-6"><h1 class="text-2xl font-bold">Tests</h1><p class="mt-1 text-sm text-base-content/60">Browse available public tests.</p><div v-if="pending" class="flex justify-center py-16"><span class="loading loading-spinner loading-lg" /></div><div v-else class="mt-6 grid gap-3 sm:grid-cols-2"><NuxtLink v-for="test in tests" :key="test.key" :to="`/accounts/tests/${test.key}`" class="card overflow-hidden rounded-lg border border-base-300 bg-base-100 transition-colors hover:bg-base-200"><div class="card-body p-5"><h2 class="font-semibold">{{ test.title }}</h2><p class="text-sm text-base-content/60">{{ test.description || 'No description provided.' }}</p></div></NuxtLink><p v-if="!tests.length" class="text-sm text-base-content/60">No public tests are available.</p></div></main></NuxtLayout></template>
-<script setup lang="ts">import type { ParticipantTest } from '~/types/test';const tests=ref<ParticipantTest[]>([]);const pending=ref(true);try{tests.value=await safeJsonParse<ParticipantTest[]>(await apiFetch('/passport/tests'))}finally{pending.value=false}</script>
+<template>
+    <main class="mx-auto max-w-4xl px-4 py-6">
+        <h1 class="text-2xl font-bold">{{ t("tests.browseTitle") }}</h1>
+        <p class="mt-1 text-sm text-base-content/60">{{ t("tests.browseDescription") }}</p>
+        <div v-if="pending" class="flex justify-center py-16">
+            <span class="loading loading-spinner loading-lg" />
+        </div>
+        <div v-else class="mt-6 grid gap-3 sm:grid-cols-2">
+            <NuxtLink
+                v-for="test in tests"
+                :key="test.key"
+                :to="`/accounts/tests/${test.key}`"
+                class="card overflow-hidden rounded-lg border border-base-300 bg-base-100 transition-colors hover:bg-base-200"
+            >
+                <div class="card-body p-5">
+                    <h2 class="font-semibold">{{ test.title }}</h2>
+                    <p class="text-sm text-base-content/60">{{ test.description || t("tests.noDescription") }}</p>
+                </div>
+            </NuxtLink>
+            <p v-if="!tests.length" class="text-sm text-base-content/60">{{ t("tests.noTests") }}</p>
+        </div>
+    </main>
+</template>
+
+<script setup lang="ts">
+import type { ParticipantTest } from "~/types/test";
+
+definePageMeta({ layout: "minimal" });
+
+const { t } = useI18n();
+const tests = ref<ParticipantTest[]>([]);
+const pending = ref(true);
+try {
+    tests.value = await safeJsonParse<ParticipantTest[]>(
+        await apiFetch("/passport/tests"),
+    );
+} finally {
+    pending.value = false;
+}
+</script>
