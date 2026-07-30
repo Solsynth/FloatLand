@@ -279,6 +279,13 @@
                                             class="checkbox checkbox-sm"
                                         />
                                         Shuffle questions</label
+                                    ><label class="flex items-center gap-2"
+                                        ><input
+                                            v-model="form.allowCategorySelection"
+                                            type="checkbox"
+                                            class="checkbox checkbox-sm"
+                                        />
+                                        Let participants choose 3–5 categories</label
                                     >
                                 </div>
                                 <div
@@ -518,6 +525,7 @@ function newTest(): AdminTest {
         isPublished: false,
         isListed: true,
         shuffleQuestions: false,
+        allowCategorySelection: false,
         randomQuestionCount: null,
         simpleQuestionPercentage: 60,
         passingScore: 100,

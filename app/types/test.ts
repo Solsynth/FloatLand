@@ -1,7 +1,10 @@
 export interface ActivationTestRequirement {
   key: string
+  title: string
   available: boolean
   passed: boolean
+  maxAttempts?: number | null
+  usedAttemptCount: number
 }
 
 export interface ActivationProgress {
@@ -16,8 +19,8 @@ export interface ActivationProgress {
 }
 
 export interface ParticipantChoice { id: string; content: string; config: Record<string, unknown> }
-export interface ParticipantQuestion { id: string; content: string; type: 0 | 1 | 2; difficulty: number; points: number; config: Record<string, unknown>; choices: ParticipantChoice[] }
-export interface ParticipantTest { key: string; title: string; description?: string; timeLimitSeconds?: number; rewardExperience?: number | null; questions: ParticipantQuestion[] }
+export interface ParticipantQuestion { id: string; content: string; category?: string | null; type: 0 | 1 | 2; difficulty: number; points: number; config: Record<string, unknown>; choices: ParticipantChoice[] }
+export interface ParticipantTest { key: string; title: string; description?: string; timeLimitSeconds?: number; rewardExperience?: number | null; maxAttempts?: number | null; allowCategorySelection: boolean; availableCategories: string[]; questions: ParticipantQuestion[] }
 export interface ParticipantAttempt {
   id: string
   key?: string

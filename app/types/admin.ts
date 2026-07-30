@@ -744,6 +744,7 @@ export interface AdminTest {
   isPublished: boolean
   isListed: boolean
   shuffleQuestions: boolean
+  allowCategorySelection: boolean
   randomQuestionCount?: number | null
   simpleQuestionPercentage: number
   isArchived?: boolean

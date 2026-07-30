@@ -76,6 +76,11 @@
                             </p>
                             <div class="flex items-center gap-3 pt-0.5">
                                 <span
+                                    v-if="question.category"
+                                    class="badge badge-outline text-xs"
+                                    >{{ question.category }}</span
+                                >
+                                <span
                                     class="badge badge-outline badge-primary text-xs"
                                     >{{ question.points }}
                                     {{ t("tests.pts") }}</span

@@ -21,7 +21,8 @@
     "active": "Active",
     "disabled": "Disabled",
     "required": "Required",
-    "default": "Default"
+    "default": "Default",
+    "error": "An error occurred"
   },
   "drive": {
     "title": "Solar Network Drive",
@@ -259,7 +260,15 @@
     "required": "Required before activation",
     "notAvailable": "Not currently available",
     "takeTest": "Take test",
-    "testsBypassed": "An invitation has waived the test requirement."
+    "testsBypassed": "An invitation has waived the test requirement.",
+    "remainingAttempts": "Attempts: {used}/{max}",
+    "maxAttemptsReached": "Maximum attempts reached",
+    "affiliationTitle": "Have an affiliation code?",
+    "affiliationHint": "Use a registration invitation code to skip eligible entry tests.",
+    "affiliationPlaceholder": "Enter affiliation code",
+    "useCode": "Use code",
+    "inviteActivated": "Your invitation code has activated this account.",
+    "inviteApplied": "Your invitation code was applied. Complete any remaining account requirements to activate."
   },
   "chat": {
     "title": "Chat",
@@ -992,6 +1001,35 @@
     "startTest": "Start test",
     "startTrial": "Start trial",
     "trialDescription": "This is a trial. Its result does not affect account activation, permissions, or retry limits.",
+    "allCategories": "All",
+    "attempts": "Attempts:",
+    "attemptsUsed": "{used}/{max}",
+    "maxAttemptsReached": "You have reached the maximum number of attempts for this test.",
+    "selectCategories": "Choose question categories",
+    "selectCategoriesHint": "Select between 3 and 5 categories. Only questions from these categories will be included.",
+    "selectAtLeast": "Select at least 3 categories to continue.",
+    "selectAtMost": "Select no more than 5 categories.",
+    "categories": {
+        "english": "English",
+        "history": "History",
+        "esports": "Esports",
+        "indie-games": "Indie Games",
+        "movie": "Movie",
+        "computer": "Computer",
+        "rhythm-game": "Rhythm Game",
+        "photography": "Photography",
+        "internet": "Internet",
+        "3a-games": "AAA Games",
+        "anime-games": "Anime Games",
+        "developer": "Developer",
+        "geography": "Geography",
+        "chemistry": "Chemistry",
+        "math": "Math",
+        "vocaloid": "Vocaloid",
+        "physics": "Physics",
+        "rikki-mahjong": "Rikki Mahjong",
+        "biology": "Biology"
+    },
     "result": {
       "title": "Test result",
       "score": "Score:",
