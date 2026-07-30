@@ -1,9 +1,8 @@
 <template>
-    <NuxtLayout name="app">
-        <main
-            class="mx-auto max-w-2xl px-4 py-6"
-            :class="{ 'pb-20': showStickyTimer && remainingSeconds !== null }"
-        >
+    <main
+        class="mx-auto max-w-2xl px-4 py-6"
+        :class="{ 'pb-20': showStickyTimer && remainingSeconds !== null }"
+    >
             <NuxtLink
                 to="/accounts/me/activation"
                 class="btn btn-ghost btn-sm mb-4"
@@ -216,8 +215,7 @@
                     </span>
                 </div>
             </div>
-        </Transition>
-    </NuxtLayout>
+    </Transition>
 </template>
 
 <script setup lang="ts">

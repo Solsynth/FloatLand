@@ -1,5 +1,5 @@
 <template>
-    <NuxtLayout name="app">
+    <NuxtLayout name="minimal">
         <main class="mx-auto max-w-2xl px-4 py-6">
             <NuxtLink to="/accounts/tests" class="btn btn-ghost btn-sm mb-4">
                 <ArrowLeftIcon class="w-4 h-4" />

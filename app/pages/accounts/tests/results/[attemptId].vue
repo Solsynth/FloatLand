@@ -1,6 +1,5 @@
 <template>
-    <NuxtLayout name="app">
-        <main class="mx-auto max-w-2xl px-4 py-6">
+    <main class="mx-auto max-w-2xl px-4 py-6">
             <div v-if="pending" class="flex justify-center py-16">
                 <span class="loading loading-spinner loading-lg" />
             </div>
@@ -115,8 +114,7 @@
                     >
                 </div>
             </div>
-        </main>
-    </NuxtLayout>
+    </main>
 </template>
 
 <script setup lang="ts">
