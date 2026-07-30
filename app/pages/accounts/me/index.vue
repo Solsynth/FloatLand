@@ -156,6 +156,14 @@
 						<div class="card bg-base-100">
 							<div class="card-body p-2">
 							<NuxtLink
+								to="/accounts/me/activation"
+								class="flex items-center gap-3 p-3 rounded-box hover:bg-base-200 transition-colors"
+							>
+								<IconShieldCheck class="w-5 h-5 text-base-content/70" />
+								<span class="flex-1">Account activation</span>
+								<IconChevronRight class="w-4 h-4 text-base-content/50" />
+							</NuxtLink>
+							<NuxtLink
 								to="/accounts/me/wallet"
 								class="flex items-center gap-3 p-3 rounded-box hover:bg-base-200 transition-colors"
 							>

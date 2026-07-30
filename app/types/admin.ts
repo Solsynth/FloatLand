@@ -692,7 +692,9 @@ export interface PermissionGroupMember {
 export interface PermissionGroupDetail {
   group: { id: string; key: string; createdAt?: string; updatedAt?: string }
   nodes: PermissionNode[]
+  nodeTotal: number
   members: PermissionGroupMember[]
+  memberTotal: number
 }
 
 export interface ActorPermissions {
@@ -711,6 +713,103 @@ export interface UpsertGroupPermissionPayload {
 export interface UpsertGroupMemberPayload {
   affectedAt?: string | null
   expiredAt?: string | null
+}
+
+export interface AdminTestChoice {
+  id?: string
+  sortOrder: number
+  content: string
+  isCorrect: boolean
+  config: Record<string, unknown>
+}
+
+export interface AdminTestQuestion {
+  id?: string
+  sortOrder: number
+  content: string
+  type: number
+  gradingMode: number
+  difficulty: number
+  points: number
+  config: Record<string, unknown>
+  choices: AdminTestChoice[]
+}
+
+export interface AdminTest {
+  id?: string
+  key: string
+  title: string
+  description?: string | null
+  isPublished: boolean
+  isListed: boolean
+  shuffleQuestions: boolean
+  randomQuestionCount?: number | null
+  simpleQuestionPercentage: number
+  isArchived?: boolean
+  passingScore: number
+  maxAttempts?: number | null
+  attemptPeriodDays: number
+  timeLimitSeconds?: number | null
+  grantedPermissionGroupKey?: string | null
+  config: Record<string, unknown>
+  questionGroups: AdminTestQuestionGroupAssignment[]
+}
+
+export interface AdminTestQuestionGroupAssignment {
+  id?: string
+  questionGroupKey: string
+  questionGroup?: AdminTestQuestionGroup
+  sortOrder: number
+}
+
+export interface AdminTestQuestionGroup {
+  id?: string
+  key: string
+  title: string
+  description?: string | null
+  config: Record<string, unknown>
+  questionCount?: number
+  questions?: AdminTestQuestion[]
+}
+
+export interface AdminTestQuestionPage {
+  totalCount: number
+  items: AdminTestQuestion[]
+}
+
+export interface AdminTestAnswer {
+  id: string
+  questionId: string
+  value: Record<string, unknown>
+  isCorrect?: boolean | null
+  awardedPoints?: number | null
+  reviewNote?: string | null
+  reviewedAt?: string | null
+}
+
+export interface AdminTestAttempt {
+  id: string
+  accountId: string
+  status: number
+  startedAt: string
+  submittedAt?: string | null
+  score?: number | null
+  answers: AdminTestAnswer[]
+}
+
+export interface AdminTestTrialResult {
+  score?: number | null
+  passed: boolean
+  answers: Array<{ questionId: string; isCorrect?: boolean | null; awardedPoints?: number | null }>
+}
+
+export interface AdminTestTrial {
+  key: string
+  title: string
+  description?: string | null
+  isPublished: boolean
+  testKey: string
+  testTitle?: string
 }
 
 // ============ Account Board (Passport) ============

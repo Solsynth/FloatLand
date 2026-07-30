@@ -90,7 +90,7 @@
           </AdminCard>
 
           <!-- Nodes -->
-          <AdminCard title="Permission Nodes">
+          <AdminCard :title="`Permission Nodes (${detail.nodeTotal})`">
             <template #actions>
               <button class="btn btn-ghost btn-xs" @click="openAddNode">
                 <IconPlus class="w-3.5 h-3.5" /> Add
@@ -119,11 +119,16 @@
                 </button>
               </div>
             </div>
+            <div v-if="detail.nodes.length < detail.nodeTotal" class="pt-3">
+              <button class="btn btn-ghost btn-sm" :disabled="nodesLoading" @click="loadMoreNodes">
+                {{ nodesLoading ? 'Loading...' : `Load more (${detail.nodeTotal - detail.nodes.length} remaining)` }}
+              </button>
+            </div>
             <p v-else class="text-sm text-base-content/40">No permission nodes</p>
           </AdminCard>
 
           <!-- Members -->
-          <AdminCard title="Members">
+          <AdminCard :title="`Members (${detail.memberTotal})`">
             <template #actions>
               <button class="btn btn-ghost btn-xs" @click="openAddMember">
                 <IconPlus class="w-3.5 h-3.5" /> Add
@@ -148,6 +153,11 @@
                   <IconTrash2 class="w-3 h-3" />
                 </button>
               </div>
+            </div>
+            <div v-if="detail.members.length < detail.memberTotal" class="pt-3">
+              <button class="btn btn-ghost btn-sm" :disabled="membersLoading" @click="loadMoreMembers">
+                {{ membersLoading ? 'Loading...' : `Load more (${detail.memberTotal - detail.members.length} remaining)` }}
+              </button>
             </div>
             <p v-else class="text-sm text-base-content/40">No members</p>
           </AdminCard>
@@ -355,6 +365,8 @@ const groupQuery = ref('')
 const selectedGroupId = ref<string | null>(null)
 const detail = ref<PermissionGroupDetail | null>(null)
 const detailLoading = ref(false)
+const nodesLoading = ref(false)
+const membersLoading = ref(false)
 const saving = ref(false)
 
 const createOpen = ref(false)
@@ -419,6 +431,40 @@ async function selectGroup(id: string) {
     useNuxtApp().$toast.error('Failed to load group detail')
   } finally {
     detailLoading.value = false
+  }
+}
+
+async function loadMoreNodes() {
+  if (!selectedGroupId.value || !detail.value) return
+  nodesLoading.value = true
+  try {
+    const page = await fetchPermissionGroup(selectedGroupId.value, {
+      nodesOffset: detail.value.nodes.length,
+      membersTake: 0,
+    })
+    detail.value.nodes.push(...page.nodes)
+    detail.value.nodeTotal = page.nodeTotal
+  } catch {
+    useNuxtApp().$toast.error('Failed to load more permission nodes')
+  } finally {
+    nodesLoading.value = false
+  }
+}
+
+async function loadMoreMembers() {
+  if (!selectedGroupId.value || !detail.value) return
+  membersLoading.value = true
+  try {
+    const page = await fetchPermissionGroup(selectedGroupId.value, {
+      nodesTake: 0,
+      membersOffset: detail.value.members.length,
+    })
+    detail.value.members.push(...page.members)
+    detail.value.memberTotal = page.memberTotal
+  } catch {
+    useNuxtApp().$toast.error('Failed to load more members')
+  } finally {
+    membersLoading.value = false
   }
 }
 

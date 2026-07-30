@@ -177,6 +177,7 @@ import {
   IconLayers,
   IconBuilding2,
   IconGlobe,
+  IconClipboardCheck,
 } from '#components'
 import type {
   CacheStats,
@@ -306,6 +307,12 @@ const sections = [
     label: 'Permissions',
     href: '/admin/permissions',
     description: 'Manage permission groups, nodes, and memberships',
+  },
+  {
+    icon: IconClipboardCheck,
+    label: 'Tests',
+    href: '/admin/tests',
+    description: 'Create platform tests and review subjective answers',
   },
   {
     icon: IconShieldAlert,

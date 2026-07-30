@@ -105,6 +105,7 @@ import {
   IconLayers,
   IconBuilding2,
   IconGlobe,
+  IconClipboardCheck,
 } from '#components'
 
 const route = useRoute()
@@ -133,6 +134,11 @@ const navGroups = [
         icon: IconKeyRound,
         label: 'Permissions',
         href: '/admin/permissions',
+      },
+      {
+        icon: IconClipboardCheck,
+        label: 'Tests',
+        href: '/admin/tests',
       },
       {
         icon: IconShieldAlert,

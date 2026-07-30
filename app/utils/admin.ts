@@ -67,6 +67,13 @@ import type {
   ActorPermissions,
   UpsertGroupPermissionPayload,
   UpsertGroupMemberPayload,
+  AdminTest,
+  AdminTestAttempt,
+  AdminTestTrialResult,
+  AdminTestTrial,
+  AdminTestQuestion,
+  AdminTestQuestionPage,
+  AdminTestQuestionGroup,
   AdminBoardItem,
   BoardPayloadPush,
   AdminMagicSpell,
@@ -110,6 +117,10 @@ const PADLOCK_PERMISSIONS = '/padlock/admin/permissions'
 const PASSPORT_BASE = '/passport/admin/accounts'
 // Passport service: realm moderation
 const PASSPORT_REALMS = '/passport/admin/realms'
+const PASSPORT_TESTS = '/passport/admin/tests'
+const PASSPORT_TEST_QUESTION_GROUPS = '/passport/admin/test-question-groups'
+const PASSPORT_TEST_QUESTIONS = '/passport/admin/test-questions'
+const PASSPORT_TEST_TRIALS = '/passport/admin/test-trials'
 // Sphere service: content moderation
 const SPHERE_POSTS = '/sphere/admin/posts'
 const SPHERE_TAGS = '/sphere/admin/tags'
@@ -1174,8 +1185,12 @@ export async function fetchPermissionGroups(query?: string): Promise<PermissionG
   )
 }
 
-export async function fetchPermissionGroup(groupId: string): Promise<PermissionGroupDetail> {
-  return fetchJson<PermissionGroupDetail>(`${PADLOCK_PERMISSIONS}/groups/${groupId}`)
+export async function fetchPermissionGroup(
+  groupId: string,
+  query: { nodesTake?: number; nodesOffset?: number; membersTake?: number; membersOffset?: number } = {},
+): Promise<PermissionGroupDetail> {
+  const qs = buildQuery(query)
+  return fetchJson<PermissionGroupDetail>(`${PADLOCK_PERMISSIONS}/groups/${groupId}${qs ? `?${qs}` : ''}`)
 }
 
 export async function createPermissionGroup(key: string): Promise<{ id: string; key: string }> {
@@ -1245,6 +1260,111 @@ export async function fetchActorPermissions(actor: string): Promise<ActorPermiss
   return fetchJson<ActorPermissions>(
     `${PADLOCK_PERMISSIONS}/actors/${encodeURIComponent(actor)}`,
   )
+}
+
+export async function fetchAdminTests(): Promise<AdminTest[]> {
+  return fetchJson<AdminTest[]>(PASSPORT_TESTS)
+}
+
+export async function createAdminTest(payload: AdminTest): Promise<AdminTest> {
+  return fetchJson<AdminTest>(PASSPORT_TESTS, {
+    method: 'POST',
+    body: JSON.stringify(camelToSnake(payload)),
+  })
+}
+
+export async function updateAdminTest(key: string, payload: AdminTest): Promise<AdminTest> {
+  return fetchJson<AdminTest>(`${PASSPORT_TESTS}/${encodeURIComponent(key)}`, {
+    method: 'PUT',
+    body: JSON.stringify(camelToSnake(payload)),
+  })
+}
+
+export async function publishAdminTest(key: string, published: boolean): Promise<AdminTest> {
+  return fetchJson<AdminTest>(`${PASSPORT_TESTS}/${encodeURIComponent(key)}/publish?published=${published}`, {
+    method: 'POST',
+  })
+}
+
+export async function archiveAdminTest(key: string, archived: boolean): Promise<AdminTest> {
+  return fetchJson<AdminTest>(`${PASSPORT_TESTS}/${encodeURIComponent(key)}/archive?archived=${archived}`, {
+    method: 'POST',
+  })
+}
+
+export async function fetchAdminTestAttempts(key: string, status = 1): Promise<AdminTestAttempt[]> {
+  return fetchJson<AdminTestAttempt[]>(`${PASSPORT_TESTS}/${encodeURIComponent(key)}/attempts?status=${status}`)
+}
+
+export async function reviewAdminTestAnswer(
+  answerId: string,
+  payload: { isCorrect: boolean; awardedPoints: number; note?: string },
+): Promise<AdminTestAttempt> {
+  return fetchJson<AdminTestAttempt>(`${PASSPORT_TESTS}/answers/${answerId}/review`, {
+    method: 'POST',
+    body: JSON.stringify(camelToSnake(payload)),
+  })
+}
+
+export async function fetchAdminTestTrial(key: string) {
+  return fetchJson<import('~/types/test').ParticipantTest>(`${PASSPORT_TESTS}/${encodeURIComponent(key)}/trial`)
+}
+
+export async function gradeAdminTestTrial(key: string, answers: Array<{ questionId: string; choiceIds?: string[]; text?: string }>): Promise<AdminTestTrialResult> {
+  return fetchJson<AdminTestTrialResult>(`${PASSPORT_TESTS}/${encodeURIComponent(key)}/trial/grade`, { method: 'POST', body: JSON.stringify(camelToSnake({ answers })) })
+}
+
+export async function createAdminTestTrialForTest(key: string): Promise<AdminTestTrial> {
+  return fetchJson<AdminTestTrial>(`${PASSPORT_TESTS}/${encodeURIComponent(key)}/trials`, { method: 'POST' })
+}
+
+export async function fetchAdminTestTrials(): Promise<AdminTestTrial[]> {
+  return fetchJson<AdminTestTrial[]>(PASSPORT_TEST_TRIALS)
+}
+
+export async function createAdminTestTrial(payload: AdminTestTrial): Promise<AdminTestTrial> {
+  return fetchJson<AdminTestTrial>(PASSPORT_TEST_TRIALS, { method: 'POST', body: JSON.stringify(camelToSnake(payload)) })
+}
+
+export async function updateAdminTestTrial(key: string, payload: AdminTestTrial): Promise<AdminTestTrial> {
+  return fetchJson<AdminTestTrial>(PASSPORT_TEST_TRIALS + '/' + encodeURIComponent(key), { method: 'PUT', body: JSON.stringify(camelToSnake(payload)) })
+}
+
+export async function fetchAdminTestQuestionGroups(): Promise<AdminTestQuestionGroup[]> {
+  return fetchJson<AdminTestQuestionGroup[]>(PASSPORT_TEST_QUESTION_GROUPS)
+}
+
+export async function createAdminTestQuestionGroup(payload: AdminTestQuestionGroup): Promise<AdminTestQuestionGroup> {
+  return fetchJson<AdminTestQuestionGroup>(PASSPORT_TEST_QUESTION_GROUPS, { method: 'POST', body: JSON.stringify(camelToSnake(payload)) })
+}
+
+export async function updateAdminTestQuestionGroup(key: string, payload: AdminTestQuestionGroup): Promise<AdminTestQuestionGroup> {
+  return fetchJson<AdminTestQuestionGroup>(`${PASSPORT_TEST_QUESTION_GROUPS}/${encodeURIComponent(key)}`, { method: 'PUT', body: JSON.stringify(camelToSnake(payload)) })
+}
+
+export async function deleteAdminTestQuestionGroup(key: string): Promise<void> {
+  await fetchJson(`${PASSPORT_TEST_QUESTION_GROUPS}/${encodeURIComponent(key)}`, { method: 'DELETE' })
+}
+
+export async function fetchAdminTestQuestions(groupKey: string, take = 20, offset = 0): Promise<AdminTestQuestionPage> {
+  const query = new URLSearchParams({ groupKey, take: String(take), offset: String(offset) })
+  return fetchJson<AdminTestQuestionPage>(`${PASSPORT_TEST_QUESTIONS}?${query}`)
+}
+
+export async function createAdminTestQuestion(groupKey: string, payload: AdminTestQuestion): Promise<AdminTestQuestion> {
+  return fetchJson<AdminTestQuestion>(PASSPORT_TEST_QUESTIONS, { method: 'POST', body: JSON.stringify(camelToSnake({ ...payload, questionGroupKey: groupKey })) })
+}
+
+export async function updateAdminTestQuestion(id: string, groupKey: string, payload: AdminTestQuestion): Promise<AdminTestQuestion> {
+  return fetchJson<AdminTestQuestion>(`${PASSPORT_TEST_QUESTIONS}/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify(camelToSnake({ ...payload, questionGroupKey: groupKey })) })
+}
+
+export async function deleteAdminTestQuestion(id: string): Promise<void> {
+  await fetchJson(`${PASSPORT_TEST_QUESTIONS}/${encodeURIComponent(id)}`, { method: 'DELETE' })
+}
+
+export async function importAdminTestQuestions(groupKey: string, questions: AdminTestQuestion[]): Promise<{ importedCount: number }> {
+  return fetchJson<{ importedCount: number }>(`${PASSPORT_TEST_QUESTIONS}/import`, { method: 'POST', body: JSON.stringify(camelToSnake({ questionGroupKey: groupKey, questions })) })
 }
 
 // ============ Magic Spells (Passport) ============
