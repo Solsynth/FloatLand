@@ -107,6 +107,14 @@ import type {
   AdminRealmMember,
   AdminRealmMemberQuery,
   AdminRealmMemberRolePayload,
+  StoragePoolConfig,
+  StoragePoolUpdatePayload,
+  StorageNodeHealth,
+  StorageHealthSummary,
+  StorageStats,
+  StorageFailureEvent,
+  PoolMigrationPayload,
+  PoolMigrationTask,
 } from '~/types/admin'
 
 // Padlock service: auth, sessions, punishments, suspend, delete, notifications, emails
@@ -1367,6 +1375,17 @@ export async function importAdminTestQuestions(groupKey: string, questions: Admi
   return fetchJson<{ importedCount: number }>(`${PASSPORT_TEST_QUESTIONS}/import`, { method: 'POST', body: JSON.stringify(camelToSnake({ questionGroupKey: groupKey, questions })) })
 }
 
+export async function exportAdminTestQuestionsCsv(groupKey?: string): Promise<string> {
+  const query = groupKey ? `?${new URLSearchParams({ groupKey })}` : ''
+  return (await apiFetch(`${PASSPORT_TEST_QUESTIONS}/export${query}`)).text()
+}
+
+export async function pruneAdminTestQuestions(groupKey?: string): Promise<{ removedCount: number }> {
+  const query = new URLSearchParams({ confirm: 'true' })
+  if (groupKey) query.set('groupKey', groupKey)
+  return fetchJson<{ removedCount: number }>(`${PASSPORT_TEST_QUESTIONS}/prune?${query}`, { method: 'DELETE' })
+}
+
 // ============ Magic Spells (Passport) ============
 
 export async function fetchAccountSpells(identifier: string): Promise<AdminMagicSpell[]> {
@@ -1485,4 +1504,53 @@ export async function resumeEmailPlan(planId: string): Promise<void> {
 
 export async function advanceEmailPlan(planId: string): Promise<void> {
   await fetchJson(`${RING_EMAIL_PLANS}/${planId}/advance`, { method: 'POST' })
+}
+
+// ============ DysonFS Storage Admin ============
+
+const STORAGE_BASE = '/drive/admin/storage'
+
+export async function fetchStoragePoolConfigs(): Promise<StoragePoolConfig[]> {
+  return fetchJson<StoragePoolConfig[]>(`${STORAGE_BASE}/config`)
+}
+
+export async function updateStoragePoolConfig(
+  poolId: string,
+  payload: StoragePoolUpdatePayload,
+): Promise<StoragePoolConfig> {
+  return fetchJson<StoragePoolConfig>(`${STORAGE_BASE}/config/${encodeURIComponent(poolId)}`, {
+    method: 'PATCH',
+    body: JSON.stringify(payload),
+  })
+}
+
+export async function fetchStorageNodeStatus(): Promise<StorageNodeHealth> {
+  return fetchJson<StorageNodeHealth>(`${STORAGE_BASE}/status`)
+}
+
+export async function fetchStorageHealth(): Promise<StorageHealthSummary> {
+  return fetchJson<StorageHealthSummary>(`${STORAGE_BASE}/health`)
+}
+
+export async function fetchStorageStats(): Promise<StorageStats> {
+  return fetchJson<StorageStats>(`${STORAGE_BASE}/stats`)
+}
+
+export async function fetchStorageFailures(limit = 100): Promise<StorageFailureEvent[]> {
+  return fetchJson<StorageFailureEvent[]>(`${STORAGE_BASE}/failures?limit=${limit}`)
+}
+
+export async function createPoolMigration(
+  payload: PoolMigrationPayload,
+): Promise<PoolMigrationTask> {
+  return fetchJson<PoolMigrationTask>(`${STORAGE_BASE}/pool-migrations`, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+}
+
+export async function fetchPoolMigrationTask(
+  taskId: string,
+): Promise<PoolMigrationTask> {
+  return fetchJson<PoolMigrationTask>(`${STORAGE_BASE}/pool-migrations/${encodeURIComponent(taskId)}`)
 }

@@ -727,6 +727,7 @@ export interface AdminTestQuestion {
   id?: string
   sortOrder: number
   content: string
+  category?: string | null
   type: number
   gradingMode: number
   difficulty: number
@@ -1166,4 +1167,90 @@ export interface EmailPlanQuery {
   take?: number
   offset?: number
   status?: number
+}
+
+// ============ DysonFS Storage Admin ============
+
+export interface StoragePoolConfig {
+  id: string
+  name: string
+  description: string
+  storage_config: {
+    endpoint: string
+    bucket: string
+    enable_ssl: boolean
+    enable_signed: boolean
+    secret_id: string
+    secret_key: string
+  }
+  secret_id_configured: boolean
+  secret_key_configured: boolean
+  billing_config: { cost_multiplier: number }
+  policy_config: { public_usable: boolean }
+  is_hidden: boolean
+}
+
+export interface StoragePoolUpdatePayload {
+  storage_config: {
+    endpoint: string
+    bucket: string
+    enable_ssl: boolean
+    enable_signed: boolean
+  }
+}
+
+export interface StorageNodeHealth {
+  checked_at: string
+  nodes: Array<{
+    id: string
+    name: string
+    machine_id: string
+    endpoint: string
+    pool_id: string
+    status: string
+    healthy: boolean
+    last_seen_at: string
+  }>
+}
+
+export interface StorageHealthSummary {
+  status: 'healthy' | 'degraded' | 'unhealthy'
+  checked_at: string
+  total_nodes: number
+  healthy_nodes: number
+}
+
+export interface StorageStats {
+  calculated_at: string
+  pools: Array<{
+    pool_id: string
+    file_count: number
+    used_bytes: number
+  }>
+}
+
+export interface StorageFailureEvent {
+  id: string
+  message: string
+  occurred_at: string
+}
+
+export interface PoolMigrationPayload {
+  source_pool_id: string
+  target_pool_id: string
+  file_ids?: string[]
+}
+
+export interface PoolMigrationTask {
+  id: string
+  status: 'pending' | 'processing' | 'completed' | 'failed'
+  progress: number
+  chunks_count: number
+  chunks_uploaded: number
+  parameters: {
+    source_pool_id: string
+    target_pool_id: string
+    file_ids?: string[]
+  }
+  error_message?: string
 }

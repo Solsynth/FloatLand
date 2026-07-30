@@ -931,6 +931,21 @@
     "draft": "草稿",
     "sidebarHint": "分享此问卷链接以收集回答。"
   },
+  "tests": {
+    "scoringHint": "答对得分、答错扣分、空题不扣分",
+    "trialHint": "模拟测试 — 结果不影响你的账户",
+    "testAttempt": "测试答题",
+    "leaveAttempt": "离开答题",
+    "timeRemaining": "剩余时间",
+    "question": "题目 {index}",
+    "pts": "分",
+    "submit": "提交试卷",
+    "violationTooltip": "{count} 次切屏记录",
+    "confirmTitle": "提交试卷？",
+    "confirmDesc": "确定要提交你的试卷吗？提交后无法修改答案。",
+    "cancel": "取消",
+    "submitConfirm": "提交"
+  },
   "search": {
     "placeholder": "搜索...",
     "tabPosts": "帖子",

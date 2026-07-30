@@ -142,6 +142,14 @@
       </aside>
     </div>
 
+    <!-- Floating Compose Button (Mobile) -->
+    <button
+      class="btn btn-circle btn-primary fixed right-5 bottom-5 z-40 h-12 w-12 shadow-sm lg:hidden"
+      @click="openCompose"
+    >
+      <IconPlus class="w-6 h-6" />
+    </button>
+
     <ClientOnly>
       <OnboardingModal />
     </ClientOnly>
@@ -152,7 +160,7 @@
 import type { Post, SnTimelineEvent } from "~/types/post";
 import { fetchTimeline } from "~/utils/api";
 import { getFileUrl } from "~/utils/files";
-import { IconAlertCircle } from "#components";
+import { IconAlertCircle, IconPlus } from "#components";
 import { useIntersectionObserver } from "@vueuse/core";
 
 const { t } = useI18n();

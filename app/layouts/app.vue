@@ -215,14 +215,6 @@
         </main>
       </div>
 
-      <!-- Floating Compose Button (Mobile) -->
-      <button
-        class="btn btn-circle btn-primary fixed right-5 bottom-5 z-40 h-12 w-12 shadow-sm lg:hidden"
-        @click="openCompose"
-      >
-        <IconPlus class="w-6 h-6" />
-      </button>
-
       <!-- Lightbox Viewer -->
       <ComposeDialog
         :open="composeOpen"
@@ -251,7 +243,6 @@ import {
   IconSettings,
   IconLogOut,
   IconLogIn,
-  IconPlus,
 } from "#components";
 
 const { t } = useI18n();
@@ -305,10 +296,6 @@ function closeMenu() {
 function handleLogout() {
   auth.logout();
   menuOpen.value = false;
-}
-
-function openCompose() {
-  composeOpen.value = true;
 }
 
 function handleComposeSubmit() {

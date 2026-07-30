@@ -223,6 +223,11 @@ export async function apiFetch(
 
   // Handle 401 Unauthorized
   if (response.status === 401 && !skipAuth && retryCount < 1) {
+    // Skip session expiration handling on localhost (dev mode)
+    if (import.meta.client && window.location.hostname === "localhost") {
+      return response;
+    }
+
     const mode = getAuthMode();
 
     if (mode === "cookie") {

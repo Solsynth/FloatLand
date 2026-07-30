@@ -951,6 +951,21 @@
     "draft": "Draft",
     "sidebarHint": "Share this survey link to collect responses."
   },
+  "tests": {
+    "scoringHint": "Correct answers earn points, wrong answers deduct points, unanswered leave no penalty",
+    "trialHint": "Trial attempt — results do not affect your account",
+    "testAttempt": "Test attempt",
+    "leaveAttempt": "Leave attempt",
+    "timeRemaining": "Time remaining",
+    "question": "Question {index}",
+    "pts": "pts",
+    "submit": "Submit test",
+    "violationTooltip": "focus violation",
+    "confirmTitle": "Submit test?",
+    "confirmDesc": "Are you sure you want to submit your test? You cannot change your answers after submission.",
+    "cancel": "Cancel",
+    "submitConfirm": "Submit"
+  },
   "search": {
     "placeholder": "Search...",
     "tabPosts": "Posts",

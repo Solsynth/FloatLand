@@ -178,6 +178,7 @@ import {
   IconBuilding2,
   IconGlobe,
   IconClipboardCheck,
+  IconHardDrive,
 } from '#components'
 import type {
   CacheStats,
@@ -391,6 +392,12 @@ const sections = [
     label: 'Cache',
     href: '/admin/cache',
     description: 'Inspect and manage platform cache',
+  },
+  {
+    icon: IconHardDrive,
+    label: 'Storage',
+    href: '/admin/storage',
+    description: 'Manage DysonFS storage pools, nodes, and migrations',
   },
 ]
 

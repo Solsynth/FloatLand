@@ -106,6 +106,7 @@ import {
   IconBuilding2,
   IconGlobe,
   IconClipboardCheck,
+  IconHardDrive,
 } from '#components'
 
 const route = useRoute()
@@ -224,6 +225,11 @@ const navGroups = [
         icon: IconDatabase,
         label: 'Cache',
         href: '/admin/cache',
+      },
+      {
+        icon: IconHardDrive,
+        label: 'Storage',
+        href: '/admin/storage',
       },
     ],
   },
