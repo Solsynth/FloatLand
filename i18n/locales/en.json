@@ -825,6 +825,30 @@
     "upgradeToPro": "Upgrade to Pro",
     "planError": "Could not load or update the workspace plan.",
     "membersError": "Could not load workspace members.",
+    "invite": "Invite",
+    "searchAccounts": "Search accounts by name or email",
+    "noMembers": "No members yet.",
+    "removeMemberConfirm": "Remove this member from the workspace?",
+    "mailboxes": "Mailboxes",
+    "addMailbox": "Add mailbox",
+    "mailboxAddress": "Mailbox address",
+    "mailboxName": "Display name",
+    "makeDefault": "Make this the default mailbox",
+    "defaultMailbox": "default",
+    "verified": "Verified",
+    "noMailboxes": "No mailboxes configured.",
+    "mailboxesError": "Could not load or create mailboxes.",
+    "flywheel": "Flywheel",
+    "saves": "saves",
+    "revisions": "revisions",
+    "details": "Details",
+    "audit": "Audit",
+    "revision": "Revision",
+    "noFlywheel": "No Flywheel saves found.",
+    "noSaves": "No encrypted saves.",
+    "noAudit": "No audit events.",
+    "flywheelError": "Could not load Flywheel management data.",
+    "deleteSaveConfirm": "Permanently delete this encrypted save and all retained revisions?",
     "viewer": "Viewer",
     "open": "Open workspace",
     "manageMembers": "Manage members",
@@ -849,6 +873,45 @@
     "signInTitle": "Sign in to manage workspaces",
     "signInDescription": "Your workspaces, members, and shared activity are available after you sign in.",
     "refresh": "Refresh"
+    ,"back": "Back"
+    ,"detailTitle": "Workspace"
+    ,"notFound": "Workspace not found."
+    ,"noDescription": "No workspace description yet."
+    ,"overview": "Overview"
+    ,"management": "Management"
+    ,"bundledPlan": "Bundled plan"
+    ,"paidPlan": "Paid plan"
+    ,"planDescription": "Review the current plan and upgrade this workspace."
+    ,"membersDescription": "Invite people and manage their workspace roles."
+    ,"mailboxesDescription": "Create and manage shared mailboxes for this workspace."
+    ,"flywheelDescription": "Manage encrypted application saves and audit history."
+    ,"nameHint": "You can change the workspace name later from its detail page."
+    ,"descriptionHint": "A short description helps members understand this workspace."
+    ,"mailboxAddressHint": "Use the local mailbox address configured for your mail service."
+    ,"mailboxNameHint": "An optional label shown to workspace members."
+    ,"mailCredentials": "Mail credentials"
+    ,"mailCredentialsDescription": "Create app passwords for SMTP, IMAP, or POP3 clients. The secret is shown only once."
+    ,"createCredential": "Create credential"
+    ,"credentialLabel": "Credential label"
+    ,"credentialLabelHint": "Use a name that identifies the device or mail client."
+    ,"credentialMailbox": "Mailbox"
+    ,"selectMailbox": "Select a mailbox"
+    ,"credentialProtocols": "Protocols"
+    ,"credentialProtocolsHint": "Choose the protocols this credential may use."
+    ,"credentialCreated": "Credential created"
+    ,"saveSecretOnce": "Save this secret now. It will not be shown again."
+    ,"noCredentials": "No mail credentials configured."
+    ,"credentialsError": "Could not load or update mail credentials."
+    ,"revokeCredentialConfirm": "Revoke this mail credential? Existing clients will stop authenticating."
+    ,"clientConfiguration": "Mail client configuration"
+    ,"clientConfigurationDescription": "Use these settings in your mail client. Prefer TLS ports when available."
+    ,"service": "Service"
+    ,"server": "Server"
+    ,"port": "Port"
+    ,"security": "Security"
+    ,"clientUsernameHint": "Username: your full mailbox address. Password: the generated credential secret."
+    ,"searchAccountsHint": "Search by account name or a primary contact email."
+    ,"role": "Role"
   },
   "login": {
     "authenticateWithPasskey": "Authenticate with Passkey",

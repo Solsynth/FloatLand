@@ -52,7 +52,7 @@ import type {
   RealmInvite,
   RealmChatRoom,
 } from "~/types/realm";
-import type { Workspace, WorkspaceMember, WorkspacePlanOrder, WorkspacePlanStatus } from "~/types/workspace";
+import type { FlywheelAuditEntry, FlywheelOwnerApp, FlywheelOwnerBlob, Workspace, WorkspaceMailbox, WorkspaceMailCredential, WorkspaceMailCredentialCreated, WorkspaceMember, WorkspacePlanOrder, WorkspacePlanStatus } from "~/types/workspace";
 
 import { snakeToCamel, camelToSnake } from "~/utils/case";
 import {
@@ -2019,6 +2019,60 @@ export async function createWorkspace(payload: {
 
 export async function fetchWorkspaceMembers(slug: string): Promise<WorkspaceMember[]> {
   return fetchJson<WorkspaceMember[]>(`/valve/workspaces/${encodeURIComponent(slug)}/members`);
+}
+
+export async function inviteWorkspaceMember(slug: string, accountId: string, role: number): Promise<WorkspaceMember> {
+  return fetchJson<WorkspaceMember>(`/valve/workspaces/${encodeURIComponent(slug)}/members/invite`, {
+    method: "POST",
+    body: JSON.stringify({ account_id: accountId, role }),
+  });
+}
+
+export async function updateWorkspaceMemberRole(slug: string, accountId: string, role: number): Promise<WorkspaceMember> {
+  return fetchJson<WorkspaceMember>(`/valve/workspaces/${encodeURIComponent(slug)}/members/${encodeURIComponent(accountId)}`, {
+    method: "PATCH",
+    body: JSON.stringify({ role }),
+  });
+}
+
+export async function removeWorkspaceMember(slug: string, accountId: string): Promise<void> {
+  await fetchJson<unknown>(`/valve/workspaces/${encodeURIComponent(slug)}/members/${encodeURIComponent(accountId)}`, { method: "DELETE" });
+}
+
+export async function fetchWorkspaceMailboxes(workspaceId: string): Promise<WorkspaceMailbox[]> {
+  return fetchJson<WorkspaceMailbox[]>(`/postal/mailboxes?workspace_id=${encodeURIComponent(workspaceId)}`);
+}
+
+export async function createWorkspaceMailbox(payload: { address: string; workspaceId: string; name?: string; isDefault?: boolean }): Promise<WorkspaceMailbox> {
+  return fetchJson<WorkspaceMailbox>("/postal/mailboxes", { method: "POST", body: JSON.stringify({ address: payload.address, workspace_id: payload.workspaceId, name: payload.name, is_default: payload.isDefault ?? false }) });
+}
+
+export async function fetchMailCredentials(): Promise<WorkspaceMailCredential[]> {
+  return fetchJson<WorkspaceMailCredential[]>("/postal/credentials");
+}
+
+export async function createMailCredential(payload: { mailboxId: string; label: string; protocols: string[] }): Promise<WorkspaceMailCredentialCreated> {
+  return fetchJson<WorkspaceMailCredentialCreated>("/postal/credentials", { method: "POST", body: JSON.stringify({ mailbox_id: payload.mailboxId, label: payload.label, protocols: payload.protocols }) });
+}
+
+export async function revokeMailCredential(credentialId: string): Promise<void> {
+  await fetchJson<unknown>(`/postal/credentials/${encodeURIComponent(credentialId)}`, { method: "DELETE" });
+}
+
+export async function fetchFlywheelApps(workspaceId: string): Promise<FlywheelOwnerApp[]> {
+  return fetchJson<FlywheelOwnerApp[]>(`/flywheel/workspaces/${encodeURIComponent(workspaceId)}/apps`);
+}
+
+export async function fetchFlywheelBlobs(workspaceId: string, appId: string): Promise<FlywheelOwnerBlob[]> {
+  return fetchJson<FlywheelOwnerBlob[]>(`/flywheel/workspaces/${encodeURIComponent(workspaceId)}/apps/${encodeURIComponent(appId)}/management/blobs`);
+}
+
+export async function fetchFlywheelAudit(workspaceId: string, appId: string): Promise<FlywheelAuditEntry[]> {
+  return fetchJson<FlywheelAuditEntry[]>(`/flywheel/workspaces/${encodeURIComponent(workspaceId)}/apps/${encodeURIComponent(appId)}/management/audit`);
+}
+
+export async function deleteFlywheelBlob(workspaceId: string, appId: string, blobId: string): Promise<void> {
+  await fetchJson<unknown>(`/flywheel/workspaces/${encodeURIComponent(workspaceId)}/apps/${encodeURIComponent(appId)}/management/blobs/${encodeURIComponent(blobId)}`, { method: "DELETE" });
 }
 
 export async function fetchWorkspacePlanStatus(slug: string): Promise<WorkspacePlanStatus> {

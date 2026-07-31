@@ -29,7 +29,7 @@ export interface WorkspaceMember {
   id: string;
   accountId: string;
   role: number;
-  account?: { name?: string; nick?: string; profile?: { picture?: FileAttachment | null } | null } | null;
+  account?: { name?: string; nick?: string; contacts?: { content: string; isPrimary?: boolean; type?: number }[]; profile?: { picture?: FileAttachment | null } | null } | null;
 }
 
 export interface WorkspacePlanStatus {
@@ -43,4 +43,54 @@ export interface WorkspacePlanOrder {
   amount: number;
   currency: string;
   plan: number;
+}
+
+export interface WorkspaceMailbox {
+  id: string;
+  accountId: string;
+  workspaceId: string | null;
+  address: string;
+  name: string | null;
+  isDefault: boolean;
+  isVerified: boolean;
+}
+
+export interface WorkspaceMailCredential {
+  id: string;
+  accountId: string;
+  mailboxId: string;
+  label: string;
+  protocols: string[];
+  createdAt: string | null;
+}
+
+export interface WorkspaceMailCredentialCreated {
+  credential: WorkspaceMailCredential;
+  secret: string;
+}
+
+export interface FlywheelOwnerApp {
+  appId: string;
+  retainedRevisionCount: number;
+  blobCount: number;
+  retainedRevisionCountTotal: number;
+  retainedBytes: number;
+  lastUpdatedAt: string;
+}
+
+export interface FlywheelOwnerBlob {
+  blobId: string;
+  currentRevision: number;
+  retainedRevisionCount: number;
+  retainedBytes: number;
+  updatedAt: string;
+}
+
+export interface FlywheelAuditEntry {
+  appId: string;
+  blobId: string | null;
+  revision: number | null;
+  action: string;
+  actorAccountId: string;
+  createdAt: string;
 }
