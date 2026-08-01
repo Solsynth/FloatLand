@@ -55,6 +55,75 @@ export interface WorkspaceMailbox {
   isVerified: boolean;
 }
 
+export interface WorkspaceMailboxAlias {
+  id: string;
+  mailboxId: string;
+  customDomainId: string;
+  localPart: string;
+  address: string;
+  name: string | null;
+}
+
+export interface WorkspaceMailboxForwardingRule {
+  id: string;
+  mailboxId: string;
+  aliasId: string;
+  destination: string;
+}
+
+export interface WorkspaceMailboxQuota {
+  workspaceId: string;
+  usedBytes: number;
+  limitBytes: number;
+  remainingBytes: number;
+}
+
+export interface WorkspaceMailboxUsage {
+  workspaceId: string;
+  used: number;
+  limit: number;
+  remaining: number;
+}
+
+export interface WorkspaceSendUsagePeriod {
+  limit: number;
+  used: number;
+  remaining: number;
+}
+
+export interface WorkspaceSendUsage {
+  workspaceId: string;
+  daily: WorkspaceSendUsagePeriod;
+  monthly: WorkspaceSendUsagePeriod;
+}
+
+export interface WorkspaceCustomDomainDnsRecord {
+  name: string;
+  type: string;
+  value: string;
+}
+
+export interface WorkspaceCustomDomain {
+  id: string;
+  workspaceId: string;
+  provider: string;
+  domain: string;
+  verificationStatus: string;
+  verifiedForSendingStatus: boolean;
+  dkimStatus: string;
+  mailFromDomain: string;
+  mailFromStatus: string;
+  stage: "basic" | "full" | "completed";
+  dnsRecords: WorkspaceCustomDomainDnsRecord[];
+}
+
+export interface WorkspaceCustomDomainUsage {
+  workspaceId: string;
+  used: number;
+  limit: number;
+  remaining: number;
+}
+
 export interface WorkspaceMailCredential {
   id: string;
   accountId: string;
