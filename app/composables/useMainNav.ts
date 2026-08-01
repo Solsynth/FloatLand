@@ -11,6 +11,7 @@ import {
   IconShield,
   IconTicket,
   IconLayoutDashboard,
+  IconBrain,
 } from "#components";
 
 export interface NavItem {
@@ -60,6 +61,12 @@ export function useMainNav() {
       { icon: IconPalette, labelKey: "nav.creatorHub", href: "/creators" },
       { icon: IconCode, labelKey: "nav.developerHub", href: "/developers" },
       { icon: IconTrendingUp, labelKey: "nav.merchantHub", href: "/merchants" },
+      {
+        icon: IconBrain,
+        labelKey: "nav.aiConsole",
+        href: "/personality",
+        requiresAuth: true,
+      },
     ];
 
     if (isSuperuser.value) {
