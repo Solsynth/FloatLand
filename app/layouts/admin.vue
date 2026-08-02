@@ -194,6 +194,36 @@ const navGroups = [
     ],
   },
   {
+    label: 'WattEngine',
+    items: [
+      {
+        icon: IconBuilding2,
+        label: 'Workspaces',
+        href: '/admin/workspaces',
+      },
+      {
+        icon: IconLayers,
+        label: 'Ideask Boards',
+        href: '/admin/boards',
+      },
+      {
+        icon: IconClipboardCheck,
+        label: 'Ideask Tasks',
+        href: '/admin/tasks',
+      },
+      {
+        icon: IconGlobe,
+        label: 'GitHub Integrations',
+        href: '/admin/github-integrations',
+      },
+      {
+        icon: IconHardDrive,
+        label: 'Flywheel',
+        href: '/admin/flywheel',
+      },
+    ],
+  },
+  {
     label: 'Messaging',
     items: [
       {

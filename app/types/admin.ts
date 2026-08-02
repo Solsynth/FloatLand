@@ -1,6 +1,7 @@
 import type { SnAccount, SnAccountBadge, SnAccountPunishment } from './auth'
+import type { FlywheelAuditEntry, Workspace, WorkspaceMember } from './workspace'
 
-export type { SnAccountPunishment }
+export type { SnAccountPunishment, Workspace, WorkspaceMember, FlywheelAuditEntry }
 
 export type PunishmentType = 'block_login' | 'disable_account'
 
@@ -1256,3 +1257,311 @@ export interface PoolMigrationTask {
   }
   error_message?: string
 }
+
+// ============ WattEngine · Valve (Workspaces) ============
+
+export const WorkspaceType = {
+  individual: 0,
+  organization: 1,
+} as const
+
+export const WorkspacePlan = {
+  free: 0,
+  pro: 1,
+  enterprise: 2,
+} as const
+
+export interface WorkspaceAdminSummary {
+  id: string
+  slug: string
+  name: string
+  type: number
+  plan: number
+  ownerAccountId: string
+  isBundled: boolean
+  memberCount: number
+  deletedAt: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface WorkspaceAdminQuery {
+  type?: number
+  plan?: number
+  q?: string
+  includeDeleted?: boolean
+  take?: number
+  offset?: number
+}
+
+export interface WorkspaceRolePermission {
+  id: string
+  workspaceId: string
+  roleLevel: number
+  canManageWorkspace: boolean
+  canManageMembers: boolean
+  canManageBilling: boolean
+  canCreateProjects: boolean
+  canManageProjects: boolean
+  canUseIdeask: boolean
+  canUseDrive: boolean
+}
+
+export interface WorkspaceUserPermission {
+  id: string
+  workspaceId: string
+  accountId: string
+  canManageWorkspace?: boolean | null
+  canManageMembers?: boolean | null
+  canManageBilling?: boolean | null
+  canCreateProjects?: boolean | null
+  canManageProjects?: boolean | null
+  canUseIdeask?: boolean | null
+  canUseDrive?: boolean | null
+}
+
+export interface WorkspaceBundledPlan {
+  id: string
+  workspaceId: string
+  accountId: string
+  plan: number
+  active: boolean
+}
+
+export interface WorkspaceAdminDetail {
+  workspace: Workspace
+  members: WorkspaceMember[]
+  rolePermissions: WorkspaceRolePermission[]
+  userPermissions: WorkspaceUserPermission[]
+  bundledPlans: WorkspaceBundledPlan[]
+}
+
+export interface WorkspaceUpdatePayload {
+  name?: string
+  slug?: string
+  description?: string
+}
+
+export interface WorkspacePlanUpdatePayload {
+  plan: number
+  planExpiresAt?: string | null
+  isBundled?: boolean
+}
+
+export interface WorkspaceAdminStats {
+  calculatedAt: string
+  totalWorkspaces: number
+  totalDeletedWorkspaces: number
+  workspacesByType: Record<string, number>
+  workspacesByPlan: Record<string, number>
+  totalMembers: number
+  totalRolePermissionConfigs: number
+  totalUserPermissionOverrides: number
+  totalBundledPlans: number
+}
+
+// ==================== WattEngine (Ideask) ====================
+
+export type IdeaskVisibility = 0 | 1
+export const IdeaskVisibility = {
+  private: 0,
+  public: 1,
+} as const
+
+/** Backend TaskCompleteReason enum, serialized as an integer. 0=Completed, 1=Skipped, 2=Duplicated. */
+export type TaskCompleteReason = 0 | 1 | 2
+/** Backend TaskStatus enum, serialized as an integer. 0=Open, 1=Completed, 2=Skipped, 3=Duplicated. */
+export type TaskListStatus = 0 | 1 | 2 | 3
+
+export interface BoardAdminSummary {
+  id: string
+  name: string
+  accountId: string
+  workspaceId: string | null
+  visibility: IdeaskVisibility
+  taskPrefix: string | null
+  taskCount: number
+  deletedAt: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface BoardAdminQuery {
+  workspaceId?: string
+  accountId?: string
+  visibility?: number
+  q?: string
+  includeDeleted?: boolean
+  take?: number
+  offset?: number
+}
+
+export interface IdeaskBoard {
+  id: string
+  name: string
+  accountId: string
+  workspaceId: string | null
+  taskPrefix: string | null
+  visibility: number
+  description: string | null
+  content: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface BoardAdminTaskSummary {
+  id: string
+  name: string
+  groupId: string | null
+  serialNumber: number
+  priority: number
+  completeReason: TaskCompleteReason | null
+  deadlineAt: string | null
+}
+
+export interface BoardAdminDetail {
+  broad: IdeaskBoard
+  tasks: BoardAdminTaskSummary[]
+}
+
+export interface BoardUpdatePayload {
+  name?: string
+  description?: string
+  visibility?: number
+  taskPrefix?: string
+  clearTaskPrefix?: boolean
+}
+
+export interface TaskAdminSummary {
+  id: string
+  broadId: string
+  name: string
+  groupId: string | null
+  serialNumber: number
+  priority: number
+  completeReason: TaskCompleteReason | null
+  deadlineAt: string | null
+  deletedAt: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface TaskAdminQuery {
+  broadId?: string
+  status?: TaskListStatus
+  groupId?: string
+  q?: string
+  includeDeleted?: boolean
+  take?: number
+  offset?: number
+}
+
+export interface IdeaskTaskComment {
+  id: string
+  taskId: string
+  authorAccountId: string | null
+  externalAuthorLogin: string | null
+  externalAuthorAvatarUrl: string | null
+  content: string
+  createdAt: string
+}
+
+export interface IdeaskGitHubIssueLink {
+  id: string
+  integrationId: string
+  taskId: string
+  githubIssueId: number
+  issueNumber: number
+  repositoryFullName: string | null
+  htmlUrl: string
+  lastGitHubUpdatedAt: string | null
+}
+
+export interface IdeaskTask {
+  id: string
+  name: string
+  description: string | null
+  content: string | null
+  priority: number
+  serialNumber: number
+  taskKey: string
+  deadlineAt: string | null
+  completedAt: string | null
+  completeReason: TaskCompleteReason | null
+  broadId: string
+  groupId: string | null
+  parentTaskId: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface TaskAdminDetail {
+  task: IdeaskTask
+  assigneeAccountIds: string[]
+  comments: IdeaskTaskComment[]
+  githubIssues: IdeaskGitHubIssueLink[]
+}
+
+export interface TaskUpdatePayload {
+  name?: string
+  description?: string
+  priority?: number
+  deadlineAt?: string | null
+  complete?: boolean
+}
+
+export interface GitHubIntegrationAdminSummary {
+  id: string
+  broadId: string
+  installationId: number
+  githubRepositoryId: number
+  owner: string
+  repository: string
+  lastSyncedAt: string | null
+  lastError: string | null
+  deletedAt: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface GitHubIntegrationAdminQuery {
+  broadId?: string
+  q?: string
+  includeDeleted?: boolean
+  take?: number
+  offset?: number
+}
+
+// ==================== WattEngine (Flywheel) ====================
+
+export interface FlywheelAdminStats {
+  calculatedAt: string
+  distinctWorkspaceCount: number
+  totalAppSettings: number
+  totalBlobs: number
+  totalBlobRevisions: number
+  totalBytes: number
+  totalAuditEntries: number
+  auditsLastDay: number
+  auditsLastWeek: number
+  auditsLastMonth: number
+}
+
+export interface FlywheelAdminApp {
+  id: string
+  workspaceId: string
+  appId: string
+  retainedRevisionCount: number
+  eventCursor: number
+  blobCount: number
+  revisionCount: number
+  totalBytes: number
+  updatedAt: string
+}
+
+export interface FlywheelAdminAppQuery {
+  workspaceId?: string
+  take?: number
+  offset?: number
+}
+

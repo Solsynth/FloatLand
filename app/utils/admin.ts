@@ -115,6 +115,29 @@ import type {
   StorageFailureEvent,
   PoolMigrationPayload,
   PoolMigrationTask,
+  WorkspaceAdminSummary,
+  WorkspaceAdminQuery,
+  WorkspaceAdminDetail,
+  WorkspaceUpdatePayload,
+  WorkspacePlanUpdatePayload,
+  WorkspaceAdminStats,
+  BoardAdminSummary,
+  BoardAdminQuery,
+  BoardAdminDetail,
+  BoardUpdatePayload,
+  TaskAdminSummary,
+  TaskAdminQuery,
+  TaskAdminDetail,
+  TaskUpdatePayload,
+  GitHubIntegrationAdminSummary,
+  GitHubIntegrationAdminQuery,
+  FlywheelAdminStats,
+  FlywheelAdminApp,
+  FlywheelAdminAppQuery,
+  Workspace,
+  IdeaskBoard,
+  IdeaskTask,
+  FlywheelAuditEntry,
 } from '~/types/admin'
 
 // Padlock service: auth, sessions, punishments, suspend, delete, notifications, emails
@@ -1553,4 +1576,166 @@ export async function fetchPoolMigrationTask(
   taskId: string,
 ): Promise<PoolMigrationTask> {
   return fetchJson<PoolMigrationTask>(`${STORAGE_BASE}/pool-migrations/${encodeURIComponent(taskId)}`)
+}
+
+// ============ WattEngine (Valve) — Workspaces ============
+
+const VALVE_WORKSPACES = '/valve/admin/workspaces'
+const VALVE_STATS = '/valve/admin/stats'
+
+async function fetchList<T>(
+  base: string,
+  params: object = {},
+): Promise<{ items: T[]; total: number }> {
+  const q = buildQuery(params as Record<string, unknown>)
+  return fetchPaginated<T>(`${base}${q ? `?${q}` : ''}`)
+}
+
+export async function fetchAdminWorkspaces(
+  params: WorkspaceAdminQuery = {},
+): Promise<{ items: WorkspaceAdminSummary[]; total: number }> {
+  return fetchList<WorkspaceAdminSummary>(VALVE_WORKSPACES, params)
+}
+
+export async function fetchAdminWorkspace(
+  id: string,
+): Promise<WorkspaceAdminDetail> {
+  return fetchJson<WorkspaceAdminDetail>(`${VALVE_WORKSPACES}/${id}`)
+}
+
+export async function updateAdminWorkspace(
+  id: string,
+  payload: WorkspaceUpdatePayload,
+): Promise<Workspace> {
+  return fetchJson<Workspace>(`${VALVE_WORKSPACES}/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(payload),
+  })
+}
+
+export async function updateAdminWorkspacePlan(
+  id: string,
+  payload: WorkspacePlanUpdatePayload,
+): Promise<Workspace> {
+  return fetchJson<Workspace>(`${VALVE_WORKSPACES}/${id}/plan`, {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  })
+}
+
+export async function deleteAdminWorkspace(id: string): Promise<void> {
+  await fetchJson(`${VALVE_WORKSPACES}/${id}`, { method: 'DELETE' })
+}
+
+export async function fetchWorkspaceAdminStats(): Promise<WorkspaceAdminStats> {
+  return fetchJson<WorkspaceAdminStats>(VALVE_STATS)
+}
+
+// ============ WattEngine (Ideask) — Boards ============
+
+const IDEASK_BOARDS = '/ideask/admin/boards'
+
+export async function fetchAdminBoards(
+  params: BoardAdminQuery = {},
+): Promise<{ items: BoardAdminSummary[]; total: number }> {
+  return fetchList<BoardAdminSummary>(IDEASK_BOARDS, params)
+}
+
+export async function fetchAdminBoard(id: string): Promise<BoardAdminDetail> {
+  return fetchJson<BoardAdminDetail>(`${IDEASK_BOARDS}/${id}`)
+}
+
+export async function updateAdminBoard(
+  id: string,
+  payload: BoardUpdatePayload,
+): Promise<IdeaskBoard> {
+  return fetchJson<IdeaskBoard>(`${IDEASK_BOARDS}/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(payload),
+  })
+}
+
+export async function deleteAdminBoard(id: string): Promise<void> {
+  await fetchJson(`${IDEASK_BOARDS}/${id}`, { method: 'DELETE' })
+}
+
+// ============ WattEngine (Ideask) — Tasks ============
+
+const IDEASK_TASKS = '/ideask/admin/tasks'
+
+export async function fetchAdminTasks(
+  params: TaskAdminQuery = {},
+): Promise<{ items: TaskAdminSummary[]; total: number }> {
+  return fetchList<TaskAdminSummary>(IDEASK_TASKS, params)
+}
+
+export async function fetchAdminTask(id: string): Promise<TaskAdminDetail> {
+  return fetchJson<TaskAdminDetail>(`${IDEASK_TASKS}/${id}`)
+}
+
+export async function updateAdminTask(
+  id: string,
+  payload: TaskUpdatePayload,
+): Promise<IdeaskTask> {
+  return fetchJson<IdeaskTask>(`${IDEASK_TASKS}/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(payload),
+  })
+}
+
+export async function deleteAdminTask(id: string): Promise<void> {
+  await fetchJson(`${IDEASK_TASKS}/${id}`, { method: 'DELETE' })
+}
+
+// ============ WattEngine (Ideask) — GitHub Integrations ============
+
+const IDEASK_GITHUB = '/ideask/admin/github-integrations'
+
+export async function fetchAdminGitHubIntegrations(
+  params: GitHubIntegrationAdminQuery = {},
+): Promise<{ items: GitHubIntegrationAdminSummary[]; total: number }> {
+  return fetchList<GitHubIntegrationAdminSummary>(IDEASK_GITHUB, params)
+}
+
+export async function deleteAdminGitHubIntegration(id: string): Promise<void> {
+  await fetchJson(`${IDEASK_GITHUB}/${id}`, { method: 'DELETE' })
+}
+
+// ============ WattEngine (Flywheel) ============
+
+const FLYWHEEL_ADMIN = '/flywheel/admin/flywheel'
+
+export async function fetchFlywheelAdminStats(): Promise<FlywheelAdminStats> {
+  return fetchJson<FlywheelAdminStats>(`${FLYWHEEL_ADMIN}/stats`)
+}
+
+export async function fetchFlywheelAdminApps(
+  params: FlywheelAdminAppQuery = {},
+): Promise<{ items: FlywheelAdminApp[]; total: number }> {
+  return fetchList<FlywheelAdminApp>(`${FLYWHEEL_ADMIN}/apps`, params)
+}
+
+export async function updateFlywheelAdminApp(
+  id: string,
+  retainedRevisionCount: number,
+): Promise<FlywheelAdminApp> {
+  return fetchJson<FlywheelAdminApp>(`${FLYWHEEL_ADMIN}/apps/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ retainedRevisionCount }),
+  })
+}
+
+export async function fetchFlywheelAdminAudit(
+  params: { workspaceId?: string; appId?: string; take?: number; offset?: number } = {},
+): Promise<{ items: FlywheelAuditEntry[]; total: number }> {
+  return fetchList<FlywheelAuditEntry>(`${FLYWHEEL_ADMIN}/audit`, params)
+}
+
+export async function deleteAdminFlywheelBlob(
+  blobId: string,
+  workspaceId: string,
+  appId: string,
+): Promise<void> {
+  const q = buildQuery({ workspaceId, appId })
+  await fetchJson(`${FLYWHEEL_ADMIN}/blobs/${blobId}?${q}`, { method: 'DELETE' })
 }

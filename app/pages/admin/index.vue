@@ -187,6 +187,8 @@ import type {
   WalletAdminStats,
   RingAdminStats,
   AccountActivityMetrics,
+  WorkspaceAdminStats,
+  FlywheelAdminStats,
 } from '~/types/admin'
 import {
   fetchCacheStats,
@@ -195,6 +197,8 @@ import {
   fetchWalletAdminStats,
   fetchRingAdminStats,
   fetchAccountActivityMetrics,
+  fetchWorkspaceAdminStats,
+  fetchFlywheelAdminStats,
 } from '~/utils/admin'
 
 definePageMeta({ middleware: 'auth' })
@@ -206,6 +210,8 @@ const sphereStats = ref<SphereAdminStats | null>(null)
 const walletStats = ref<WalletAdminStats | null>(null)
 const ringStats = ref<RingAdminStats | null>(null)
 const activity = ref<AccountActivityMetrics | null>(null)
+const workspaceStats = ref<WorkspaceAdminStats | null>(null)
+const flywheelStats = ref<FlywheelAdminStats | null>(null)
 
 const activityMetrics = computed(() => {
   const a = activity.value
@@ -291,6 +297,40 @@ const servicePanels = computed(() => [
           { label: 'Active push', value: ringStats.value.activePushSubscriptions },
           { label: 'Send requests', value: ringStats.value.totalSendRequests },
           { label: 'Delivery attempts', value: ringStats.value.totalDeliveryAttempts },
+        ]
+      : null,
+  },
+  {
+    title: 'Workspaces (Valve)',
+    icon: IconBuilding2,
+    iconClass: 'text-primary',
+    empty: 'Unavailable (needs workspaces.view)',
+    rows: workspaceStats.value
+      ? [
+          { label: 'Total workspaces', value: workspaceStats.value.totalWorkspaces },
+          { label: 'Deleted', value: workspaceStats.value.totalDeletedWorkspaces },
+          { label: 'Members', value: workspaceStats.value.totalMembers },
+          { label: 'Role permission configs', value: workspaceStats.value.totalRolePermissionConfigs },
+          { label: 'User overrides', value: workspaceStats.value.totalUserPermissionOverrides },
+          { label: 'Bundled plans', value: workspaceStats.value.totalBundledPlans },
+        ]
+      : null,
+  },
+  {
+    title: 'Flywheel',
+    icon: IconHardDrive,
+    iconClass: 'text-success',
+    empty: 'Unavailable (needs flywheel.view)',
+    rows: flywheelStats.value
+      ? [
+          { label: 'Workspaces', value: flywheelStats.value.distinctWorkspaceCount },
+          { label: 'App settings', value: flywheelStats.value.totalAppSettings },
+          { label: 'Blobs', value: flywheelStats.value.totalBlobs },
+          { label: 'Revisions', value: flywheelStats.value.totalBlobRevisions },
+          { label: 'Bytes', value: flywheelStats.value.totalBytes },
+          { label: 'Audit entries', value: flywheelStats.value.totalAuditEntries },
+          { label: 'Audits (1d)', value: flywheelStats.value.auditsLastDay },
+          { label: 'Audits (7d)', value: flywheelStats.value.auditsLastWeek },
         ]
       : null,
   },
@@ -399,6 +439,36 @@ const sections = [
     href: '/admin/storage',
     description: 'Manage DysonFS storage pools, nodes, and migrations',
   },
+  {
+    icon: IconBuilding2,
+    label: 'Workspaces',
+    href: '/admin/workspaces',
+    description: 'Manage Valve workspaces, plans, and members',
+  },
+  {
+    icon: IconLayers,
+    label: 'Ideask Boards',
+    href: '/admin/boards',
+    description: 'Manage project boards platform-wide',
+  },
+  {
+    icon: IconClipboardCheck,
+    label: 'Ideask Tasks',
+    href: '/admin/tasks',
+    description: 'Inspect and moderate tasks across all boards',
+  },
+  {
+    icon: IconGlobe,
+    label: 'GitHub Integrations',
+    href: '/admin/github-integrations',
+    description: 'Diagnose and remove repository sync links',
+  },
+  {
+    icon: IconHardDrive,
+    label: 'Flywheel',
+    href: '/admin/flywheel',
+    description: 'Platform Flywheel storage, apps, and audit',
+  },
 ]
 
 function formatNum(n: number | undefined | null): string {
@@ -447,6 +517,8 @@ async function loadAll() {
     fetchRingAdminStats(),
     fetchAccountActivityMetrics(),
     fetchCacheStats(),
+    fetchWorkspaceAdminStats(),
+    fetchFlywheelAdminStats(),
   ])
   passportStats.value = results[0].status === 'fulfilled' ? results[0].value : null
   sphereStats.value = results[1].status === 'fulfilled' ? results[1].value : null
@@ -454,6 +526,8 @@ async function loadAll() {
   ringStats.value = results[3].status === 'fulfilled' ? results[3].value : null
   activity.value = results[4].status === 'fulfilled' ? results[4].value : null
   cacheStats.value = results[5].status === 'fulfilled' ? results[5].value : null
+  workspaceStats.value = results[6].status === 'fulfilled' ? results[6].value : null
+  flywheelStats.value = results[7].status === 'fulfilled' ? results[7].value : null
   loading.value = false
 }
 
