@@ -1349,7 +1349,7 @@ export interface WorkspacePlanUpdatePayload {
 }
 
 export interface BackfillWorkspacesPayload {
-  accountIds: string[]
+  account_ids: string[]
 }
 
 export interface BackfillIndividualWorkspaceResult {

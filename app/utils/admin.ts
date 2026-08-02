@@ -1639,7 +1639,7 @@ export async function backfillIndividualWorkspaces(
     `${VALVE_WORKSPACES}/backfill`,
     {
       method: 'POST',
-      body: JSON.stringify({ accountIds }),
+      body: JSON.stringify({ account_ids: accountIds }), // Valve binds AccountIds via snake_case naming policy
     },
   )
 }
