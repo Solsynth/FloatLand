@@ -1348,6 +1348,18 @@ export interface WorkspacePlanUpdatePayload {
   isBundled?: boolean
 }
 
+export interface BackfillWorkspacesPayload {
+  accountIds: string[]
+}
+
+export interface BackfillIndividualWorkspaceResult {
+  accountId: string
+  created: boolean
+  workspaceId: string | null
+  alreadyExists: boolean
+  error: string | null
+}
+
 export interface WorkspaceAdminStats {
   calculatedAt: string
   totalWorkspaces: number

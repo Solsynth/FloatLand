@@ -121,6 +121,7 @@ import type {
   WorkspaceUpdatePayload,
   WorkspacePlanUpdatePayload,
   WorkspaceAdminStats,
+  BackfillIndividualWorkspaceResult,
   BoardAdminSummary,
   BoardAdminQuery,
   BoardAdminDetail,
@@ -1629,6 +1630,18 @@ export async function deleteAdminWorkspace(id: string): Promise<void> {
 
 export async function fetchWorkspaceAdminStats(): Promise<WorkspaceAdminStats> {
   return fetchJson<WorkspaceAdminStats>(VALVE_STATS)
+}
+
+export async function backfillIndividualWorkspaces(
+  accountIds: string[],
+): Promise<BackfillIndividualWorkspaceResult[]> {
+  return fetchJson<BackfillIndividualWorkspaceResult[]>(
+    `${VALVE_WORKSPACES}/backfill`,
+    {
+      method: 'POST',
+      body: JSON.stringify({ accountIds }),
+    },
+  )
 }
 
 // ============ WattEngine (Ideask) — Boards ============

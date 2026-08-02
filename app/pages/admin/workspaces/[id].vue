@@ -59,46 +59,67 @@
 
           <!-- Edit fields -->
           <AdminCard title="Edit Workspace">
-            <div class="space-y-4">
-              <label class="form-control">
-                <span class="label-text text-xs mb-1">Name</span>
-                <input v-model="editForm.name" class="input input-sm rounded-box border-0 bg-base-200" placeholder="Workspace name" />
-              </label>
-              <label class="form-control">
-                <span class="label-text text-xs mb-1">Description</span>
-                <textarea v-model="editForm.description" class="textarea textarea-sm rounded-box border-0 bg-base-200" rows="2" placeholder="Short description" />
-              </label>
-              <label class="form-control">
-                <span class="label-text text-xs mb-1">Slug</span>
-                <input v-model="editForm.slug" class="input input-sm rounded-box border-0 bg-base-200" placeholder="my-workspace" />
-              </label>
-              <button class="btn btn-sm btn-primary" :disabled="savingEdit" @click="saveEdit">
+            <form class="space-y-4" @submit.prevent="saveEdit">
+              <fieldset class="fieldset">
+                <legend class="fieldset-legend">Name</legend>
+                <input
+                  v-model="editForm.name"
+                  type="text"
+                  class="input"
+                  placeholder="Workspace name"
+                />
+                <p class="label">You can edit the workspace name later on from settings.</p>
+              </fieldset>
+              <fieldset class="fieldset">
+                <legend class="fieldset-legend">Description</legend>
+                <textarea
+                  v-model="editForm.description"
+                  class="textarea"
+                  rows="2"
+                  placeholder="Short description"
+                ></textarea>
+              </fieldset>
+              <fieldset class="fieldset">
+                <legend class="fieldset-legend">Slug</legend>
+                <input
+                  v-model="editForm.slug"
+                  type="text"
+                  class="input"
+                  placeholder="my-workspace"
+                />
+                <p class="label">Changing the slug will update the workspace URL.</p>
+              </fieldset>
+              <button class="btn btn-sm btn-primary" type="submit" :disabled="savingEdit">
                 {{ savingEdit ? 'Saving...' : 'Save changes' }}
               </button>
-            </div>
+            </form>
           </AdminCard>
         </div>
 
         <div class="space-y-6">
           <!-- Change plan -->
           <AdminCard title="Change Plan">
-            <div class="space-y-4">
-              <label class="form-control">
-                <span class="label-text text-xs mb-1">Plan</span>
-                <select v-model="planForm.plan" class="select select-sm rounded-box border-0 bg-base-200">
+            <form class="space-y-4" @submit.prevent="savePlan">
+              <fieldset class="fieldset">
+                <legend class="fieldset-legend">Plan</legend>
+                <select v-model="planForm.plan" class="select">
                   <option :value="0">Free</option>
                   <option :value="1">Pro</option>
                   <option :value="2">Enterprise</option>
                 </select>
-              </label>
-              <label class="form-control">
-                <span class="label-text text-xs mb-1">Plan Expires At (optional)</span>
-                <input v-model="planForm.planExpiresAt" type="datetime-local" class="input input-sm rounded-box border-0 bg-base-200" />
-              </label>
-              <button class="btn btn-sm btn-primary" :disabled="savingPlan" @click="savePlan">
+              </fieldset>
+              <fieldset class="fieldset">
+                <legend class="fieldset-legend">Plan Expires At (optional)</legend>
+                <input
+                  v-model="planForm.planExpiresAt"
+                  type="datetime-local"
+                  class="input"
+                />
+              </fieldset>
+              <button class="btn btn-sm btn-primary" type="submit" :disabled="savingPlan">
                 {{ savingPlan ? 'Saving...' : 'Update plan' }}
               </button>
-            </div>
+            </form>
           </AdminCard>
 
           <!-- Danger zone -->

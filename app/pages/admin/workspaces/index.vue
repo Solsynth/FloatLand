@@ -52,6 +52,60 @@
       </div>
     </AdminCard>
 
+    <!-- Backfill individual workspaces -->
+    <AdminCard class="mb-6">
+      <form class="space-y-4" @submit.prevent="runBackfill">
+        <fieldset class="fieldset">
+          <legend class="fieldset-legend">Account IDs</legend>
+          <textarea
+            v-model="backfillInput"
+            class="textarea"
+            rows="3"
+            placeholder="00000000-0000-0000-0000-000000000000, 11111111-1111-1111-1111-111111111111 …"
+          ></textarea>
+          <p class="label">
+            Creates an individual workspace for each account that doesn't already own one (comma, space, or newline
+            separated).
+          </p>
+        </fieldset>
+        <button
+          class="btn btn-sm btn-primary"
+          type="submit"
+          :disabled="backfilling || !backfillIds.length"
+        >
+          <IconRefreshCw class="w-4 h-4" :class="{ 'animate-spin': backfilling }" />
+          {{ backfilling ? 'Backfilling…' : `Backfill ${backfillIds.length} account${backfillIds.length === 1 ? '' : 's'}` }}
+        </button>
+      </form>
+
+      <div v-if="backfillResults.length" class="mt-4 border-t border-base-300 pt-4">
+        <h4 class="text-sm font-semibold mb-3">Results</h4>
+        <ul class="space-y-2">
+          <li
+            v-for="r in backfillResults"
+            :key="r.accountId"
+            class="flex items-baseline gap-2 text-sm"
+          >
+            <span
+              class="font-semibold"
+              :class="r.created ? 'text-success' : r.alreadyExists ? 'text-base-content/40' : 'text-error'"
+            >
+              {{ r.created ? '✓' : r.alreadyExists ? '·' : '✕' }}
+            </span>
+            <code class="font-mono text-xs">{{ r.accountId }}</code>
+            <span
+              class="text-xs"
+              :class="r.error || (!r.created && !r.alreadyExists) ? 'text-error' : 'text-base-content/50'"
+            >
+              <template v-if="r.created">created (workspace {{ r.workspaceId }})</template>
+              <template v-else-if="r.alreadyExists">already has an individual workspace</template>
+              <template v-else>{{ r.error || 'failed' }}</template>
+            </span>
+          </li>
+        </ul>
+      </div>
+    </AdminCard>
+
     <div v-if="isLoading" class="flex justify-center py-16">
       <span class="loading loading-spinner loading-lg" />
     </div>
@@ -138,8 +192,8 @@ import {
   IconChevronLeft,
   IconChevronRight,
 } from '#components'
-import type { WorkspaceAdminSummary, WorkspaceAdminStats, WorkspaceAdminQuery } from '~/types/admin'
-import { fetchAdminWorkspaces, fetchWorkspaceAdminStats } from '~/utils/admin'
+import type { WorkspaceAdminSummary, WorkspaceAdminStats, WorkspaceAdminQuery, BackfillIndividualWorkspaceResult } from '~/types/admin'
+import { fetchAdminWorkspaces, fetchWorkspaceAdminStats, backfillIndividualWorkspaces } from '~/utils/admin'
 
 definePageMeta({ middleware: 'auth' })
 
@@ -157,6 +211,50 @@ const filters = ref<{ q: string; type?: number; plan?: number; includeDeleted?: 
 
 const stats = ref<WorkspaceAdminStats | null>(null)
 const statsLoading = ref(false)
+
+const backfillInput = ref('')
+const backfilling = ref(false)
+const backfillResults = ref<BackfillIndividualWorkspaceResult[]>([])
+const backfillIds = computed(() =>
+  backfillInput.value
+    .split(/[\s,;]+/)
+    .map((t) => t.trim())
+    .filter(Boolean),
+)
+const GUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+async function runBackfill() {
+  const valid: string[] = []
+  const invalid: string[] = []
+  for (const id of backfillIds.value) {
+    if (GUID_RE.test(id)) valid.push(id)
+    else invalid.push(id)
+  }
+  backfillResults.value = invalid.map((id) => ({
+    accountId: id,
+    created: false,
+    workspaceId: null,
+    alreadyExists: false,
+    error: 'Invalid account ID',
+  }))
+  if (!valid.length) return
+  backfilling.value = true
+  try {
+    const results = await backfillIndividualWorkspaces(valid)
+    backfillResults.value = [...backfillResults.value, ...results]
+  } catch (err) {
+    backfillResults.value = [{
+      accountId: valid.join(', '),
+      created: false,
+      workspaceId: null,
+      alreadyExists: false,
+      error: err instanceof Error ? err.message : 'Backfill failed',
+    }]
+  } finally {
+    backfilling.value = false
+    load()
+  }
+}
 
 function planLabel(plan: number) {
   return ['Free', 'Pro', 'Enterprise'][plan] || `Plan ${plan}`
