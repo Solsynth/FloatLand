@@ -10,135 +10,123 @@
             <div class="flex items-start justify-between gap-4">
               <div>
                 <h2 class="text-2xl font-bold">
-                  {{ app.name || app.manifest.name }}
+                  {{ app.name || app.manifest?.name || "Untitled" }}
                 </h2>
                 <p class="text-base-content/50 font-mono">
                   {{ app.slug }} ·
-                  {{ app.manifest.version || app.version || "unversioned" }}
+                  {{ app.manifest?.version || app.version || "unversioned" }}
                 </p>
               </div>
               <span class="badge">{{ stageLabel(app.stage) }}</span>
             </div>
             <p class="mt-4 text-base-content/70">
-              {{ app.description || app.manifest.description }}
+              {{ app.description || app.manifest?.description || "No description" }}
             </p>
           </div>
         </div>
         <div class="card bg-base-100 shadow-sm">
           <div class="card-body p-5">
-            <h3 class="font-bold mb-3">Manifest</h3>
-            <form class="space-y-3" @submit.prevent="saveManifest">
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <fieldset class="fieldset">
-                  <legend class="fieldset-legend">Plugin ID</legend>
-                  <input
-                    v-model="manifestForm.id"
-                    class="input w-full"
-                    required
-                  />
-                </fieldset>
-                <fieldset class="fieldset">
-                  <legend class="fieldset-legend">Name</legend>
-                  <input
-                    v-model="manifestForm.name"
-                    class="input w-full"
-                    required
-                  />
-                </fieldset>
-                <fieldset class="fieldset">
-                  <legend class="fieldset-legend">Version</legend>
-                  <input
-                    v-model="manifestForm.version"
-                    class="input w-full"
-                    required
-                  />
-                </fieldset>
-                <fieldset class="fieldset">
-                  <legend class="fieldset-legend">Status</legend>
-                  <select v-model.number="stage" class="select w-full">
-                    <option :value="0">Development</option>
-                    <option :value="1">Staging</option>
-                    <option :value="2">Production</option>
-                  </select>
-                </fieldset>
-                <fieldset class="fieldset">
-                  <legend class="fieldset-legend">Author</legend>
-                  <input v-model="manifestForm.author" class="input w-full" />
-                </fieldset>
-                <fieldset class="fieldset sm:col-span-2">
-                  <legend class="fieldset-legend">Description</legend>
-                  <textarea
-                    v-model="manifestForm.description"
-                    class="textarea w-full"
-                    rows="3"
-                  />
-                </fieldset>
-                <fieldset class="fieldset">
-                  <legend class="fieldset-legend">Entry file</legend>
-                  <input
-                    v-model="manifestForm.entry"
-                    class="input w-full"
-                    required
-                  />
-                </fieldset>
-                <fieldset class="fieldset sm:col-span-2">
-                  <legend class="fieldset-legend">Homepage</legend>
-                  <input
-                    v-model="manifestForm.homepage"
-                    type="url"
-                    class="input w-full"
-                  />
-                </fieldset>
-                <label
-                  class="label cursor-pointer justify-start gap-3 sm:col-span-2"
-                  ><input
-                    v-model="manifestForm.background"
-                    type="checkbox"
-                    class="toggle toggle-primary"
-                  /><span>Run in the background</span></label
-                >
-                <fieldset class="fieldset sm:col-span-2">
-                  <legend class="fieldset-legend">Permissions</legend>
-                  <TagsInputRoot
-                    v-model="manifestPermissions"
-                    :delimiter="/[ ,;\t\n\r]+/"
-                    add-on-paste
-                    add-on-blur
-                    class="input flex h-auto min-h-12 w-full flex-wrap items-center gap-2 py-2"
-                    ><TagsInputItem
-                      v-for="permission in manifestPermissions"
-                      :key="permission"
-                      :value="permission"
-                      class="badge badge-primary gap-1"
-                      ><TagsInputItemText /><TagsInputItemDelete
-                        class="btn btn-ghost btn-xs btn-circle" /></TagsInputItem
-                    ><TagsInputInput
-                      class="min-w-32 flex-1 bg-transparent outline-none"
-                      placeholder="Add permission"
-                  /></TagsInputRoot>
-                </fieldset>
-                <div
-                  class="sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-3"
-                >
-                  <button
-                    type="button"
-                    class="btn btn-outline justify-start"
-                    @click="chooseIcon"
-                  >
-                    Choose cloud icon</button
-                  ><button
-                    type="button"
-                    class="btn btn-outline justify-start"
-                    @click="chooseBackground"
-                  >
-                    Choose cloud background
-                  </button>
-                </div>
-              </div>
-              <button class="btn btn-primary" :disabled="savingManifest">
-                <IconSave class="w-4 h-4" /> Save manifest
+            <h3 class="font-bold mb-3">Status</h3>
+            <div class="flex items-end gap-3">
+              <fieldset class="fieldset flex-1 max-w-xs">
+                <legend class="fieldset-legend">Stage</legend>
+                <select v-model.number="stage" class="select w-full">
+                  <option :value="0">Development</option>
+                  <option :value="1">Staging</option>
+                  <option :value="2">Production</option>
+                </select>
+              </fieldset>
+              <button
+                class="btn btn-primary"
+                :disabled="savingStage"
+                @click="saveStage"
+              >
+                <IconSave class="w-4 h-4" /> Save
               </button>
-            </form>
+            </div>
+          </div>
+        </div>
+        <div v-if="app.manifest" class="card bg-base-100 shadow-sm">
+          <div class="card-body p-5">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="font-bold">Manifest</h3>
+              <span class="text-xs text-base-content/50"
+                >Read from manifest.json in the uploaded package</span
+              >
+            </div>
+            <dl class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+              <div>
+                <dt class="text-xs text-base-content/50">Plugin ID</dt>
+                <dd class="font-mono">{{ app.manifest.id }}</dd>
+              </div>
+              <div>
+                <dt class="text-xs text-base-content/50">Name</dt>
+                <dd>{{ app.manifest.name }}</dd>
+              </div>
+              <div>
+                <dt class="text-xs text-base-content/50">Version</dt>
+                <dd>{{ app.manifest.version || "1.0.0" }}</dd>
+              </div>
+              <div>
+                <dt class="text-xs text-base-content/50">Author</dt>
+                <dd>{{ app.manifest.author || "—" }}</dd>
+              </div>
+              <div class="sm:col-span-2">
+                <dt class="text-xs text-base-content/50">Description</dt>
+                <dd class="whitespace-pre-wrap">
+                  {{ app.manifest.description || "—" }}
+                </dd>
+              </div>
+              <div>
+                <dt class="text-xs text-base-content/50">Entry file</dt>
+                <dd class="font-mono">{{ app.manifest.entry || "main.js" }}</dd>
+              </div>
+              <div>
+                <dt class="text-xs text-base-content/50">Homepage</dt>
+                <dd>{{ app.manifest.homepage || "—" }}</dd>
+              </div>
+              <div class="sm:col-span-2">
+                <dt class="text-xs text-base-content/50">Permissions</dt>
+                <dd
+                  v-if="app.manifest.permissions?.length"
+                  class="flex flex-wrap gap-1"
+                >
+                  <span
+                    v-for="permission in app.manifest.permissions"
+                    :key="permission"
+                    class="badge badge-primary badge-sm"
+                    >{{ permission }}</span
+                  >
+                </dd>
+                <dd v-else>—</dd>
+              </div>
+              <div class="sm:col-span-2">
+                <dt class="text-xs text-base-content/50">Background</dt>
+                <dd>
+                  {{ app.manifest.background ? "Runs in the background" : "No" }}
+                </dd>
+              </div>
+            </dl>
+          </div>
+        </div>
+        <div class="card bg-base-100 shadow-sm">
+          <div class="card-body p-5">
+            <h3 class="font-bold mb-3">Appearance</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <button
+                type="button"
+                class="btn btn-outline justify-start"
+                @click="chooseIcon"
+              >
+                Choose cloud icon</button
+              ><button
+                type="button"
+                class="btn btn-outline justify-start"
+                @click="chooseBackground"
+              >
+                Choose cloud background
+              </button>
+            </div>
           </div>
         </div>
         <div class="card bg-base-100 shadow-sm">
@@ -204,8 +192,9 @@
               <IconUpload class="w-4 h-4" /> Upload ZIP
             </button>
             <p class="text-xs text-base-content/50 mt-2">
-              ZIP must be no larger than 5 MiB and contain a valid
-              manifest.json.
+              ZIP must be no larger than 5 MiB and contain a manifest.json —
+              plugin metadata (name, version, permissions, ...) is read from
+              it on upload.
             </p>
           </div>
         </div>
@@ -230,13 +219,6 @@ import {
   PackageCheck as IconPackageCheck,
   Download as IconDownload,
 } from "@lucide/vue";
-import {
-  TagsInputInput,
-  TagsInputItem,
-  TagsInputItemDelete,
-  TagsInputItemText,
-  TagsInputRoot,
-} from "reka-ui";
 import type { MiniApp, PluginPackageResult } from "~/types/developer";
 import type { SnCloudFile } from "~/types/drive";
 import {
@@ -258,7 +240,7 @@ const file = ref<File | null>(null);
 const uploading = ref(false);
 const packageResult = ref<PluginPackageResult | null>(null);
 const filePicker = useCloudFilePicker();
-const savingManifest = ref(false);
+const savingStage = ref(false);
 const stage = ref(0);
 const hasPackage = computed(() =>
   Boolean(
@@ -268,18 +250,6 @@ const hasPackage = computed(() =>
       app.value?.packageSha256,
   ),
 );
-const manifestForm = reactive({
-  id: "",
-  name: "",
-  version: "",
-  author: "",
-  description: "",
-  entry: "",
-  icon: "",
-  homepage: "",
-  background: false,
-});
-const manifestPermissions = ref<string[]>([]);
 function stageLabel(stage: number) {
   return stage === 2 ? "Production" : stage === 1 ? "Staging" : "Development";
 }
@@ -299,16 +269,7 @@ async function load() {
       projectId.value,
       miniAppId.value,
     );
-    if (app.value) {
-      stage.value = app.value.stage;
-      const {
-        icon: _icon,
-        permissions,
-        ...editableManifest
-      } = app.value.manifest;
-      Object.assign(manifestForm, editableManifest);
-      manifestPermissions.value = [...(permissions || [])];
-    }
+    if (app.value) stage.value = app.value.stage;
   } catch {
     app.value = null;
   }
@@ -335,16 +296,15 @@ async function chooseBackground() {
       backgroundId: (file as SnCloudFile).id,
     });
 }
-async function saveManifest() {
-  savingManifest.value = true;
+async function saveStage() {
+  savingStage.value = true;
   try {
     await updateMiniApp(pubName.value, projectId.value, miniAppId.value, {
       stage: stage.value,
-      manifest: { ...manifestForm, permissions: manifestPermissions.value },
     });
     await load();
   } finally {
-    savingManifest.value = false;
+    savingStage.value = false;
   }
 }
 async function upload() {

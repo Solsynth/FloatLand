@@ -35,11 +35,11 @@
               </div>
               <div class="min-w-0 flex-1">
                 <div class="font-medium">
-                  {{ app.name || app.manifest.name }}
+                  {{ app.name || app.manifest?.name || app.slug }}
                 </div>
                 <div class="text-sm text-base-content/50">
                   {{ app.slug }} · v{{
-                    app.version || app.manifest.version || "unversioned"
+                    app.version || app.manifest?.version || "unversioned"
                   }}
                 </div>
               </div>
@@ -76,60 +76,12 @@
               <option :value="2">Production</option>
             </select>
           </fieldset>
+          <p class="text-sm text-base-content/60">
+            Plugin metadata (name, version, permissions, ...) is read from the
+            manifest.json inside the uploaded package — upload it after
+            creating.
+          </p>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <fieldset class="fieldset">
-              <legend class="fieldset-legend">Plugin ID</legend>
-              <input
-                v-model="form.manifest.id"
-                class="input w-full"
-                required
-                placeholder="com.example.my_plugin"
-              />
-            </fieldset>
-            <fieldset class="fieldset">
-              <legend class="fieldset-legend">Name</legend>
-              <input
-                v-model="form.manifest.name"
-                class="input w-full"
-                required
-                placeholder="My Plugin"
-              />
-            </fieldset>
-            <fieldset class="fieldset">
-              <legend class="fieldset-legend">Version</legend>
-              <input
-                v-model="form.manifest.version"
-                class="input w-full"
-                required
-                placeholder="1.0.0"
-              />
-            </fieldset>
-            <fieldset class="fieldset">
-              <legend class="fieldset-legend">Author</legend>
-              <input
-                v-model="form.manifest.author"
-                class="input w-full"
-                placeholder="Example"
-              />
-            </fieldset>
-            <fieldset class="fieldset sm:col-span-2">
-              <legend class="fieldset-legend">Description</legend>
-              <textarea
-                v-model="form.manifest.description"
-                class="textarea w-full"
-                rows="3"
-                placeholder="A short description."
-              />
-            </fieldset>
-            <fieldset class="fieldset">
-              <legend class="fieldset-legend">Entry file</legend>
-              <input
-                v-model="form.manifest.entry"
-                class="input w-full"
-                required
-                placeholder="main.js"
-              />
-            </fieldset>
             <div class="sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-3">
               <button
                 type="button"
@@ -146,43 +98,6 @@
                 Choose cloud background
               </button>
             </div>
-            <fieldset class="fieldset sm:col-span-2">
-              <legend class="fieldset-legend">Homepage</legend>
-              <input
-                v-model="form.manifest.homepage"
-                type="url"
-                class="input w-full"
-                placeholder="https://example.com/my-plugin"
-              />
-            </fieldset>
-            <label
-              class="label cursor-pointer justify-start gap-3 sm:col-span-2"
-              ><input
-                v-model="form.manifest.background"
-                type="checkbox"
-                class="toggle toggle-primary"
-              /><span>Run in the background</span></label
-            >
-            <fieldset class="fieldset sm:col-span-2">
-              <legend class="fieldset-legend">Permissions</legend>
-              <TagsInputRoot
-                v-model="form.permissions"
-                :delimiter="/[ ,;\t\n\r]+/"
-                add-on-paste
-                add-on-blur
-                class="input flex h-auto min-h-12 w-full flex-wrap items-center gap-2 py-2"
-                ><TagsInputItem
-                  v-for="permission in form.permissions"
-                  :key="permission"
-                  :value="permission"
-                  class="badge badge-primary gap-1"
-                  ><TagsInputItemText /><TagsInputItemDelete
-                    class="btn btn-ghost btn-xs btn-circle" /></TagsInputItem
-                ><TagsInputInput
-                  class="min-w-32 flex-1 bg-transparent outline-none"
-                  placeholder="Add permission"
-              /></TagsInputRoot>
-            </fieldset>
           </div>
           <div class="flex justify-end gap-2">
             <button
@@ -214,13 +129,6 @@ import {
   Puzzle as IconPuzzle,
   ChevronRight as IconChevronRight,
 } from "@lucide/vue";
-import {
-  TagsInputInput,
-  TagsInputItem,
-  TagsInputItemDelete,
-  TagsInputItemText,
-  TagsInputRoot,
-} from "reka-ui";
 import type { MiniApp } from "~/types/developer";
 import { createMiniApp, fetchMiniApps } from "~/utils/developer";
 import type { SnCloudFile } from "~/types/drive";
@@ -243,17 +151,6 @@ const form = reactive({
   stage: 0,
   iconId: "",
   backgroundId: "",
-  permissions: [] as string[],
-  manifest: {
-    id: "",
-    name: "",
-    version: "1.0.0",
-    author: "",
-    description: "",
-    entry: "main.js",
-    homepage: "",
-    background: false,
-  },
 });
 
 function stageLabel(stage: number) {
@@ -272,17 +169,6 @@ function openCreate() {
   form.stage = 0;
   form.iconId = "";
   form.backgroundId = "";
-  form.permissions = [];
-  Object.assign(form.manifest, {
-    id: "",
-    name: "",
-    version: "1.0.0",
-    author: "",
-    description: "",
-    entry: "main.js",
-    homepage: "",
-    background: false,
-  });
   createOpen.value = true;
 }
 async function chooseIcon() {
@@ -305,13 +191,11 @@ async function chooseBackground() {
 async function handleCreate() {
   saving.value = true;
   try {
-    const manifest = { ...form.manifest, permissions: form.permissions };
     await createMiniApp(pubName.value, projectId.value, {
       slug: form.slug,
       stage: form.stage,
       iconId: form.iconId || undefined,
       backgroundId: form.backgroundId || undefined,
-      manifest,
     });
     createOpen.value = false;
     await load();

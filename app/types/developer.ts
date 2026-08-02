@@ -71,8 +71,8 @@ export interface MiniApp {
   id: string;
   slug: string;
   stage: number;
-  manifest: PluginManifest;
-  pluginId?: string;
+  manifest: PluginManifest | null;
+  pluginId?: string | null;
   name?: string;
   version?: string;
   author?: string;

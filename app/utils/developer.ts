@@ -143,7 +143,7 @@ export async function createMiniApp(
   data: {
     slug: string;
     stage?: number;
-    manifest: Record<string, unknown>;
+    manifest?: Record<string, unknown>;
     iconId?: string;
     backgroundId?: string;
   },

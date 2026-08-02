@@ -40,13 +40,12 @@
               </div>
               <div class="min-w-0">
                 <h3 class="font-bold truncate">
-                  {{ plugin.name || plugin.manifest.name }}
+                  {{ plugin.name || plugin.manifest?.name || plugin.slug }}
                 </h3>
                 <p class="text-xs text-base-content/50">
                   {{
                     plugin.publisher?.nick ||
                     plugin.author ||
-                    plugin.manifest.author ||
                     "Unknown publisher"
                   }}
                 </p>
@@ -55,13 +54,13 @@
             <p class="text-sm text-base-content/70 mt-3">
               {{
                 plugin.description ||
-                plugin.manifest.description ||
+                plugin.manifest?.description ||
                 "No description"
               }}
             </p>
             <div class="mt-3 text-xs text-base-content/50">
               {{ plugin.slug }} · v{{
-                plugin.version || plugin.manifest.version || "unversioned"
+                plugin.version || plugin.manifest?.version || "unversioned"
               }}
             </div>
           </div></NuxtLink

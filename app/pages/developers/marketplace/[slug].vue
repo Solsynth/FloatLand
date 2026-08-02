@@ -14,26 +14,25 @@
             </div>
             <div>
               <h1 class="text-2xl font-bold">
-                {{ plugin.name || plugin.manifest.name }}
+                {{ plugin.name || plugin.manifest?.name || plugin.slug }}
               </h1>
               <p class="text-base-content/50">
                 {{
                   plugin.publisher?.nick ||
                   plugin.author ||
-                  plugin.manifest.author ||
                   "Unknown publisher"
                 }}
               </p>
             </div>
           </div>
           <p class="mt-5 text-base-content/80">
-            {{ plugin.description || plugin.manifest.description }}
+            {{ plugin.description || plugin.manifest?.description }}
           </p>
           <div class="mt-4 flex flex-wrap gap-2 text-sm">
             <span class="badge">{{ plugin.slug }}</span
             ><span class="badge"
               >v{{
-                plugin.version || plugin.manifest.version || "unversioned"
+                plugin.version || plugin.manifest?.version || "unversioned"
               }}</span
             >
           </div>
@@ -44,9 +43,9 @@
             target="_blank"
             rel="noopener"
             >Download package</a
-          ><a
-            v-if="plugin.homepage || plugin.manifest.homepage"
-            :href="plugin.homepage || plugin.manifest.homepage"
+          <a
+            v-if="plugin.homepage || plugin.manifest?.homepage"
+            :href="plugin.homepage || plugin.manifest?.homepage"
             class="btn btn-ghost mt-2"
             target="_blank"
             rel="noopener"
