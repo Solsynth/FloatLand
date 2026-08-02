@@ -230,6 +230,11 @@ export function useWebSocket() {
           case 'messages.update':
             eventBus.emit('chat:message:update', camelData as any)
             break
+          case 'messages.sync.file':
+            // camelData is the snake-to-camel converted packet payload;
+            // the event bus expects the SnChatMessage shape for this channel.
+            eventBus.emit('chat:message:update', camelData as SnChatMessage)
+            break
           case 'messages.delete':
             eventBus.emit('chat:message:delete', camelData as any)
             break

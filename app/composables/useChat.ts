@@ -113,21 +113,44 @@ export function useChat() {
     const onUpdateMessage = (message: SnChatMessage) => {
       const roomId = message.chatRoomId
       const msgState = messageStates[roomId]
+      // Sync messages (messages.sync.*) reference the target via meta.message_id
+      // and carry the target's full payload. Resolve the real message instead
+      // of treating the sync event as a standalone row.
+      const targetId =
+        (message.meta?.messageId as string | undefined) ?? message.id
       if (msgState) {
-        const idx = msgState.messages.findIndex((m) => m.id === message.id)
+        const idx = msgState.messages.findIndex((m) => m.id === targetId)
         if (idx >= 0) {
+          const existing = msgState.messages[idx]!
           // Create new array to trigger reactivity
           const newMessages = [...msgState.messages]
-          newMessages[idx] = message
+          const merged = {
+            ...existing,
+            ...message,
+            id: targetId,
+            type: existing.type,
+            createdAt: existing.createdAt,
+          }
+          if (merged.meta && message.meta?.messageId != null) {
+            merged.meta = { ...merged.meta }
+            delete merged.meta.messageId
+          }
+          newMessages[idx] = merged
           msgState.messages = newMessages
-          messageCache.saveMessage(message)
+          messageCache.saveMessage(merged)
         }
       }
 
       // Update last message in summary if it's the same
       const summary = roomState.summaries[roomId]
-      if (summary?.lastMessage?.id === message.id) {
-        summary.lastMessage = message
+      if (summary?.lastMessage?.id === targetId) {
+        summary.lastMessage = {
+          ...summary.lastMessage,
+          ...message,
+          id: targetId,
+          type: summary.lastMessage.type,
+          createdAt: summary.lastMessage.createdAt,
+        }
       }
     }
 
