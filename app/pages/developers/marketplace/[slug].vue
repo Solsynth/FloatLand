@@ -43,6 +43,7 @@
             target="_blank"
             rel="noopener"
             >Download package</a
+          >
           <a
             v-if="plugin.homepage || plugin.manifest?.homepage"
             :href="plugin.homepage || plugin.manifest?.homepage"
