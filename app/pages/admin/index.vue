@@ -179,6 +179,7 @@ import {
   IconGlobe,
   IconClipboardCheck,
   IconHardDrive,
+  IconPhoneCall,
 } from '#components'
 import type {
   CacheStats,
@@ -408,6 +409,12 @@ const sections = [
     label: 'Tickets',
     href: '/admin/tickets',
     description: 'Support tickets, replies, and assignment',
+  },
+  {
+    icon: IconPhoneCall,
+    label: 'On-call Admins',
+    href: '/admin/tickets/on-call',
+    description: 'Manage who receives ticket notifications',
   },
   {
     icon: IconBell,

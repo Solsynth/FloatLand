@@ -80,6 +80,15 @@ export interface SnTicket {
   deletedAt?: string | null
 }
 
+export interface SnTicketOnCallAdmin {
+  id: string
+  accountId: string
+  account?: SnAccount | null
+  createdAt: string
+  updatedAt?: string
+  deletedAt?: string | null
+}
+
 export interface CreateTicketPayload {
   title: string
   content?: string

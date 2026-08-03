@@ -4,6 +4,7 @@ import type { FileAttachment } from '~/types/post'
 import type {
   SnTicket,
   SnTicketMessage,
+  SnTicketOnCallAdmin,
   TicketFileRef,
   CreateTicketPayload,
   UpdateTicketPayload,
@@ -98,6 +99,28 @@ export async function fetchTicketCount(params: TicketCountQuery = {}): Promise<n
     `${TICKETS_BASE}/count${qs ? `?${qs}` : ''}`,
   )
   return res.count ?? 0
+}
+
+// ============ On-call admin roster ============
+
+/** Passport admin ticket on-call roster routes (gateway: /passport/admin/tickets/on-call) */
+const TICKETS_ON_CALL_BASE = '/passport/admin/tickets/on-call'
+
+export async function fetchOnCallAdmins(): Promise<SnTicketOnCallAdmin[]> {
+  return fetchJson<SnTicketOnCallAdmin[]>(TICKETS_ON_CALL_BASE)
+}
+
+export async function addOnCallAdmin(accountId: string): Promise<void> {
+  await fetchJson(TICKETS_ON_CALL_BASE, {
+    method: 'POST',
+    body: JSON.stringify(camelToSnake({ accountId })),
+  })
+}
+
+export async function removeOnCallAdmin(accountId: string): Promise<void> {
+  await fetchJson(`${TICKETS_ON_CALL_BASE}/${encodeURIComponent(accountId)}`, {
+    method: 'DELETE',
+  })
 }
 
 // ============ Labels ============

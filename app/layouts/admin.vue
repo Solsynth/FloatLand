@@ -107,6 +107,7 @@ import {
   IconGlobe,
   IconClipboardCheck,
   IconHardDrive,
+  IconPhoneCall,
 } from '#components'
 
 const route = useRoute()
@@ -230,6 +231,11 @@ const navGroups = [
         icon: IconTicket,
         label: 'Tickets',
         href: '/admin/tickets',
+      },
+      {
+        icon: IconPhoneCall,
+        label: 'On-call',
+        href: '/admin/tickets/on-call',
       },
       {
         icon: IconBell,
