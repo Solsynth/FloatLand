@@ -1277,10 +1277,83 @@
     "choose": "选择 {name}",
     "compareTitle": "比较会员权益",
     "compareDesc": "快速查看各 Stellar 计划等级的差异。",
-    "compareNote": "所有等级均包含基础 Solar Network 体验。",
+    "compareNote": "会员存储叠加在按等级解锁的免费存储之上。",
     "benefit": "权益",
+    "same": "相同",
+    "notIncluded": "不包含",
     "seoTitle": "定价 - Stellar 计划",
-    "seoDescription": "选择适合你使用方式的 Solar Network Stellar 计划。"
+    "seoDescription": "选择适合你使用方式的 Solar Network Stellar 计划。",
+    "tiers": {
+      "stellar": {
+        "name": "Stellar",
+        "tagline": "核心会员",
+        "description": "为想要更优质身份工具和更快节奏的会员提供的轻量升级。",
+        "storage": "额外 +10GiB 云存储",
+        "levelBoost": "1.5 倍升级加成",
+        "usernameStyle": "有限用户名颜色",
+        "features": {
+          "f0": "额外 +10GiB 云存储",
+          "f1": "有限用户名颜色选项",
+          "f2": "翻译",
+          "f3": "1.5 倍升级加成",
+          "f4": "可获得认证",
+          "f5": "发布者槽位：基础 2 个，Lv30+ 起 3 个，每级特权 +2"
+        }
+      },
+      "nova": {
+        "name": "Nova",
+        "tagline": "扩展创作者工具",
+        "description": "包含 Stellar 全部权益，并为发布者、领域和机器人工作流提供更多空间。",
+        "storage": "额外 +25GiB 云存储",
+        "levelBoost": "2 倍升级加成",
+        "usernameStyle": "无限用户名颜色",
+        "features": {
+          "f0": "包含 Stellar 全部权益",
+          "f1": "额外 +25GiB 云存储",
+          "f2": "无限用户名颜色选项",
+          "f3": "发布者槽位：基础 2 个，Lv30+ 起 3 个，每级特权 +2",
+          "f4": "机器人槽位：Lv30 起 1 个，Lv60 起 2 个，Lv90 起 3 个，每级特权 +1",
+          "f5": "领域槽位：与机器人槽位相同",
+          "f6": "2 倍升级加成"
+        }
+      },
+      "supernova": {
+        "name": "Supernova",
+        "tagline": "最高容量等级",
+        "description": "包含 Nova 全部权益，提供最大的存储空间和最充裕的扩展余地。",
+        "storage": "额外 +50GiB 云存储",
+        "levelBoost": "2.5 倍升级加成",
+        "usernameStyle": "无限用户名颜色选项",
+        "features": {
+          "f0": "包含 Nova 全部权益",
+          "f1": "额外 +50GiB 云存储",
+          "f2": "无限用户名颜色选项",
+          "f3": "发布者槽位：基础 2 个，Lv30+ 起 3 个，每级特权 +2",
+          "f4": "机器人槽位：Lv30 起 1 个，Lv60 起 2 个，Lv90 起 3 个，每级特权 +1",
+          "f5": "领域槽位：与机器人槽位相同",
+          "f6": "2.5 倍升级加成"
+        }
+      }
+    },
+    "compare": {
+      "storage": { "label": "额外存储", "stellar": "+10GiB", "nova": "+25GiB", "supernova": "+50GiB" },
+      "usernameColor": { "label": "用户名颜色", "stellar": "有限", "nova": "无限", "supernova": "无限" },
+      "translation": { "label": "翻译", "stellar": "包含", "nova": "包含", "supernova": "包含" },
+      "levelingBoost": { "label": "升级加成", "stellar": "1.5x", "nova": "2x", "supernova": "2.5x" },
+      "verification": { "label": "认证资格", "stellar": "符合条件", "nova": "符合条件", "supernova": "符合条件" },
+      "publisherQuota": { "label": "发布者槽位", "stellar": "基础 2 个，Lv30+ 起 3 个，每级特权 +2", "nova": "@:pricing.same", "supernova": "@:pricing.same" },
+      "realmQuota": { "label": "领域槽位", "stellar": "@:pricing.notIncluded", "nova": "Lv30/60/90 起 1/2/3 个，每级特权 +1", "supernova": "@:pricing.same" },
+      "botQuota": { "label": "机器人槽位", "stellar": "@:pricing.notIncluded", "nova": "Lv30/60/90 起 1/2/3 个，每级特权 +1", "supernova": "@:pricing.same" }
+    },
+    "levelQuota": {
+      "title": "按等级解锁免费存储",
+      "desc": "每个账户都会获得随等级增长的免费云存储。会员等级在此基础上叠加额外存储空间。",
+      "steps": {
+        "lv0": { "level": "Lv0", "quota": "0.5GiB" },
+        "lv10": { "level": "Lv10", "quota": "1GiB" },
+        "lv120": { "level": "Lv120", "quota": "10GiB" }
+      }
+    }
   },
   "post": {
     "title": "帖子",

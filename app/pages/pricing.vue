@@ -133,14 +133,6 @@
                                     </li>
                                 </ul>
 
-                                <div class="mt-auto card-actions">
-                                    <NuxtLink
-                                        to="/auth/login"
-                                        class="btn btn-primary w-full"
-                                    >
-                                        {{ t('pricing.choose', { name: tier.name }) }}
-                                    </NuxtLink>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -169,9 +161,9 @@
                                     <thead>
                                         <tr class="text-sm text-base-content/55">
                                             <th>{{ t('pricing.benefit') }}</th>
-                                            <th>Stellar</th>
-                                            <th>Nova</th>
-                                            <th>Supernova</th>
+                                            <th>{{ t('pricing.tiers.stellar.name') }}</th>
+                                            <th>{{ t('pricing.tiers.nova.name') }}</th>
+                                            <th>{{ t('pricing.tiers.supernova.name') }}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -197,6 +189,36 @@
                                         </tr>
                                     </tbody>
                                 </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Free Storage by Level -->
+                    <div class="card bg-base-100">
+                        <div class="card-body gap-5">
+                            <div>
+                                <h2 class="text-xl font-bold">
+                                    {{ t('pricing.levelQuota.title') }}
+                                </h2>
+                                <p class="mt-1 text-sm text-base-content/65">
+                                    {{ t('pricing.levelQuota.desc') }}
+                                </p>
+                            </div>
+                            <div class="grid gap-3 sm:grid-cols-3">
+                                <div
+                                    v-for="step in levelQuotaSteps"
+                                    :key="step.level"
+                                    class="rounded-box bg-base-200/60 p-4 text-center"
+                                >
+                                    <div
+                                        class="text-xs font-semibold text-base-content/45"
+                                    >
+                                        {{ step.level }}
+                                    </div>
+                                    <div class="mt-1 text-lg font-black">
+                                        {{ step.quota }}
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -236,117 +258,69 @@ interface ComparisonRow {
     values: [string, string, string];
 }
 
-const tiers: Tier[] = [
-    {
-        name: "Stellar",
-        tagline: "Core membership",
-        description:
-            "A lighter upgrade for members who want better identity tools and a faster pace.",
-        storage: "5GB cloud storage",
-        levelBoost: "1.5x leveling boost",
-        usernameStyle: "Limited username colors",
-        iconComponent: IconSparkles,
-        features: [
-            "5GB cloud storage",
-            "Limited username color options",
-            "Translation",
-            "1.5x leveling up boost",
-            "Ability to get verified",
-            "Publisher quota: base 2, becomes 3 at level 30+, plus 2 per perk level",
-        ],
-    },
-    {
-        name: "Nova",
-        tagline: "Expanded creator tools",
-        description:
-            "Everything in Stellar, with more room for publishers, realms, and bot-driven workflows.",
-        storage: "10GB cloud storage",
-        levelBoost: "2x leveling boost",
-        usernameStyle: "Unlimited username colors",
-        iconComponent: IconRocket,
-        features: [
-            "Everything in Stellar",
-            "10GB cloud storage",
-            "Unlimited username color options",
-            "Publisher quota: base 2, becomes 3 at level 30+, plus 2 per perk level",
-            "Bot quota: base 0, then 1 at level 30, 2 at level 60, 3 at level 90, plus 1 per perk level",
-            "Realm quota: same as bot quota",
-            "2x leveling up boost",
-        ],
-    },
-    {
-        name: "Supernova",
-        tagline: "Highest capacity tier",
-        description:
-            "Everything in Nova, with the largest storage tier and the most room to scale out your setup.",
-        storage: "15GB cloud storage",
-        levelBoost: "2.5x leveling boost",
-        usernameStyle: "Unlimited username color options",
-        iconComponent: IconStars,
-        features: [
-            "Everything in Nova",
-            "15GB cloud storage",
-            "Unlimited username color options",
-            "Publisher quota: base 2, becomes 3 at level 30+, plus 2 per perk level",
-            "Bot quota: base 0, then 1 at level 30, 2 at level 60, 3 at level 90, plus 1 per perk level",
-            "Realm quota: same as bot quota",
-            "2.5x leveling up boost",
-        ],
-    },
+interface TierDef {
+    key: "stellar" | "nova" | "supernova";
+    featureKeys: string[];
+    iconComponent: typeof IconSparkles;
+}
+
+interface ComparisonRowDef {
+    key: string;
+    iconComponent: typeof IconCloud;
+}
+
+const tierDefs: TierDef[] = [
+    { key: "stellar", featureKeys: ["f0", "f1", "f2", "f3", "f4", "f5"], iconComponent: IconSparkles },
+    { key: "nova", featureKeys: ["f0", "f1", "f2", "f3", "f4", "f5", "f6"], iconComponent: IconRocket },
+    { key: "supernova", featureKeys: ["f0", "f1", "f2", "f3", "f4", "f5", "f6"], iconComponent: IconStars },
 ];
 
-const comparisonRows: ComparisonRow[] = [
-    {
-        label: "Cloud storage",
-        iconComponent: IconCloud,
-        values: ["5GB", "10GB", "15GB"],
-    },
-    {
-        label: "Username color",
-        iconComponent: IconPalette,
-        values: ["Limited", "Unlimited", "Unlimited"],
-    },
-    {
-        label: "Translation",
-        iconComponent: IconLanguages,
-        values: ["Included", "Included", "Included"],
-    },
-    {
-        label: "Leveling boost",
-        iconComponent: IconGauge,
-        values: ["1.5x", "2x", "2.5x"],
-    },
-    {
-        label: "Verification access",
-        iconComponent: IconBadgeCheck,
-        values: ["Eligible", "Eligible", "Eligible"],
-    },
-    {
-        label: "Publisher quota",
-        iconComponent: IconSparkles,
-        values: ["2 base, 3 at lvl 30+, +2/perk", "Same", "Same"],
-    },
-    {
-        label: "Realm quota",
-        iconComponent: IconRocket,
-        values: [
-            "Not included",
-            "0/1/2/3 by lvl 0/30/60/90, +1/perk",
-            "Same",
-        ],
-    },
-    {
-        label: "Bot quota",
-        iconComponent: IconBot,
-        values: [
-            "Not included",
-            "0/1/2/3 by lvl 0/30/60/90, +1/perk",
-            "Same",
-        ],
-    },
+const comparisonRowDefs: ComparisonRowDef[] = [
+    { key: "storage", iconComponent: IconCloud },
+    { key: "usernameColor", iconComponent: IconPalette },
+    { key: "translation", iconComponent: IconLanguages },
+    { key: "levelingBoost", iconComponent: IconGauge },
+    { key: "verification", iconComponent: IconBadgeCheck },
+    { key: "publisherQuota", iconComponent: IconSparkles },
+    { key: "realmQuota", iconComponent: IconRocket },
+    { key: "botQuota", iconComponent: IconBot },
 ];
+
+const levelQuotaStepKeys = ["lv0", "lv10", "lv120"] as const;
 
 const { t } = useI18n();
+
+const tiers = computed<Tier[]>(() =>
+    tierDefs.map((def) => ({
+        name: t(`pricing.tiers.${def.key}.name`),
+        tagline: t(`pricing.tiers.${def.key}.tagline`),
+        description: t(`pricing.tiers.${def.key}.description`),
+        storage: t(`pricing.tiers.${def.key}.storage`),
+        levelBoost: t(`pricing.tiers.${def.key}.levelBoost`),
+        usernameStyle: t(`pricing.tiers.${def.key}.usernameStyle`),
+        iconComponent: def.iconComponent,
+        features: def.featureKeys.map((k) => t(`pricing.tiers.${def.key}.features.${k}`)),
+    })),
+);
+
+const comparisonRows = computed<ComparisonRow[]>(() =>
+    comparisonRowDefs.map((def) => ({
+        label: t(`pricing.compare.${def.key}.label`),
+        iconComponent: def.iconComponent,
+        values: [
+            t(`pricing.compare.${def.key}.stellar`),
+            t(`pricing.compare.${def.key}.nova`),
+            t(`pricing.compare.${def.key}.supernova`),
+        ] as [string, string, string],
+    })),
+);
+
+const levelQuotaSteps = computed<Array<{ level: string; quota: string }>>(() =>
+    levelQuotaStepKeys.map((key) => ({
+        level: t(`pricing.levelQuota.steps.${key}.level`),
+        quota: t(`pricing.levelQuota.steps.${key}.quota`),
+    })),
+);
 
 defineOgImage('UniOgImage', { title: t('pricing.seoTitle'), description: t('pricing.seoDescription') })
 
