@@ -1012,6 +1012,7 @@
     "monthly": "每月",
     "disabled": "已禁用",
     "flywheelDescription": "管理加密应用存档和审计历史。",
+    "flywheelQuotaDescription": "Flywheel 对象存储最多可使用此工作区存储配额的 50%。",
     "nameHint": "之后可以在工作区详情页修改名称。",
     "descriptionHint": "简短的简介可以帮助成员了解这个工作区。",
     "mailboxAddressHint": "输入本地部分，或输入自定义域名的完整地址。",

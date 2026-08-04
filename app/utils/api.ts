@@ -52,7 +52,7 @@ import type {
   RealmInvite,
   RealmChatRoom,
 } from "~/types/realm";
-import type { FlywheelAuditEntry, FlywheelOwnerApp, FlywheelOwnerBlob, Workspace, WorkspaceCustomDomain, WorkspaceCustomDomainUsage, WorkspaceMailbox, WorkspaceMailboxAlias, WorkspaceMailboxForwardingRule, WorkspaceMailboxQuota, WorkspaceMailboxUsage, WorkspaceMailCredential, WorkspaceMailCredentialCreated, WorkspaceMember, WorkspacePlanOrder, WorkspacePlanStatus, WorkspaceSendUsage } from "~/types/workspace";
+import type { FlywheelAuditEntry, FlywheelOwnerApp, FlywheelOwnerBlob, FlywheelStorageQuota, Workspace, WorkspaceCustomDomain, WorkspaceCustomDomainUsage, WorkspaceMailbox, WorkspaceMailboxAlias, WorkspaceMailboxForwardingRule, WorkspaceMailboxQuota, WorkspaceMailboxUsage, WorkspaceMailCredential, WorkspaceMailCredentialCreated, WorkspaceMember, WorkspacePlanOrder, WorkspacePlanStatus, WorkspaceSendUsage } from "~/types/workspace";
 
 import { snakeToCamel, camelToSnake } from "~/utils/case";
 import {
@@ -2122,6 +2122,10 @@ export async function revokeMailCredential(credentialId: string): Promise<void> 
 
 export async function fetchFlywheelApps(workspaceId: string): Promise<FlywheelOwnerApp[]> {
   return fetchJson<FlywheelOwnerApp[]>(`/flywheel/workspaces/${encodeURIComponent(workspaceId)}/apps`);
+}
+
+export async function fetchFlywheelStorageQuota(workspaceId: string): Promise<FlywheelStorageQuota> {
+  return fetchJson<FlywheelStorageQuota>(`/flywheel/workspaces/${encodeURIComponent(workspaceId)}/quota`);
 }
 
 export async function fetchFlywheelBlobs(workspaceId: string, appId: string): Promise<FlywheelOwnerBlob[]> {

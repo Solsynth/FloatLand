@@ -1032,6 +1032,7 @@
      ,"domainStageFull": "Full"
      ,"domainStageCompleted": "Completed"
     ,"flywheelDescription": "Manage encrypted application saves and audit history."
+    ,"flywheelQuotaDescription": "Flywheel blob storage may use up to 50% of this workspace's storage quota."
     ,"nameHint": "You can change the workspace name later from its detail page."
     ,"descriptionHint": "A short description helps members understand this workspace."
      ,"mailboxAddressHint": "Enter a local part, or a complete address for a custom domain."

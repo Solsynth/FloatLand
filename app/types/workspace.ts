@@ -155,6 +155,11 @@ export interface FlywheelOwnerBlob {
   updatedAt: string;
 }
 
+export interface FlywheelStorageQuota {
+  usedBytes: number;
+  budgetBytes: number;
+}
+
 export interface FlywheelAuditEntry {
   appId: string;
   blobId: string | null;
