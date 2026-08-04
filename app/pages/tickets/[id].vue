@@ -101,6 +101,27 @@
             {{ t('tickets.noMessages') }}
           </p>
         </div>
+
+        <!-- Reply -->
+        <div class="mt-4 rounded-box bg-base-100 p-4">
+          <textarea
+            v-model="reply"
+            class="textarea textarea-sm w-full rounded-box border-0 bg-base-200"
+            rows="4"
+            maxlength="16384"
+            :placeholder="t('tickets.reply.placeholder')"
+          />
+          <div class="flex justify-end mt-3">
+            <button
+              class="btn btn-sm btn-primary"
+              :disabled="sending || !reply.trim()"
+              @click="sendReply"
+            >
+              <span v-if="sending" class="loading loading-spinner loading-xs" />
+              <span v-else>{{ t('tickets.reply.submit') }}</span>
+            </button>
+          </div>
+        </div>
       </template>
     </div>
   </NuxtLayout>
@@ -111,6 +132,7 @@ import { IconArrowLeft, IconTicket } from '#components'
 import type { SnTicket, SnTicketMessage } from '~/types/ticket'
 import {
   fetchTicket,
+  addTicketMessage,
   ticketTypeLabel,
   ticketStatusLabel,
   ticketPriorityLabel,
@@ -127,6 +149,8 @@ const { user } = useAuth()
 
 const ticket = ref<SnTicket | null>(null)
 const loading = ref(true)
+const reply = ref('')
+const sending = ref(false)
 
 const sortedMessages = computed(() => {
   const msgs = [...(ticket.value?.messages ?? [])]
@@ -190,6 +214,20 @@ function formatDateTime(date: string) {
 
 function isUrl(s: string) {
   return /^https?:\/\//i.test(s)
+}
+
+async function sendReply() {
+  if (!ticket.value || !reply.value.trim() || sending.value) return
+  sending.value = true
+  try {
+    await addTicketMessage(ticket.value.id, { content: reply.value.trim() })
+    reply.value = ''
+    ticket.value = await fetchTicket(route.params.id as string)
+  } catch {
+    useNuxtApp().$toast.error(t('tickets.errors.replyFailed'))
+  } finally {
+    sending.value = false
+  }
 }
 
 async function load() {

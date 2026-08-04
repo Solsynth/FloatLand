@@ -234,6 +234,10 @@
     "notFound": "未找到工单",
     "conversation": "对话",
     "noMessages": "暂无消息",
+    "reply": {
+      "placeholder": "写下回复…",
+      "submit": "发送回复"
+    },
     "you": "你",
     "staff": "客服",
     "waitingNotice": "我们正在等待你提供更多信息。工作人员回复后会更新此对话。",
@@ -281,7 +285,8 @@
     },
     "errors": {
       "loadFailed": "加载工单失败",
-      "createFailed": "创建工单失败"
+      "createFailed": "创建工单失败",
+      "replyFailed": "发送回复失败"
     }
   },
   "notifications": {
