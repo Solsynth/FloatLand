@@ -40,7 +40,7 @@ export interface SnContact {
   updatedAt?: string
 }
 
-/** Public connection shape from GET /passport/accounts/{name}/connections */
+/** Public connection shape from GET /stargate/accounts/{name}/connections */
 export interface AdminPublicConnection {
   provider: string
   providedIdentifier: string

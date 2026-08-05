@@ -859,7 +859,7 @@ async function handleOidcLogin(provider: string) {
     const redirectParam = redirectUrl ? `&redirect=${encodeURIComponent(redirectUrl)}` : "";
     const returnUrl = `${window.location.origin}/auth/callback/${provider}?${redirectParam}`;
     const deviceId = await auth.getDeviceId();
-    const url = `${config.public.apiBaseUrl}/padlock/auth/login/${provider}?returnUrl=${encodeURIComponent(returnUrl)}&deviceId=${deviceId}&flow=login`;
+    const url = `${config.public.apiBaseUrl}/stargate/auth/login/${provider}?returnUrl=${encodeURIComponent(returnUrl)}&deviceId=${deviceId}&flow=login`;
     window.location.href = url;
 }
 

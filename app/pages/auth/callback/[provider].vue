@@ -33,7 +33,7 @@ onMounted(() => {
   }
 
   const query = new URLSearchParams(route.query as Record<string, string>).toString();
-  const redirectUrl = `${API_BASE_URL}/padlock/auth/callback/${provider}${query ? `?${query}` : ""}`;
+  const redirectUrl = `${API_BASE_URL}/stargate/auth/callback/${provider}${query ? `?${query}` : ""}`;
 
   window.location.href = redirectUrl;
 });

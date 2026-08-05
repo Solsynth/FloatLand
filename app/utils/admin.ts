@@ -141,10 +141,10 @@ import type {
   FlywheelAuditEntry,
 } from '~/types/admin'
 
-// Padlock service: auth, sessions, punishments, suspend, delete, notifications, emails
-const PADLOCK_BASE = '/padlock/admin/accounts'
-// Padlock permission groups
-const PADLOCK_PERMISSIONS = '/padlock/admin/permissions'
+// Stargate service: auth, sessions, punishments, suspend, delete, notifications, emails
+const PADLOCK_BASE = '/stargate/admin/accounts'
+// Stargate permission groups
+const PADLOCK_PERMISSIONS = '/stargate/admin/permissions'
 // Passport service: profile-hydrated accounts, activities, status, badges
 const PASSPORT_BASE = '/passport/admin/accounts'
 // Passport service: realm moderation
@@ -163,8 +163,8 @@ const SPHERE_PUBLISHERS = '/sphere/admin/publishers'
 const WALLET_PAYMENTS = '/wallet/admin/payments'
 const WALLET_SUBSCRIPTIONS = '/wallet/admin/subscriptions'
 const WALLET_PRODUCTS = '/wallet/admin/wallet-products'
-// Padlock service: cache management
-const PADLOCK_CACHE = '/padlock/admin/cache'
+// Stargate service: cache management
+const PADLOCK_CACHE = '/stargate/admin/cache'
 // Ring service: delivery observability + email plans
 const RING_DELIVERY_OBS = '/ring/admin/delivery-observability'
 const RING_EMAIL_PLANS = '/ring/admin/email-plans'
@@ -173,7 +173,7 @@ const PASSPORT_STATS = '/passport/admin/stats'
 const SPHERE_STATS = '/sphere/admin/stats'
 const WALLET_STATS = '/wallet/admin/stats'
 const RING_STATS = '/ring/admin/stats'
-const PADLOCK_GEOGRAPHY = '/padlock/admin/stats/users/geography'
+const PADLOCK_GEOGRAPHY = '/stargate/admin/stats/users/geography'
 
 async function fetchPaginated<T>(
   endpoint: string,
@@ -217,7 +217,7 @@ export async function fetchAdminAccounts(
   })
   const suffix = qs ? `?${qs}` : ''
 
-  // Padlock owns auth-side list metadata (email, sessions, punishments).
+  // Stargate owns auth-side list metadata (email, sessions, punishments).
   const padlockRes = await apiFetch(`${PADLOCK_BASE}${suffix}`)
   const totalHeader = padlockRes.headers.get('X-Total')
   const total = totalHeader ? parseInt(totalHeader, 10) : 0
@@ -426,11 +426,11 @@ export async function fetchNotificationDeliveryObservability(
   )
 }
 
-/** Public connected platforms for an account (Passport). */
+/** Public connected platforms for an account (Stargate). */
 export async function fetchAccountPublicConnections(
   name: string,
 ): Promise<AdminPublicConnection[]> {
-  return fetchJson<AdminPublicConnection[]>(`/passport/accounts/${encodeURIComponent(name)}/connections`)
+  return fetchJson<AdminPublicConnection[]>(`/stargate/accounts/${encodeURIComponent(name)}/connections`)
 }
 
 export async function fetchPunishmentsCreated(): Promise<SnAccountPunishment[]> {
@@ -1414,7 +1414,7 @@ export async function pruneAdminTestQuestions(groupKey?: string): Promise<{ remo
 
 export async function fetchAccountSpells(identifier: string): Promise<AdminMagicSpell[]> {
   return fetchJson<AdminMagicSpell[]>(
-    `${PASSPORT_BASE}/${encodeURIComponent(identifier)}/spells`,
+    `${PADLOCK_BASE}/${encodeURIComponent(identifier)}/spells`,
   )
 }
 
@@ -1423,7 +1423,7 @@ export async function createAccountSpell(
   payload: CreateAdminMagicSpellPayload,
 ): Promise<AdminMagicSpell> {
   return fetchJson<AdminMagicSpell>(
-    `${PASSPORT_BASE}/${encodeURIComponent(identifier)}/spells`,
+    `${PADLOCK_BASE}/${encodeURIComponent(identifier)}/spells`,
     {
       method: 'POST',
       body: JSON.stringify(camelToSnake(payload)),
@@ -1437,7 +1437,7 @@ export async function resendAccountSpell(
   payload: ResendAdminMagicSpellPayload = { bypassVerify: true },
 ): Promise<void> {
   await fetchJson(
-    `${PASSPORT_BASE}/${encodeURIComponent(identifier)}/spells/${spellId}/resend`,
+    `${PADLOCK_BASE}/${encodeURIComponent(identifier)}/spells/${spellId}/resend`,
     {
       method: 'POST',
       body: JSON.stringify(camelToSnake(payload)),
@@ -1447,7 +1447,7 @@ export async function resendAccountSpell(
 
 export async function deleteAccountSpell(identifier: string, spellId: string): Promise<void> {
   await fetchJson(
-    `${PASSPORT_BASE}/${encodeURIComponent(identifier)}/spells/${spellId}`,
+    `${PADLOCK_BASE}/${encodeURIComponent(identifier)}/spells/${spellId}`,
     { method: 'DELETE' },
   )
 }

@@ -234,7 +234,7 @@ export async function apiFetch(
       // Cookie mode: Call refresh endpoint (uses HttpOnly refresh cookie)
       try {
         const refreshResponse = await fetch(
-          `${API_BASE_URL}/padlock/auth/refresh`,
+          `${API_BASE_URL}/stargate/auth/refresh`,
           {
             method: "POST",
             credentials: "include",
@@ -288,7 +288,7 @@ export async function createChallenge(
   account: string,
   deviceInfo: Record<string, unknown>,
 ): Promise<SnAuthChallenge> {
-  const response = await apiFetch("/padlock/auth/challenge", {
+  const response = await apiFetch("/stargate/auth/challenge", {
     method: "POST",
     body: JSON.stringify({ account, ...deviceInfo }),
     skipAuth: true,
@@ -298,7 +298,7 @@ export async function createChallenge(
 
 export async function getFactors(challengeId: string): Promise<SnAuthFactor[]> {
   const response = await apiFetch(
-    `/padlock/auth/challenge/${challengeId}/factors`,
+    `/stargate/auth/challenge/${challengeId}/factors`,
     { skipAuth: true },
   );
   return safeJsonParse<SnAuthFactor[]>(response);
@@ -307,7 +307,7 @@ export async function getFactors(challengeId: string): Promise<SnAuthFactor[]> {
 export async function getChallenge(
   challengeId: string,
 ): Promise<SnAuthChallenge> {
-  const response = await apiFetch(`/padlock/auth/challenge/${challengeId}`, {
+  const response = await apiFetch(`/stargate/auth/challenge/${challengeId}`, {
     skipAuth: true,
   });
   return safeJsonParse<SnAuthChallenge>(response);
@@ -318,7 +318,7 @@ export async function requestFactorCode(
   factorId: string,
 ): Promise<unknown> {
   const response = await apiFetch(
-    `/padlock/auth/challenge/${challengeId}/factors/${factorId}`,
+    `/stargate/auth/challenge/${challengeId}/factors/${factorId}`,
     {
       method: "POST",
       skipAuth: true,
@@ -358,7 +358,7 @@ export async function startPasskeyAuthentication(
   challengeId: string,
 ): Promise<PasskeyAuthenticationOptions> {
   const response = await apiFetch(
-    `/padlock/auth/challenge/${challengeId}/passkey/start`,
+    `/stargate/auth/challenge/${challengeId}/passkey/start`,
     {
       method: "POST",
       skipAuth: true,
@@ -388,7 +388,7 @@ export async function completePasskeyAuthentication(
   userHandle?: string | null,
 ): Promise<SnAuthChallenge> {
   const response = await apiFetch(
-    `/padlock/auth/challenge/${challengeId}/passkey/complete`,
+    `/stargate/auth/challenge/${challengeId}/passkey/complete`,
     {
       method: "POST",
       body: JSON.stringify(
@@ -414,7 +414,7 @@ export async function startDiscoverablePasskeyAuthentication(payload: {
   audiences?: string[];
   scopes?: string[];
 }): Promise<PasskeyAuthenticationOptions> {
-  const response = await apiFetch("/padlock/auth/passkey/start", {
+  const response = await apiFetch("/stargate/auth/passkey/start", {
     method: "POST",
     body: JSON.stringify(
       camelToSnake({
@@ -447,7 +447,7 @@ export async function completeDiscoverablePasskeyAuthentication(
   userHandle?: string | null,
 ): Promise<SnAuthChallenge> {
   const response = await apiFetch(
-    `/padlock/auth/passkey/${challengeId}/complete`,
+    `/stargate/auth/passkey/${challengeId}/complete`,
     {
       method: "POST",
       body: JSON.stringify(
@@ -502,7 +502,7 @@ export async function generateQrLogin(payload: {
   audiences?: string[];
   scopes?: string[];
 }): Promise<QrLoginGenerateResponse> {
-  const response = await apiFetch("/padlock/auth/qr/generate", {
+  const response = await apiFetch("/stargate/auth/qr/generate", {
     method: "POST",
     body: JSON.stringify(
       camelToSnake({
@@ -522,7 +522,7 @@ export async function generateQrLogin(payload: {
 export async function getQrLoginStatus(
   qrChallengeId: string,
 ): Promise<QrLoginStatusResponse> {
-  const response = await apiFetch(`/padlock/auth/qr/${qrChallengeId}`, {
+  const response = await apiFetch(`/stargate/auth/qr/${qrChallengeId}`, {
     skipAuth: true,
   });
   return safeJsonParse<QrLoginStatusResponse>(response);
@@ -535,7 +535,7 @@ export async function startPasskeyRegistration(payload: {
   rpId: string;
   rpName: string;
 }): Promise<PasskeyRegistrationOptions> {
-  const response = await apiFetch("/padlock/factors/passkey/start", {
+  const response = await apiFetch("/stargate/factors/passkey/start", {
     method: "POST",
     body: JSON.stringify(camelToSnake(payload)),
   });
@@ -548,7 +548,7 @@ export async function completePasskeyRegistration(payload: {
   clientDataJson: string;
   attestationObject: string;
 }): Promise<SnPasskey> {
-  const response = await apiFetch("/padlock/factors/passkey/complete", {
+  const response = await apiFetch("/stargate/factors/passkey/complete", {
     method: "POST",
     body: JSON.stringify(camelToSnake(payload)),
   });
@@ -556,7 +556,7 @@ export async function completePasskeyRegistration(payload: {
 }
 
 export async function fetchPasskeys(): Promise<SnPasskey[]> {
-  const response = await apiFetch("/padlock/factors/passkey");
+  const response = await apiFetch("/stargate/factors/passkey");
   return safeJsonParse<SnPasskey[]>(response);
 }
 
@@ -564,7 +564,7 @@ export async function updatePasskey(
   passkeyId: string,
   label: string,
 ): Promise<SnPasskey> {
-  const response = await apiFetch(`/padlock/factors/passkey/${passkeyId}`, {
+  const response = await apiFetch(`/stargate/factors/passkey/${passkeyId}`, {
     method: "PATCH",
     body: JSON.stringify({ label }),
   });
@@ -572,7 +572,7 @@ export async function updatePasskey(
 }
 
 export async function deletePasskey(passkeyId: string): Promise<void> {
-  await apiFetch(`/padlock/factors/passkey/${passkeyId}`, {
+  await apiFetch(`/stargate/factors/passkey/${passkeyId}`, {
     method: "DELETE",
   });
 }
@@ -582,7 +582,7 @@ export async function verifyChallenge(
   factorId: string,
   password: string,
 ): Promise<SnAuthChallenge> {
-  const response = await apiFetch(`/padlock/auth/challenge/${challengeId}`, {
+  const response = await apiFetch(`/stargate/auth/challenge/${challengeId}`, {
     method: "PATCH",
     body: JSON.stringify(camelToSnake({ factorId, password })),
     skipAuth: true,
@@ -591,7 +591,7 @@ export async function verifyChallenge(
 }
 
 export async function getToken(code: string): Promise<SnAuthToken> {
-  const response = await apiFetch("/padlock/auth/token", {
+  const response = await apiFetch("/stargate/auth/token", {
     method: "POST",
     body: JSON.stringify({ grant_type: "authorization_code", code }),
     skipAuth: true,
@@ -627,7 +627,7 @@ export async function refreshApiAccessToken(
   refreshToken: string,
 ): Promise<StoredTokenPair | null> {
   try {
-    const response = await apiFetch("/padlock/auth/token", {
+    const response = await apiFetch("/stargate/auth/token", {
       method: "POST",
       body: JSON.stringify({
         grant_type: "refresh_token",
@@ -658,18 +658,18 @@ export async function refreshApiAccessToken(
 }
 
 export async function getUserInfo(): Promise<SnAccount> {
-  const response = await apiFetch("/passport/accounts/me");
+  const response = await apiFetch("/stargate/accounts/me");
   return safeJsonParse<SnAccount>(response);
 }
 
 // Cookie-mode auth helpers
 export async function logoutApi(): Promise<void> {
-  await apiFetch("/padlock/auth/logout", { method: "POST", skipAuth: true });
+  await apiFetch("/stargate/auth/logout", { method: "POST", skipAuth: true });
 }
 
 export async function refreshSession(): Promise<boolean> {
   try {
-    const response = await fetch(`${API_BASE_URL}/padlock/auth/refresh`, {
+    const response = await fetch(`${API_BASE_URL}/stargate/auth/refresh`, {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
@@ -688,7 +688,7 @@ export async function createAccount(payload: {
   language: string;
   captchaToken: string;
 }): Promise<unknown> {
-  const response = await apiFetch("/padlock/accounts", {
+  const response = await apiFetch("/stargate/accounts", {
     method: "POST",
     body: JSON.stringify(camelToSnake({ ...payload })),
     skipAuth: true,
@@ -700,7 +700,7 @@ export async function requestPasswordReset(
   account: string,
   captchaToken: string,
 ): Promise<unknown> {
-  const response = await apiFetch("/padlock/accounts/recovery/password", {
+  const response = await apiFetch("/stargate/accounts/recovery/password", {
     method: "POST",
     body: JSON.stringify(camelToSnake({ account, captchaToken })),
     skipAuth: true,
@@ -709,7 +709,7 @@ export async function requestPasswordReset(
 }
 
 export async function getCaptchaConfig(): Promise<CaptchaConfig> {
-  const response = await apiFetch("/padlock/auth/captcha", { skipAuth: true });
+  const response = await apiFetch("/stargate/auth/captcha", { skipAuth: true });
   return safeJsonParse<CaptchaConfig>(response);
 }
 
@@ -723,7 +723,7 @@ export interface AuthorizeClientInfo {
 
 export async function getAuthorizeClientInfo(query: URLSearchParams): Promise<AuthorizeClientInfo> {
   const response = await apiFetch(
-    `/padlock/auth/open/authorize?${query.toString()}`,
+    `/stargate/auth/open/authorize?${query.toString()}`,
     { skipAuth: true },
   );
   return safeJsonParse(response);
@@ -736,7 +736,7 @@ export async function submitAuthorizeDecision(
   const payload = new URLSearchParams(query);
   payload.set("authorize", authorize ? "true" : "false");
 
-  const response = await apiFetch("/padlock/auth/open/authorize", {
+  const response = await apiFetch("/stargate/auth/open/authorize", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: payload.toString(),
@@ -779,7 +779,7 @@ export async function fetchStoreProducts(
 
 export async function getSpell(spellWord: string): Promise<SpellInfo> {
   const response = await apiFetch(
-    `/passport/spells/${encodeURIComponent(spellWord)}`,
+    `/stargate/spells/${encodeURIComponent(spellWord)}`,
   );
   return safeJsonParse<SpellInfo>(response);
 }
@@ -789,7 +789,7 @@ export async function applySpell(
   newPassword?: string,
 ): Promise<unknown> {
   const response = await apiFetch(
-    `/passport/spells/${encodeURIComponent(spellWord)}/apply`,
+    `/stargate/spells/${encodeURIComponent(spellWord)}/apply`,
     {
       method: "POST",
       body: newPassword ? JSON.stringify({ new_password: newPassword }) : null,
@@ -804,7 +804,7 @@ export function getOidcLoginUrl(
   returnUrl: string,
 ): string {
   const params = new URLSearchParams({ returnUrl, deviceId, flow: "login" });
-  return `${API_BASE_URL}/padlock/auth/login/${provider.toLowerCase()}?${params}`;
+  return `${API_BASE_URL}/stargate/auth/login/${provider.toLowerCase()}?${params}`;
 }
 
 // Data API - Posts
@@ -1131,7 +1131,7 @@ export async function searchAccounts(
 ): Promise<SnAccount[]> {
   const params = new URLSearchParams({ query, take: String(take) });
   const response = await apiFetch(
-    `/passport/accounts/search?${params.toString()}`,
+    `/stargate/accounts/search?${params.toString()}`,
     { skipAuth: true },
   );
   return safeJsonParse<SnAccount[]>(response);
@@ -1161,7 +1161,7 @@ export async function searchRealms(query: string, take = 20): Promise<Realm[]> {
 // Data API - Accounts
 export async function fetchAccount(name: string): Promise<SnAccount> {
   const response = await apiFetch(
-    `/passport/accounts/${encodeURIComponent(name)}`,
+    `/stargate/accounts/${encodeURIComponent(name)}`,
     { skipAuth: true },
   );
   return safeJsonParse<SnAccount>(response);
@@ -1172,7 +1172,7 @@ export async function fetchAccountPunishment(
 ): Promise<SnAccountPunishment | null> {
   try {
     const response = await apiFetch(
-      `/padlock/accounts/${encodeURIComponent(name)}/punishments/overview`,
+      `/stargate/accounts/${encodeURIComponent(name)}/punishments/overview`,
       { skipAuth: true },
     );
     if (!response.ok) return null;
@@ -1257,7 +1257,7 @@ export async function fetchPublicAccountBoard(
 ): Promise<AccountBoardItem[]> {
   try {
     const response = await apiFetch(
-      `/passport/accounts/${encodeURIComponent(name)}/board`,
+      `/stargate/accounts/${encodeURIComponent(name)}/board`,
       { skipAuth: true },
     );
     const list = await safeJsonParse<unknown[]>(response);
@@ -1273,7 +1273,7 @@ export async function fetchPublicAccountConnections(
 ): Promise<PublicAccountConnection[]> {
   try {
     const response = await apiFetch(
-      `/passport/accounts/${encodeURIComponent(name)}/connections`,
+      `/stargate/accounts/${encodeURIComponent(name)}/connections`,
       { skipAuth: true },
     );
     return safeJsonParse<PublicAccountConnection[]>(response);
@@ -1540,7 +1540,7 @@ export async function fetchRelationships(
   take = 20,
 ): Promise<{ items: Relationship[]; total: number; hasMore: boolean }> {
   const response = await apiFetch(
-    `/passport/relationships?offset=${offset}&take=${take}`,
+    `/stargate/relationships?offset=${offset}&take=${take}`,
   );
   const data = await safeJsonParse<Relationship[]>(response);
   const total = parseInt(response.headers.get("x-total") || "0", 10);
@@ -1552,30 +1552,30 @@ export async function fetchRelationships(
 }
 
 export async function fetchFriendRequests(): Promise<Relationship[]> {
-  const response = await apiFetch("/passport/relationships/requests");
+  const response = await apiFetch("/stargate/relationships/requests");
   return safeJsonParse<Relationship[]>(response);
 }
 
 export async function sendFriendRequest(accountId: string): Promise<void> {
-  await apiFetch(`/passport/relationships/${accountId}/friends`, {
+  await apiFetch(`/stargate/relationships/${accountId}/friends`, {
     method: "POST",
   });
 }
 
 export async function acceptFriendRequest(accountId: string): Promise<void> {
-  await apiFetch(`/passport/relationships/${accountId}/friends/accept`, {
+  await apiFetch(`/stargate/relationships/${accountId}/friends/accept`, {
     method: "POST",
   });
 }
 
 export async function declineFriendRequest(accountId: string): Promise<void> {
-  await apiFetch(`/passport/relationships/${accountId}/friends/decline`, {
+  await apiFetch(`/stargate/relationships/${accountId}/friends/decline`, {
     method: "POST",
   });
 }
 
 export async function cancelFriendRequest(relatedId: string): Promise<void> {
-  await apiFetch(`/passport/relationships/${relatedId}/friends`, {
+  await apiFetch(`/stargate/relationships/${relatedId}/friends`, {
     method: "DELETE",
   });
 }
@@ -1584,14 +1584,14 @@ export async function updateRelationship(
   accountId: string,
   status: number,
 ): Promise<void> {
-  await apiFetch(`/passport/relationships/${accountId}`, {
+  await apiFetch(`/stargate/relationships/${accountId}`, {
     method: "PATCH",
     body: JSON.stringify({ status }),
   });
 }
 
 export async function deleteRelationship(relatedId: string): Promise<void> {
-  await apiFetch(`/passport/relationships/${relatedId}`, {
+  await apiFetch(`/stargate/relationships/${relatedId}`, {
     method: "DELETE",
   });
 }
@@ -1785,7 +1785,7 @@ export interface WalletPinStatus {
 }
 
 export async function fetchWalletPinStatus(): Promise<WalletPinStatus> {
-  const response = await apiFetch("/padlock/accounts/me/pin-status");
+  const response = await apiFetch("/stargate/accounts/me/pin-status");
   return safeJsonParse<WalletPinStatus>(response);
 }
 
@@ -2391,7 +2391,7 @@ export async function updateAccount(payload: {
   language?: string;
   region?: string;
 }): Promise<SnAccount> {
-  const response = await apiFetch("/padlock/accounts/me", {
+  const response = await apiFetch("/stargate/accounts/me", {
     method: "PATCH",
     body: JSON.stringify(camelToSnake(payload)),
   });
@@ -2412,7 +2412,7 @@ export async function updateProfile(payload: {
   backgroundId?: string;
   links?: { name: string; url: string }[];
 }): Promise<SnAccount> {
-  const response = await apiFetch("/passport/accounts/me/profile", {
+  const response = await apiFetch("/stargate/accounts/me/profile", {
     method: "PATCH",
     body: JSON.stringify(camelToSnake(payload)),
   });
@@ -2420,14 +2420,14 @@ export async function updateProfile(payload: {
 }
 
 export async function deleteAccount(): Promise<void> {
-  await apiFetch("/passport/accounts/me", {
+  await apiFetch("/stargate/accounts/me", {
     method: "DELETE",
   });
 }
 
 // Settings API - Auth Factors
 export async function fetchAuthFactors(): Promise<SnAuthFactor[]> {
-  const response = await apiFetch("/padlock/factors");
+  const response = await apiFetch("/stargate/factors");
   return safeJsonParse<SnAuthFactor[]>(response);
 }
 
@@ -2441,7 +2441,7 @@ export async function createAuthFactor(payload: {
     payload.secret !== undefined
       ? payload.secret
       : (payload.data?.secret ?? null);
-  const response = await apiFetch("/padlock/factors", {
+  const response = await apiFetch("/stargate/factors", {
     method: "POST",
     body: JSON.stringify({ type: payload.type, secret }),
   });
@@ -2449,7 +2449,7 @@ export async function createAuthFactor(payload: {
 }
 
 export async function deleteAuthFactor(factorId: string): Promise<void> {
-  await apiFetch(`/padlock/factors/${factorId}`, {
+  await apiFetch(`/stargate/factors/${factorId}`, {
     method: "DELETE",
   });
 }
@@ -2458,7 +2458,7 @@ export async function enableAuthFactor(
   factorId: string,
   verificationCode?: string,
 ): Promise<SnAuthFactor> {
-  const response = await apiFetch(`/padlock/factors/${factorId}/enable`, {
+  const response = await apiFetch(`/stargate/factors/${factorId}/enable`, {
     method: "POST",
     body: verificationCode ? JSON.stringify(verificationCode) : undefined,
   });
@@ -2466,14 +2466,14 @@ export async function enableAuthFactor(
 }
 
 export async function disableAuthFactor(factorId: string): Promise<void> {
-  await apiFetch(`/padlock/factors/${factorId}/disable`, {
+  await apiFetch(`/stargate/factors/${factorId}/disable`, {
     method: "POST",
   });
 }
 
 // Settings API - Contact Methods
 export async function fetchContactMethods(): Promise<SnContactMethod[]> {
-  const response = await apiFetch("/padlock/contacts");
+  const response = await apiFetch("/stargate/contacts");
   return safeJsonParse<SnContactMethod[]>(response);
 }
 
@@ -2481,7 +2481,7 @@ export async function createContactMethod(payload: {
   type: number;
   content: string;
 }): Promise<SnContactMethod> {
-  const response = await apiFetch("/padlock/contacts", {
+  const response = await apiFetch("/stargate/contacts", {
     method: "POST",
     body: JSON.stringify(camelToSnake(payload)),
   });
@@ -2489,13 +2489,13 @@ export async function createContactMethod(payload: {
 }
 
 export async function deleteContactMethod(contactId: string): Promise<void> {
-  await apiFetch(`/padlock/contacts/${contactId}`, {
+  await apiFetch(`/stargate/contacts/${contactId}`, {
     method: "DELETE",
   });
 }
 
 export async function verifyContactMethod(contactId: string): Promise<void> {
-  await apiFetch(`/padlock/contacts/${contactId}/verify`, {
+  await apiFetch(`/stargate/contacts/${contactId}/verify`, {
     method: "POST",
   });
 }
@@ -2503,19 +2503,19 @@ export async function verifyContactMethod(contactId: string): Promise<void> {
 export async function setPrimaryContactMethod(
   contactId: string,
 ): Promise<void> {
-  await apiFetch(`/padlock/contacts/${contactId}/primary`, {
+  await apiFetch(`/stargate/contacts/${contactId}/primary`, {
     method: "POST",
   });
 }
 
 export async function makeContactPublic(contactId: string): Promise<void> {
-  await apiFetch(`/padlock/contacts/${contactId}/public`, {
+  await apiFetch(`/stargate/contacts/${contactId}/public`, {
     method: "POST",
   });
 }
 
 export async function makeContactPrivate(contactId: string): Promise<void> {
-  await apiFetch(`/padlock/contacts/${contactId}/public`, {
+  await apiFetch(`/stargate/contacts/${contactId}/public`, {
     method: "DELETE",
   });
 }
@@ -2524,25 +2524,25 @@ export async function makeContactPrivate(contactId: string): Promise<void> {
 export async function fetchAccountConnections(): Promise<
   SnAccountConnection[]
 > {
-  const response = await apiFetch("/padlock/connections");
+  const response = await apiFetch("/stargate/connections");
   return safeJsonParse<SnAccountConnection[]>(response);
 }
 
 export async function deleteAccountConnection(
   connectionId: string,
 ): Promise<void> {
-  await apiFetch(`/padlock/connections/${connectionId}`, {
+  await apiFetch(`/stargate/connections/${connectionId}`, {
     method: "DELETE",
   });
 }
 
 export function getConnectionAuthUrl(provider: string): string {
-  return `${API_BASE_URL}/padlock/auth/login/${provider.toLowerCase()}`;
+  return `${API_BASE_URL}/stargate/auth/login/${provider.toLowerCase()}`;
 }
 
 // Settings API - Auth Devices & Sessions
 export async function fetchAuthDevices(): Promise<SnAuthDevice[]> {
-  const response = await apiFetch("/padlock/devices");
+  const response = await apiFetch("/stargate/devices");
   const raw = await safeJsonParse<{ sessions: SnAuthSession[] }[]>(response);
 
   return raw.map((item) => {
@@ -2567,7 +2567,7 @@ export async function fetchAuthSessions(
   const params = new URLSearchParams();
   if (type !== undefined) params.set("type", String(type));
   params.set("include_children", "false");
-  const response = await apiFetch(`/padlock/sessions?${params.toString()}`);
+  const response = await apiFetch(`/stargate/sessions?${params.toString()}`);
   const data = await safeJsonParse<SnAuthSession[]>(response);
   return Array.isArray(data) ? data : [];
 }
@@ -2575,25 +2575,25 @@ export async function fetchAuthSessions(
 export async function fetchSessionChildren(
   parentId: string,
 ): Promise<SnAuthSession[]> {
-  const response = await apiFetch(`/padlock/sessions/${parentId}/children`);
+  const response = await apiFetch(`/stargate/sessions/${parentId}/children`);
   const data = await safeJsonParse<{ items: SnAuthSession[] }>(response);
   return data.items;
 }
 
 export async function revokeDevice(deviceId: string): Promise<void> {
-  await apiFetch(`/padlock/devices/${deviceId}`, {
+  await apiFetch(`/stargate/devices/${deviceId}`, {
     method: "DELETE",
   });
 }
 
 export async function revokeSession(sessionId: string): Promise<void> {
-  await apiFetch(`/padlock/sessions/${sessionId}`, {
+  await apiFetch(`/stargate/sessions/${sessionId}`, {
     method: "DELETE",
   });
 }
 
 export async function revokeAllOtherSessions(): Promise<void> {
-  await apiFetch("/padlock/sessions/others", {
+  await apiFetch("/stargate/sessions/others", {
     method: "DELETE",
   });
 }
@@ -2602,7 +2602,7 @@ export async function updateDeviceLabel(
   deviceId: string,
   label: string,
 ): Promise<void> {
-  await apiFetch(`/padlock/devices/${deviceId}/label`, {
+  await apiFetch(`/stargate/devices/${deviceId}/label`, {
     method: "PATCH",
     body: JSON.stringify({ label }),
   });
@@ -3485,7 +3485,7 @@ export async function getDeviceCodeStatus(
   userCode: string,
 ): Promise<DeviceCodeStatus> {
   const response = await apiFetch(
-    `/padlock/auth/open/device/code/${encodeURIComponent(userCode)}`,
+    `/stargate/auth/open/device/code/${encodeURIComponent(userCode)}`,
     { skipAuth: true },
   );
   return safeJsonParse<DeviceCodeStatus>(response);
@@ -3493,14 +3493,14 @@ export async function getDeviceCodeStatus(
 
 export async function approveDeviceCode(userCode: string): Promise<void> {
   await apiFetch(
-    `/padlock/auth/open/device/code/${encodeURIComponent(userCode)}/approve`,
+    `/stargate/auth/open/device/code/${encodeURIComponent(userCode)}/approve`,
     { method: "POST" },
   );
 }
 
 export async function declineDeviceCode(userCode: string): Promise<void> {
   await apiFetch(
-    `/padlock/auth/open/device/code/${encodeURIComponent(userCode)}/decline`,
+    `/stargate/auth/open/device/code/${encodeURIComponent(userCode)}/decline`,
     { method: "POST" },
   );
 }

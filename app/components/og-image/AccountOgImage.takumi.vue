@@ -12,7 +12,7 @@ const apiBaseUrl = runtimeConfig.public.apiBaseUrl as string
 // Fetch account data server-side
 const { data: account } = await useAsyncData(
   `og-account-${accountName}`,
-  () => $fetch(`${apiBaseUrl}/passport/accounts/${encodeURIComponent(accountName)}`).then(snakeToCamel),
+  () => $fetch(`${apiBaseUrl}/stargate/accounts/${encodeURIComponent(accountName)}`).then(snakeToCamel),
   { server: true }
 )
 

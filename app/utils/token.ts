@@ -132,7 +132,7 @@ export async function refreshAccessToken(
 
 	tokenRefreshInFlight = (async () => {
 		try {
-			const response = await fetch(`${apiBaseUrl}/padlock/auth/token`, {
+			const response = await fetch(`${apiBaseUrl}/stargate/auth/token`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',

@@ -127,7 +127,7 @@ export interface SnAccountConnection {
   createdAt: string;
 }
 
-/** Public connection shape from GET /passport/accounts/{name}/connections */
+/** Public connection shape from GET /stargate/accounts/{name}/connections */
 export interface PublicAccountConnection {
   provider: string;
   providedIdentifier: string;
@@ -152,7 +152,7 @@ export type AccountBoardPayload = Record<
   BoardPayloadField | string | number | boolean | unknown
 >;
 
-/** Account profile board item from GET /passport/accounts/{name}/board */
+/** Account profile board item from GET /stargate/accounts/{name}/board */
 export interface AccountBoardItem {
   id?: string;
   accountId?: string;
@@ -281,7 +281,7 @@ export const FACTOR_TYPES: Record<
   },
 };
 
-/** Web client QR login challenge (POST /padlock/auth/qr/generate). */
+/** Web client QR login challenge (POST /stargate/auth/qr/generate). */
 export interface QrLoginGenerateResponse {
   qrChallengeId: string;
   authChallengeId: string;
@@ -291,7 +291,7 @@ export interface QrLoginGenerateResponse {
 }
 
 /**
- * Poll response from GET /padlock/auth/qr/{id}.
+ * Poll response from GET /stargate/auth/qr/{id}.
  * Backend serializes QrLoginStatus as a number by default (0–4).
  */
 export interface QrLoginStatusResponse {
