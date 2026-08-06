@@ -675,14 +675,14 @@ export interface AccountBoardItem {
 }
 
 export async function fetchAccountBoard(): Promise<AccountBoardItem[]> {
-  const response = await apiFetch("/stargate/accounts/me/board");
+  const response = await apiFetch("/passport/accounts/me/board");
   return safeJsonParse<AccountBoardItem[]>(response);
 }
 
 export async function updateAccountBoard(
   items: Omit<AccountBoardItem, "id" | "accountId">[],
 ): Promise<AccountBoardItem[]> {
-  const response = await apiFetch("/stargate/accounts/me/board", {
+  const response = await apiFetch("/passport/accounts/me/board", {
     method: "PUT",
     body: JSON.stringify(camelToSnake(items)),
   });

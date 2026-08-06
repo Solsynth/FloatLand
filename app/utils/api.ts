@@ -1257,7 +1257,7 @@ export async function fetchPublicAccountBoard(
 ): Promise<AccountBoardItem[]> {
   try {
     const response = await apiFetch(
-      `/stargate/accounts/${encodeURIComponent(name)}/board`,
+      `/passport/accounts/${encodeURIComponent(name)}/board`,
       { skipAuth: true },
     );
     const list = await safeJsonParse<unknown[]>(response);

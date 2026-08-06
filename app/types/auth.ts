@@ -152,7 +152,7 @@ export type AccountBoardPayload = Record<
   BoardPayloadField | string | number | boolean | unknown
 >;
 
-/** Account profile board item from GET /stargate/accounts/{name}/board */
+/** Account profile board item from GET /passport/accounts/{name}/board */
 export interface AccountBoardItem {
   id?: string;
   accountId?: string;
