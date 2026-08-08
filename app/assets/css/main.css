@@ -700,3 +700,9 @@
     animation-duration: 1ms;
   }
 }
+
+
+/* Keep the active LightGallery thumbnail aligned with the current theme. */
+.lg-thumb-item.active {
+  border-color: var(--color-primary) !important;
+}

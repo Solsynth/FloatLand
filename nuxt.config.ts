@@ -143,7 +143,13 @@ export default defineNuxtConfig({
       },
     ],
   },
-  css: ["~/assets/css/main.css"],
+  css: [
+    "~/assets/css/main.css",
+    "lightgallery/css/lightgallery.css",
+    "lightgallery/css/lg-thumbnail.css",
+    "lightgallery/css/lg-video.css",
+    "lightgallery/css/lg-zoom.css",
+  ],
   components: [
     {
       path: "~/components",

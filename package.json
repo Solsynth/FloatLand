@@ -24,6 +24,7 @@
     "blurhash": "^2.0.5",
     "cropperjs": "^2.1.1",
     "idb": "^8.0.3",
+    "lightgallery": "^2.9.0",
     "lunar-javascript": "^1.7.7",
     "markdown-it": "^14.3.0",
     "mitt": "^3.0.1",

@@ -15,27 +15,15 @@ const state = reactive<LightboxState>({
 export function useLightbox() {
   function open(attachments: FileAttachment[], index: number = 0) {
     state.attachments = attachments;
-    state.currentIndex = index;
-    state.isOpen = true;
+    state.currentIndex = Math.max(0, Math.min(index, attachments.length - 1));
+    state.isOpen = attachments.length > 0;
   }
 
   function close() {
     state.isOpen = false;
   }
 
-  function next() {
-    if (state.currentIndex < state.attachments.length - 1) {
-      state.currentIndex++;
-    }
-  }
-
-  function prev() {
-    if (state.currentIndex > 0) {
-      state.currentIndex--;
-    }
-  }
-
-  function goTo(index: number) {
+  function setCurrentIndex(index: number) {
     if (index >= 0 && index < state.attachments.length) {
       state.currentIndex = index;
     }
@@ -45,8 +33,6 @@ export function useLightbox() {
     state: readonly(state),
     open,
     close,
-    next,
-    prev,
-    goTo,
+    setCurrentIndex,
   };
 }

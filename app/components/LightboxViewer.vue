@@ -1,89 +1,149 @@
 <template>
-  <Teleport to="body">
-    <div
-      v-if="state.isOpen"
-      class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/85"
-      @click.self="close"
-    >
-      <!-- Close button -->
-      <button
-        class="absolute right-4 top-4 z-10 btn btn-sm btn-circle bg-white/10 border-none text-white hover:bg-white/20"
-        @click="close"
-      >
-        <IconX class="w-5 h-5" />
-      </button>
-
-      <!-- Full-screen image viewer -->
-      <div class="relative flex items-center justify-center w-screen h-screen select-none">
-        <img
-          v-if="currentAttachment"
-          :src="getFileUrl(currentAttachment.id)"
-          :alt="currentAttachment.name"
-          class="w-full h-full object-contain"
-          draggable="false"
-          @click.stop
-        >
-
-        <!-- Navigation -->
-        <button
-          v-if="state.currentIndex > 0"
-          class="absolute left-4 top-1/2 -translate-y-1/2 btn btn-circle bg-white/10 border-none text-white hover:bg-white/40 transition-all"
-          @click.stop="prev"
-        >
-          <IconChevronLeft class="w-6 h-6" />
-        </button>
-        <button
-          v-if="state.currentIndex < state.attachments.length - 1"
-          class="absolute right-4 top-1/2 -translate-y-1/2 btn btn-circle bg-white/10 border-none text-white hover:bg-white/40 transition-all"
-          @click.stop="next"
-        >
-          <IconChevronRight class="w-6 h-6" />
-        </button>
-
-        <!-- Counter -->
-        <div class="absolute bottom-6 left-1/2 -translate-x-1/2 rounded-box bg-black/60 px-4 py-1.5 text-sm font-medium text-white/90">
-          {{ state.currentIndex + 1 }} / {{ state.attachments.length }}
-        </div>
-      </div>
-    </div>
-  </Teleport>
+  <ClientOnly>
+    <LightGallery
+      :settings="settings"
+      :on-init="onInit"
+      :on-after-close="onAfterClose"
+      :on-after-slide="onAfterSlide"
+    />
+  </ClientOnly>
 </template>
 
 <script setup lang="ts">
+import type { AfterSlideDetail, InitDetail } from 'lightgallery/lg-events';
+import type { GalleryItem } from 'lightgallery/lg-utils';
+import type { LightGallerySettings } from 'lightgallery/lg-settings';
+import type { LightGallery as LightGalleryInstance } from 'lightgallery/lightgallery';
+import LightGallery from 'lightgallery/vue';
+import lgThumbnail from 'lightgallery/plugins/thumbnail';
+import lgVideo from 'lightgallery/plugins/video';
+import lgZoom from 'lightgallery/plugins/zoom';
+import type { FileAttachment } from '~/types/post';
+import { isAudioFile, isImageFile, isVideoFile } from '~/utils/fileType';
 import { getFileUrl } from '~/utils/files';
-import {
-  IconChevronLeft,
-  IconChevronRight,
-  IconX,
-} from '#components';
 
-const { state, close, next, prev } = useLightbox();
+const { state, close, setCurrentIndex } = useLightbox();
 
-const currentAttachment = computed(() => {
-  return state.attachments[state.currentIndex];
+const gallery = shallowRef<LightGalleryInstance | null>(null);
+const settings = reactive<LightGallerySettings>({
+  dynamic: true,
+  dynamicEl: [],
+  plugins: [lgThumbnail, lgVideo, lgZoom],
+  thumbnail: true,
+  zoom: true,
+  controls: true,
+  counter: true,
+  download: true,
+  hash: false,
+  closable: true,
+  escKey: true,
+  hideBarsDelay: 3000,
+  autoplayFirstVideo: true,
 });
 
-// Handle keyboard navigation
-onMounted(() => {
-  const handleKeydown = (e: KeyboardEvent) => {
-    if (!state.isOpen) return;
+const mediaAttachments = computed(() =>
+  state.attachments.filter(
+    attachment =>
+      isImageFile(attachment) ||
+      isVideoFile(attachment) ||
+      isAudioFile(attachment),
+  ),
+);
 
-    switch (e.key) {
-      case 'ArrowLeft':
-        prev();
-        break;
-      case 'ArrowRight':
-        next();
-        break;
-      case 'Escape':
-        close();
-        break;
-    }
+function getAttachmentUrl(attachment: FileAttachment): string {
+  return attachment.url || getFileUrl(attachment.id) || '';
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
+}
+
+function toGalleryItem(attachment: FileAttachment): GalleryItem {
+  const url = getAttachmentUrl(attachment);
+  const caption = escapeHtml(attachment.name);
+  const baseItem: GalleryItem = {
+    src: url,
+    thumb: url,
+    alt: attachment.name,
+    title: attachment.name,
+    subHtml: `<span>${caption}</span>`,
+    downloadUrl: url || false,
+    download: attachment.name,
   };
 
-  document.addEventListener('keydown', handleKeydown);
-  onUnmounted(() => {
-    document.removeEventListener('keydown', handleKeydown);
-  });
-});
+  if (!isVideoFile(attachment) && !isAudioFile(attachment)) {
+    return baseItem;
+  }
+
+  return {
+    ...baseItem,
+    // LightGallery detects HTML5 video slides when src is empty and video is set.
+    src: '',
+    video: {
+      source: [{ src: url, type: attachment.mimeType }],
+      tracks: [],
+      attributes: {
+        controls: true,
+        autoplay: true,
+        playsinline: true,
+      } as unknown as HTMLVideoElement,
+    },
+  };
+}
+
+function getGalleryItems(): GalleryItem[] {
+  return mediaAttachments.value.map(toGalleryItem);
+}
+
+function openGallery() {
+  const instance = gallery.value;
+  if (!instance || !state.isOpen) return;
+
+  const items = getGalleryItems();
+  if (!items.length) {
+    close();
+    return;
+  }
+
+  const index = Math.min(state.currentIndex, items.length - 1);
+  if (instance.lgOpened) {
+    instance.updateSlides(items, index);
+    return;
+  }
+
+  instance.refresh(items);
+  instance.openGallery(index);
+}
+
+function onInit(detail: InitDetail) {
+  gallery.value = detail.instance;
+  if (state.isOpen) openGallery();
+}
+
+function onAfterSlide(detail: AfterSlideDetail) {
+  setCurrentIndex(detail.index);
+}
+
+function onAfterClose() {
+  close();
+}
+
+watch(
+  () => state.isOpen,
+  isOpen => {
+    if (isOpen) nextTick(openGallery);
+  },
+);
+
+watch(
+  () => state.attachments,
+  () => {
+    if (state.isOpen) nextTick(openGallery);
+  },
+);
 </script>
