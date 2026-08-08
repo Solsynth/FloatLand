@@ -167,6 +167,7 @@ import {
 } from "#components";
 
 const { t, locale, locales, setLocale } = useI18n();
+const { notify } = useAlert();
 
 const isSaving = ref(false);
 
@@ -250,7 +251,7 @@ async function saveAppearance() {
     localStorage.setItem("display-options", JSON.stringify(display));
 
     await new Promise((r) => setTimeout(r, 500));
-    alert(t("appearance.saved"));
+    await notify(t("appearance.saved"));
   } finally {
     isSaving.value = false;
   }

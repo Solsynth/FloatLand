@@ -507,6 +507,7 @@ import {
 
 const router = useRouter();
 const authStore = useAuthStore();
+const { notify, confirm } = useAlert();
 
 // State
 const isLoading = ref(true);
@@ -639,7 +640,7 @@ async function handleCancel(rel: Relationship) {
 }
 
 async function handleBlock(rel: Relationship) {
-    if (!confirm("Block this user?")) return;
+    if (!(await confirm("Confirm", "Block this user?"))) return;
     const accountId = getAccount(rel)?.id;
     if (!accountId) return;
     isActionLoading.value[rel.id] = true;
@@ -668,7 +669,7 @@ async function handleUnblock(rel: Relationship) {
 }
 
 async function handleDelete(rel: Relationship) {
-    if (!confirm(`Remove relationship with @${getAccountName(rel)}?`)) return;
+    if (!(await confirm("Confirm", `Remove relationship with @${getAccountName(rel)}?`))) return;
     const accountId = getAccount(rel)?.id;
     if (!accountId) return;
     isActionLoading.value[rel.id] = true;
@@ -688,7 +689,7 @@ async function submitAddFriend() {
     try {
         const account = await fetchAccount(friendUsername.value);
         if (!account?.id) {
-            alert("User not found");
+            await notify("User not found");
             return;
         }
         await sendFriendRequest(account.id);
@@ -697,7 +698,7 @@ async function submitAddFriend() {
         await loadData();
     } catch (err) {
         console.error("Failed to add friend:", err);
-        alert("Failed to send friend request");
+        await notify("Failed to send friend request");
     } finally {
         isAddingFriend.value = false;
     }

@@ -157,7 +157,7 @@ function handleSaved() {
 
 async function handleDelete() {
   if (!detailCollection.value) return
-  if (!confirm(t('creator.collections.deleteConfirm'))) return
+  if (!(await useAlert().confirm('Confirm', t('creator.collections.deleteConfirm')))) return
   try {
     await deleteCollection(pubName.value, detailCollection.value.slug)
     closeDetail()

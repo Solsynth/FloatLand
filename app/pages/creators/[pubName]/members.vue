@@ -174,7 +174,7 @@ async function saveRole() {
 }
 
 async function handleRemove(accountId: string) {
-  if (!confirm(t('creator.members.removeConfirm'))) return
+  if (!(await useAlert().confirm('Confirm', t('creator.members.removeConfirm')))) return
   await removeMember(pubName.value, accountId)
   await refreshMembers()
 }

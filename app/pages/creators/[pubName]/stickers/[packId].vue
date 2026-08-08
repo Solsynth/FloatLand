@@ -267,13 +267,13 @@ function handleBatchSaved() {
 }
 
 async function handleDeletePack() {
-  if (!confirm(t('creator.stickers.deletePackConfirm'))) return
+  if (!(await useAlert().confirm('Confirm', t('creator.stickers.deletePackConfirm')))) return
   await deleteStickerPack(packId.value)
   navigateTo(`/creators/${pubName.value}/stickers`)
 }
 
 async function handleDeleteSticker(stickerId: string) {
-  if (!confirm(t('creator.stickers.deleteSticker'))) return
+  if (!(await useAlert().confirm('Confirm', t('creator.stickers.deleteSticker')))) return
   await deleteSticker(packId.value, stickerId)
   await refreshStickers()
 }

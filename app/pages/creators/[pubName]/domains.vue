@@ -245,7 +245,7 @@ async function handleAdd() {
 
 // Remove domain
 async function handleRemove(domainId: string) {
-  if (!confirm(t('creator.domains.removeConfirm'))) return
+  if (!(await useAlert().confirm('Confirm', t('creator.domains.removeConfirm')))) return
   try {
     await removeDomain(pubName.value, domainId)
     await refresh()

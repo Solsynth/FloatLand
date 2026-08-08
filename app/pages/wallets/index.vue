@@ -1381,13 +1381,13 @@ async function handleCreateWallet() {
         selectedWalletId.value = newWallet.id;
         showCreateWalletDrawer.value = false;
         createWalletForm.name = "";
-    } catch (err) { console.error("Failed to create wallet:", err); alert("Failed to create wallet"); }
+    } catch (err) { console.error("Failed to create wallet:", err); await useAlert().notify("Failed to create wallet"); }
     finally { isSubmitting.value = false; }
 }
 
 async function setDefaultWallet(walletId: string) {
     try { await apiSetDefaultWallet(walletId); await loadData(); }
-    catch (err) { console.error("Failed to set default wallet:", err); alert("Failed to set default wallet"); }
+    catch (err) { console.error("Failed to set default wallet:", err); await useAlert().notify("Failed to set default wallet"); }
 }
 
 async function togglePublicId(walletId: string, enable: boolean) {
@@ -1395,7 +1395,7 @@ async function togglePublicId(walletId: string, enable: boolean) {
         if (enable) await enableWalletPublicId(walletId);
         else await disableWalletPublicId(walletId);
         await loadData();
-    } catch (err) { console.error("Failed to toggle public ID:", err); alert("Failed to toggle public ID"); }
+    } catch (err) { console.error("Failed to toggle public ID:", err); await useAlert().notify("Failed to toggle public ID"); }
 }
 
 async function loadMoreTransactions() {
@@ -1421,7 +1421,7 @@ async function submitTransfer() {
         let payeePublicId: string | undefined;
         if (transferForm.payeeType === 'account') {
             const account = await fetchAccount(transferForm.recipient);
-            if (!account?.id) { alert("User not found"); return; }
+            if (!account?.id) { await useAlert().notify("User not found"); return; }
             payeeAccountId = account.id;
         } else { payeePublicId = transferForm.publicId.trim().toUpperCase(); }
         await createTransfer({
@@ -1434,7 +1434,7 @@ async function submitTransfer() {
         showTransferDrawer.value = false;
         Object.assign(transferForm, { amount: "", recipient: "", publicId: "", remark: "", pinCode: "", freeze: false, requireConfirmation: false });
         await loadData();
-    } catch (err) { console.error("Transfer failed:", err); alert("Transfer failed"); }
+    } catch (err) { console.error("Transfer failed:", err); await useAlert().notify("Transfer failed"); }
     finally { isSubmitting.value = false; }
 }
 
@@ -1457,7 +1457,7 @@ async function submitFund() {
         showFundDrawer.value = false;
         Object.assign(fundForm, { totalAmount: "", amountOfSplits: "1", message: "", pinCode: "", isRaising: false, isOpen: true, targetAmount: "", contributionType: 0, contributionAmount: "", deadlineAt: "" });
         await loadData();
-    } catch (err) { console.error("Fund creation failed:", err); alert("Failed to create fund"); }
+    } catch (err) { console.error("Fund creation failed:", err); await useAlert().notify("Failed to create fund"); }
     finally { isSubmitting.value = false; }
 }
 
@@ -1465,7 +1465,7 @@ async function handleConfirmTransaction() {
     if (!selectedTransaction.value) return;
     isSubmitting.value = true;
     try { await confirmTransaction(selectedTransaction.value.id); selectedTransaction.value = null; await loadData(); }
-    catch (err) { console.error("Failed to confirm transaction:", err); alert("Failed to confirm transaction"); }
+    catch (err) { console.error("Failed to confirm transaction:", err); await useAlert().notify("Failed to confirm transaction"); }
     finally { isSubmitting.value = false; }
 }
 
@@ -1473,7 +1473,7 @@ async function handleRejectTransaction() {
     if (!selectedTransaction.value) return;
     isSubmitting.value = true;
     try { await rejectTransaction(selectedTransaction.value.id); selectedTransaction.value = null; await loadData(); }
-    catch (err) { console.error("Failed to reject transaction:", err); alert("Failed to reject transaction"); }
+    catch (err) { console.error("Failed to reject transaction:", err); await useAlert().notify("Failed to reject transaction"); }
     finally { isSubmitting.value = false; }
 }
 

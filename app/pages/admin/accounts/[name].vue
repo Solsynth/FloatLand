@@ -1236,7 +1236,7 @@ async function doPushBoardPayload() {
 }
 
 async function doDeleteBoardItem(itemId: string) {
-  if (!confirm('Remove this board widget from the account?')) return
+  if (!(await useAlert().confirm('Confirm', 'Remove this board widget from the account?'))) return
   try {
     await deleteBoardItem(identifier.value, itemId)
     await loadBoard()
@@ -1385,7 +1385,7 @@ async function doResendSpell(spellId: string) {
 }
 
 async function doDeleteSpell(spellId: string) {
-  if (!confirm('Cancel this magic spell? This cannot be undone.')) return
+  if (!(await useAlert().confirm('Confirm', 'Cancel this magic spell? This cannot be undone.'))) return
   try {
     await deleteAccountSpell(identifier.value, spellId)
     await loadSpells()

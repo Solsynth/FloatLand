@@ -224,7 +224,7 @@ async function handleSubmit() {
 }
 
 async function handleDelete(project: DevProject) {
-  if (!confirm(t('developer.projects.deleteConfirm'))) return
+  if (!(await useAlert().confirm('Confirm', t('developer.projects.deleteConfirm')))) return
   try {
     await deleteDevProject(pubName.value, project.id)
     await loadData()

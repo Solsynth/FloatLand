@@ -262,7 +262,7 @@ async function handleUpdate() {
 }
 
 async function handleDelete() {
-  if (!confirm(t('developer.projects.deleteConfirm'))) return
+  if (!(await useAlert().confirm('Confirm', t('developer.projects.deleteConfirm')))) return
   try {
     await deleteDevProject(pubName.value, projectId.value)
     router.push(`/developers/${pubName.value}`)

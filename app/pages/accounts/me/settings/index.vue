@@ -365,6 +365,7 @@ import { updateAccount, updateProfile } from "~/utils/api";
 
 const { t } = useI18n();
 const auth = useAuthStore();
+const { notify } = useAlert();
 const user = computed(() => auth.user);
 
 const isSavingBasic = ref(false);
@@ -443,9 +444,9 @@ async function handleAvatarUpload(event: Event) {
 
   try {
     // TODO: Upload file to cloud and get ID
-    alert("Avatar upload coming soon");
-  } catch (err) {
-    alert("Failed to upload avatar");
+    await notify("Avatar upload coming soon");
+  } catch {
+    await notify("Failed to upload avatar");
   }
 }
 
@@ -455,9 +456,9 @@ async function handleBackgroundUpload(event: Event) {
 
   try {
     // TODO: Upload file to cloud and get ID
-    alert("Background upload coming soon");
-  } catch (err) {
-    alert("Failed to upload background");
+    await notify("Background upload coming soon");
+  } catch {
+    await notify("Failed to upload background");
   }
 }
 
@@ -470,9 +471,9 @@ async function saveBasicInfo() {
       region: basicForm.region,
     });
     await auth.refreshUser();
-    alert("Basic info saved successfully");
+    await notify("Basic info saved successfully");
   } catch (err) {
-    alert(err instanceof Error ? err.message : "Failed to save basic info");
+    await notify(err instanceof Error ? err.message : "Failed to save basic info");
   } finally {
     isSavingBasic.value = false;
   }
@@ -495,9 +496,9 @@ async function saveProfile() {
       links: validLinks,
     });
     await auth.refreshUser();
-    alert("Profile saved successfully");
+    await notify("Profile saved successfully");
   } catch (err) {
-    alert(err instanceof Error ? err.message : "Failed to save profile");
+    await notify(err instanceof Error ? err.message : "Failed to save profile");
   } finally {
     isSavingProfile.value = false;
   }
@@ -516,9 +517,9 @@ async function detectTimezone() {
   try {
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
     profileForm.timeZone = tz;
-    alert(`Timezone detected: ${tz}`);
-  } catch (err) {
-    alert("Failed to detect timezone");
+    await notify(`Timezone detected: ${tz}`);
+  } catch {
+    await notify("Failed to detect timezone");
   } finally {
     isDetectingTimezone.value = false;
   }

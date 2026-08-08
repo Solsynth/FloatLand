@@ -848,7 +848,7 @@ async function submitCreate() {
 }
 
 async function revokeCredential(credential: PersonalityCredential) {
-  if (!confirm(t("ai.revokeConfirm", { name: credential.name }))) return;
+  if (!(await useAlert().confirm('Confirm', t("ai.revokeConfirm", { name: credential.name })))) return;
   revokingId.value = credential.id;
   try {
     await revokePersonalityCredential(credential.id);

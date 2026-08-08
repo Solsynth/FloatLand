@@ -1105,7 +1105,7 @@ async function handleUpdateLinks() {
 }
 
 async function handleDelete() {
-  if (!confirm(t('developer.apps.deleteConfirm'))) return
+  if (!(await useAlert().confirm('Confirm', t('developer.apps.deleteConfirm')))) return
   try {
     await deleteCustomApp(pubName.value, projectId.value, appId.value)
     router.push(`/developers/${pubName.value}/projects/${projectId.value}/apps`)
@@ -1146,7 +1146,7 @@ function secretTypeLabel(type: number) {
 }
 
 async function handleDeleteSecret(secretId: string) {
-  if (!confirm(t('developer.apps.secrets.deleteConfirm'))) return
+  if (!(await useAlert().confirm('Confirm', t('developer.apps.secrets.deleteConfirm')))) return
   try {
     await deleteAppSecret(pubName.value, projectId.value, appId.value, secretId)
     secrets.value = await fetchAppSecrets(pubName.value, projectId.value, appId.value)
@@ -1273,7 +1273,7 @@ async function handleSaveProduct() {
 }
 
 async function handleDeleteProduct(productId: string) {
-  if (!confirm(t('developer.apps.products.deleteConfirm'))) return
+  if (!(await useAlert().confirm('Confirm', t('developer.apps.products.deleteConfirm')))) return
   try {
     await deleteAppProduct(pubName.value, projectId.value, appId.value, productId)
     products.value = await fetchAppProducts(pubName.value, projectId.value, appId.value)

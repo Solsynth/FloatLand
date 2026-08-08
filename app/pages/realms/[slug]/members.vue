@@ -326,17 +326,17 @@ async function loadMore() {
 
 async function promoteMember(_member: RealmMember) {
 	// TODO: Implement promotion API
-	alert('Coming soon!');
+  await useAlert().notify('Coming soon!');
 }
 
 async function demoteMember(_member: RealmMember) {
 	// TODO: Implement demotion API
-	alert('Coming soon!');
+  await useAlert().notify('Coming soon!');
 }
 
 async function kickMember(_member: RealmMember) {
 	// TODO: Implement kick API
-	alert('Coming soon!');
+  await useAlert().notify('Coming soon!');
 }
 
 // Initial load

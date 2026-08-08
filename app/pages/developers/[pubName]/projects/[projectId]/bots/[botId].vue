@@ -549,7 +549,7 @@ async function handleUpdate() {
 }
 
 async function handleDelete() {
-  if (!confirm(t('developer.bots.deleteConfirm'))) return
+  if (!(await useAlert().confirm('Confirm', t('developer.bots.deleteConfirm')))) return
   try {
     await deleteBot(pubName.value, projectId.value, botId.value)
     router.push(`/developers/${pubName.value}/projects/${projectId.value}/bots`)
@@ -584,7 +584,7 @@ function copyKey(value: string | null) {
 }
 
 async function handleDeleteKey(keyId: string) {
-  if (!confirm(t('developer.bots.keys.deleteConfirm'))) return
+  if (!(await useAlert().confirm('Confirm', t('developer.bots.keys.deleteConfirm')))) return
   try {
     await deleteBotKey(pubName.value, projectId.value, botId.value, keyId)
     keys.value = await fetchBotKeys(pubName.value, projectId.value, botId.value)

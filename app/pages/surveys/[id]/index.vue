@@ -471,7 +471,7 @@ async function submitAnswer() {
 }
 
 async function deleteAnswer() {
-  if (!confirm(t('surveys.deleteConfirm'))) return
+  if (!(await useAlert().confirm('Confirm', t('surveys.deleteConfirm')))) return
   try {
     await apiFetch(`/sphere/surveys/${encodeURIComponent(surveyId.value)}/answer`, {
       method: 'DELETE',

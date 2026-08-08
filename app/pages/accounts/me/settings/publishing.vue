@@ -131,6 +131,7 @@ import { fetchManagedPublishers } from "~/utils/creator";
 import type { PublisherManaged } from "~/types/creator";
 
 const { t } = useI18n();
+const { notify } = useAlert();
 const pending = ref(true);
 const isSaving = ref(false);
 const loadError = ref("");
@@ -171,9 +172,9 @@ async function save() {
       defaultReplyPublisherId: form.defaultReplyPublisherId,
       defaultFediversePublisherId: form.defaultFediversePublisherId,
     });
-    alert(t("settings.saved"));
+    await notify(t("settings.saved"));
   } catch (err) {
-    alert(err instanceof Error ? err.message : t("settings.savePublishingFail"));
+    await notify(err instanceof Error ? err.message : t("settings.savePublishingFail"));
   } finally {
     isSaving.value = false;
   }

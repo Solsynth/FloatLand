@@ -128,6 +128,7 @@ import {
 } from "~/utils/api";
 
 const { t } = useI18n();
+const { notify } = useAlert();
 const pending = ref(true);
 const loadError = ref("");
 const isAddingTopic = ref(false);
@@ -188,7 +189,7 @@ async function onPreferenceChange(topic: string, raw: string) {
     await setNotificationPreference(topic, preference);
   } catch (err) {
     preferences.value[topic] = previous;
-    alert(err instanceof Error ? err.message : t("settings.savePreferenceFail"));
+    await notify(err instanceof Error ? err.message : t("settings.savePreferenceFail"));
   } finally {
     savingTopic.value = null;
   }
@@ -203,7 +204,7 @@ async function addCustomTopic() {
     newTopic.description = "";
     showAddTopic.value = false;
   } catch (err) {
-    alert(err instanceof Error ? err.message : t("settings.addTopicFail"));
+    await notify(err instanceof Error ? err.message : t("settings.addTopicFail"));
   } finally {
     isAddingTopic.value = false;
   }

@@ -1,9 +1,9 @@
 <template>
   <AlertDialogRoot :open="open" @update:open="$emit('update:open', $event)">
     <AlertDialogPortal>
-      <AlertDialogOverlay class="fixed inset-0 bg-black/40 z-50" />
+      <AlertDialogOverlay class="fixed inset-0 z-[100] bg-black/40 transition-opacity duration-200 ease-out data-[state=open]:opacity-100 data-[state=closed]:opacity-0" />
       <AlertDialogContent
-        class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 bg-base-100 rounded-box shadow-sm w-[90vw] max-w-md p-6"
+        class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[101] bg-base-100 rounded-box p-6 w-[90vw] max-w-md shadow-lg transition-[opacity,transform] duration-200 ease-out data-[state=open]:scale-100 data-[state=open]:opacity-100 data-[state=closed]:scale-95 data-[state=closed]:opacity-0"
       >
         <AlertDialogTitle class="text-lg font-semibold mb-2">
           {{ title }}

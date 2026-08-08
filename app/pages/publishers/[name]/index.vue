@@ -671,7 +671,7 @@ async function subscribe() {
 
 async function unsubscribe() {
   if (!publisherName.value) return;
-  const confirmed = confirm("Are you sure you want to unsubscribe?");
+  const confirmed = await useAlert().confirm("Confirm", "Are you sure you want to unsubscribe?");
   if (!confirmed) return;
   isSubscribing.value = true;
   try {

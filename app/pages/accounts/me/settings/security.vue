@@ -955,6 +955,7 @@ import {
 
 const { t } = useI18n();
 const auth = useAuth();
+const { notify, confirm } = useAlert();
 
 const isRequestingPasswordReset = ref(false);
 const showPasswordCaptcha = ref(false);
@@ -1162,9 +1163,9 @@ async function onPasswordCaptchaVerified(token: string) {
     try {
         await requestPasswordReset(accountName, token);
         passwordResetSent.value = true;
-        alert(t("settings.passwordChangeSent"));
+        await notify(t("settings.passwordChangeSent"));
     } catch (err) {
-        alert(err instanceof Error ? err.message : t("settings.passwordChangeFail"));
+        await notify(err instanceof Error ? err.message : t("settings.passwordChangeFail"));
     } finally {
         isRequestingPasswordReset.value = false;
     }
@@ -1182,20 +1183,20 @@ async function addContact() {
         showAddContact.value = false;
         await refreshContacts();
     } catch (err) {
-        alert(err instanceof Error ? err.message : t("settings.addContactFail"));
+        await notify(err instanceof Error ? err.message : t("settings.addContactFail"));
     } finally {
         isAddingContact.value = false;
     }
 }
 
 async function removeContact(id: string) {
-    if (!confirm(t("settings.deleteContactConfirm"))) return;
+    if (!(await confirm("Confirm", t("settings.deleteContactConfirm")))) return;
     isProcessing.value = id;
     try {
         await deleteContactMethod(id);
         await refreshContacts();
     } catch (err) {
-        alert(err instanceof Error ? err.message : t("settings.deleteContactFail"));
+        await notify(err instanceof Error ? err.message : t("settings.deleteContactFail"));
     } finally {
         isProcessing.value = null;
     }
@@ -1205,10 +1206,10 @@ async function requestContactVerify(id: string) {
     isProcessing.value = id;
     try {
         await verifyContactMethod(id);
-        alert(t("settings.verifyContactSent"));
+        await notify(t("settings.verifyContactSent"));
         await refreshContacts();
     } catch (err) {
-        alert(err instanceof Error ? err.message : t("settings.verifyContactFail"));
+        await notify(err instanceof Error ? err.message : t("settings.verifyContactFail"));
     } finally {
         isProcessing.value = null;
     }
@@ -1220,7 +1221,7 @@ async function makePrimaryContact(id: string) {
         await setPrimaryContactMethod(id);
         await refreshContacts();
     } catch (err) {
-        alert(err instanceof Error ? err.message : t("settings.setPrimaryFail"));
+        await notify(err instanceof Error ? err.message : t("settings.setPrimaryFail"));
     } finally {
         isProcessing.value = null;
     }
@@ -1236,20 +1237,20 @@ async function toggleContactPublic(contact: SnContactMethod) {
         }
         await refreshContacts();
     } catch (err) {
-        alert(err instanceof Error ? err.message : t("settings.togglePublicFail"));
+        await notify(err instanceof Error ? err.message : t("settings.togglePublicFail"));
     } finally {
         isProcessing.value = null;
     }
 }
 
 async function removeConnection(id: string) {
-    if (!confirm(t("settings.disconnectConfirm"))) return;
+    if (!(await confirm("Confirm", t("settings.disconnectConfirm")))) return;
     isProcessing.value = id;
     try {
         await deleteAccountConnection(id);
         await refreshConnections();
     } catch (err) {
-        alert(err instanceof Error ? err.message : t("settings.disconnectFail"));
+        await notify(err instanceof Error ? err.message : t("settings.disconnectFail"));
     } finally {
         isProcessing.value = null;
     }
@@ -1347,9 +1348,9 @@ async function registerPasskey() {
     isRegisteringPasskey.value = true;
     try {
         await performPasskeyRegistration();
-        alert(t("settings.passkeyRegistered"));
+        await notify(t("settings.passkeyRegistered"));
     } catch (err) {
-        alert(err instanceof Error ? err.message : t("settings.passkeyRegisterFailed"));
+        await notify(err instanceof Error ? err.message : t("settings.passkeyRegisterFailed"));
     } finally {
         isRegisteringPasskey.value = false;
     }
@@ -1368,20 +1369,20 @@ async function confirmRenamePasskey() {
         renamingPasskey.value = null;
         await refreshPasskeys();
     } catch (err) {
-        alert(err instanceof Error ? err.message : t("settings.passkeyRenameFailed"));
+        await notify(err instanceof Error ? err.message : t("settings.passkeyRenameFailed"));
     } finally {
         isRenamingPasskey.value = false;
     }
 }
 
 async function removePasskey(passkey: SnPasskey) {
-    if (!confirm(t("settings.deletePasskeyConfirm", { label: passkey.label }))) return;
+    if (!(await confirm("Confirm", t("settings.deletePasskeyConfirm", { label: passkey.label })))) return;
     isProcessing.value = passkey.id;
     try {
         await apiDeletePasskey(passkey.id);
         await refreshPasskeys();
     } catch (err) {
-        alert(err instanceof Error ? err.message : t("settings.passkeyDeleteFailed"));
+        await notify(err instanceof Error ? err.message : t("settings.passkeyDeleteFailed"));
     } finally {
         isProcessing.value = null;
     }
@@ -1394,7 +1395,7 @@ async function addFactor() {
 
         if (type === 7) {
             await performPasskeyRegistration(newPasskeyLabel.value);
-            alert(t("settings.passkeyRegistered"));
+            await notify(t("settings.passkeyRegistered"));
             showAddFactor.value = false;
             newFactorType.value = "";
             newPasskeyLabel.value = "";
@@ -1418,7 +1419,7 @@ async function addFactor() {
             showRecoveryCode.value = true;
         }
 
-        alert(t("settings.factorCreated"));
+        await notify(t("settings.factorCreated"));
         showAddFactor.value = false;
         newFactorType.value = "";
         newFactorSecret.value = "";
@@ -1426,7 +1427,7 @@ async function addFactor() {
         newPasskeyLabel.value = "";
         await refreshFactors();
     } catch (err) {
-        alert(err instanceof Error ? err.message : t("settings.factorCreateFailed"));
+        await notify(err instanceof Error ? err.message : t("settings.factorCreateFailed"));
     } finally {
         isAddingFactor.value = false;
     }
@@ -1438,10 +1439,10 @@ async function enableFactor(factor: SnAuthFactor) {
         isProcessing.value = factor.id;
         try {
             await enableAuthFactor(factor.id);
-            alert(t("settings.factorEnabled"));
+            await notify(t("settings.factorEnabled"));
             await refreshFactors();
         } catch (err) {
-            alert(err instanceof Error ? err.message : t("settings.factorEnableFailed"));
+            await notify(err instanceof Error ? err.message : t("settings.factorEnableFailed"));
         } finally {
             isProcessing.value = null;
         }
@@ -1459,11 +1460,11 @@ async function confirmEnableFactor() {
     isEnabling.value = true;
     try {
         await enableAuthFactor(selectedFactor.value.id, verificationCode.value);
-        alert("Factor enabled successfully");
+        await notify("Factor enabled successfully");
         showEnableFactor.value = false;
         await refreshFactors();
     } catch (err) {
-        alert(err instanceof Error ? err.message : "Failed to enable factor");
+        await notify(err instanceof Error ? err.message : "Failed to enable factor");
     } finally {
         isEnabling.value = false;
     }
@@ -1473,25 +1474,25 @@ async function disableFactor(factor: SnAuthFactor) {
     isProcessing.value = factor.id;
     try {
         await disableAuthFactor(factor.id);
-        alert("Factor disabled successfully");
+        await notify("Factor disabled successfully");
         await refreshFactors();
     } catch (err) {
-        alert(err instanceof Error ? err.message : "Failed to disable factor");
+        await notify(err instanceof Error ? err.message : "Failed to disable factor");
     } finally {
         isProcessing.value = null;
     }
 }
 
 async function deleteFactor(factor: SnAuthFactor) {
-    if (!confirm("Are you sure you want to delete this factor?")) return;
+    if (!(await confirm("Confirm", "Are you sure you want to delete this factor?"))) return;
 
     isProcessing.value = factor.id;
     try {
         await apiDeleteFactor(factor.id);
-        alert("Factor deleted successfully");
+        await notify("Factor deleted successfully");
         await refreshFactors();
     } catch (err) {
-        alert(err instanceof Error ? err.message : "Failed to delete factor");
+        await notify(err instanceof Error ? err.message : "Failed to delete factor");
     } finally {
         isProcessing.value = null;
     }
@@ -1505,59 +1506,59 @@ async function createRecoveryCode() {
             recoveryCode.value = factor.createdResponse.recovery_code as string;
             showRecoveryCode.value = true;
         }
-        alert("Recovery code created");
+        await notify("Recovery code created");
         await refreshFactors();
     } catch (err) {
-        alert(err instanceof Error ? err.message : "Failed to create recovery code");
+        await notify(err instanceof Error ? err.message : "Failed to create recovery code");
     } finally {
         isCreatingRecovery.value = false;
     }
 }
 
 async function logoutDevice(device: SnAuthDevice) {
-    if (!confirm(`Logout device "${device.deviceLabel || device.deviceName}"?`)) return;
+    if (!(await confirm("Confirm", `Logout device "${device.deviceLabel || device.deviceName}"?`))) return;
 
     isProcessing.value = device.deviceId;
     try {
         await revokeDevice(device.deviceId);
-        alert("Device logged out successfully");
+        await notify("Device logged out successfully");
         selectedDevice.value = null;
         await refreshDevices();
         await refreshSessions();
     } catch (err) {
-        alert(err instanceof Error ? err.message : "Failed to logout device");
+        await notify(err instanceof Error ? err.message : "Failed to logout device");
     } finally {
         isProcessing.value = null;
     }
 }
 
 async function logoutSession(session: SnAuthSession) {
-    if (!confirm("Logout this session?")) return;
+    if (!(await confirm("Confirm", "Logout this session?"))) return;
 
     isProcessing.value = session.id;
     try {
         await revokeSession(session.id);
-        alert("Session logged out successfully");
+        await notify("Session logged out successfully");
         await refreshSessions();
         await refreshDevices();
     } catch (err) {
-        alert(err instanceof Error ? err.message : "Failed to logout session");
+        await notify(err instanceof Error ? err.message : "Failed to logout session");
     } finally {
         isProcessing.value = null;
     }
 }
 
 async function logoutAllOtherSessions() {
-    if (!confirm("Logout from all other devices and sessions?")) return;
+    if (!(await confirm("Confirm", "Logout from all other devices and sessions?"))) return;
 
     isLoggingOutAll.value = true;
     try {
         await revokeAllOtherSessions();
-        alert("All other sessions logged out");
+        await notify("All other sessions logged out");
         await refreshDevices();
         await refreshSessions();
     } catch (err) {
-        alert(err instanceof Error ? err.message : "Failed to logout all sessions");
+        await notify(err instanceof Error ? err.message : "Failed to logout all sessions");
     } finally {
         isLoggingOutAll.value = false;
     }

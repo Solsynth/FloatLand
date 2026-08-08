@@ -478,7 +478,7 @@ function exitSelection() {
 
 async function batchDelete() {
   if (selectedIds.value.size === 0) return;
-  if (!confirm(t("creator.posts.batchDelete"))) return;
+  if (!(await useAlert().confirm('Confirm', t("creator.posts.batchDelete")))) return;
   batchLoading.value = true;
   try {
     await batchDeletePosts(Array.from(selectedIds.value));

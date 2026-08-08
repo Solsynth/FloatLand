@@ -191,7 +191,7 @@ async function loadMore() {
 }
 
 async function handleEmptyTrash() {
-  if (!confirm(t("drive.confirmEmptyTrash"))) return;
+  if (!(await useAlert().confirm('Confirm', t("drive.confirmEmptyTrash")))) return;
   try {
     const count = await deleteDriveRecycledFiles();
     $toast.success(t("drive.trashEmptied", { count }));
@@ -203,7 +203,7 @@ async function handleEmptyTrash() {
 }
 
 async function handleDelete(file: SnCloudFile) {
-  if (confirm(t("drive.confirmPermanentDelete", { name: file.name }))) {
+  if (await useAlert().confirm('Confirm', t("drive.confirmPermanentDelete", { name: file.name }))) {
     await deleteFile(file.id);
   }
 }

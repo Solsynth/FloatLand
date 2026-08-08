@@ -112,6 +112,7 @@ import { deleteAccount } from "~/utils/api";
 
 const { t } = useI18n();
 const { user, logout } = useAuth();
+const { notify } = useAlert();
 
 const confirmDelete = ref(false);
 const confirmName = ref("");
@@ -127,12 +128,12 @@ async function requestDeletion() {
   isDeleting.value = true;
   try {
     await deleteAccount();
-    alert(t("settings.accountDeletionSent"));
+    await notify(t("settings.accountDeletionSent"));
     closeDeleteModal();
     await logout();
     await navigateTo("/");
   } catch (err) {
-    alert(
+    await notify(
       err instanceof Error ? err.message : t("settings.accountDeletionFail"),
     );
   } finally {

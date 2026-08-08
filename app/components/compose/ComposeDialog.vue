@@ -4,10 +4,10 @@
       <DrawerPortal>
         <DrawerOverlay class="fixed inset-0 z-50 bg-black/40" />
         <DrawerContent
-          class="fixed bottom-0 left-0 right-0 z-50 mx-auto flex h-[min(88vh,720px)] max-w-2xl flex-col rounded-t-box bg-base-100 shadow-sm outline-none"
+          class="fixed bottom-0 left-0 right-0 z-50 mx-auto flex h-[min(88vh,720px)] max-w-2xl flex-col overflow-hidden rounded-t-box bg-base-100 shadow-sm outline-none"
         >
           <!-- Drag handle -->
-          <div class="flex justify-center pb-1 pt-3">
+          <div class="flex justify-center bg-base-200/70 pb-1 pt-3">
             <div class="h-1 w-10 rounded-full bg-base-content/20" />
           </div>
 

@@ -419,13 +419,13 @@ async function handleRename(newName: string) {
 }
 
 async function handleDelete(file: SnCloudFile) {
-  if (confirm(t("drive.confirmDelete", { name: file.name }))) {
+  if (await useAlert().confirm('Confirm', t("drive.confirmDelete", { name: file.name }))) {
     await deleteFile(file.id);
   }
 }
 
 async function handleBatchDelete() {
-  if (confirm(t("drive.confirmDeleteSelected", { count: state.selectedFileIds.size }))) {
+  if (await useAlert().confirm('Confirm', t("drive.confirmDeleteSelected", { count: state.selectedFileIds.size }))) {
     await batchDelete();
   }
 }

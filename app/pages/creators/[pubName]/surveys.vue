@@ -762,7 +762,7 @@ async function handleSave() {
 
 // Actions
 async function handlePublish(id: string) {
-  if (!confirm(t('creator.surveys.publishConfirm'))) return
+  if (!(await useAlert().confirm('Confirm', t('creator.surveys.publishConfirm')))) return
   try {
     await publishSurvey(id)
     await refresh()
@@ -773,7 +773,7 @@ async function handlePublish(id: string) {
 }
 
 async function handleArchive(id: string) {
-  if (!confirm(t('creator.surveys.archiveConfirm'))) return
+  if (!(await useAlert().confirm('Confirm', t('creator.surveys.archiveConfirm')))) return
   try {
     await archiveSurvey(id)
     await refresh()
@@ -794,7 +794,7 @@ async function handleClone(id: string) {
 }
 
 async function handleDelete(id: string) {
-  if (!confirm(t('creator.surveys.deleteConfirm'))) return
+  if (!(await useAlert().confirm('Confirm', t('creator.surveys.deleteConfirm')))) return
   try {
     await deleteSurvey(id)
     await refresh()

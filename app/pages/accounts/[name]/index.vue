@@ -343,6 +343,7 @@ import { renderMarkdown } from "~/utils/markdown";
 
 const route = useRoute();
 const auth = useAuth();
+const { notify, confirm } = useAlert();
 const accountName = computed(() => route.params.name as string);
 
 const account = ref<SnAccount | null>(null);
@@ -626,7 +627,7 @@ async function addFriend() {
     await addAccountAsFriend(account.value.id);
     await loadRelationship();
   } catch (err) {
-    alert(err instanceof Error ? err.message : "Failed to add friend");
+    await notify(err instanceof Error ? err.message : "Failed to add friend");
   } finally {
     isActionLoading.value = false;
   }
@@ -634,13 +635,13 @@ async function addFriend() {
 
 async function block() {
   if (!account.value?.id) return;
-  if (!confirm("Block this user?")) return;
+  if (!(await confirm("Confirm", "Block this user?"))) return;
   isActionLoading.value = true;
   try {
     await blockAccount(account.value.id);
     await loadRelationship();
   } catch (err) {
-    alert(err instanceof Error ? err.message : "Failed to block");
+    await notify(err instanceof Error ? err.message : "Failed to block");
   } finally {
     isActionLoading.value = false;
   }
@@ -653,7 +654,7 @@ async function unblock() {
     await unblockAccount(account.value.id);
     await loadRelationship();
   } catch (err) {
-    alert(err instanceof Error ? err.message : "Failed to unblock");
+    await notify(err instanceof Error ? err.message : "Failed to unblock");
   } finally {
     isActionLoading.value = false;
   }
@@ -663,7 +664,7 @@ async function sendMessage() {
   if (!account.value?.id) return;
   isActionLoading.value = true;
   try {
-    alert("Direct message feature coming soon!");
+    await notify("Direct message feature coming soon!");
   } finally {
     isActionLoading.value = false;
   }
@@ -681,7 +682,7 @@ async function shareProfile() {
 }
 
 async function reportUser() {
-  alert("Report feature coming soon!");
+  await notify("Report feature coming soon!");
 }
 
 // Lazy-load timeline when switching to activity tab

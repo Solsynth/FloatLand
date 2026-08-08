@@ -401,7 +401,7 @@ async function doUpdate() {
 
 async function doDelete() {
   if (!ticket.value) return
-  if (!confirm(`Delete ticket "${ticket.value.title}"? This cannot be undone.`)) return
+  if (!(await useAlert().confirm('Confirm', `Delete ticket "${ticket.value.title}"? This cannot be undone.`))) return
   acting.value = true
   try {
     await deleteTicket(ticket.value.id)

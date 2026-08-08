@@ -187,7 +187,7 @@ async function handleAddSubscriber(account: SnAccount) {
 }
 
 async function handleRemoveSubscriber(accountId: string) {
-  if (!confirm(t('creator.subscribers.removeConfirm'))) return
+  if (!(await useAlert().confirm('Confirm', t('creator.subscribers.removeConfirm')))) return
   await removeSubscriber(pubName.value, accountId)
   await refreshSubscribers()
 }

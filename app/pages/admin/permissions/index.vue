@@ -511,7 +511,7 @@ async function doRenameGroup() {
 async function doDeleteGroup() {
   if (!selectedGroupId.value || !detail.value) return
   if (detail.value.group.key === 'default') return
-  if (!confirm(`Delete permission group "${detail.value.group.key}"?`)) return
+  if (!(await useAlert().confirm('Confirm', `Delete permission group "${detail.value.group.key}"?`))) return
   try {
     await deletePermissionGroup(selectedGroupId.value)
     selectedGroupId.value = null
@@ -553,7 +553,7 @@ async function doAddNode() {
 
 async function doDeleteNode(key: string) {
   if (!selectedGroupId.value) return
-  if (!confirm(`Remove permission node "${key}"?`)) return
+  if (!(await useAlert().confirm('Confirm', `Remove permission node "${key}"?`))) return
   try {
     await deleteGroupPermission(selectedGroupId.value, key)
     await selectGroup(selectedGroupId.value)
@@ -586,7 +586,7 @@ async function doAddMember() {
 
 async function doRemoveMember(actor: string) {
   if (!selectedGroupId.value) return
-  if (!confirm(`Remove ${actor} from this group?`)) return
+  if (!(await useAlert().confirm('Confirm', `Remove ${actor} from this group?`))) return
   try {
     await deleteGroupMember(selectedGroupId.value, actor)
     await selectGroup(selectedGroupId.value)

@@ -194,6 +194,7 @@ defineOgImage('UniOgImage', { title: 'Check-in Temple' })
 useSolarSeo({ title: "Check-in Temple" });
 
 const auth = useAuth();
+const { notify } = useAlert();
 
 // State
 const initialLoading = ref(true);
@@ -243,7 +244,7 @@ async function doCheckIn(captchaToken?: string) {
     if (err instanceof ApiError && err.status === 423) {
       showCaptcha.value = true;
     } else {
-      alert(err instanceof Error ? err.message : "Check-in failed");
+      await notify(err instanceof Error ? err.message : "Check-in failed");
     }
   } finally {
     isCheckingIn.value = false;

@@ -729,7 +729,7 @@ async function handleSaveWidget() {
 }
 
 async function handleDelete(widgetKey: string, index: number) {
-  if (!confirm(t('developer.apps.boardWidgets.deleteConfirm'))) return
+  if (!(await useAlert().confirm('Confirm', t('developer.apps.boardWidgets.deleteConfirm')))) return
   try {
     await deleteBoardWidget(pubName.value, projectId.value, appId.value, widgetKey)
     widgets.value.splice(index, 1)

@@ -260,6 +260,7 @@ import { fetchMyBadges, activateBadge } from "~/utils/api";
 import { getBadgeColor, getBadgeName, getBadgeDescription } from "~/utils/badges";
 
 const router = useRouter();
+const { notify } = useAlert();
 const badgeManifestStore = useBadgeManifestStore();
 
 // State
@@ -331,7 +332,7 @@ async function activateSelectedBadge() {
         selectedBadge.value = null;
     } catch (err) {
         console.error("Failed to activate badge:", err);
-        alert("Failed to activate badge");
+        await notify("Failed to activate badge");
     } finally {
         isActivating.value = false;
     }

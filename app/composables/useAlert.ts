@@ -43,6 +43,14 @@ export function useAlert() {
       variant: 'danger',
     })
   }
+  function notify(description: string, title = 'Notice'): Promise<boolean> {
+    return alert({
+      title,
+      description,
+      confirmText: 'OK',
+      cancelText: '',
+    })
+  }
 
   function handleConfirm() {
     if (alertState.value?.resolve) {
@@ -61,6 +69,7 @@ export function useAlert() {
   return {
     alertState,
     alert,
+    notify,
     confirm,
     destructive,
     handleConfirm,

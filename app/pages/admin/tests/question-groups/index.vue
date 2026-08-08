@@ -920,9 +920,10 @@ async function exportCsv() {
 async function pruneQuestions() {
     if (
         !selectedKey.value ||
-        !confirm(
+        !(await useAlert().confirm(
+            'Confirm',
             `Remove all questions from "${selectedKey.value}"? This cannot be undone.`,
-        )
+        ))
     )
         return;
     try {
@@ -939,7 +940,7 @@ async function removeQuestion(question: AdminTestQuestion) {
         questions.value = questions.value.filter((item) => item !== question);
         return;
     }
-    if (!confirm("Delete this question?")) return;
+    if (!(await useAlert().confirm('Confirm', "Delete this question?"))) return;
     try {
         await deleteAdminTestQuestion(question.id);
         if (questions.value.length === 1 && pageOffset.value > 0)
@@ -958,7 +959,7 @@ async function changePage(direction: number) {
 async function removeGroup() {
     if (
         !selectedKey.value ||
-        !confirm(`Delete question group "${selectedKey.value}"?`)
+        !(await useAlert().confirm('Confirm', `Delete question group "${selectedKey.value}"?`))
     )
         return;
     try {

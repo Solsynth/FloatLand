@@ -169,7 +169,7 @@ async function toggleFediverse() {
 }
 
 async function handleDelete() {
-  if (!confirm(t('creator.deletePublisherConfirm'))) return
+  if (!(await useAlert().confirm('Confirm', t('creator.deletePublisherConfirm')))) return
   await deletePublisher(pubName.value)
   creator.clearSelection()
   navigateTo('/creators')

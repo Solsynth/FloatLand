@@ -127,6 +127,7 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
+const { confirm } = useAlert()
 
 const form = reactive({
   title: props.feed?.title ?? '',
@@ -167,7 +168,7 @@ async function handleSubmit() {
 
 async function handleDelete() {
   if (!props.feed) return
-  if (!confirm(t('creator.feeds.deleteConfirm'))) return
+  if (!(await confirm('Confirm', t('creator.feeds.deleteConfirm')))) return
   await deleteWebFeed(props.pubName, props.feed.id)
   emit('close')
 }
