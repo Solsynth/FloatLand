@@ -282,15 +282,18 @@
 import type { SnCloudFile } from "~/types/drive";
 import { fetchDriveBreadcrumb } from "~/utils/api";
 
-defineOgImage('UniOgImage', { title: 'Drive', description: 'Manage your files on Solar Network.' })
-
-useSolarSeo({
-  title: "Drive",
-  description: "Manage your files on Solar Network.",
-});
-
 const { t } = useI18n();
 const route = useRoute();
+
+defineOgImage("UniOgImage", {
+  title: t("drive.title"),
+  description: t("drive.description"),
+});
+
+useSolarSeo({
+  title: t("drive.title"),
+  description: t("drive.description"),
+});
 
 const {
   state: driveState,
@@ -328,7 +331,7 @@ onMounted(async () => {
   driveState.mode = "indexed";
   driveState.files = [];
   driveState.currentFolderId = null;
-  driveState.pathStack = [{ id: null, name: "Root" }];
+  driveState.pathStack = [{ id: null, name: t("drive.root") }];
   driveState.currentPath = "/";
   driveState.selectedFileIds.clear();
   driveState.isSelectionMode = false;
@@ -338,7 +341,7 @@ onMounted(async () => {
     try {
       const breadcrumb = await fetchDriveBreadcrumb(folderId);
       const pathStack: Array<{ id: string | null; name: string }> = [
-        { id: null, name: "Root" },
+        { id: null, name: t("drive.root") },
       ];
       for (const item of breadcrumb) {
         if (item.isFolder) {
@@ -419,13 +422,13 @@ async function handleRename(newName: string) {
 }
 
 async function handleDelete(file: SnCloudFile) {
-  if (await useAlert().confirm('Confirm', t("drive.confirmDelete", { name: file.name }))) {
+  if (await useAlert().confirm(t("common.confirm"), t("drive.confirmDelete", { name: file.name }))) {
     await deleteFile(file.id);
   }
 }
 
 async function handleBatchDelete() {
-  if (await useAlert().confirm('Confirm', t("drive.confirmDeleteSelected", { count: state.selectedFileIds.size }))) {
+  if (await useAlert().confirm(t("common.confirm"), t("drive.confirmDeleteSelected", { count: state.selectedFileIds.size }))) {
     await batchDelete();
   }
 }

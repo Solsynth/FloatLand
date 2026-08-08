@@ -39,7 +39,7 @@
         <!-- Branding -->
         <NuxtLink to="/drive" class="flex items-center gap-2 justify-self-start">
           <img src="/favicon.png" alt="Solar Network" class="w-5 h-5" />
-          <span class="text-sm font-medium hidden sm:inline">Solar Network Drive</span>
+          <span class="text-sm font-medium hidden sm:inline">{{ t("drive.title") }}</span>
         </NuxtLink>
 
         <!-- File name (centered) -->
@@ -96,11 +96,14 @@ const formFields = ref<Record<string, string>>({});
 const formReady = ref(false);
 const fileName = ref<string>("");
 
-defineOgImage('UniOgImage', { title: 'Edit Document', description: 'Edit document with Collabora Online.' })
+defineOgImage("UniOgImage", {
+  title: t("drive.editDocument"),
+  description: t("drive.editDocumentDescription"),
+});
 
 useSolarSeo({
-  title: "Edit Document",
-  description: "Edit document with Collabora Online.",
+  title: t("drive.editDocument"),
+  description: t("drive.editDocumentDescription"),
 });
 
 onMounted(() => {

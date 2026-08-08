@@ -284,14 +284,18 @@
 import type { SnCloudFile } from "~/types/drive";
 import { deleteDriveRecycledFiles } from "~/utils/api";
 
-defineOgImage('UniOgImage', { title: 'Recent', description: 'Recently uploaded files and attachments.' })
+const { t } = useI18n();
 
-useSolarSeo({
-  title: "Recent",
-  description: "Recently uploaded files and attachments.",
+defineOgImage("UniOgImage", {
+  title: t("drive.recent"),
+  description: t("drive.recentDescription"),
 });
 
-const { t } = useI18n();
+useSolarSeo({
+  title: t("drive.recent"),
+  description: t("drive.recentDescription"),
+});
+
 const { $toast } = useNuxtApp();
 
 const {
@@ -341,7 +345,7 @@ function handleToggleRecycled() {
 }
 
 async function handleEmptyTrash() {
-  if (!(await useAlert().confirm('Confirm', t("drive.confirmEmptyTrash")))) return;
+  if (!(await useAlert().confirm(t("common.confirm"), t("drive.confirmEmptyTrash")))) return;
   try {
     const count = await deleteDriveRecycledFiles();
     $toast.success(t("drive.trashEmptied", { count }));
@@ -386,13 +390,13 @@ async function handleRename(newName: string) {
 }
 
 async function handleDelete(file: SnCloudFile) {
-  if (await useAlert().confirm('Confirm', t("drive.confirmDelete", { name: file.name }))) {
+  if (await useAlert().confirm(t("common.confirm"), t("drive.confirmDelete", { name: file.name }))) {
     await deleteFile(file.id);
   }
 }
 
 async function handleBatchDelete() {
-  if (await useAlert().confirm('Confirm', t("drive.confirmDeleteSelected", { count: state.selectedFileIds.size }))) {
+  if (await useAlert().confirm(t("common.confirm"), t("drive.confirmDeleteSelected", { count: state.selectedFileIds.size }))) {
     await batchDelete();
   }
 }

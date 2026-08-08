@@ -147,15 +147,18 @@
 import type { SnCloudFile } from "~/types/drive";
 import { deleteDriveRecycledFiles } from "~/utils/api";
 
-defineOgImage('UniOgImage', { title: 'Trash', description: 'Recycled and deleted files.' })
-
-useSolarSeo({
-  title: "Trash",
-  description: "Recycled and deleted files.",
-});
-
 const { t } = useI18n();
 const { $toast } = useNuxtApp();
+
+defineOgImage("UniOgImage", {
+  title: t("drive.trash"),
+  description: t("drive.trashDescription"),
+});
+
+useSolarSeo({
+  title: t("drive.trash"),
+  description: t("drive.trashDescription"),
+});
 
 const {
   state,
@@ -191,7 +194,7 @@ async function loadMore() {
 }
 
 async function handleEmptyTrash() {
-  if (!(await useAlert().confirm('Confirm', t("drive.confirmEmptyTrash")))) return;
+  if (!(await useAlert().confirm(t("common.confirm"), t("drive.confirmEmptyTrash")))) return;
   try {
     const count = await deleteDriveRecycledFiles();
     $toast.success(t("drive.trashEmptied", { count }));
@@ -203,7 +206,7 @@ async function handleEmptyTrash() {
 }
 
 async function handleDelete(file: SnCloudFile) {
-  if (await useAlert().confirm('Confirm', t("drive.confirmPermanentDelete", { name: file.name }))) {
+  if (await useAlert().confirm(t("common.confirm"), t("drive.confirmPermanentDelete", { name: file.name }))) {
     await deleteFile(file.id);
   }
 }

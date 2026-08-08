@@ -295,7 +295,7 @@
                   @click="showIframe = true"
                 >
                   <IconEye class="w-4 h-4" />
-                  {{ t("drive.previewInViewer", "Preview in viewer") }}
+                  {{ t("drive.previewInViewer") }}
                 </button>
                 <button
                   class="btn btn-outline btn-sm mt-4"

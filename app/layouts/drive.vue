@@ -106,11 +106,11 @@ const showUsageDetails = ref(false);
 const usage = computed<DriveUsage | null>(() => drive.state.usage ?? null);
 
 // Breadcrumb segments based on current route path
-const segmentLabels: Record<string, string> = {
-  drive: "Drive",
-  recent: "Recent",
-  trash: "Trash",
-};
+const segmentLabels = computed<Record<string, string>>(() => ({
+  drive: t("nav.drive"),
+  recent: t("drive.recent"),
+  trash: t("drive.trash"),
+}));
 
 const breadcrumbs = computed(() => {
   const parts: Array<{ label: string; href: string }> = [
@@ -121,7 +121,7 @@ const breadcrumbs = computed(() => {
   for (let i = 1; i < segments.length; i++) {
     const seg = segments[i] as string;
     const href = "/" + segments.slice(0, i + 1).join("/");
-    const label = segmentLabels[seg] || seg;
+    const label = segmentLabels.value[seg] || seg;
     parts.push({ label, href });
   }
   return parts;
