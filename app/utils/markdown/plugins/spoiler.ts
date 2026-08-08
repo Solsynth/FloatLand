@@ -43,10 +43,58 @@ function spoilerPlugin(md: MarkdownIt): void {
     return true
   })
 
+  // v-html content cannot use Vue event bindings. Delegate spoiler interaction
+  // once so every markdown consumer gets the same click and keyboard behavior.
+  if (
+    typeof document !== 'undefined' &&
+    document.documentElement.dataset.spoilerHandlerInstalled !== 'true'
+  ) {
+    const toggleSpoiler = (spoiler: Element) => {
+      const revealed = spoiler.classList.toggle('revealed')
+      spoiler.setAttribute('aria-expanded', String(revealed))
+    }
+
+    document.addEventListener(
+      'click',
+      (event) => {
+        const target = event.target
+        if (!(target instanceof Element)) return
+
+        const spoiler = target.closest('.spoiler')
+        if (!spoiler) return
+
+        event.preventDefault()
+        event.stopPropagation()
+        toggleSpoiler(spoiler)
+      },
+      true,
+    )
+
+    document.addEventListener(
+      'keydown',
+      (event) => {
+        if (event.key !== 'Enter' && event.key !== ' ') return
+
+        const target = event.target
+        if (!(target instanceof Element)) return
+
+        const spoiler = target.closest('.spoiler')
+        if (!spoiler) return
+
+        event.preventDefault()
+        event.stopPropagation()
+        toggleSpoiler(spoiler)
+      },
+      true,
+    )
+
+    document.documentElement.dataset.spoilerHandlerInstalled = 'true'
+  }
+
   // Add renderer rule for spoiler tokens
   md.renderer.rules.spoiler = (tokens, idx) => {
     const token = tokens[idx]
-    return `<span class="spoiler" onclick="this.classList.toggle('revealed')" title="Click to reveal">${md.utils.escapeHtml(token.content)}</span>`
+    return `<span class="spoiler" role="button" tabindex="0" aria-expanded="false" title="Click to reveal">${md.utils.escapeHtml(token.content)}</span>`
   }
 }
 

@@ -546,15 +546,24 @@
 
   .sticker-img {
     display: inline-block;
-    width: 1.5rem;
-    height: 1.5rem;
+    width: 3rem;
+    height: 3rem;
     vertical-align: middle;
     object-fit: contain;
   }
 
-  .sticker-img.enlarged {
+  .sticker-img[data-sticker-size="small"] {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  .sticker-img[data-sticker-size="large"] {
     width: 6rem;
     height: 6rem;
+  }
+
+  .sticker-img[data-standalone="false"] {
+    margin-inline: 3px;
   }
 
   .cloud-file-image {

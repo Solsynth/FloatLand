@@ -150,9 +150,6 @@
       <IconPlus class="w-6 h-6" />
     </button>
 
-    <ClientOnly>
-      <OnboardingModal />
-    </ClientOnly>
   </NuxtLayout>
 </template>
 
@@ -246,7 +243,7 @@ async function fetchTimelinePage(
 
   const existing = new Set(timelineEvents.value.map((e) => e.id));
   const uniqueItems = (result?.items ?? []).filter((e) => !existing.has(e.id));
-  let nextCursor = result?.nextCursor ?? null;
+  const nextCursor = result?.nextCursor ?? null;
 
   if (result?.mode) {
     timelineMode.value = result.mode;
