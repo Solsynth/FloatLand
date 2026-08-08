@@ -230,6 +230,10 @@
 
       <!-- WebSocket Status -->
       <WebSocketStatus />
+      <!-- Keep outside both responsive slots; each slot renders page content. -->
+      <ClientOnly>
+        <OnboardingModal />
+      </ClientOnly>
     </div>
   </div>
 </template>
