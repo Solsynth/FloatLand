@@ -6,35 +6,44 @@
     <!-- Add reaction button (client-only to avoid Teleport to body SSR issues) -->
     <ClientOnly>
       <PopoverRoot v-if="showAddButton" v-model:open="showReactionPicker">
-        <PopoverTrigger class="btn btn-ghost btn-xs gap-1 h-7 px-2">
+        <PopoverTrigger
+          class="btn btn-ghost btn-xs h-7 gap-1 px-2"
+          aria-label="Add reaction"
+        >
           <IconSmilePlus class="h-3.5 w-3.5" />
           <span class="text-xs">React</span>
         </PopoverTrigger>
 
         <PopoverPortal>
           <PopoverContent
-            class="bg-base-100 rounded-box shadow-sm p-3 z-50"
+            class="reaction-popover-content z-50 rounded-box border border-base-300/70 bg-base-100 p-3 shadow-lg"
             :side-offset="8"
-            align="center"
+            side="top"
+            align="start"
             :collision-padding="16"
           >
             <div class="grid grid-cols-3 gap-3">
               <button
-                v-for="emoji in availableReactions"
-                :key="emoji.symbol"
-                class="flex flex-col items-center gap-2 p-3 rounded-box hover:bg-base-200 transition-colors"
-                @click.stop="addReaction(emoji.symbol)"
+                v-for="reaction in availableReactions"
+                :key="reaction.symbol"
+                type="button"
+                class="flex flex-col items-center gap-2 rounded-box p-3 transition-colors hover:bg-base-200"
+                :class="{ 'bg-primary/10': isReactionSelected(reaction.symbol) }"
+                :aria-label="reaction.label"
+                :aria-pressed="isReactionSelected(reaction.symbol)"
+                @click.stop="addReaction(reaction.symbol)"
               >
                 <img
-                  :src="`/images/stickers/${emoji.symbol}.webp`"
-                  :alt="emoji.label"
-                  class="w-10 h-10 object-contain"
+                  :src="`/images/stickers/${reaction.symbol}.webp`"
+                  :alt="reaction.label"
+                  class="h-10 w-10 object-contain"
                 />
                 <span class="text-xs font-medium text-base-content/70">
-                  {{ emoji.label }}
+                  {{ reaction.label }}
                 </span>
               </button>
             </div>
+            <PopoverArrow class="fill-base-100" />
           </PopoverContent>
         </PopoverPortal>
       </PopoverRoot>
@@ -44,7 +53,8 @@
     <button
       v-for="reaction in displayReactions"
       :key="reaction.symbol"
-      class="inline-flex items-center gap-1 h-7 px-2 rounded-box text-xs font-medium transition-colors"
+      type="button"
+      class="inline-flex h-7 items-center gap-1 rounded-box px-2 text-xs font-medium transition-colors"
       :class="
         reaction.userReacted
           ? 'bg-primary/15 text-primary'
@@ -67,7 +77,8 @@
     <!-- More reactions indicator -->
     <button
       v-if="reactions.length > maxVisible"
-      class="inline-flex items-center h-7 px-2 rounded-box text-xs font-medium bg-base-200 text-base-content/70 hover:bg-base-300"
+      type="button"
+      class="inline-flex h-7 items-center rounded-box bg-base-200 px-2 text-xs font-medium text-base-content/70 hover:bg-base-300"
       @click.stop="showAll = !showAll"
     >
       +{{ reactions.length - maxVisible }}
@@ -79,6 +90,7 @@
 import { IconSmilePlus } from "#components";
 import { camelToSnakeStr } from "~/utils/case";
 import {
+  PopoverArrow,
   PopoverContent,
   PopoverPortal,
   PopoverRoot,
@@ -181,8 +193,55 @@ function toggleReaction(reaction: Reaction) {
   }
 }
 
+function isReactionSelected(symbol: string): boolean {
+  return props.reactions.some(
+    (reaction) => reaction.symbol === symbol && reaction.userReacted,
+  );
+}
+
 function addReaction(symbol: string) {
-  emit("react", symbol, 0);
+  if (isReactionSelected(symbol)) {
+    emit("remove", symbol);
+  } else {
+    emit("react", symbol, 0);
+  }
   showReactionPicker.value = false;
 }
+
 </script>
+
+<style scoped>
+:global(.reaction-popover-content) {
+  transform-origin: var(--reka-popover-content-transform-origin);
+}
+
+:global(.reaction-popover-content[data-state="open"]) {
+  animation: reactionPopoverOpen 160ms ease-out;
+}
+
+:global(.reaction-popover-content[data-state="closed"]) {
+  animation: reactionPopoverClose 100ms ease-in;
+}
+
+@keyframes reactionPopoverOpen {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes reactionPopoverClose {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.96) translateY(4px);
+  }
+}
+</style>

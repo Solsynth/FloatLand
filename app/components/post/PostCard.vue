@@ -424,9 +424,6 @@
 
       <!-- Reactions -->
       <PostReactionList
-        v-if="
-          post.reactionsCount && Object.keys(post.reactionsCount).length > 0
-        "
         :reactions="formattedReactions"
         :post-id="post.id"
         class="mt-2"
