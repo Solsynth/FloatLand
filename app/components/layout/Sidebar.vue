@@ -97,7 +97,7 @@
         >
             <!-- Toggle Button + Notification Bell Row (expanded) -->
             <div
-                v-if="isAuthenticated && !collapsed"
+                v-if="hasUserProfile && !collapsed"
                 class="flex items-center justify-start gap-4 ps-4"
             >
                 <button
@@ -112,7 +112,7 @@
 
             <!-- Toggle Button (expanded, no auth) -->
             <button
-                v-if="!isAuthenticated && !collapsed"
+                v-if="!hasUserProfile && !collapsed"
                 class="btn btn-ghost btn-circle btn-sm"
                 aria-label="Collapse sidebar"
                 @click="toggleSidebar"
@@ -122,7 +122,7 @@
 
             <!-- Notification Bell + Toggle (collapsed) -->
             <template v-if="collapsed">
-                <div v-if="isAuthenticated" class="flex justify-center">
+                <div v-if="hasUserProfile" class="flex justify-center">
                     <NotificationBell />
                 </div>
                 <div class="flex justify-center">
@@ -138,7 +138,7 @@
 
             <!-- User Profile Mini -->
             <div
-                v-if="isAuthenticated && user"
+                v-if="hasUserProfile"
                 class="dropdown dropdown-end dropdown-top w-full"
             >
                 <button
@@ -282,10 +282,15 @@ const avatarUrl = computed(() => getFileUrl(user.value?.profile?.picture?.id));
 const fallbackInitials = computed(() =>
     (username.value || "?").slice(0, 2).toUpperCase(),
 );
+const hasUserProfile = computed(
+    () =>
+        isAuthenticated.value &&
+        Boolean(user.value?.id?.trim() && user.value?.name?.trim()),
+);
 
-function handleLogout() {
-    logout();
-    navigateTo("/");
+async function handleLogout() {
+    await logout();
+    await navigateTo("/");
 }
 
 function isNavActive(href: string) {

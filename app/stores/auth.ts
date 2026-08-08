@@ -83,6 +83,27 @@ export const useAuthStore = defineStore("auth", () => {
         return Math.max(0, stepTotal - stepRemain);
     });
 
+    function isValidAccount(value: unknown): value is SnAccount {
+        if (!value || typeof value !== "object") return false;
+
+        const account = value as Partial<SnAccount>;
+        return (
+            typeof account.id === "string" &&
+            account.id.trim().length > 0 &&
+            typeof account.name === "string" &&
+            account.name.trim().length > 0
+        );
+    }
+
+    function setAuthenticatedUser(userData: unknown): asserts userData is SnAccount {
+        if (!isValidAccount(userData)) {
+            throw new Error("Authenticated user response is missing account identity");
+        }
+
+        user.value = userData;
+        isAuthenticated.value = true;
+    }
+
     const displayName = computed(() => user.value?.nick || user.value?.name || "");
 
     const isSuperuser = computed(() => user.value?.isSuperuser === true);
@@ -91,16 +112,22 @@ export const useAuthStore = defineStore("auth", () => {
     async function initAuth() {
         isLoading.value = true;
         try {
-            const userData = await getUserInfo();
-            user.value = userData;
-            isAuthenticated.value = true;
+            const mode = import.meta.client ? getAuthMode() : "cookie";
+            const saved = mode === "bearer" ? readTokenPair() : null;
 
-            // For bearer mode, also populate token ref from localStorage
-            if (import.meta.client && getAuthMode() === "bearer") {
-                const saved = readTokenPair();
-                if (saved) {
-                    token.value = { token: saved.token, expiresAt: saved.expiresAt };
-                }
+            // Avoid an unauthenticated /me request when bearer mode has no token.
+            if (mode === "bearer" && !saved) {
+                user.value = null;
+                isAuthenticated.value = false;
+                token.value = null;
+                return;
+            }
+
+            const userData = await getUserInfo();
+            setAuthenticatedUser(userData);
+
+            if (saved) {
+                token.value = { token: saved.token, expiresAt: saved.expiresAt };
             }
         } catch {
             user.value = null;
@@ -115,8 +142,7 @@ export const useAuthStore = defineStore("auth", () => {
         try {
             isLoading.value = true;
             const userData = await getUserInfo();
-            user.value = userData;
-            isAuthenticated.value = true;
+            setAuthenticatedUser(userData);
         } catch (error) {
             console.error("Failed to fetch user:", error);
             user.value = null;

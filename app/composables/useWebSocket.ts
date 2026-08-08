@@ -31,7 +31,7 @@ let heartbeatAt: Date | null = null
 let isClosing = false
 let reconnectCount = 0
 let reconnectWindowStart: Date | null = null
-let isInitialized = false
+let authWatchInitialized = false
 
 const options = { ...DEFAULT_OPTIONS }
 
@@ -39,7 +39,7 @@ const options = { ...DEFAULT_OPTIONS }
 
 export function useWebSocket() {
   const config = useRuntimeConfig()
-
+  const { isAuthenticated } = useAuth()
   function getUrl(): string {
     const baseUrl = config.public.apiBaseUrl as string
     return baseUrl.replace(/^http/, 'ws') + '/ws'
@@ -101,8 +101,7 @@ export function useWebSocket() {
   }
 
   function scheduleReconnect() {
-    if (isClosing) return
-
+    if (isClosing || !isAuthenticated.value) return
     const now = new Date()
     if (
       !reconnectWindowStart ||
@@ -118,6 +117,7 @@ export function useWebSocket() {
       console.warn(`[WebSocket] Reconnect limit exceeded. Retrying in 30s.`)
       addStatus('disconnected')
       reconnectTimer = setTimeout(() => {
+        if (isClosing || !isAuthenticated.value) return
         reconnectWindowStart = null
         reconnectCount = 0
         addStatus('connecting')
@@ -137,7 +137,7 @@ export function useWebSocket() {
     )
 
     reconnectTimer = setTimeout(() => {
-      if (isClosing) return
+      if (isClosing || !isAuthenticated.value) return
       addStatus('connecting')
       connect()
     }, delayMs)
@@ -145,8 +145,11 @@ export function useWebSocket() {
 
   function connect() {
     if (import.meta.server) return
+    if (!isAuthenticated.value) {
+      disconnect()
+      return
+    }
     if (isClosing) return
-
     cancelTimers()
     addStatus('connecting')
 
@@ -275,6 +278,11 @@ export function useWebSocket() {
   }
 
   function manualReconnect() {
+    if (!isAuthenticated.value) {
+      disconnect()
+      return
+    }
+
     console.log('[WebSocket] Manual reconnect triggered')
     reconnectCount = 0
     reconnectWindowStart = null
@@ -316,6 +324,13 @@ export function useWebSocket() {
       type: 'messages.typing',
       data: { chat_room_id: roomId, type: 'typing' },
       endpoint: 'messager',
+    })
+  }
+
+  if (!authWatchInitialized) {
+    authWatchInitialized = true
+    watch(isAuthenticated, (authenticated) => {
+      if (!authenticated) disconnect()
     })
   }
 
