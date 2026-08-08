@@ -45,7 +45,7 @@
 
       <!-- Right Sidebar (Desktop only) -->
       <aside class="hidden w-full self-start sticky top-4 xl:block">
-        <RightSidebar />
+        <ExploreSidebar />
       </aside>
     </div>
   </NuxtLayout>

@@ -280,7 +280,7 @@
 				</div>
 			</div>
 
-			<!-- Right Sidebar - Publisher Info (20rem, matches RightSidebar rail) -->
+			<!-- Right Sidebar - Publisher Info (20rem, matches ExploreSidebar rail) -->
 			<aside class="hidden w-full self-start sticky top-4 xl:block">
 				<PublisherSidebar
 					v-if="post?.publisher"

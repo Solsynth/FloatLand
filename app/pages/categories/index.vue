@@ -114,7 +114,7 @@
 
       <!-- Right Sidebar (Desktop only) -->
       <aside class="feed-sidebar">
-        <RightSidebar />
+        <ExploreSidebar />
       </aside>
     </div>
   </NuxtLayout>

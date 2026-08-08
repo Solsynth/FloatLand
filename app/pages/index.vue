@@ -136,9 +136,9 @@
         </div>
       </div>
 
-      <!-- Right Sidebar (20rem rail) -->
+      <!-- Explore Sidebar (20rem rail) -->
       <aside class="feed-sidebar">
-        <RightSidebar />
+        <ExploreSidebar />
       </aside>
     </div>
 

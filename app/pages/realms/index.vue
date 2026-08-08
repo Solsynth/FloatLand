@@ -144,7 +144,7 @@
       </div>
 
       <aside class="hidden w-full self-start sticky top-4 xl:block">
-        <RightSidebar />
+        <ExploreSidebar />
       </aside>
 
       <RealmCreateModal

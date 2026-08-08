@@ -14,7 +14,7 @@
 
     <div class="flex gap-3" :class="bodyClass">
       <!-- Avatar + activity badge -->
-      <div class="relative shrink-0">
+      <div class="relative shrink-0 self-start">
         <div v-if="account" class="avatar">
           <div class="h-9 w-9 rounded-full">
             <img
@@ -46,7 +46,7 @@
         </div>
 
         <span
-          class="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full border-2 border-base-100"
+          class="absolute bottom-0 right-0 flex h-4 w-4 items-center justify-center rounded-full border-2 border-base-100"
           :class="activityBadgeClass"
         >
           <component :is="activityIcon" class="h-2.5 w-2.5 text-white" />

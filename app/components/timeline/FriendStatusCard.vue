@@ -1,7 +1,7 @@
 <template>
   <div :class="rootClass">
     <div class="flex items-start gap-3" :class="bodyClass">
-      <div class="relative shrink-0">
+      <div class="relative shrink-0 self-start">
         <div v-if="account" class="avatar">
           <div class="h-9 w-9 rounded-full">
             <img
@@ -33,11 +33,9 @@
         </div>
 
         <span
-          class="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full border-2 border-base-100"
+          class="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-base-100"
           :class="statusBadgeClass"
-        >
-          <component :is="statusIcon" class="h-2.5 w-2.5 text-white" />
-        </span>
+        />
       </div>
 
       <div class="min-w-0 flex-1">
@@ -217,9 +215,9 @@ const statusBadgeClass = computed(() => {
     case 2:
       return "bg-error";
     case 3:
-      return "bg-base-content/40";
+      return "bg-base-300";
     default:
-      return props.status.isOnline ? "bg-success" : "bg-base-content/40";
+      return props.status.isOnline ? "bg-success" : "bg-base-300";
   }
 });
 

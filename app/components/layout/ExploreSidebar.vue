@@ -75,17 +75,37 @@
       </div>
     </section>
 
-    <!-- Legal Footer -->
+    <!-- External resources -->
     <div class="px-2 text-xs leading-relaxed text-base-content/40">
       <p>{{ t("sidebar.copyright", { year: currentYear }) }}</p>
       <div class="flex flex-wrap gap-2 text-xs">
-        <a href="/about" class="link link-hover">{{ t("sidebar.about") }}</a>
+        <a
+          :href="aboutUrl"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="link link-hover"
+        >{{ t("sidebar.about") }}</a>
         <span class="text-base-content/30">&middot;</span>
-        <a href="/privacy" class="link link-hover">{{ t("sidebar.privacy") }}</a>
+        <a
+          :href="privacyUrl"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="link link-hover"
+        >{{ t("sidebar.privacy") }}</a>
         <span class="text-base-content/30">&middot;</span>
-        <a href="/terms" class="link link-hover">{{ t("sidebar.terms") }}</a>
+        <a
+          :href="userAgreementUrl"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="link link-hover"
+        >{{ t("sidebar.terms") }}</a>
         <span class="text-base-content/30">&middot;</span>
-        <a href="/help" class="link link-hover">{{ t("sidebar.help") }}</a>
+        <a
+          :href="helpUrl"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="link link-hover"
+        >{{ t("sidebar.help") }}</a>
       </div>
     </div>
   </div>
@@ -100,15 +120,21 @@ import {
   type PostTag,
 } from "~/utils/api";
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 
 const auth = useAuth();
 const { isAuthenticated } = auth;
 const currentYear = new Date().getFullYear();
 const searchQuery = ref("");
 
-const categories = ref<PostCategory[]>([]);
-const tags = ref<PostTag[]>([]);
+const aboutUrl = "https://solsynth.dev/products-solar-network";
+const privacyUrl = "https://solsynth.dev/legal/privacy-policy";
+const userAgreementUrl = "https://solsynth.dev/legal/user-agreements";
+const helpUrl = computed(() =>
+  locale.value.startsWith("zh")
+    ? "https://kb.solsynth.dev/zh/solar-network/"
+    : "https://kb.solsynth.dev/solar-network/",
+);
 
 function handleSearch() {
   if (searchQuery.value.trim()) {
@@ -116,20 +142,32 @@ function handleSearch() {
   }
 }
 
-async function loadData() {
-  try {
-    const [categoriesResult, tagsResult] = await Promise.all([
-      fetchCategories(5, 0),
-      fetchTags(10, 0),
-    ]);
-    categories.value = categoriesResult.categories;
-    tags.value = tagsResult.tags;
-  } catch (e) {
-    console.error("Failed to load sidebar data:", e);
-  }
-}
+const { data: sidebarData } = await useAsyncData(
+  "explore-sidebar",
+  async () => {
+    try {
+      const [categoriesResult, tagsResult] = await Promise.all([
+        fetchCategories(5, 0),
+        fetchTags(10, 0),
+      ]);
 
-onMounted(() => {
-  loadData();
-});
+      return {
+        categories: categoriesResult.categories,
+        tags: tagsResult.tags,
+      };
+    } catch (error) {
+      console.error("Failed to load explore sidebar data:", error);
+      return { categories: [], tags: [] };
+    }
+  },
+  {
+    default: () => ({
+      categories: [] as PostCategory[],
+      tags: [] as PostTag[],
+    }),
+  },
+);
+
+const categories = computed(() => sidebarData.value?.categories ?? []);
+const tags = computed(() => sidebarData.value?.tags ?? []);
 </script>
