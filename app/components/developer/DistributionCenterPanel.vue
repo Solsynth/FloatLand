@@ -17,6 +17,17 @@
             {{ localizedDistributionText(product.names, product.name, localizationLocales) }}
           </h1>
           <p class="mt-1 font-mono text-sm text-base-content/55">{{ product.slug }}</p>
+          <div class="mt-2 inline-flex max-w-full items-center gap-2 rounded-box border border-base-300 bg-base-200/40 px-2 py-1 text-xs">
+            <span class="shrink-0 text-base-content/55">{{ t('developer.apps.distribution.appId') }}</span>
+            <code class="min-w-0 max-w-[14rem] truncate whitespace-nowrap font-mono text-base-content/75">{{ product.id }}</code>
+            <button
+              class="btn btn-ghost btn-xs h-6 min-h-6 px-2"
+              type="button"
+              @click="copyIdentifier(product.id)"
+            >
+              {{ t('ai.copy') }}
+            </button>
+          </div>
           <p v-if="product.description || Object.keys(product.descriptions || {}).length" class="mt-3 max-w-2xl text-sm text-base-content/65">
             {{ localizedDistributionText(product.descriptions, product.description, localizationLocales) }}
           </p>
@@ -61,14 +72,23 @@
               >
                 <span class="block font-medium">{{ localizedDistributionText(channel.displayNames, channel.displayName || channel.name, localizationLocales) }}</span>
                 <span class="mt-1 block font-mono text-xs text-base-content/50">{{ channel.name }}</span>
+                <span class="mt-1 block max-w-[14rem] truncate whitespace-nowrap font-mono text-[11px] text-base-content/45">{{ t('developer.apps.distribution.channelId') }} · {{ channel.id }}</span>
               </button>
               <div class="flex shrink-0 items-center gap-2">
                 <span class="text-xs text-base-content/55">
                   <template v-if="channel.latest">
-                    {{ channel.latest.version }} · {{ channel.latest.artifacts.length }} {{ t('developer.apps.distribution.artifactCount') }}
+                    {{ localizedDistributionText(channel.latest.titles, channel.latest.title || channel.latest.version, localizationLocales) }}
+                    · {{ channel.latest.version }} · {{ channel.latest.artifacts.length }} {{ t('developer.apps.distribution.artifactCount') }}
                   </template>
                   <template v-else>{{ t('developer.apps.distribution.noRelease') }}</template>
                 </span>
+                <button
+                  class="btn btn-ghost btn-xs"
+                  type="button"
+                  @click.stop="copyIdentifier(channel.id)"
+                >
+                  {{ t('ai.copy') }}
+                </button>
                 <button class="btn btn-ghost btn-xs" type="button" @click="openChannelEditor(channel)">
                   <IconPencil class="h-3.5 w-3.5" />
                   <span class="sr-only">{{ t('developer.apps.distribution.editChannel') }}</span>
@@ -86,6 +106,17 @@
             <div>
               <h2 class="font-semibold">{{ t('developer.apps.distribution.releases') }}</h2>
               <p v-if="selectedChannel" class="mt-1 font-mono text-xs text-base-content/50">{{ selectedChannel.name }}</p>
+              <div class="mt-2 inline-flex max-w-full items-center gap-2 rounded-box border border-base-300 bg-base-200/40 px-2 py-1 text-xs">
+                <span class="shrink-0 text-base-content/55">{{ t('developer.apps.distribution.channelId') }}</span>
+                <code class="min-w-0 max-w-[14rem] truncate whitespace-nowrap font-mono text-base-content/75">{{ selectedChannel.id }}</code>
+                <button
+                  class="btn btn-ghost btn-xs h-6 min-h-6 px-2"
+                  type="button"
+                  @click="copyIdentifier(selectedChannel.id)"
+                >
+                  {{ t('ai.copy') }}
+                </button>
+              </div>
             </div>
             <button
               class="btn btn-primary btn-sm shrink-0"
@@ -105,9 +136,23 @@
               class="flex items-start justify-between gap-3 border border-base-300 p-3 rounded-box transition-colors hover:border-primary/50"
             >
               <div>
-                <div class="font-mono text-sm">{{ release.version }}</div>
+                <div class="font-medium">
+                  {{ localizedDistributionText(release.titles, release.title || release.version, localizationLocales) }}
+                </div>
+                <div class="mt-1 font-mono text-sm">{{ release.version }}</div>
                 <div class="mt-1 text-xs text-base-content/55">
                   {{ release.status }} · {{ release.artifacts.length }} {{ t('developer.apps.distribution.artifactCount') }}
+                </div>
+                <div class="mt-2 inline-flex max-w-full items-center gap-2 rounded-box border border-base-300 bg-base-200/40 px-2 py-1 text-xs">
+                  <span class="shrink-0 text-base-content/55">{{ t('developer.apps.distribution.releaseId') }}</span>
+                  <code class="min-w-0 max-w-[14rem] truncate whitespace-nowrap font-mono text-base-content/75">{{ release.id }}</code>
+                  <button
+                    class="btn btn-ghost btn-xs h-6 min-h-6 px-2"
+                    type="button"
+                    @click.stop="copyIdentifier(release.id)"
+                  >
+                    {{ t('ai.copy') }}
+                  </button>
                 </div>
               </div>
               <div v-if="release.status !== 'yanked'" class="flex shrink-0 items-center gap-2">
@@ -176,6 +221,63 @@
         </div>
         <p v-else class="mt-5 border border-base-300 p-4 rounded-box text-sm text-base-content/60">
           {{ t('developer.apps.distribution.metricsEmpty') }}
+        </p>
+      </section>
+      <section class="border border-base-300 bg-base-100 p-5 rounded-box">
+        <div class="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h2 class="font-semibold">{{ t('developer.apps.distribution.uploadKeys') }}</h2>
+            <p class="mt-1 text-sm text-base-content/60">{{ t('developer.apps.distribution.uploadKeysHint') }}</p>
+          </div>
+          <button class="btn btn-outline btn-sm" :disabled="isLoadingUploadApiKeys" type="button" @click="loadUploadApiKeys">
+            <span v-if="isLoadingUploadApiKeys" class="loading loading-spinner loading-xs" />
+            {{ t('developer.apps.distribution.refresh') }}
+          </button>
+        </div>
+        <div v-if="oneTimeUploadApiKey" class="alert alert-warning mt-5 rounded-box border border-warning/40">
+          <div class="min-w-0">
+            <div class="font-medium">{{ t('developer.apps.distribution.uploadKeyCreated') }}</div>
+            <code class="mt-2 block max-w-[28rem] truncate whitespace-nowrap font-mono text-xs">{{ oneTimeUploadApiKey }}</code>
+          </div>
+          <button class="btn btn-warning btn-sm shrink-0" type="button" @click="copyIdentifier(oneTimeUploadApiKey)">
+            {{ t('ai.copy') }}
+          </button>
+        </div>
+        <form class="mt-5 flex flex-col gap-2 sm:flex-row" @submit.prevent="createUploadApiKey">
+          <input
+            v-model="newUploadApiKeyName"
+            class="input w-full"
+            type="text"
+            maxlength="100"
+            :placeholder="t('developer.apps.distribution.uploadKeyNamePlaceholder')"
+            :aria-label="t('developer.apps.distribution.uploadKeyName')"
+            required
+          />
+          <button class="btn btn-primary shrink-0" :disabled="isCreatingUploadApiKey" type="submit">
+            <span v-if="isCreatingUploadApiKey" class="loading loading-spinner loading-xs" />
+            {{ t('developer.apps.distribution.createUploadKey') }}
+          </button>
+        </form>
+        <div v-if="uploadApiKeys.length" class="mt-5 space-y-2">
+          <div
+            v-for="key in uploadApiKeys"
+            :key="key.id"
+            class="flex flex-wrap items-center justify-between gap-3 border border-base-300 p-3 rounded-box"
+          >
+            <div class="min-w-0">
+              <div class="font-medium">{{ key.name }}</div>
+              <div class="mt-1 text-xs text-base-content/55">
+                <span class="font-mono">{{ key.id }}</span>
+                <span v-if="key.lastUsedAt"> · {{ key.lastUsedAt }}</span>
+              </div>
+            </div>
+            <button class="btn btn-ghost btn-xs text-error" type="button" @click="deleteUploadApiKey(key)">
+              {{ t('common.remove') }}
+            </button>
+          </div>
+        </div>
+        <p v-else class="mt-5 border border-base-300 p-4 rounded-box text-sm text-base-content/60">
+          {{ t('developer.apps.distribution.noUploadKeys') }}
         </p>
       </section>
     </template>
@@ -412,6 +514,15 @@
             class="grid gap-4 border border-base-300 p-4 rounded-box"
           >
             <fieldset class="fieldset">
+              <legend class="fieldset-legend">{{ t('developer.apps.distribution.releaseTitle') }}</legend>
+              <input
+                v-model="entry.title"
+                type="text"
+                class="input w-full"
+                :placeholder="t('developer.apps.distribution.releaseTitle')"
+              />
+            </fieldset>
+            <fieldset class="fieldset">
               <legend class="fieldset-legend">{{ t('developer.apps.distribution.releaseNotes') }}</legend>
               <div class="flex gap-2">
                 <select v-model="entry.locale" class="select w-32" :aria-label="t('developer.apps.distribution.selectLanguage')">
@@ -454,11 +565,67 @@
               <input
                 class="file-input w-full"
                 type="file"
-                :required="!artifact.objectKey"
-                :disabled="Boolean(artifact.objectKey)"
+                :required="!artifact.isExisting && !artifact.downloadUrl"
+                :disabled="Boolean(artifact.isExisting || artifact.downloadUrl)"
                 @change="selectArtifactFile(index, $event)"
               />
             </fieldset>
+            <fieldset class="fieldset sm:col-span-2">
+              <legend class="fieldset-legend">{{ t('developer.apps.distribution.externalUrl') }}</legend>
+              <input
+                v-model="artifact.downloadUrl"
+                type="url"
+                class="input w-full"
+                :placeholder="t('developer.apps.distribution.externalUrlPlaceholder')"
+                :disabled="Boolean(artifact.isExisting)"
+              />
+              <p class="text-xs text-base-content/55">{{ t('developer.apps.distribution.externalUrlHint') }}</p>
+            </fieldset>
+            <div v-if="artifact.downloadUrl" class="grid gap-4 sm:col-span-2 sm:grid-cols-2">
+              <fieldset class="fieldset">
+                <legend class="fieldset-legend">{{ t('developer.apps.distribution.fileName') }}</legend>
+                <input
+                  v-model="artifact.fileName"
+                  type="text"
+                  class="input w-full"
+                  :required="Boolean(artifact.downloadUrl)"
+                  :disabled="Boolean(artifact.isExisting)"
+                />
+              </fieldset>
+              <fieldset class="fieldset">
+                <legend class="fieldset-legend">{{ t('developer.apps.distribution.mimeType') }}</legend>
+                <input
+                  v-model="artifact.mimeType"
+                  type="text"
+                  class="input w-full"
+                  placeholder="application/gzip"
+                  :required="Boolean(artifact.downloadUrl)"
+                  :disabled="Boolean(artifact.isExisting)"
+                />
+              </fieldset>
+              <fieldset class="fieldset">
+                <legend class="fieldset-legend">{{ t('developer.apps.distribution.size') }}</legend>
+                <input
+                  v-model="artifact.size"
+                  type="number"
+                  min="0"
+                  step="1"
+                  class="input w-full"
+                  :required="Boolean(artifact.downloadUrl)"
+                  :disabled="Boolean(artifact.isExisting)"
+                />
+              </fieldset>
+              <fieldset class="fieldset">
+                <legend class="fieldset-legend">{{ t('developer.apps.distribution.hash') }}</legend>
+                <input
+                  v-model="artifact.hash"
+                  type="text"
+                  class="input w-full font-mono text-sm"
+                  :required="Boolean(artifact.downloadUrl)"
+                  :disabled="Boolean(artifact.isExisting)"
+                />
+              </fieldset>
+            </div>
             <fieldset class="fieldset">
               <legend class="fieldset-legend">{{ t('developer.apps.distribution.platform') }}</legend>
               <input
@@ -467,7 +634,7 @@
                 class="input w-full"
                 placeholder="macos"
                 required
-                :disabled="Boolean(artifact.objectKey)"
+                :disabled="Boolean(artifact.isExisting)"
               />
             </fieldset>
             <fieldset class="fieldset">
@@ -478,7 +645,7 @@
                 class="input w-full"
                 placeholder="arm64"
                 required
-                :disabled="Boolean(artifact.objectKey)"
+                :disabled="Boolean(artifact.isExisting)"
               />
             </fieldset>
             <fieldset class="fieldset">
@@ -488,7 +655,7 @@
                 type="text"
                 class="input w-full"
                 :placeholder="t('developer.apps.distribution.artifactSlug')"
-                :disabled="Boolean(artifact.objectKey)"
+                :disabled="Boolean(artifact.isExisting)"
               />
             </fieldset>
             <fieldset class="fieldset sm:col-span-2">
@@ -497,7 +664,7 @@
                 v-model="artifact.meta"
                 class="textarea min-h-24 w-full font-mono text-sm"
                 :placeholder="t('developer.apps.distribution.artifactMetaPlaceholder')"
-                :disabled="Boolean(artifact.objectKey)"
+                :disabled="Boolean(artifact.isExisting)"
                 rows="3"
               />
               <p class="text-xs text-base-content/55">{{ t('developer.apps.distribution.artifactMetaHint') }}</p>
@@ -556,17 +723,10 @@
           <label class="flex items-start gap-3 border border-base-300 p-4 rounded-box">
             <input v-model="releaseForm.forceUpdate" class="checkbox checkbox-sm mt-0.5" type="checkbox" />
             <span>
-              <span class="block font-medium">{{ t('developer.apps.distribution.forceUpdate') }}</span>
-              <span class="mt-1 block text-xs text-base-content/60">{{ t('developer.apps.distribution.forceUpdateHint') }}</span>
+              <span class="font-medium">{{ t('developer.apps.distribution.forceUpdate') }}</span>
+              <span class="mt-1 block text-xs text-base-content/55">{{ t('developer.apps.distribution.forceUpdateHint') }}</span>
             </span>
           </label>
-        </div>
-        <div class="flex justify-end gap-2 pt-4">
-          <button class="btn btn-ghost" type="button" @click="releaseDrawerOpen = false">{{ t('common.cancel') }}</button>
-          <button class="btn btn-primary" type="submit" :disabled="isCreatingRelease || !releaseChannels.length">
-            <span v-if="isCreatingRelease" class="loading loading-spinner loading-sm" />
-            {{ editingReleaseId ? t('common.save') : t('developer.apps.distribution.createDraft') }}
-          </button>
         </div>
       </form>
     </AdminDrawer>
@@ -575,15 +735,18 @@
 
 <script setup lang="ts">
 import { IconPencil, IconPlus, IconRefreshCw } from '#components'
-import type { DistributionArtifact, DistributionChannel, DistributionLocalizedText, DistributionMetrics, DistributionProduct, DistributionRelease } from '~/types/distribution'
+import type { DistributionArtifact, DistributionChannel, DistributionLocalizedText, DistributionMetrics, DistributionProduct, DistributionRelease, DistributionUploadApiKey } from '~/types/distribution'
 import {
   associateDistributionArtifact,
   createDistributionChannel,
   createDistributionRelease,
+  createDistributionUploadApiKey,
+  deleteDistributionUploadApiKey,
   fetchDistributionChannels,
   fetchDistributionMetrics,
   fetchDistributionProducts,
   fetchDistributionReleases,
+  fetchDistributionUploadApiKeys,
   localizedDistributionText,
   prepareDistributionUpload,
   updateDistributionChannel,
@@ -609,12 +772,19 @@ type ChannelLocalizationEntry = {
 type ReleaseLocalizationEntry = {
   id: string
   locale: string
+  title: string
   description: string
 }
 type ReleaseArtifactEntry = {
   id: string
   file: File | null
+  isExisting: boolean
   objectKey?: string
+  downloadUrl: string
+  fileName: string
+  mimeType: string
+  size: string
+  hash: string
   slug: string
   meta: string
   platform: string
@@ -656,6 +826,11 @@ const newChannelLanguage = ref('')
 const newReleaseLanguage = ref('')
 const metrics = ref<DistributionMetrics | null>(null)
 const isLoadingMetrics = ref(false)
+const uploadApiKeys = ref<DistributionUploadApiKey[]>([])
+const isLoadingUploadApiKeys = ref(false)
+const isCreatingUploadApiKey = ref(false)
+const newUploadApiKeyName = ref('')
+const oneTimeUploadApiKey = ref('')
 const isCreatingChannel = ref(false)
 const isCreatingRelease = ref(false)
 const publishingId = ref<string | null>(null)
@@ -679,14 +854,22 @@ const releaseForm = reactive({
 function normalizeLocale(value: string) {
   return value.trim().replaceAll('_', '-').toLowerCase()
 }
-
-
-function localizedFormFallback(fields: DistributionLocalizedText, fallback: string) {
-  return localizedDistributionText(fields, fallback, localizationLocales.value)
-}
-
 function newArtifact(): ReleaseArtifactEntry {
-  return { id: crypto.randomUUID(), file: null, objectKey: undefined, slug: '', meta: '', platform: '', architecture: '' }
+  return {
+    id: crypto.randomUUID(),
+    file: null,
+    isExisting: false,
+    objectKey: undefined,
+    downloadUrl: '',
+    fileName: '',
+    mimeType: '',
+    size: '',
+    hash: '',
+    slug: '',
+    meta: '',
+    platform: '',
+    architecture: '',
+  }
 }
 
 function releaseArtifactEntries(artifacts: DistributionArtifact[]) {
@@ -694,7 +877,13 @@ function releaseArtifactEntries(artifacts: DistributionArtifact[]) {
     ? artifacts.map((artifact) => ({
         id: artifact.id || crypto.randomUUID(),
         file: null,
+        isExisting: true,
         objectKey: artifact.objectKey,
+        downloadUrl: artifact.downloadUrl || '',
+        fileName: artifact.fileName || '',
+        mimeType: artifact.mimeType || '',
+        size: artifact.size ? String(artifact.size) : '',
+        hash: artifact.hash || '',
         slug: artifact.slug || '',
         meta: artifact.meta ? JSON.stringify(artifact.meta, null, 2) : '',
         platform: artifact.platform,
@@ -844,16 +1033,22 @@ function channelLocalizedMap(field: 'displayName' | 'description') {
 }
 
 function newReleaseLocalization(localeCode = contentLocale.value): ReleaseLocalizationEntry {
-  return { id: crypto.randomUUID(), locale: localeCode, description: '' }
+  return { id: crypto.randomUUID(), locale: localeCode, title: '', description: '' }
 }
 
-function releaseLocalizationEntries(descriptions: DistributionLocalizedText | undefined, fallback: string) {
-  const locales = new Set(Object.keys(descriptions || {}))
+function releaseLocalizationEntries(
+  titles: DistributionLocalizedText | undefined,
+  descriptions: DistributionLocalizedText | undefined,
+  fallbackTitle: string,
+  fallbackDescription: string,
+) {
+  const locales = new Set([...Object.keys(titles || {}), ...Object.keys(descriptions || {})])
   if (!locales.size) locales.add(contentLocale.value)
   return [...locales].map((localeCode, index) => ({
     id: crypto.randomUUID(),
     locale: localeCode,
-    description: localizedValue(descriptions, localeCode) || (index === 0 ? fallback : ''),
+    title: localizedValue(titles, localeCode) || (index === 0 ? fallbackTitle : ''),
+    description: localizedValue(descriptions, localeCode) || (index === 0 ? fallbackDescription : ''),
   }))
 }
 
@@ -870,6 +1065,12 @@ function removeReleaseLocalization(index: number) {
 function releaseLocalizedMap() {
   return releaseForm.localizations.reduce<DistributionLocalizedText>((result, entry) => {
     result[entry.locale] = entry.description.trim()
+    return result
+  }, {})
+}
+function releaseTitleMap() {
+  return releaseForm.localizations.reduce<DistributionLocalizedText>((result, entry) => {
+    result[entry.locale] = entry.title.trim()
     return result
   }, {})
 }
@@ -925,11 +1126,16 @@ async function loadProduct() {
       ? await fetchDistributionReleases(product.value.id, selectedChannel.value.name)
       : []
     metrics.value = null
+    uploadApiKeys.value = []
+    oneTimeUploadApiKey.value = ''
+    if (product.value) await loadUploadApiKeys()
   } catch (error) {
     product.value = null
     channels.value = []
     selectedChannel.value = null
     releases.value = []
+    uploadApiKeys.value = []
+    oneTimeUploadApiKey.value = ''
     $toast.error(error instanceof Error ? error.message : t('developer.apps.distribution.requestFailed'))
   } finally {
     isLoading.value = false
@@ -1012,12 +1218,60 @@ function addArtifact() {
 function removeArtifact(index: number) {
   releaseForm.artifacts.splice(index, 1)
 }
+async function copyIdentifier(value: string) {
+  try {
+    await navigator.clipboard.writeText(value)
+    $toast.success(t('developer.apps.distribution.idCopied'))
+  } catch {
+    $toast.error(t('developer.apps.distribution.copyFailed'))
+  }
+}
+async function loadUploadApiKeys() {
+  if (!product.value) return
+  isLoadingUploadApiKeys.value = true
+  try {
+    uploadApiKeys.value = await fetchDistributionUploadApiKeys(product.value.id)
+  } catch (error) {
+    $toast.error(error instanceof Error ? error.message : t('developer.apps.distribution.requestFailed'))
+  } finally {
+    isLoadingUploadApiKeys.value = false
+  }
+}
+
+async function createUploadApiKey() {
+  if (!product.value || !newUploadApiKeyName.value.trim()) return
+  isCreatingUploadApiKey.value = true
+  try {
+    const created = await createDistributionUploadApiKey(product.value.id, newUploadApiKeyName.value.trim())
+    uploadApiKeys.value = [created, ...uploadApiKeys.value]
+    oneTimeUploadApiKey.value = created.key
+    newUploadApiKeyName.value = ''
+    $toast.success(t('developer.apps.distribution.uploadKeyCreatedToast'))
+  } catch (error) {
+    $toast.error(error instanceof Error ? error.message : t('developer.apps.distribution.requestFailed'))
+  } finally {
+    isCreatingUploadApiKey.value = false
+  }
+}
+
+async function deleteUploadApiKey(key: DistributionUploadApiKey) {
+  if (!product.value || !window.confirm(t('developer.apps.distribution.deleteUploadKeyConfirm'))) return
+  try {
+    await deleteDistributionUploadApiKey(product.value.id, key.id)
+    uploadApiKeys.value = uploadApiKeys.value.filter((item) => item.id !== key.id)
+    $toast.success(t('developer.apps.distribution.uploadKeyDeleted'))
+  } catch (error) {
+    $toast.error(error instanceof Error ? error.message : t('developer.apps.distribution.requestFailed'))
+  }
+}
 
 function selectArtifactFile(index: number, event: Event) {
   const file = (event.target as HTMLInputElement).files?.[0]
   if (file) {
     releaseForm.artifacts[index].file = file
+    releaseForm.artifacts[index].isExisting = false
     releaseForm.artifacts[index].objectKey = undefined
+    releaseForm.artifacts[index].downloadUrl = ''
   }
 }
 
@@ -1058,20 +1312,51 @@ function parseReleaseMetadata(entries: ReleaseMetadataEntry[]) {
 }
 async function associateNewReleaseArtifacts(productId: string, releaseId: string) {
   for (const artifact of releaseForm.artifacts) {
-    if (!artifact.file) {
-      if (artifact.objectKey || (!artifact.platform.trim() && !artifact.architecture.trim())) continue
+    if (artifact.isExisting) continue
+    const hasExternalUrl = Boolean(artifact.downloadUrl.trim())
+    if (!artifact.file && !hasExternalUrl) {
+      if (!artifact.platform.trim() && !artifact.architecture.trim()) continue
       throw new Error(t('developer.apps.distribution.fileRequired'))
     }
     if (!artifact.platform.trim() || !artifact.architecture.trim()) {
       throw new Error(t('developer.apps.distribution.fileRequired'))
     }
     const meta = parseArtifactMeta(artifact.meta)
-    const hash = await sha256(artifact.file)
+    if (hasExternalUrl) {
+      let externalUrl: URL
+      try {
+        externalUrl = new URL(artifact.downloadUrl.trim())
+      } catch {
+        throw new Error(t('developer.apps.distribution.externalUrlInvalid'))
+      }
+      if (externalUrl.protocol !== 'http:' && externalUrl.protocol !== 'https:') {
+        throw new Error(t('developer.apps.distribution.externalUrlInvalid'))
+      }
+      const size = Number(artifact.size)
+      if (!artifact.fileName.trim() || !artifact.mimeType.trim() || !Number.isSafeInteger(size) || size < 0 || !artifact.hash.trim()) {
+        throw new Error(t('developer.apps.distribution.externalArtifactRequired'))
+      }
+      await associateDistributionArtifact(productId, releaseId, {
+        downloadUrl: externalUrl.toString(),
+        fileName: artifact.fileName.trim(),
+        mimeType: artifact.mimeType.trim(),
+        size,
+        hash: artifact.hash.trim(),
+        platform: artifact.platform.trim(),
+        architecture: artifact.architecture.trim(),
+        slug: artifact.slug.trim() || undefined,
+        meta,
+      })
+      continue
+    }
+    const file = artifact.file
+    if (!file) continue
+    const hash = await sha256(file)
     const upload = await prepareDistributionUpload(productId, {
-      fileName: artifact.file.name,
-      mimeType: artifact.file.type || 'application/octet-stream',
+      fileName: file.name,
+      mimeType: file.type || 'application/octet-stream',
     })
-    await uploadDistributionArtifact(upload, artifact.file, artifact.file.type || 'application/octet-stream', hash)
+    await uploadDistributionArtifact(upload, file, file.type || 'application/octet-stream', hash)
     await associateDistributionArtifact(productId, releaseId, {
       objectKey: upload.objectKey,
       platform: artifact.platform.trim(),
@@ -1101,26 +1386,38 @@ function openReleaseEditor(release: DistributionRelease) {
     ? [...release.channels]
     : selectedChannel.value ? [selectedChannel.value.name] : []
   releaseForm.version = release.version
-  releaseForm.localizations = releaseLocalizationEntries(release.descriptions, release.releaseNotes)
+  releaseForm.localizations = releaseLocalizationEntries(
+    release.titles,
+    release.descriptions,
+    release.title || release.version,
+    release.releaseNotes,
+  )
   releaseForm.metadataEntries = releaseMetadataEntries(release.metadata)
   releaseForm.forceUpdate = release.forceUpdate === true
   releaseForm.artifacts = releaseArtifactEntries(release.artifacts || [])
   newReleaseLanguage.value = ''
   releaseDrawerOpen.value = true
 }
-
 async function saveRelease() {
   if (!product.value || !releaseChannels.value.length) return
+  if (!releaseForm.localizations.some((entry) => entry.title.trim())) {
+    $toast.error(t('developer.apps.distribution.releaseTitleRequired'))
+    return
+  }
   const isEditing = Boolean(editingReleaseId.value)
   isCreatingRelease.value = true
   try {
     let release: DistributionRelease
+    const titles = releaseTitleMap()
+    const title = localizedFormFallback(titles, releaseForm.version)
     const descriptions = releaseLocalizedMap()
     const releaseNotes = localizedFormFallback(descriptions, '')
     const metadata = parseReleaseMetadata(releaseForm.metadataEntries)
     if (editingReleaseId.value) {
       release = await updateDistributionRelease(product.value.id, editingReleaseId.value, {
         version: releaseForm.version,
+        title,
+        titles,
         channels: releaseChannels.value,
         releaseNotes,
         descriptions,
@@ -1134,6 +1431,8 @@ async function saveRelease() {
     } else {
       release = await createDistributionRelease(product.value.id, {
         version: releaseForm.version,
+        title,
+        titles,
         channels: releaseChannels.value,
         releaseNotes,
         descriptions,

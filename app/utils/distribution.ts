@@ -8,6 +8,8 @@ import type {
   DistributionUpdateCheck,
   DistributionUpdateCheckInput,
   DistributionUpload,
+  DistributionUploadApiKey,
+  DistributionCreatedUploadApiKey,
 } from '~/types/distribution'
 import { apiFetch, safeJsonParse } from '~/utils/api'
 
@@ -76,6 +78,32 @@ export async function updateDistributionProduct(
     { method: 'PUT', body: JSON.stringify(input) },
   )
   return safeJsonParse<DistributionProduct>(response)
+}
+
+function uploadApiKeysPath(productId: string, keyId?: string) {
+  const suffix = keyId ? `/${encodeURIComponent(keyId)}` : ''
+  return `/api/products/${encodeURIComponent(productId)}/upload-api-keys${suffix}`
+}
+
+export async function fetchDistributionUploadApiKeys(productId: string): Promise<DistributionUploadApiKey[]> {
+  const response = await apiFetch(uploadApiKeysPath(productId))
+  const payload = await safeJsonParse<DistributionUploadApiKey[] | { data?: DistributionUploadApiKey[] }>(response)
+  return Array.isArray(payload) ? payload : payload.data ?? []
+}
+
+export async function createDistributionUploadApiKey(
+  productId: string,
+  name: string,
+): Promise<DistributionCreatedUploadApiKey> {
+  const response = await apiFetch(uploadApiKeysPath(productId), {
+    method: 'POST',
+    body: JSON.stringify({ name }),
+  })
+  return safeJsonParse<DistributionCreatedUploadApiKey>(response)
+}
+
+export async function deleteDistributionUploadApiKey(productId: string, keyId: string) {
+  await apiFetch(uploadApiKeysPath(productId, keyId), { method: 'DELETE' })
 }
 
 export async function fetchDistributionChannels(productId: string): Promise<DistributionChannel[]> {
@@ -165,19 +193,29 @@ export async function associateDistributionArtifact(
   productId: string,
   releaseId: string,
   input: {
-    objectKey: string
+    objectKey?: string
+    downloadUrl?: string
+    fileName?: string
+    mimeType?: string
+    size?: number
+    hash?: string
     platform: string
     architecture: string
     slug?: string
     meta?: Record<string, unknown>
   },
-) {
+): Promise<void> {
   await apiFetch(
     distributionPath(`/products/${encodeURIComponent(productId)}/releases/${encodeURIComponent(releaseId)}/artifacts`),
     {
       method: 'POST',
       body: JSON.stringify({
         object_key: input.objectKey,
+        download_url: input.downloadUrl,
+        file_name: input.fileName,
+        mime_type: input.mimeType,
+        size: input.size,
+        hash: input.hash,
         platform: input.platform,
         architecture: input.architecture,
         slug: input.slug,
@@ -191,6 +229,8 @@ export async function createDistributionRelease(
   productId: string,
   input: {
     version: string
+    title?: string
+    titles?: DistributionLocalizedText
     channels: string[]
     releaseNotes?: string
     descriptions?: DistributionLocalizedText
@@ -201,6 +241,8 @@ export async function createDistributionRelease(
 ): Promise<DistributionRelease> {
   const body: Record<string, unknown> = {
     version: input.version,
+    title: input.title,
+    titles: input.titles,
     channels: input.channels,
     release_notes: input.releaseNotes,
     descriptions: input.descriptions,
@@ -228,6 +270,8 @@ export async function updateDistributionRelease(
   releaseId: string,
   input: {
     version: string
+    title?: string
+    titles?: DistributionLocalizedText
     channels: string[]
     releaseNotes?: string
     descriptions?: DistributionLocalizedText
@@ -241,6 +285,8 @@ export async function updateDistributionRelease(
       method: 'PUT',
       body: JSON.stringify({
         version: input.version,
+        title: input.title,
+        titles: input.titles,
         channels: input.channels,
         release_notes: input.releaseNotes,
         descriptions: input.descriptions,

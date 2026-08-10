@@ -11,6 +11,17 @@ export interface DistributionProduct {
   createdAt: string
   updatedAt: string
 }
+export interface DistributionUploadApiKey {
+  id: string
+  name: string
+  createdAt?: string
+  lastUsedAt?: string | null
+}
+
+export interface DistributionCreatedUploadApiKey extends DistributionUploadApiKey {
+  key: string
+}
+
 
 export interface DistributionChannel {
   id: string
@@ -24,7 +35,7 @@ export interface DistributionChannel {
 
 export interface DistributionArtifact {
   id?: string
-  objectKey: string
+  objectKey?: string
   platform: string
   architecture: string
   fileName: string
@@ -40,6 +51,8 @@ export interface DistributionRelease {
   id: string
   productId: string
   version: string
+  title?: string
+  titles?: DistributionLocalizedText
   channel?: string
   channels: string[]
   releaseNotes: string
