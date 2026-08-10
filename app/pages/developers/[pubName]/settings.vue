@@ -83,9 +83,9 @@ const isLoading = ref(false)
 
 const developerInfo = computed(() => currentDeveloper.value)
 
-defineOgImage('UniOgImage', { title: `${t('developer.settings')} - ${pubName.value}` })
+defineOgImage('UniOgImage', { title: `${t('developer.settings')} · ${pubName.value}` })
 
-useSolarSeo({ title: `${t('developer.settings')} - ${pubName.value}` })
+useSolarSeo({ title: `${t('developer.settings')} · ${pubName.value}` })
 
 function formatDate(dateStr?: string) {
   if (!dateStr) return '-'

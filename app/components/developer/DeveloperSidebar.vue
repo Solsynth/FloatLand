@@ -113,6 +113,11 @@ const navGroups = computed(() => {
           label: t("developer.settings"),
           href: `/developers/${p}/settings`,
         },
+        {
+          icon: IconStore,
+          label: t("developer.apps.distribution.title"),
+          href: `/developers/${p}/distribution`,
+        },
       ],
     });
   }

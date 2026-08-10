@@ -118,7 +118,7 @@ const segmentLabels: Record<string, string> = {
   bots: "Bots",
   "api-playground": "API Playground",
   marketplace: "Plugin Marketplace",
-  miniapps: "Plugins",
+  distribution: "Distribution",
 };
 
 const nickLabel = computed(

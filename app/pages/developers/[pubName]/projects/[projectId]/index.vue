@@ -204,9 +204,9 @@ const editForm = reactive({
   description: '',
 })
 
-defineOgImage('UniOgImage', { title: `${t('developer.projects.detail')} - ${pubName.value}` })
+defineOgImage('UniOgImage', { title: `${t('developer.projects.detail')} · ${pubName.value}` })
 
-useSolarSeo({ title: `${t('developer.projects.detail')} - ${pubName.value}` })
+useSolarSeo({ title: `${t('developer.projects.detail')} · ${pubName.value}` })
 
 function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString()

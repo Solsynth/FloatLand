@@ -56,6 +56,8 @@
           </div>
         </div>
 
+
+
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <!-- Secrets Section -->
           <div class="card bg-base-100 shadow-sm">
@@ -951,9 +953,9 @@ const backgroundPickerOpen = ref(false)
 const picturePreview = computed(() => getFileUrl(pictureId.value))
 const backgroundPreview = computed(() => getFileUrl(backgroundId.value))
 
-defineOgImage('UniOgImage', { title: `${t('developer.apps.detail')} - ${pubName.value}` })
+defineOgImage('UniOgImage', { title: `${t('developer.apps.detail')} · ${pubName.value}` })
 
-useSolarSeo({ title: `${t('developer.apps.detail')} - ${pubName.value}` })
+useSolarSeo({ title: `${t('developer.apps.detail')} · ${pubName.value}` })
 
 const productPicturePreview = computed(() => getFileUrl(productPictureId.value))
 const productBackgroundPreview = computed(() => getFileUrl(productBackgroundId.value))

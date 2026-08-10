@@ -134,9 +134,9 @@ const newBot = reactive({
   bio: '',
 })
 
-defineOgImage('UniOgImage', { title: `${t('developer.bots.title')} - ${pubName.value}` })
+defineOgImage('UniOgImage', { title: `${t('developer.bots.title')} · ${pubName.value}` })
 
-useSolarSeo({ title: `${t('developer.bots.title')} - ${pubName.value}` })
+useSolarSeo({ title: `${t('developer.bots.title')} · ${pubName.value}` })
 
 async function loadBots() {
   isLoading.value = true

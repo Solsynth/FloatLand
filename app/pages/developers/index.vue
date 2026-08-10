@@ -11,24 +11,31 @@
           <template v-else>
             <!-- Developer List -->
             <div v-if="developers.length > 0" class="space-y-1">
-              <NuxtLink v-for="dev in developers" :key="dev.id" :to="`/developers/${dev.publisher?.name}`"
-                class="flex items-center gap-4 rounded-box p-3 transition-colors hover:bg-base-200">
-                <div class="avatar">
-                  <div class="w-10 rounded-full">
-                    <img v-if="dev.publisher?.picture?.id" :src="getFileUrl(dev.publisher?.picture?.id)!"
-                      :alt="dev.publisher?.nick" />
-                    <div v-else
-                      class="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-content text-sm font-bold">
-                      {{ dev.publisher?.nick?.slice(0, 2).toUpperCase() }}
+              <div v-for="dev in developers" :key="dev.id" class="flex items-center gap-2 rounded-box p-2 transition-colors hover:bg-base-200">
+                <NuxtLink :to="`/developers/${dev.publisher?.name}`" class="flex min-w-0 flex-1 items-center gap-4 p-1">
+                  <div class="avatar">
+                    <div class="w-10 rounded-full">
+                      <img v-if="dev.publisher?.picture?.id" :src="getFileUrl(dev.publisher?.picture?.id)!" :alt="dev.publisher?.nick" />
+                      <div v-else class="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-content text-sm font-bold">
+                        {{ dev.publisher?.nick?.slice(0, 2).toUpperCase() }}
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div class="min-w-0 flex-1">
-                  <div class="font-medium">{{ dev.publisher?.nick }}</div>
-                  <div class="text-sm text-base-content/50">@{{ dev.publisher?.name }}</div>
-                </div>
-                <IconChevronRight class="w-5 h-5 text-base-content/30" />
-              </NuxtLink>
+                  <div class="min-w-0 flex-1">
+                    <div class="font-medium">{{ dev.publisher?.nick }}</div>
+                    <div class="text-sm text-base-content/50">@{{ dev.publisher?.name }}</div>
+                  </div>
+                  <IconChevronRight class="w-5 h-5 text-base-content/30" />
+                </NuxtLink>
+                <NuxtLink
+                  v-if="dev.publisher?.name"
+                  :to="`/developers/${dev.publisher.name}/distribution`"
+                  class="btn btn-ghost btn-sm"
+                >
+                  <IconStore class="w-4 h-4" />
+                  {{ t('developer.apps.distribution.title') }}
+                </NuxtLink>
+              </div>
             </div>
 
             <!-- Empty State -->
@@ -92,6 +99,7 @@ import {
   IconInfo,
   IconChevronRight,
   IconPlus,
+  IconStore,
 } from '#components'
 import { getFileUrl } from '~/utils/files'
 import { enrollDeveloper } from '~/utils/developer'
