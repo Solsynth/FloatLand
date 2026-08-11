@@ -161,6 +161,22 @@ export async function fetchDistributionReleases(
   return payload.data ?? [];
 }
 
+export async function fetchDistributionManagedReleases(
+  productId: string,
+  channel: string,
+): Promise<DistributionRelease[]> {
+  const params = new URLSearchParams({ channel, limit: "100", offset: "0" });
+  const response = await apiFetch(
+    distributionPath(
+      `/products/${encodeURIComponent(productId)}/releases/manage?${params}`,
+    ),
+  );
+  const payload = await safeJsonParse<{ data: DistributionRelease[] }>(
+    response,
+  );
+  return payload.data ?? [];
+}
+
 export async function createDistributionChannel(
   productId: string,
   input: {
@@ -365,6 +381,18 @@ export async function updateDistributionRelease(
     },
   );
   return safeJsonParse<DistributionRelease>(response);
+}
+
+export async function deleteDistributionRelease(
+  productId: string,
+  releaseId: string,
+) {
+  await apiFetch(
+    distributionPath(
+      `/products/${encodeURIComponent(productId)}/releases/${encodeURIComponent(releaseId)}`,
+    ),
+    { method: "DELETE" },
+  );
 }
 async function postDistributionUpdate(
   endpoint: string,

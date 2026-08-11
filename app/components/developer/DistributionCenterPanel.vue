@@ -162,8 +162,19 @@
                 </button>
                 <button
                   v-if="release.status === 'draft'"
+                  class="btn btn-ghost btn-xs text-error"
+                  type="button"
+                  :disabled="deletingId === release.id"
+                  @click="deleteRelease(release)"
+                >
+                  <span v-if="deletingId === release.id" class="loading loading-spinner loading-xs" />
+                  <IconTrash v-else class="h-3.5 w-3.5" />
+                  <span class="sr-only">{{ t('developer.apps.distribution.deleteRelease') }}</span>
+                </button>
+                <button
+                  v-if="release.status === 'draft'"
                   class="btn btn-outline btn-xs"
-                  :disabled="publishingId === release.id || !release.artifacts.length"
+                  :disabled="publishingId === release.id || deletingId === release.id || !release.artifacts.length"
                   @click="publishRelease(release.id)"
                 >
                   <span v-if="publishingId === release.id" class="loading loading-spinner loading-xs" />
@@ -734,21 +745,23 @@
 </template>
 
 <script setup lang="ts">
-import { IconPencil, IconPlus, IconRefreshCw } from '#components'
+import { IconPencil, IconPlus, IconRefreshCw, IconTrash } from '#components'
 import type { DistributionArtifact, DistributionChannel, DistributionLocalizedText, DistributionMetrics, DistributionProduct, DistributionRelease, DistributionUploadApiKey } from '~/types/distribution'
 import {
   associateDistributionArtifact,
   createDistributionChannel,
   createDistributionRelease,
   createDistributionUploadApiKey,
+  deleteDistributionRelease,
   deleteDistributionUploadApiKey,
   fetchDistributionChannels,
+  fetchDistributionManagedReleases,
   fetchDistributionMetrics,
   fetchDistributionProducts,
-  fetchDistributionReleases,
   fetchDistributionUploadApiKeys,
   localizedDistributionText,
   prepareDistributionUpload,
+  publishDistributionRelease,
   updateDistributionChannel,
   updateDistributionProduct,
   updateDistributionRelease,
@@ -834,6 +847,7 @@ const oneTimeUploadApiKey = ref('')
 const isCreatingChannel = ref(false)
 const isCreatingRelease = ref(false)
 const publishingId = ref<string | null>(null)
+const deletingId = ref<string | null>(null)
 const channelDrawerOpen = ref(false)
 const releaseDrawerOpen = ref(false)
 const editingChannelId = ref<string | null>(null)
@@ -1127,7 +1141,7 @@ async function loadProduct() {
     channels.value = product.value ? await fetchDistributionChannels(product.value.id) : []
     selectedChannel.value = channels.value[0] || null
     releases.value = selectedChannel.value && product.value
-      ? await fetchDistributionReleases(product.value.id, selectedChannel.value.name)
+      ? await fetchDistributionManagedReleases(product.value.id, selectedChannel.value.name)
       : []
     metrics.value = null
     uploadApiKeys.value = []
@@ -1150,7 +1164,7 @@ async function selectChannel(channel: DistributionChannel) {
   selectedChannel.value = channel
   if (!product.value) return
   try {
-    releases.value = await fetchDistributionReleases(product.value.id, channel.name)
+    releases.value = await fetchDistributionManagedReleases(product.value.id, channel.name)
   } catch (error) {
     $toast.error(error instanceof Error ? error.message : t('developer.apps.distribution.requestFailed'))
   }
@@ -1430,7 +1444,7 @@ async function saveRelease() {
       })
       await associateNewReleaseArtifacts(product.value.id, release.id)
       releases.value = selectedChannel.value
-        ? await fetchDistributionReleases(product.value.id, selectedChannel.value.name)
+        ? await fetchDistributionManagedReleases(product.value.id, selectedChannel.value.name)
         : releases.value.map((item) => item.id === release.id ? release : item)
     } else {
       release = await createDistributionRelease(product.value.id, {
@@ -1474,6 +1488,21 @@ async function publishRelease(releaseId: string) {
     $toast.error(error instanceof Error ? error.message : t('developer.apps.distribution.requestFailed'))
   } finally {
     publishingId.value = null
+  }
+}
+
+async function deleteRelease(release: DistributionRelease) {
+  if (!product.value || release.status !== 'draft') return
+  if (!window.confirm(t('developer.apps.distribution.deleteReleaseConfirm', { version: release.version }))) return
+  deletingId.value = release.id
+  try {
+    await deleteDistributionRelease(product.value.id, release.id)
+    releases.value = releases.value.filter((item) => item.id !== release.id)
+    $toast.success(t('developer.apps.distribution.releaseDeleted'))
+  } catch (error) {
+    $toast.error(error instanceof Error ? error.message : t('developer.apps.distribution.requestFailed'))
+  } finally {
+    deletingId.value = null
   }
 }
 
