@@ -61,6 +61,7 @@ import {
   refreshAccessToken,
   type StoredTokenPair,
 } from "~/utils/token";
+import { mergeCookieHeader } from "~/utils/cookies";
 
 // Re-export types for convenience
 export type { SpellInfo };
@@ -199,12 +200,13 @@ export async function apiFetch(
     headers["Content-Type"] = "application/json";
   }
 
-  // SSR: Forward cookies from incoming request
-  if (import.meta.server) {
-    const requestHeaders = useRequestHeaders(["cookie"]);
-    if (requestHeaders.cookie) {
-      headers["cookie"] = requestHeaders.cookie;
-    }
+  // SSR has no browser cookie jar. Forward the incoming request's cookie
+  // header explicitly on every server-side API call, including refresh.
+  const incomingCookie = import.meta.server
+    ? headers["cookie"] || useRequestHeaders(["cookie"]).cookie
+    : undefined;
+  if (incomingCookie) {
+    headers["cookie"] = incomingCookie;
   }
 
   // Client bearer mode: Add Authorization header
@@ -231,19 +233,53 @@ export async function apiFetch(
     const mode = getAuthMode();
 
     if (mode === "cookie") {
-      // Cookie mode: Call refresh endpoint (uses HttpOnly refresh cookie)
+      // Cookie mode: Call refresh endpoint (uses HttpOnly refresh cookie).
+      // On SSR, credentials do not provide a cookie jar, so forward the
+      // incoming request cookie header explicitly.
       try {
         const refreshResponse = await fetch(
           `${API_BASE_URL}/stargate/auth/refresh`,
           {
             method: "POST",
             credentials: "include",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+              "Content-Type": "application/json",
+              ...(incomingCookie ? { cookie: incomingCookie } : {}),
+            },
           },
         );
-
         if (refreshResponse.ok) {
-          return apiFetch(endpoint, { ...options, retryCount: retryCount + 1 });
+          if (import.meta.server) {
+            const refreshedCookies =
+              "getSetCookie" in refreshResponse.headers
+                ? (
+                    refreshResponse.headers as Headers & {
+                      getSetCookie: () => string[];
+                    }
+                  ).getSetCookie()
+                : [];
+            const responseEvent = useRequestEvent();
+            for (const cookie of refreshedCookies) {
+              responseEvent?.res.headers.append("set-cookie", cookie);
+            }
+
+            const retryCookie = mergeCookieHeader(
+              incomingCookie,
+              refreshedCookies,
+            );
+            return apiFetch(endpoint, {
+              ...options,
+              headers: {
+                ...((options.headers as Record<string, string>) || {}),
+                ...(retryCookie ? { cookie: retryCookie } : {}),
+              },
+              retryCount: retryCount + 1,
+            });
+          }
+          return apiFetch(endpoint, {
+            ...options,
+            retryCount: retryCount + 1,
+          });
         }
       } catch {
         // Refresh failed, proceed to logout
