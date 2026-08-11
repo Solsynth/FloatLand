@@ -102,7 +102,7 @@
         </section>
 
         <section class="border border-base-300 bg-base-100 p-5 rounded-box">
-          <div class="flex items-start justify-between gap-3">
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <h2 class="font-semibold">{{ t('developer.apps.distribution.releases') }}</h2>
               <p v-if="selectedChannel" class="mt-1 font-mono text-xs text-base-content/50">{{ selectedChannel.name }}</p>
@@ -119,7 +119,7 @@
               </div>
             </div>
             <button
-              class="btn btn-primary btn-sm shrink-0"
+              class="btn btn-primary btn-sm shrink-0 self-end sm:self-start"
               type="button"
               :disabled="!channels.length"
               @click="openCreateRelease"
@@ -133,9 +133,9 @@
             <div
               v-for="release in releases"
               :key="release.id"
-              class="flex items-start justify-between gap-3 border border-base-300 p-3 rounded-box transition-colors hover:border-primary/50"
+              class="flex flex-col gap-3 border border-base-300 p-3 rounded-box transition-colors hover:border-primary/50 sm:flex-row sm:items-start sm:justify-between"
             >
-              <div>
+              <div class="min-w-0">
                 <div class="font-medium">
                   {{ localizedDistributionText(release.titles, release.title || release.version, localizationLocales) }}
                 </div>
@@ -155,7 +155,7 @@
                   </button>
                 </div>
               </div>
-              <div v-if="release.status !== 'yanked'" class="flex shrink-0 items-center gap-2">
+              <div v-if="release.status !== 'yanked'" class="flex shrink-0 flex-wrap items-center justify-end gap-2 self-end sm:self-start">
                 <button class="btn btn-ghost btn-xs" type="button" @click="openReleaseEditor(release)">
                   <IconPencil class="h-3.5 w-3.5" />
                   <span class="sr-only">{{ t('developer.apps.distribution.editRelease') }}</span>
