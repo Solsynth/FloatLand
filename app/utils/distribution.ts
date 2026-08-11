@@ -422,7 +422,7 @@ export function checkDistributionAppUpdate(
   input: DistributionUpdateCheckInput,
 ) {
   return postDistributionUpdate(
-    distributionPath(`/apps/${encodeURIComponent(appId)}/update/check`)
+    distributionPath(`/apps/${encodeURIComponent(appId)}/update/check`),
     input,
   );
 }
