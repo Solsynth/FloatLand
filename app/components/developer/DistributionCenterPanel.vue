@@ -592,7 +592,7 @@
               />
               <p class="text-xs text-base-content/55">{{ t('developer.apps.distribution.externalUrlHint') }}</p>
             </fieldset>
-            <div v-if="artifact.downloadUrl" class="grid gap-4 sm:col-span-2 sm:grid-cols-2">
+            <div v-if="artifact.isExisting || artifact.downloadUrl" class="grid gap-4 sm:col-span-2 sm:grid-cols-2">
               <fieldset class="fieldset">
                 <legend class="fieldset-legend">{{ t('developer.apps.distribution.fileName') }}</legend>
                 <input
