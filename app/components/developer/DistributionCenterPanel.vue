@@ -106,7 +106,7 @@
             <div>
               <h2 class="font-semibold">{{ t('developer.apps.distribution.releases') }}</h2>
               <p v-if="selectedChannel" class="mt-1 font-mono text-xs text-base-content/50">{{ selectedChannel.name }}</p>
-              <div class="mt-2 inline-flex max-w-full items-center gap-2 rounded-box border border-base-300 bg-base-200/40 px-2 py-1 text-xs">
+              <div v-if="selectedChannel" class="mt-2 inline-flex max-w-full items-center gap-2 rounded-box border border-base-300 bg-base-200/40 px-2 py-1 text-xs">
                 <span class="shrink-0 text-base-content/55">{{ t('developer.apps.distribution.channelId') }}</span>
                 <code class="min-w-0 max-w-[14rem] truncate whitespace-nowrap font-mono text-base-content/75">{{ selectedChannel.id }}</code>
                 <button
