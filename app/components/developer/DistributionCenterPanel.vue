@@ -969,6 +969,10 @@ function localizedValue(values: DistributionLocalizedText | undefined, localeCod
   const language = Object.entries(values || {}).find(([key]) => normalizeLocale(key).split('-')[0] === normalizedLocale.split('-')[0])
   return (exact || language)?.[1] || ''
 }
+function localizedFormFallback(values: DistributionLocalizedText, fallback: string) {
+  return localizedDistributionText(values, fallback, localizationLocales.value)
+}
+
 
 function localeOptionsFor<T extends { locale: string }>(entries: T[], index: number) {
   const currentLocale = entries[index].locale
