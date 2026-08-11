@@ -41,13 +41,25 @@
                 </p>
               </div>
             </div>
-            <NuxtLink
-              class="btn btn-outline btn-sm shrink-0 self-start sm:self-center"
-              :to="productPath(product.slug)"
-            >
-              {{ t('developer.apps.distribution.manage') }}
-              <IconChevronRight class="h-4 w-4" />
-            </NuxtLink>
+            <div class="flex shrink-0 flex-wrap justify-end gap-2 self-start sm:self-center">
+              <NuxtLink
+                class="btn btn-outline btn-sm"
+                :to="productPath(product.slug)"
+              >
+                {{ t('developer.apps.distribution.manage') }}
+                <IconChevronRight class="h-4 w-4" />
+              </NuxtLink>
+              <button
+                class="btn btn-ghost btn-sm text-error"
+                type="button"
+                :disabled="deletingProductId === product.id"
+                @click="deleteProduct(product)"
+              >
+                <span v-if="deletingProductId === product.id" class="loading loading-spinner loading-sm" />
+                <IconTrash v-else class="h-4 w-4" />
+                <span class="sr-only">{{ t('developer.apps.distribution.deleteProduct') }}</span>
+              </button>
+            </div>
           </article>
         </div>
 
@@ -161,9 +173,9 @@
 </template>
 
 <script setup lang="ts">
-import { IconChevronRight, IconPackage, IconPlus } from '#components'
+import { IconChevronRight, IconPackage, IconPlus, IconTrash } from '#components'
 import type { DistributionLocalizedText, DistributionProduct } from '~/types/distribution'
-import { createDistributionProduct, fetchDistributionProducts, localizedDistributionText } from '~/utils/distribution'
+import { createDistributionProduct, deleteDistributionProduct, fetchDistributionProducts, localizedDistributionText } from '~/utils/distribution'
 
 definePageMeta({ middleware: 'developer' })
 
@@ -192,6 +204,7 @@ type ProductLocalizationEntry = {
 const products = ref<DistributionProduct[]>([])
 const isLoading = ref(false)
 const isCreatingProduct = ref(false)
+const deletingProductId = ref<string | null>(null)
 const createDrawerOpen = ref(false)
 const newProductLanguage = ref('')
 const productForm = reactive({
@@ -290,6 +303,24 @@ async function createProduct() {
     $toast.error(error instanceof Error ? error.message : t('developer.apps.distribution.requestFailed'))
   } finally {
     isCreatingProduct.value = false
+  }
+}
+
+async function deleteProduct(product: DistributionProduct) {
+  const { confirm } = useAlert()
+  if (!(await confirm(
+    t('developer.apps.distribution.deleteProduct'),
+    t('developer.apps.distribution.deleteProductConfirm', { name: product.name || product.slug }),
+  ))) return
+  deletingProductId.value = product.id
+  try {
+    await deleteDistributionProduct(product.id)
+    products.value = products.value.filter((item) => item.id !== product.id)
+    $toast.success(t('developer.apps.distribution.productDeleted'))
+  } catch (error) {
+    $toast.error(error instanceof Error ? error.message : t('developer.apps.distribution.requestFailed'))
+  } finally {
+    deletingProductId.value = null
   }
 }
 

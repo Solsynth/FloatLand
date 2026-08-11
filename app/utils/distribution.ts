@@ -97,6 +97,13 @@ export async function updateDistributionProduct(
   );
   return safeJsonParse<DistributionProduct>(response);
 }
+export async function deleteDistributionProduct(productId: string) {
+  await apiFetch(
+    distributionPath(`/products/${encodeURIComponent(productId)}`),
+    { method: "DELETE" },
+  );
+}
+
 
 function uploadApiKeysPath(productId: string, keyId?: string) {
   const suffix = keyId ? `/${encodeURIComponent(keyId)}` : "";
@@ -229,6 +236,18 @@ export async function updateDistributionChannel(
   );
   return safeJsonParse<DistributionChannel>(response);
 }
+export async function deleteDistributionChannel(
+  productId: string,
+  channelId: string,
+) {
+  await apiFetch(
+    distributionPath(
+      `/products/${encodeURIComponent(productId)}/channels/${encodeURIComponent(channelId)}`,
+    ),
+    { method: "DELETE" },
+  );
+}
+
 
 export async function prepareDistributionUpload(
   productId: string,

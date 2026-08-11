@@ -32,10 +32,20 @@
             {{ localizedDistributionText(product.descriptions, product.description, localizationLocales) }}
           </p>
         </div>
-        <div class="flex shrink-0 gap-2">
+        <div class="flex shrink-0 flex-wrap justify-end gap-2">
           <button class="btn btn-outline btn-sm" type="button" @click="openProductEditor">
             <IconPencil class="h-4 w-4" />
             {{ t('developer.apps.distribution.editProduct') }}
+          </button>
+          <button
+            class="btn btn-ghost btn-sm text-error"
+            type="button"
+            :disabled="deletingProduct"
+            @click="deleteProduct"
+          >
+            <span v-if="deletingProduct" class="loading loading-spinner loading-sm" />
+            <IconTrash v-else class="h-4 w-4" />
+            <span>{{ t('developer.apps.distribution.deleteProduct') }}</span>
           </button>
           <button class="btn btn-ghost btn-sm" :disabled="isLoading" @click="loadProduct">
             <IconRefreshCw class="h-4 w-4" :class="{ 'animate-spin': isLoading }" />
@@ -74,8 +84,8 @@
                 <span class="mt-1 block font-mono text-xs text-base-content/50">{{ channel.name }}</span>
                 <span class="mt-1 block max-w-[14rem] truncate whitespace-nowrap font-mono text-[11px] text-base-content/45">{{ t('developer.apps.distribution.channelId') }} · {{ channel.id }}</span>
               </button>
-              <div class="flex shrink-0 items-center gap-2">
-                <span class="text-xs text-base-content/55">
+              <div class="flex shrink-0 flex-wrap items-center justify-end gap-2">
+                <span class="max-w-[12rem] truncate text-xs text-base-content/55">
                   <template v-if="channel.latest">
                     {{ localizedDistributionText(channel.latest.titles, channel.latest.title || channel.latest.version, localizationLocales) }}
                     · {{ channel.latest.version }} · {{ channel.latest.artifacts.length }} {{ t('developer.apps.distribution.artifactCount') }}
@@ -89,9 +99,20 @@
                 >
                   {{ t('ai.copy') }}
                 </button>
-                <button class="btn btn-ghost btn-xs" type="button" @click="openChannelEditor(channel)">
+                <button class="btn btn-ghost btn-xs" type="button" @click.stop="openChannelEditor(channel)">
                   <IconPencil class="h-3.5 w-3.5" />
                   <span class="sr-only">{{ t('developer.apps.distribution.editChannel') }}</span>
+                </button>
+                <button
+                  v-if="!isBuiltinChannelName(channel.name)"
+                  class="btn btn-ghost btn-xs text-error"
+                  type="button"
+                  :disabled="deletingChannelId === channel.id"
+                  @click.stop="deleteChannel(channel)"
+                >
+                  <span v-if="deletingChannelId === channel.id" class="loading loading-spinner loading-xs" />
+                  <IconTrash v-else class="h-3.5 w-3.5" />
+                  <span class="sr-only">{{ t('developer.apps.distribution.deleteChannel') }}</span>
                 </button>
               </div>
             </div>
@@ -752,6 +773,8 @@ import {
   createDistributionChannel,
   createDistributionRelease,
   createDistributionUploadApiKey,
+  deleteDistributionChannel,
+  deleteDistributionProduct,
   deleteDistributionRelease,
   deleteDistributionUploadApiKey,
   fetchDistributionChannels,
@@ -815,6 +838,7 @@ const props = defineProps<{
 }>()
 const { t, locale, locales, localeProperties } = useI18n()
 const { $toast } = useNuxtApp()
+const { confirm } = useAlert()
 const localizationLocales = computed(() => [localeProperties.value.language, locale.value])
 const contentLocale = computed(() => localeProperties.value.language || locale.value || 'en-US')
 const contentLocaleOptions = computed(() =>
@@ -848,6 +872,8 @@ const isCreatingChannel = ref(false)
 const isCreatingRelease = ref(false)
 const publishingId = ref<string | null>(null)
 const deletingId = ref<string | null>(null)
+const deletingChannelId = ref<string | null>(null)
+const deletingProduct = ref(false)
 const channelDrawerOpen = ref(false)
 const releaseDrawerOpen = ref(false)
 const editingChannelId = ref<string | null>(null)
@@ -864,6 +890,10 @@ const releaseForm = reactive({
   forceUpdate: false,
   artifacts: [] as ReleaseArtifactEntry[],
 })
+function isBuiltinChannelName(name: string) {
+  return name === 'stable' || name === 'beta' || name === 'nightly'
+}
+
 
 function normalizeLocale(value: string) {
   return value.trim().replaceAll('_', '-').toLowerCase()
@@ -1132,6 +1162,23 @@ async function saveProduct() {
     isUpdatingProduct.value = false
   }
 }
+async function deleteProduct() {
+  if (!product.value) return
+  if (!(await confirm(
+    t('developer.apps.distribution.deleteProduct'),
+    t('developer.apps.distribution.deleteProductConfirm', { name: product.value.name || product.value.slug }),
+  ))) return
+  deletingProduct.value = true
+  try {
+    await deleteDistributionProduct(product.value.id)
+    await navigateTo(`/developers/${encodeURIComponent(props.publisherName)}/distribution`)
+  } catch (error) {
+    $toast.error(error instanceof Error ? error.message : t('developer.apps.distribution.requestFailed'))
+  } finally {
+    deletingProduct.value = false
+  }
+}
+
 
 async function loadProduct() {
   isLoading.value = true
@@ -1228,6 +1275,34 @@ async function saveChannel() {
     isCreatingChannel.value = false
   }
 }
+async function deleteChannel(channel: DistributionChannel) {
+  if (!product.value || isBuiltinChannelName(channel.name)) return
+  if (!(await confirm(
+    t('developer.apps.distribution.deleteChannel'),
+    t('developer.apps.distribution.deleteChannelConfirm', {
+      name: channel.displayName || channel.name,
+    }),
+  ))) return
+  deletingChannelId.value = channel.id
+  try {
+    await deleteDistributionChannel(product.value.id, channel.id)
+    const remainingChannels = channels.value.filter((item) => item.id !== channel.id)
+    channels.value = remainingChannels
+    if (selectedChannel.value?.id === channel.id) {
+      const nextChannel = remainingChannels[0] || null
+      selectedChannel.value = nextChannel
+      releases.value = nextChannel
+        ? await fetchDistributionManagedReleases(product.value.id, nextChannel.name)
+        : []
+    }
+    $toast.success(t('developer.apps.distribution.channelDeleted'))
+  } catch (error) {
+    $toast.error(error instanceof Error ? error.message : t('developer.apps.distribution.requestFailed'))
+  } finally {
+    deletingChannelId.value = null
+  }
+}
+
 
 function addArtifact() {
   releaseForm.artifacts.push(newArtifact())
@@ -1273,7 +1348,10 @@ async function createUploadApiKey() {
 }
 
 async function deleteUploadApiKey(key: DistributionUploadApiKey) {
-  if (!product.value || !window.confirm(t('developer.apps.distribution.deleteUploadKeyConfirm'))) return
+  if (!product.value || !(await confirm(
+    t('developer.apps.distribution.deleteUploadKey'),
+    t('developer.apps.distribution.deleteUploadKeyConfirm'),
+  ))) return
   try {
     await deleteDistributionUploadApiKey(product.value.id, key.id)
     uploadApiKeys.value = uploadApiKeys.value.filter((item) => item.id !== key.id)
@@ -1493,7 +1571,10 @@ async function publishRelease(releaseId: string) {
 
 async function deleteRelease(release: DistributionRelease) {
   if (!product.value || release.status !== 'draft') return
-  if (!window.confirm(t('developer.apps.distribution.deleteReleaseConfirm', { version: release.version }))) return
+  if (!(await confirm(
+    t('developer.apps.distribution.deleteRelease'),
+    t('developer.apps.distribution.deleteReleaseConfirm', { version: release.version }),
+  ))) return
   deletingId.value = release.id
   try {
     await deleteDistributionRelease(product.value.id, release.id)
