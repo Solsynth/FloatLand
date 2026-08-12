@@ -15,6 +15,7 @@
           <AlertDialogCancel
             v-if="cancelText"
             class="btn btn-ghost"
+            type="button"
             @click="$emit('cancel')"
           >
             {{ cancelText }}
@@ -22,7 +23,8 @@
           <AlertDialogAction
             class="btn"
             :class="variant === 'danger' ? 'btn-error' : 'btn-primary'"
-            @click="$emit('confirm')"
+            type="button"
+            @click.capture.prevent="$emit('confirm')"
           >
             {{ confirmText }}
           </AlertDialogAction>
