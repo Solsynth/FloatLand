@@ -128,7 +128,10 @@
     "recentAttachments": "最近附件"
   },
   "nav": {
+    "utilities": "工具",
+    "pricing": "定价",
     "explore": "探索",
+    "timeline": "时间线",
     "realms": "领域",
     "workspaces": "工作区",
     "drive": "云盘",

@@ -121,7 +121,10 @@
     "recentAttachments": "Recent Attachments"
   },
   "nav": {
+    "utilities": "Utilities",
+    "pricing": "Pricing",
     "explore": "Explore",
+    "timeline": "Timeline",
     "realms": "Realms",
     "workspaces": "Workspaces",
     "drive": "Drive",

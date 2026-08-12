@@ -1,236 +1,315 @@
 <template>
   <div class="min-h-screen bg-base-200">
-    <div class="app-shell mx-auto max-w-7xl">
-      <!-- Desktop Layout -->
-      <div
-        class="hidden lg:grid lg:gap-6 lg:px-4"
-        :class="
-          collapsed
-            ? 'lg:grid-cols-[5rem_1fr]'
-            : 'lg:grid-cols-[16rem_1fr]'
-        "
-      >
-        <aside class="app-sidebar">
-          <Sidebar />
-        </aside>
-        <main class="min-h-screen py-4">
-          <slot />
-        </main>
-      </div>
+    <header
+      class="sticky top-0 z-40 w-full border-b border-base-300 bg-base-100 shadow-sm"
+    >
+      <div class="navbar mx-auto min-h-16 max-w-7xl px-4 lg:px-6">
+        <div class="navbar-start gap-1">
+          <NuxtLink to="/" class="flex items-center gap-2" aria-label="Home">
+            <img src="/favicon.png" alt="Solar Network" class="h-9 w-9" />
+          </NuxtLink>
+        </div>
 
-      <!-- Mobile Layout -->
-      <div class="lg:hidden flex flex-col min-h-screen">
-        <!-- Mobile Header -->
-        <header
-          class="fixed top-0 left-0 right-0 z-50 bg-base-100 shadow-sm"
-        >
-          <div class="mx-auto max-w-2xl px-4">
-            <div class="flex h-14 items-center justify-between">
-              <!-- Left: Home -->
-              <NuxtLink to="/" class="btn btn-circle btn-ghost btn-sm">
-                <IconHome class="w-5 h-5" />
-              </NuxtLink>
-
-              <!-- Center: Logo -->
-              <NuxtLink to="/">
-                <img src="/favicon.png" alt="Solar Network" class="w-8 h-8" />
-              </NuxtLink>
-
-              <!-- Right: Menu -->
-              <div ref="menuContainer" class="relative flex items-center gap-1">
-                <button
-                  class="btn btn-circle btn-ghost btn-sm"
-                  aria-label="Menu"
-                  @click="toggleMenu"
-                >
-                  <IconMenu class="w-5 h-5" />
-                </button>
-
-                <!-- Dropdown Menu -->
-                <div
-                  v-if="menuOpen"
-                  class="app-mobile-menu absolute top-full right-0 z-50 mt-2 w-56 py-2"
-                >
-                  <template v-if="isAuthenticated && user">
-                    <NuxtLink
-                      v-for="item in navItems"
-                      :key="item.to"
-                      :to="item.to"
-                      class="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-base-200"
-                      @click="closeMenu"
-                    >
-                      <component
-                        :is="item.icon"
-                        class="w-5 h-5 text-base-content/70"
-                      />
-                      <span class="font-medium">{{ item.label }}</span>
-                    </NuxtLink>
-
-                    <!-- Backstage section -->
-                    <button
-                      type="button"
-                      class="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-base-200"
-                      @click="backstageOpen = !backstageOpen"
-                    >
-                      <component
-                        :is="backstageEntry.icon"
-                        class="w-5 h-5 text-base-content/70"
-                      />
-                      <span class="font-medium">{{
-                        t(backstageEntry.labelKey)
-                      }}</span>
-                    </button>
-                    <div v-if="backstageOpen" class="pb-1">
-                      <NuxtLink
-                        v-for="item in backstageNavItems"
-                        :key="item.to"
-                        :to="item.to"
-                        class="flex items-center gap-3 py-2.5 pe-4 ps-11 transition-colors hover:bg-base-200"
-                        @click="closeMenu"
+        <nav class="navbar-center hidden lg:flex" aria-label="Primary">
+          <ul class="menu menu-horizontal gap-1 p-0">
+            <li
+              v-for="group in navGroups"
+              :key="group.key"
+              class="dropdown dropdown-center"
+            >
+              <button
+                type="button"
+                class="gap-2"
+                :class="isNavGroupActive(group) ? 'bg-primary/10 text-primary' : ''"
+                aria-haspopup="menu"
+              >
+                <component :is="group.icon" class="h-4 w-4" />
+                <span>{{ group.label }}</span>
+              </button>
+              <ul
+                tabindex="0"
+                class="menu dropdown-content z-50 mt-2 w-60 rounded-box border border-base-300 bg-base-100 text-base-content p-2 shadow-lg"
+              >
+                <li v-for="item in group.items" :key="item.to">
+                  <NuxtLink
+                    :to="item.to"
+                    :class="isNavActive(item.to) ? 'bg-primary/10 text-primary' : ''"
+                  >
+                    <span class="relative">
+                      <component :is="item.icon" class="h-4 w-4" />
+                      <span
+                        v-if="item.badge"
+                        class="absolute -top-2 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-error px-1 text-[9px] font-bold text-error-content"
                       >
-                        <component
-                          :is="item.icon"
-                          class="w-4 h-4 text-base-content/60"
-                        />
-                        <span class="text-sm font-medium">{{
-                          item.label
-                        }}</span>
-                      </NuxtLink>
-                    </div>
+                        {{ item.badge > 99 ? "99+" : item.badge }}
+                      </span>
+                    </span>
+                    {{ item.label }}
+                  </NuxtLink>
+                </li>
+              </ul>
+            </li>
+            <li class="dropdown dropdown-end">
+              <button
+                type="button"
+                class="gap-2"
+                :class="isBackstageActive ? 'bg-primary/10 text-primary' : ''"
+                aria-haspopup="menu"
+              >
+                <component :is="backstageEntry.icon" class="h-4 w-4" />
+                <span>{{ t(backstageEntry.labelKey) }}</span>
+              </button>
+              <ul
+                tabindex="0"
+                class="menu dropdown-content z-50 mt-2 w-56 rounded-box border border-base-300 bg-base-100 text-base-content p-2 shadow-lg"
+              >
+                <li v-for="item in backstageNavItems" :key="item.to">
+                  <NuxtLink
+                    :to="item.to"
+                    :class="isNavActive(item.to) ? 'bg-primary/10 text-primary' : ''"
+                  >
+                    <component :is="item.icon" class="h-4 w-4" />
+                    {{ item.label }}
+                  </NuxtLink>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
 
-                    <div class="mt-2 px-4 py-3">
-                      <div class="flex items-center gap-3">
-                        <div v-if="avatarUrl" class="avatar">
-                          <div class="w-9 rounded-full">
-                            <img :src="avatarUrl" :alt="user.name" />
-                          </div>
-                        </div>
-                        <div v-else class="avatar avatar-placeholder">
-                          <div
-                            class="w-9 rounded-full bg-primary text-primary-content"
-                          >
-                            <span class="text-xs font-medium">
-                              {{ (user.name || "?").slice(0, 2).toUpperCase() }}
-                            </span>
-                          </div>
-                        </div>
-                        <div class="min-w-0">
-                          <p class="truncate font-medium">{{ displayName }}</p>
-                          <p class="truncate text-sm text-base-content/60">
-                            @{{ user.name }}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                    <NuxtLink
-                      to="/accounts/me"
-                      class="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-base-200"
-                      @click="closeMenu"
-                    >
-                      <IconUser class="w-5 h-5 text-base-content/70" />
-                      <span class="font-medium">{{ t("nav.account") }}</span>
-                    </NuxtLink>
-                    <NuxtLink
-                      to="/accounts/me/settings"
-                      class="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-base-200"
-                      @click="closeMenu"
-                    >
-                      <IconSettings class="w-5 h-5 text-base-content/70" />
-                      <span class="font-medium">{{ t("nav.settings") }}</span>
-                    </NuxtLink>
-                    <button
-                      class="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-base-200"
-                      @click="handleLogout"
-                    >
-                      <IconLogOut class="w-5 h-5 text-base-content/70" />
-                      <span class="font-medium">{{ t("nav.logout") }}</span>
-                    </button>
-                  </template>
-                  <template v-else>
-                    <NuxtLink
-                      v-for="item in navItems"
-                      :key="item.to"
-                      :to="item.to"
-                      class="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-base-200"
-                      @click="closeMenu"
-                    >
-                      <component
-                        :is="item.icon"
-                        class="w-5 h-5 text-base-content/70"
-                      />
-                      <span class="font-medium">{{ item.label }}</span>
-                    </NuxtLink>
+        <div class="navbar-end gap-1">
+          <NotificationBell v-if="isAuthenticated && user" />
 
-                    <!-- Backstage section -->
-                    <button
-                      type="button"
-                      class="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-base-200"
-                      @click="backstageOpen = !backstageOpen"
-                    >
-                      <component
-                        :is="backstageEntry.icon"
-                        class="w-5 h-5 text-base-content/70"
-                      />
-                      <span class="font-medium">{{
-                        t(backstageEntry.labelKey)
-                      }}</span>
-                    </button>
-                    <div v-if="backstageOpen" class="pb-1">
-                      <NuxtLink
-                        v-for="item in backstageNavItems"
-                        :key="item.to"
-                        :to="item.to"
-                        class="flex items-center gap-3 py-2.5 pe-4 ps-11 transition-colors hover:bg-base-200"
-                        @click="closeMenu"
-                      >
-                        <component
-                          :is="item.icon"
-                          class="w-4 h-4 text-base-content/60"
-                        />
-                        <span class="text-sm font-medium">{{
-                          item.label
-                        }}</span>
-                      </NuxtLink>
-                    </div>
-
-                    <div class="divider my-1" />
-                    <NuxtLink
-                      to="/auth/login"
-                      class="flex items-center gap-3 px-4 py-3 text-primary transition-colors hover:bg-base-200"
-                      @click="closeMenu"
-                    >
-                      <IconLogIn class="w-5 h-5" />
-                      <span class="font-medium">{{ t("nav.signIn") }}</span>
-                    </NuxtLink>
-                  </template>
+          <div v-if="isAuthenticated && user" class="dropdown dropdown-end hidden sm:block">
+            <button
+              type="button"
+              class="btn btn-ghost h-auto min-h-10 gap-2 px-2"
+              aria-haspopup="menu"
+            >
+              <div v-if="avatarUrl" class="avatar">
+                <div class="w-8 rounded-full">
+                  <img :src="avatarUrl" :alt="user.name" />
                 </div>
               </div>
+              <div v-else class="avatar avatar-placeholder">
+                <div class="w-8 rounded-full bg-primary text-primary-content">
+                  <span class="text-xs font-medium">
+                    {{ (user.name || "?").slice(0, 2).toUpperCase() }}
+                  </span>
+                </div>
+              </div>
+              <span class="hidden max-w-32 truncate text-sm font-medium xl:inline">
+                {{ displayName }}
+              </span>
+            </button>
+            <ul
+              tabindex="0"
+              class="menu dropdown-content z-50 mt-2 w-52 rounded-box border border-base-300 bg-base-100 text-base-content p-2 shadow-lg"
+            >
+              <li>
+                <NuxtLink to="/accounts/me">
+                  <IconUser class="h-4 w-4" />
+                  {{ t("nav.account") }}
+                </NuxtLink>
+              </li>
+              <li>
+                <NuxtLink to="/accounts/me/settings">
+                  <IconSettings class="h-4 w-4" />
+                  {{ t("nav.settings") }}
+                </NuxtLink>
+              </li>
+              <li>
+                <NuxtLink to="/tickets">
+                  <IconTicket class="h-4 w-4" />
+                  {{ t("nav.tickets") }}
+                </NuxtLink>
+              </li>
+              <li>
+                <button type="button" @click="handleLogout">
+                  <IconLogOut class="h-4 w-4" />
+                  {{ t("nav.logout") }}
+                </button>
+              </li>
+            </ul>
+          </div>
+
+          <NuxtLink
+            v-else
+            to="/auth/login"
+            class="btn btn-ghost btn-sm hidden gap-2 sm:inline-flex"
+          >
+            <IconLogIn class="h-4 w-4" />
+            {{ t("nav.signIn") }}
+          </NuxtLink>
+
+          <div class="lg:hidden">
+            <button
+              type="button"
+              class="btn btn-ghost btn-circle btn-sm"
+              aria-label="Menu"
+              :aria-expanded="menuOpen"
+              @click="toggleMenu"
+            >
+              <IconMenu class="h-5 w-5" />
+            </button>
+
+          </div>
+        </div>
+      </div>
+    </header>
+    <Transition name="drawer-fade">
+      <div
+        v-if="menuOpen"
+        class="fixed inset-0 z-40 bg-black/40 lg:hidden"
+        @click="closeMenu"
+      />
+    </Transition>
+    <Transition name="drawer-slide">
+      <aside
+        v-if="menuOpen"
+        class="fixed right-0 top-16 bottom-0 z-50 w-80 overflow-y-auto border-l border-base-300 bg-base-100 p-4 text-base-content shadow-xl scrollbar-none lg:hidden"
+        @click.stop
+      >
+        <nav aria-label="Mobile" class="menu w-full p-0">
+          <ul class="w-full p-0">
+            <li v-for="group in navGroups" :key="group.key">
+              <button
+                type="button"
+                class="justify-start"
+                :class="isNavGroupActive(group) ? 'bg-primary/10 text-primary' : ''"
+                :aria-expanded="mobileGroupOpen === group.key"
+                @click="toggleMobileGroup(group.key)"
+              >
+                <component :is="group.icon" class="h-5 w-5" />
+                {{ group.label }}
+              </button>
+              <ul
+                v-if="mobileGroupOpen === group.key"
+                class="menu menu-sm ms-4 w-auto p-0"
+              >
+                <li v-for="item in group.items" :key="item.to">
+                  <NuxtLink
+                    :to="item.to"
+                    :class="isNavActive(item.to) ? 'bg-primary/10 text-primary' : ''"
+                    @click="closeMenu"
+                  >
+                    <span class="relative">
+                      <component :is="item.icon" class="h-4 w-4" />
+                      <span
+                        v-if="item.badge"
+                        class="absolute -top-2 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-error px-1 text-[9px] font-bold text-error-content"
+                      >
+                        {{ item.badge > 99 ? "99+" : item.badge }}
+                      </span>
+                    </span>
+                    {{ item.label }}
+                  </NuxtLink>
+                </li>
+              </ul>
+            </li>
+            <li>
+              <button
+                type="button"
+                class="justify-start"
+                :class="isBackstageActive ? 'bg-primary/10 text-primary' : ''"
+                :aria-expanded="backstageOpen"
+                @click="backstageOpen = !backstageOpen"
+              >
+                <component :is="backstageEntry.icon" class="h-5 w-5" />
+                {{ t(backstageEntry.labelKey) }}
+              </button>
+              <ul v-if="backstageOpen" class="menu menu-sm ms-4 w-auto p-0">
+                <li v-for="item in backstageNavItems" :key="item.to">
+                  <NuxtLink
+                    :to="item.to"
+                    :class="isNavActive(item.to) ? 'bg-primary/10 text-primary' : ''"
+                    @click="closeMenu"
+                  >
+                    <component :is="item.icon" class="h-4 w-4" />
+                    {{ item.label }}
+                  </NuxtLink>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+
+        <div v-if="isAuthenticated && user" class="divider my-2" />
+        <div
+          v-if="isAuthenticated && user"
+          class="flex items-center gap-3 px-3 py-2"
+        >
+          <div v-if="avatarUrl" class="avatar shrink-0">
+            <div class="w-9 rounded-full">
+              <img :src="avatarUrl" :alt="user.name" />
             </div>
           </div>
-        </header>
+          <div v-else class="avatar avatar-placeholder shrink-0">
+            <div class="w-9 rounded-full bg-primary text-primary-content">
+              <span class="text-xs font-medium">
+                {{ (user.name || "?").slice(0, 2).toUpperCase() }}
+              </span>
+            </div>
+          </div>
+          <div class="min-w-0">
+            <p class="truncate font-medium">{{ displayName }}</p>
+            <p class="truncate text-sm text-base-content/60">
+              @{{ user.name }}
+            </p>
+          </div>
+        </div>
+        <ul v-if="isAuthenticated && user" class="menu w-full p-0">
+          <li>
+            <NuxtLink to="/accounts/me" @click="closeMenu">
+              <IconUser class="h-5 w-5" />
+              {{ t("nav.account") }}
+            </NuxtLink>
+          </li>
+          <li>
+            <NuxtLink to="/accounts/me/settings" @click="closeMenu">
+              <IconSettings class="h-5 w-5" />
+              {{ t("nav.settings") }}
+            </NuxtLink>
+          </li>
+          <li>
+            <NuxtLink to="/tickets" @click="closeMenu">
+              <IconTicket class="h-5 w-5" />
+              {{ t("nav.tickets") }}
+            </NuxtLink>
+          </li>
+          <li>
+            <button type="button" @click="handleLogout">
+              <IconLogOut class="h-5 w-5" />
+              {{ t("nav.logout") }}
+            </button>
+          </li>
+        </ul>
+        <NuxtLink
+          v-else
+          to="/auth/login"
+          class="mt-2 flex min-h-10 items-center gap-3 rounded-box px-3 py-2 text-primary hover:bg-base-200"
+          @click="closeMenu"
+        >
+          <IconLogIn class="h-5 w-5" />
+          {{ t("nav.signIn") }}
+        </NuxtLink>
+      </aside>
+    </Transition>
+    <div class="app-shell mx-auto max-w-7xl">
 
-        <!-- Mobile Main Content -->
-        <main class="flex-1 px-4 py-3 pt-[4.5rem]">
-          <slot />
-        </main>
-      </div>
+      <main class="min-h-screen px-4 py-4 lg:px-6">
+        <slot />
+      </main>
 
-      <!-- Lightbox Viewer -->
       <ComposeDialog
         :open="composeOpen"
         @close="composeOpen = false"
         @submit="handleComposeSubmit"
       />
 
-      <!-- Lightbox Viewer -->
       <LightboxViewer />
-
-      <!-- Notification Drawer -->
       <NotificationDrawer />
-
-      <!-- WebSocket Status -->
       <WebSocketStatus />
-      <!-- Keep outside both responsive slots; each slot renders page content. -->
       <ClientOnly>
         <OnboardingModal />
       </ClientOnly>
@@ -241,23 +320,39 @@
 <script setup lang="ts">
 import { getFileUrl } from "~/utils/files";
 import {
-  IconHome,
+  IconCompass,
   IconMenu,
+  IconTicket,
   IconUser,
   IconSettings,
   IconLogOut,
   IconLogIn,
+  IconSearch,
+  IconTags,
+  IconSparkles,
 } from "#components";
+type TopbarNavItem = {
+  to: string;
+  label: string;
+  icon: any;
+  badge?: number | null;
+};
+type TopbarNavGroup = {
+  key: string;
+  label: string;
+  icon: any;
+  items: TopbarNavItem[];
+};
 
 const { t } = useI18n();
-const { collapsed } = useSidebar();
+const route = useRoute();
 
 const auth = useAuth();
 const { isAuthenticated, user } = auth;
 
 const menuOpen = ref(false);
 const backstageOpen = ref(false);
-const menuContainer = ref<HTMLElement | null>(null);
+const mobileGroupOpen = ref("discover");
 const composeOpen = ref(false);
 
 const {
@@ -271,6 +366,7 @@ const navItems = computed(() =>
     to: item.href,
     label: t(item.labelKey),
     icon: item.icon,
+    badge: item.badge,
   })),
 );
 
@@ -281,9 +377,96 @@ const backstageNavItems = computed(() =>
     icon: item.icon,
   })),
 );
+const navGroups = computed<TopbarNavGroup[]>(() => {
+  const existing = (href: string, fallback: TopbarNavItem): TopbarNavItem =>
+    navItems.value.find((item) => item.to === href) || fallback;
+
+  return [
+    {
+      key: "explore",
+      label: t("nav.explore"),
+      icon: IconCompass,
+      items: [
+        {
+          to: "/",
+          label: t("nav.timeline"),
+          icon: IconCompass,
+        },
+        existing("/realms", {
+          to: "/realms",
+          label: t("nav.realms"),
+          icon: IconCompass,
+        }),
+        {
+          to: "/categories",
+          label: t("categories.title"),
+          icon: IconTags,
+        },
+        {
+          to: "/search",
+          label: t("search.seoTitle"),
+          icon: IconSearch,
+        },
+      ],
+    },
+    {
+      key: "community",
+      label: t("nav.community"),
+      icon: IconUser,
+      items: [
+        existing("/workspaces", {
+          to: "/workspaces",
+          label: t("nav.workspaces"),
+          icon: IconUser,
+        }),
+        existing("/chat", {
+          to: "/chat",
+          label: t("nav.chat"),
+          icon: IconUser,
+        }),
+      ],
+    },
+    {
+      key: "utilities",
+      label: t("nav.utilities"),
+      icon: IconSettings,
+      items: [
+        existing("/drive", {
+          to: "/drive",
+          label: t("nav.drive"),
+          icon: IconSettings,
+        }),
+        existing("/wallets", {
+          to: "/wallets",
+          label: t("nav.wallet"),
+          icon: IconSparkles,
+        }),
+        {
+          to: "/pricing",
+          label: t("nav.pricing"),
+          icon: IconSparkles,
+        },
+      ],
+    },
+  ];
+});
 
 const displayName = computed(() => user.value?.nick || user.value?.name || "");
 const avatarUrl = computed(() => getFileUrl(user.value?.profile?.picture?.id));
+const isBackstageActive = computed(() =>
+  backstageNavItems.value.some((item) => isNavActive(item.to)),
+);
+function isNavGroupActive(group: TopbarNavGroup) {
+  return group.items.some((item) => isNavActive(item.to));
+}
+
+function toggleMobileGroup(key: string) {
+  mobileGroupOpen.value = mobileGroupOpen.value === key ? "" : key;
+}
+
+function isNavActive(path: string) {
+  return route.path === path || (path !== "/" && route.path.startsWith(`${path}/`));
+}
 
 function toggleMenu() {
   menuOpen.value = !menuOpen.value;
@@ -299,7 +482,7 @@ function closeMenu() {
 
 function handleLogout() {
   auth.logout();
-  menuOpen.value = false;
+  closeMenu();
 }
 
 function handleComposeSubmit() {
@@ -310,28 +493,15 @@ function handleOpenComposeEvent() {
   composeOpen.value = true;
 }
 
-function handleClickOutside(event: MouseEvent) {
-  if (
-    menuContainer.value &&
-    !menuContainer.value.contains(event.target as Node)
-  ) {
-    menuOpen.value = false;
-  }
-}
+
+watch(() => route.path, closeMenu);
 
 onMounted(() => {
-  document.addEventListener("click", handleClickOutside);
   window.addEventListener("open-compose", handleOpenComposeEvent);
 });
 
 onUnmounted(() => {
-  document.removeEventListener("click", handleClickOutside);
   window.removeEventListener("open-compose", handleOpenComposeEvent);
 });
 </script>
 
-<style scoped>
-.safe-area-pb {
-  padding-bottom: env(safe-area-inset-bottom, 0);
-}
-</style>
