@@ -7,6 +7,8 @@
         :src="fileUrl"
         :alt="attachment.name"
         class="w-full h-full object-cover"
+        loading="lazy"
+        decoding="async"
       >
       <div v-else class="p-8 flex flex-col items-center justify-center">
         <IconFileImage class="w-12 h-12 text-base-content/30 mb-2" />

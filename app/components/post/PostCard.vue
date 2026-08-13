@@ -40,6 +40,8 @@
                     :src="getAvatarUrl(referencePost)"
                     :alt="getDisplayName(referencePost.publisher)"
                     class="h-full w-full rounded-full object-cover"
+                    loading="lazy"
+                    decoding="async"
                   />
                 </div>
               </div>
@@ -117,11 +119,13 @@
         >
           <div v-if="getAvatarUrl(post)" class="avatar">
             <div class="h-10 w-10 rounded-full">
-              <img
-                :src="getAvatarUrl(post)"
-                :alt="getDisplayName(post.publisher)"
-                class="h-full w-full rounded-full object-cover"
-              />
+                <img
+                  :src="getAvatarUrl(post)"
+                  :alt="getDisplayName(post.publisher)"
+                  class="h-full w-full rounded-full object-cover"
+                  loading="lazy"
+                  decoding="async"
+                />
             </div>
           </div>
           <div v-else class="avatar avatar-placeholder">
@@ -247,6 +251,8 @@
               :src="thumbnailUrl"
               :alt="post.title || 'Article thumbnail'"
               class="h-full w-full object-cover"
+              loading="lazy"
+              decoding="async"
             />
           </div>
           <div class="p-3">

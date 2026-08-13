@@ -296,17 +296,18 @@
         <slot />
       </main>
 
-      <ComposeDialog
+      <LazyComposeDialog
+        v-if="composeOpen"
         :open="composeOpen"
         @close="composeOpen = false"
         @submit="handleComposeSubmit"
       />
 
-      <LightboxViewer />
-      <NotificationDrawer />
+      <LazyLightboxViewer v-if="lightboxState.isOpen" />
+      <LazyNotificationDrawer v-if="notificationDrawerOpen" />
       <WebSocketStatus />
       <ClientOnly>
-        <OnboardingModal />
+        <LazyOnboardingModal />
       </ClientOnly>
     </div>
   </div>
@@ -353,6 +354,9 @@ const {
   backstageItems,
   backstageEntry,
 } = useMainNav();
+
+const { state: lightboxState } = useLightbox();
+const { drawerOpen: notificationDrawerOpen } = useNotifications();
 
 const navItems = computed(() =>
   mainNavItems.value.map((item) => ({

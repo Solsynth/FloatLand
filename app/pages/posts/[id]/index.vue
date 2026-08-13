@@ -335,53 +335,55 @@ const userInitials = computed(() => {
 	return name.slice(0, 2).toUpperCase();
 });
 
-// Fetch post
-const {
-	data: post,
-	status: postStatus,
-	refresh: refreshPost,
-} = await useAsyncData(
-	() => `post-${postId.value}`,
-	() => fetchPost(postId.value),
-	{ watch: [postId] }
-);
-
-// Fetch replies
-const { data: replies } = await useAsyncData(
-	() => `post-replies-${postId.value}`,
-	() => fetchPostReplies(postId.value),
-	{ watch: [postId], default: () => [] }
-);
-
-// Fetch forwards
-const { data: forwards } = await useAsyncData(
-	() => `post-forwards-${postId.value}`,
-	async () => {
-		const result = await fetchPostForwards(postId.value);
-		return result.posts;
+// Load the primary post and secondary interaction lists together. These are
+// independent requests; keeping them in one async-data wave removes four
+// serial network round trips during navigation.
+const [
+	{
+		data: post,
+		status: postStatus,
+		refresh: refreshPost,
 	},
-	{ watch: [postId], default: () => [] }
-);
-
-// Fetch boosts
-const { data: boosts } = await useAsyncData(
-	() => `post-boosts-${postId.value}`,
-	async () => {
-		const result = await fetchPostBoosts(postId.value);
-		return result.items;
-	},
-	{ watch: [postId], default: () => [] }
-);
-
-// Fetch reactions list
-const { data: reactionList } = await useAsyncData(
-	() => `post-reactions-${postId.value}`,
-	async () => {
-		const result = await fetchPostReactionList(postId.value);
-		return result.items;
-	},
-	{ watch: [postId], default: () => [] }
-);
+	{ data: replies },
+	{ data: forwards },
+	{ data: boosts },
+	{ data: reactionList },
+] = await Promise.all([
+	useAsyncData(
+		() => `post-${postId.value}`,
+		() => fetchPost(postId.value),
+		{ watch: [postId] },
+	),
+	useAsyncData(
+		() => `post-replies-${postId.value}`,
+		() => fetchPostReplies(postId.value),
+		{ watch: [postId], default: () => [] },
+	),
+	useAsyncData(
+		() => `post-forwards-${postId.value}`,
+		async () => {
+			const result = await fetchPostForwards(postId.value);
+			return result.posts;
+		},
+		{ watch: [postId], default: () => [] },
+	),
+	useAsyncData(
+		() => `post-boosts-${postId.value}`,
+		async () => {
+			const result = await fetchPostBoosts(postId.value);
+			return result.items;
+		},
+		{ watch: [postId], default: () => [] },
+	),
+	useAsyncData(
+		() => `post-reactions-${postId.value}`,
+		async () => {
+			const result = await fetchPostReactionList(postId.value);
+			return result.items;
+		},
+		{ watch: [postId], default: () => [] },
+	),
+]);
 
 // Tab configuration
 const { t } = useI18n();

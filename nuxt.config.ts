@@ -145,10 +145,6 @@ export default defineNuxtConfig({
   },
   css: [
     "~/assets/css/main.css",
-    "lightgallery/css/lightgallery.css",
-    "lightgallery/css/lg-thumbnail.css",
-    "lightgallery/css/lg-video.css",
-    "lightgallery/css/lg-zoom.css",
   ],
   components: [
     {
@@ -158,6 +154,14 @@ export default defineNuxtConfig({
   ],
   experimental: {
     viewTransition: true,
+    defaults: {
+      nuxtLink: {
+        prefetchOn: {
+          visibility: false,
+          interaction: true,
+        },
+      },
+    },
   },
   image: {
     inject: false,
@@ -219,16 +223,6 @@ export default defineNuxtConfig({
       link: [
         { rel: "icon", type: "image/png", href: "/favicon.png" },
         { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
-        { rel: "preconnect", href: "https://fonts.googleapis.com" },
-        {
-          rel: "preconnect",
-          href: "https://fonts.gstatic.com",
-          crossorigin: "",
-        },
-        {
-          rel: "stylesheet",
-          href: "https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap",
-        },
       ],
     },
   },
