@@ -4,7 +4,7 @@
     <!-- Main Content -->
     <div class="min-w-0">
     <!-- Mobile Header -->
-    <div class="lg:hidden sticky z-10 -mx-4 -mt-4 top-14 mb-2">
+    <div class="lg:hidden sticky z-10 -mx-4 -mt-4 top-16 mb-2">
       <div class="flex items-center gap-3 bg-base-100 px-4 py-3">
         <button class="btn btn-circle btn-ghost btn-sm" @click="handleBack">
           <IconArrowLeft class="w-5 h-5" />
@@ -252,7 +252,7 @@
   </div>
 
     <!-- Right Sidebar (20rem rail) -->
-    <div v-if="survey" class="hidden w-full space-y-4 self-start sticky top-4 xl:block">
+    <div v-if="survey" class="hidden w-full space-y-4 self-start sticky top-20 xl:block">
       <div class="card bg-base-100 shadow-sm">
         <div class="card-body p-4">
           <h3 class="font-bold text-sm">{{ survey.title || t('surveys.untitled') }}</h3>

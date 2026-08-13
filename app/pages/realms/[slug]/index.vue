@@ -343,7 +343,7 @@
       </div>
 
       <!-- Desktop right rail (20rem) -->
-      <aside class="hidden w-full self-start sticky top-4 xl:block">
+      <aside class="hidden w-full self-start sticky top-20 xl:block">
         <RealmSidebar
           :realm-slug="realm.slug"
           :is-member="isMember"

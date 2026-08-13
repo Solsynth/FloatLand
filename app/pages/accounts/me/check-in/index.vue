@@ -116,7 +116,7 @@
       </div>
 
       <!-- Right Sidebar (Desktop only) -->
-      <aside class="hidden w-full self-start sticky top-4 xl:block">
+      <aside class="hidden w-full self-start sticky top-20 xl:block">
         <div class="space-y-4">
           <FortuneTrendCard />
         </div>

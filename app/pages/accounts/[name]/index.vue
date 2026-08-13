@@ -250,7 +250,7 @@
 
         <!-- Sidebar: bio + meta (right on desktop, above content on mobile) -->
         <aside
-          class="order-1 lg:order-2 space-y-3 w-full min-w-0 lg:sticky lg:top-4 lg:self-start"
+          class="order-1 lg:order-2 space-y-3 w-full min-w-0 lg:sticky lg:top-20 lg:self-start"
         >
           <div v-if="account.profile?.bio" class="card">
             <div class="card-body p-4">

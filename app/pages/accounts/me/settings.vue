@@ -25,7 +25,7 @@
 			</div>
 
 			<!-- Right Sidebar - Settings Navigation -->
-			<aside class="hidden xl:block sticky top-4 self-start max-h-[calc(100vh-2rem)] overflow-y-auto">
+			<aside class="hidden xl:block sticky top-20 self-start max-h-[calc(100vh-5rem)] overflow-y-auto">
 				<div class="mt-4">
 					<h2 class="card-title text-lg mb-4 px-2">{{ t('settings.title') }}</h2>
 					<ul class="menu menu-vertical p-0 gap-1 w-full">

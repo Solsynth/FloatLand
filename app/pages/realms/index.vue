@@ -143,7 +143,7 @@
         </div>
       </div>
 
-      <aside class="hidden w-full self-start sticky top-4 xl:block">
+      <aside class="hidden w-full self-start sticky top-20 xl:block">
         <ExploreSidebar />
       </aside>
 

@@ -4,13 +4,16 @@
     <div class="relative">
       <input
         v-model="searchQuery"
-        type="text"
+        type="search"
         :placeholder="t('common.search')"
-        class="rail-search input w-full"
+        :aria-label="t('common.search')"
+        class="rail-search input w-full pr-10"
         @keyup.enter="handleSearch"
       />
       <button
-        class="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/40 hover:text-base-content/70 transition-colors"
+        type="button"
+        :aria-label="t('common.search')"
+        class="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/40 transition-colors hover:text-base-content/70"
         @click="handleSearch"
       >
         <IconSearch class="h-4 w-4" />

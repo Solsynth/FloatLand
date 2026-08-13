@@ -98,7 +98,7 @@
     <div class="min-h-screen bg-base-100">
       <!-- Top bar -->
       <div
-        class="sticky top-0 z-10 bg-base-100"
+        class="sticky top-16 z-10 bg-base-100"
       >
         <div
           class="mx-auto flex max-w-5xl items-center justify-between px-4 py-3"
@@ -313,7 +313,7 @@
         <Transition name="slide">
           <div
             v-if="showInfo"
-            class="fixed top-[57px] right-0 bottom-0 z-30 hidden w-80 overflow-y-auto bg-base-100 lg:block"
+            class="fixed top-16 right-0 bottom-0 z-30 hidden w-80 overflow-y-auto bg-base-100 lg:block"
           >
             <div class="p-4">
               <div class="flex items-center justify-between mb-4">

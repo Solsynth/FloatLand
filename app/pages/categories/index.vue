@@ -12,7 +12,7 @@
           <button
             class="search-tabs__item"
             :class="{ 'search-tabs__item--active': activeTab === 'categories' }"
-            @click="activeTab = 'categories'"
+            @click="selectTab('categories')"
           >
             <IconFolder class="w-4 h-4 mr-2" />
             Categories
@@ -20,7 +20,7 @@
           <button
             class="search-tabs__item"
             :class="{ 'search-tabs__item--active': activeTab === 'tags' }"
-            @click="activeTab = 'tags'"
+            @click="selectTab('tags')"
           >
             <IconTag class="w-4 h-4 mr-2" />
             Tags
@@ -140,7 +140,25 @@ useSolarSeo({
   description: 'Browse categories and tags on Solar Network.',
 })
 
-const activeTab = ref<'categories' | 'tags'>('categories')
+const route = useRoute()
+const activeTab = ref<'categories' | 'tags'>(
+  route.query.tab === 'tags' ? 'tags' : 'categories',
+)
+
+watch(
+  () => route.query.tab,
+  (tab) => {
+    activeTab.value = tab === 'tags' ? 'tags' : 'categories'
+  },
+)
+
+function selectTab(tab: 'categories' | 'tags') {
+  activeTab.value = tab
+  void navigateTo(
+    { query: tab === 'tags' ? { tab } : {} },
+    { replace: true },
+  )
+}
 
 // Categories state
 const categories = ref<PostCategory[]>([])

@@ -49,6 +49,16 @@
                 </li>
               </ul>
             </li>
+            <li>
+              <NuxtLink
+                :to="driveNavItem.to"
+                class="gap-2"
+                :class="isNavActive(driveNavItem.to) ? 'bg-primary/10 text-primary' : ''"
+              >
+                <component :is="driveNavItem.icon" class="h-4 w-4" />
+                <span>{{ driveNavItem.label }}</span>
+              </NuxtLink>
+            </li>
             <li class="dropdown dropdown-end">
               <button
                 type="button"
@@ -104,12 +114,30 @@
             </button>
             <ul
               tabindex="0"
-              class="menu dropdown-content z-50 mt-2 w-52 rounded-box border border-base-300 bg-base-100 text-base-content p-2 shadow-lg"
+              class="menu dropdown-content z-50 mt-2 w-52 gap-1 rounded-box border border-base-300 bg-base-100 text-base-content p-2 shadow-lg"
             >
               <li>
                 <NuxtLink to="/accounts/me">
                   <IconUser class="h-4 w-4" />
                   {{ t("nav.account") }}
+                </NuxtLink>
+              </li>
+              <li>
+                <NuxtLink to="/workspaces">
+                  <IconBriefcaseBusiness class="h-4 w-4" />
+                  {{ t("nav.workspaces") }}
+                </NuxtLink>
+              </li>
+              <li>
+                <NuxtLink to="/wallets">
+                  <IconWallet class="h-4 w-4" />
+                  {{ t("nav.wallet") }}
+                </NuxtLink>
+              </li>
+              <li>
+                <NuxtLink to="/pricing">
+                  <IconCreditCard class="h-4 w-4" />
+                  {{ t("nav.pricing") }}
                 </NuxtLink>
               </li>
               <li>
@@ -130,7 +158,7 @@
                   {{ t("nav.logout") }}
                 </button>
               </li>
-            </ul>
+</ul>
           </div>
 
           <NuxtLink
@@ -202,6 +230,17 @@
               </li>
             </ul>
           </section>
+          <NuxtLink
+            :to="driveNavItem.to"
+            class="mb-3 flex h-12 min-h-12 items-center gap-3 rounded-box px-3 py-0 text-base leading-5"
+            :class="isNavActive(driveNavItem.to) ? 'bg-primary/10 text-primary' : ''"
+            @click="closeMenu"
+          >
+            <span class="flex h-5 w-5 shrink-0 items-center justify-center">
+              <component :is="driveNavItem.icon" class="h-5 w-5" />
+            </span>
+            <span class="flex h-5 items-center leading-5">{{ driveNavItem.label }}</span>
+          </NuxtLink>
           <section>
             <div
               class="flex h-12 min-h-12 items-center gap-3 px-3 py-0 text-base font-semibold leading-6 text-base-content/70"
@@ -253,11 +292,29 @@
             </p>
           </div>
         </div>
-        <ul v-if="isAuthenticated && user" class="menu w-full p-0">
+        <ul v-if="isAuthenticated && user" class="menu w-full gap-1 p-0">
           <li>
             <NuxtLink to="/accounts/me" class="flex h-12 min-h-12 items-center gap-3 px-3 py-0 text-base leading-5" @click="closeMenu">
               <span class="flex h-5 w-5 shrink-0 items-center justify-center"><IconUser class="h-5 w-5" /></span>
               <span class="flex h-5 items-center leading-5">{{ t("nav.account") }}</span>
+            </NuxtLink>
+          </li>
+          <li>
+            <NuxtLink to="/workspaces" class="flex h-12 min-h-12 items-center gap-3 px-3 py-0 text-base leading-5" @click="closeMenu">
+              <span class="flex h-5 w-5 shrink-0 items-center justify-center"><IconBriefcaseBusiness class="h-5 w-5" /></span>
+              <span class="flex h-5 items-center leading-5">{{ t("nav.workspaces") }}</span>
+            </NuxtLink>
+          </li>
+          <li>
+            <NuxtLink to="/wallets" class="flex h-12 min-h-12 items-center gap-3 px-3 py-0 text-base leading-5" @click="closeMenu">
+              <span class="flex h-5 w-5 shrink-0 items-center justify-center"><IconWallet class="h-5 w-5" /></span>
+              <span class="flex h-5 items-center leading-5">{{ t("nav.wallet") }}</span>
+            </NuxtLink>
+          </li>
+          <li>
+            <NuxtLink to="/pricing" class="flex h-12 min-h-12 items-center gap-3 px-3 py-0 text-base leading-5" @click="closeMenu">
+              <span class="flex h-5 w-5 shrink-0 items-center justify-center"><IconCreditCard class="h-5 w-5" /></span>
+              <span class="flex h-5 items-center leading-5">{{ t("nav.pricing") }}</span>
             </NuxtLink>
           </li>
           <li>
@@ -316,6 +373,9 @@
 <script setup lang="ts">
 import { getFileUrl } from "~/utils/files";
 import {
+  IconHardDrive,
+  IconBriefcaseBusiness,
+  IconCreditCard,
   IconCompass,
   IconMenu,
   IconTicket,
@@ -325,7 +385,6 @@ import {
   IconLogIn,
   IconSearch,
   IconTags,
-  IconSparkles,
 } from "#components";
 type TopbarNavItem = {
   to: string;
@@ -389,11 +448,6 @@ const navGroups = computed<TopbarNavGroup[]>(() => {
           label: t("nav.timeline"),
           icon: IconCompass,
         },
-        existing("/realms", {
-          to: "/realms",
-          label: t("nav.realms"),
-          icon: IconCompass,
-        }),
         {
           to: "/categories",
           label: t("categories.title"),
@@ -411,10 +465,10 @@ const navGroups = computed<TopbarNavGroup[]>(() => {
       label: t("nav.community"),
       icon: IconUser,
       items: [
-        existing("/workspaces", {
-          to: "/workspaces",
-          label: t("nav.workspaces"),
-          icon: IconUser,
+        existing("/realms", {
+          to: "/realms",
+          label: t("nav.realms"),
+          icon: IconCompass,
         }),
         existing("/chat", {
           to: "/chat",
@@ -423,30 +477,14 @@ const navGroups = computed<TopbarNavGroup[]>(() => {
         }),
       ],
     },
-    {
-      key: "utilities",
-      label: t("nav.utilities"),
-      icon: IconSettings,
-      items: [
-        existing("/drive", {
-          to: "/drive",
-          label: t("nav.drive"),
-          icon: IconSettings,
-        }),
-        existing("/wallets", {
-          to: "/wallets",
-          label: t("nav.wallet"),
-          icon: IconSparkles,
-        }),
-        {
-          to: "/pricing",
-          label: t("nav.pricing"),
-          icon: IconSparkles,
-        },
-      ],
-    },
   ];
 });
+
+const driveNavItem = computed<TopbarNavItem>(() => ({
+  to: "/drive",
+  label: t("nav.storage"),
+  icon: IconHardDrive,
+}));
 
 const displayName = computed(() => user.value?.nick || user.value?.name || "");
 const avatarUrl = computed(() => getFileUrl(user.value?.profile?.picture?.id));

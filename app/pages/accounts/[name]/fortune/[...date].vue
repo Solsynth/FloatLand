@@ -119,7 +119,7 @@
                 </div>
 
                 <!-- Right Sidebar (xl+) -->
-                <aside class="hidden w-full space-y-4 self-start sticky top-4 xl:block">
+                <aside class="hidden w-full space-y-4 self-start sticky top-20 xl:block">
                     <!-- User Profile Card -->
                     <div v-if="account" class="card bg-base-100 overflow-hidden">
                         <div class="h-16 w-full bg-base-200">

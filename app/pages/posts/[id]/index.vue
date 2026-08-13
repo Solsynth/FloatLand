@@ -1,7 +1,7 @@
 <template>
 	<NuxtLayout name="app">
 		<!-- Mobile Header -->
-		<div class="lg:hidden sticky z-10 mb-4 -mx-4 -mt-4 top-14">
+		<div class="lg:hidden sticky z-10 mb-4 -mx-4 -mt-4 top-16">
 			<div
 				class="flex items-center gap-4 bg-base-100 pl-6 pr-4 py-3"
 			>
@@ -281,7 +281,7 @@
 			</div>
 
 			<!-- Right Sidebar - Publisher Info (20rem, matches ExploreSidebar rail) -->
-			<aside class="hidden w-full self-start sticky top-4 xl:block">
+			<aside class="hidden w-full self-start sticky top-20 xl:block">
 				<PublisherSidebar
 					v-if="post?.publisher"
 					:publisher="post?.publisher"
