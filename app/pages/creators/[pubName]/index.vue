@@ -96,99 +96,6 @@
       </template>
     </div>
 
-    <template #rightbar>
-      <div
-        class="space-y-4 card bg-base-100 shadow-sm rounded-none min-h-full p-4"
-      >
-        <!-- Publisher Info -->
-        <div v-if="currentPublisher" class="card bg-base-100 shadow-sm">
-          <div class="card-body p-4">
-            <div class="flex items-center gap-3 mb-3">
-              <div class="avatar">
-                <div class="w-10 rounded-full">
-                  <img
-                    v-if="currentPublisher.picture?.id"
-                    :src="getFileUrl(currentPublisher.picture?.id)!"
-                    :alt="currentPublisher.nick"
-                  />
-                  <div
-                    v-else
-                    class="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-content text-sm font-bold"
-                  >
-                    {{ currentPublisher.nick?.slice(0, 2).toUpperCase() }}
-                  </div>
-                </div>
-              </div>
-              <div class="min-w-0">
-                <div class="font-semibold text-sm truncate">
-                  {{ currentPublisher.nick }}
-                </div>
-                <div class="text-xs text-base-content/50">
-                  @{{ currentPublisher.name }}
-                </div>
-              </div>
-            </div>
-            <p
-              v-if="currentPublisher.bio"
-              class="text-xs text-base-content/60 line-clamp-3"
-            >
-              {{ currentPublisher.bio }}
-            </p>
-          </div>
-        </div>
-
-        <!-- Quick Stats -->
-        <div v-if="stats" class="card bg-base-100 shadow-sm">
-          <div class="card-body p-4">
-            <h3 class="font-semibold text-sm mb-3">
-              {{ t("creator.dashboard") }}
-            </h3>
-            <div class="space-y-2">
-              <div class="flex items-center justify-between text-sm">
-                <span class="text-base-content/60">{{
-                  t("creator.stats.postsCreated")
-                }}</span>
-                <span class="font-medium">{{ stats.postsCreated }}</span>
-              </div>
-              <div class="flex items-center justify-between text-sm">
-                <span class="text-base-content/60">{{
-                  t("creator.stats.upvoteReceived")
-                }}</span>
-                <span class="font-medium">{{ stats.upvoteReceived }}</span>
-              </div>
-              <div class="flex items-center justify-between text-sm">
-                <span class="text-base-content/60">{{
-                  t("creator.stats.downvoteReceived")
-                }}</span>
-                <span class="font-medium">{{ stats.downvoteReceived }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Rating Summary -->
-        <div v-if="rating" class="card bg-base-100 shadow-sm">
-          <div class="card-body p-4">
-            <h3 class="font-semibold text-sm mb-3">
-              {{ t("creator.rating.title") }}
-            </h3>
-            <div class="flex items-center gap-3">
-              <span class="text-3xl font-bold" :class="ratingTextColor">{{
-                rating.grade
-              }}</span>
-              <div>
-                <div class="text-sm font-medium">
-                  {{ formatRating(rating.rating) }}
-                </div>
-                <div class="text-xs text-base-content/50">
-                  {{ t("creator.rating.rank", { rank: rating.rank }) }}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </template>
   </NuxtLayout>
 </template>
 
@@ -217,7 +124,6 @@ import {
   fetchManagedPublishers,
 } from "~/utils/creator";
 import { fetchPublisherHeatmap } from "~/utils/api";
-import { getFileUrl } from "~/utils/files";
 
 definePageMeta({ middleware: "creator" });
 

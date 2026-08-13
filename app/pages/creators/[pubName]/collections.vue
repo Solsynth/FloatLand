@@ -83,16 +83,6 @@
       </AdminDrawer>
     </div>
 
-    <template #rightbar>
-      <div class="card bg-base-100 shadow-sm min-h-full rounded-none">
-          <div class="card-body p-4">
-            <h3 class="font-semibold text-sm mb-3">{{ t('creator.collections.title') }}</h3>
-            <p class="text-xs text-base-content/60">
-              {{ t('creator.collections.slugHint') }}
-            </p>
-          </div>
-        </div>
-    </template>
   </NuxtLayout>
 </template>
 

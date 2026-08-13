@@ -1,22 +1,5 @@
 <template>
   <aside class="flex h-full flex-col bg-base-100">
-    <!-- Logo -->
-    <div class="flex h-14 shrink-0 items-center gap-3 px-4">
-      <NuxtLink to="/" class="shrink-0">
-        <img src="/favicon.png" alt="Logo" class="h-8 w-8" />
-      </NuxtLink>
-      <div class="min-w-0">
-        <NuxtLink
-          to="/"
-          class="block text-sm font-bold tracking-tight text-base-content leading-tight"
-        >
-          Solar Network
-        </NuxtLink>
-        <p class="text-xs text-base-content/45 font-medium truncate">
-          {{ sectionLabel }}
-        </p>
-      </div>
-    </div>
 
     <!-- Portal Toggle (only when a publisher is selected) -->
     <div v-if="isPublisherSelected && showPortalToggle" class="px-3 pt-3 pb-1">

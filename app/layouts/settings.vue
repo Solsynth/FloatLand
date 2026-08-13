@@ -1,12 +1,17 @@
 <template>
-    <div class="min-h-screen bg-base-200">
-        <div class="app-shell mx-auto max-w-7xl">
-            <!-- Desktop Layout -->
-            <div class="hidden lg:grid lg:grid-cols-[16rem_1fr] lg:gap-6 lg:px-4">
+    <header class="hidden sticky top-0 z-50 border-b border-base-300 bg-base-100 shadow-sm lg:block">
+        <div class="navbar min-h-16 px-4 lg:px-6">
+            <NuxtLink to="/" class="flex items-center" aria-label="Solar Network">
+                <img src="/favicon.png" alt="Solar Network" class="h-9 w-9" />
+            </NuxtLink>
+        </div>
+    </header>
+    <div class="app-shell">
+        <!-- Desktop Layout -->
+        <div class="hidden min-h-[calc(100vh-4rem)] lg:grid lg:grid-cols-[16rem_1fr] lg:gap-6 lg:px-4">
                 <!-- Settings Sidebar -->
                 <aside class="settings-sidebar">
                     <div class="p-4">
-                            <h2 class="text-lg font-bold mb-4">{{ t("settings.title") }}</h2>
                             <nav class="space-y-1">
                                 <NuxtLink
                                     v-for="item in menuItems"
@@ -67,7 +72,6 @@
                 </nav>
             </div>
         </div>
-    </div>
 </template>
 
 <script setup lang="ts">

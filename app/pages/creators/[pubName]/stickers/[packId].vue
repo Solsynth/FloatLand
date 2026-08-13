@@ -152,17 +152,6 @@
       </AdminDrawer>
     </div>
 
-    <template #rightbar>
-      <div v-if="pack" class="card bg-base-100 shadow-sm rounded-none min-h-full">
-        <div class="card-body p-4">
-          <h3 class="font-semibold text-sm mb-3">{{ pack.name }}</h3>
-          <div class="space-y-2 text-xs text-base-content/60">
-            <p>{{ t('creator.stickers.prefix') }}: <span class="font-mono">:{{ pack.prefix }}+slug:</span></p>
-            <p>{{ t('creator.stickers.count', { count: stickers?.length ?? 0 }) }}</p>
-          </div>
-        </div>
-      </div>
-    </template>
   </NuxtLayout>
 </template>
 

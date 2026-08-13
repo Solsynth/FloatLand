@@ -1,9 +1,17 @@
 <template>
   <div class="min-h-screen bg-base-200">
-    <!-- Desktop Layout -->
-    <div class="hidden lg:flex min-h-screen">
+    <AdminHeader
+      class="hidden lg:block"
+      :breadcrumbs="breadcrumbs"
+      :page-title="pageTitle"
+    />
+
+    <!-- Desktop Drive Layout -->
+    <div class="hidden min-h-[calc(100vh-3.5rem)] lg:flex">
       <!-- Sidebar -->
-      <aside class="fixed left-0 top-0 bottom-0 w-[18rem] z-40 overflow-y-auto scrollbar-none">
+      <aside
+        class="sticky top-14 z-40 h-[calc(100vh-3.5rem)] w-[18rem] shrink-0 overflow-y-auto border-r border-base-300 scrollbar-none"
+      >
         <DriveSidebar
           :usage="usage"
           @storage-details="showUsageDetails = true"
@@ -11,27 +19,11 @@
       </aside>
 
       <!-- Main Area -->
-      <div class="ml-72 flex-1 flex flex-col min-h-screen max-h-screen" :class="{ 'mr-88': $slots.rightbar }">
-        <!-- Header -->
-        <AdminHeader :breadcrumbs="breadcrumbs" :page-title="pageTitle" />
-
-        <!-- Content -->
-        <div class="flex-1 flex min-h-0">
-          <main class="flex-1 min-w-0 overflow-y-auto scrollbar-none">
-            <div class="mx-auto h-full" :class="contentWidthClass">
-              <slot />
-            </div>
-          </main>
+      <main class="min-w-0 flex-1 overflow-y-auto scrollbar-none">
+        <div class="mx-auto h-full" :class="contentWidthClass">
+          <slot />
         </div>
-      </div>
-
-      <!-- Right Sidebar (fixed to right edge) -->
-      <aside
-        v-if="$slots.rightbar"
-        class="fixed right-0 top-0 bottom-0 w-88 z-30 overflow-y-auto border-l border-base-300/30 scrollbar-none"
-      >
-        <slot name="rightbar" />
-      </aside>
+      </main>
     </div>
 
     <!-- Mobile Layout -->

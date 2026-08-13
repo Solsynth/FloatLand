@@ -189,14 +189,6 @@
       </AdminDrawer>
     </div>
 
-    <template #rightbar>
-      <div class="min-h-full bg-base-100 p-5">
-        <h3 class="font-semibold text-sm mb-2">{{ t("creator.title") }}</h3>
-        <p class="text-xs text-base-content/55 leading-relaxed">
-          {{ t("creator.quota.info") }}
-        </p>
-      </div>
-    </template>
   </NuxtLayout>
 </template>
 

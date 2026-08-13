@@ -1,8 +1,9 @@
 <template>
   <NuxtLayout name="developer">
-    <template #rightbar>
-      <!-- API Explorer Sidebar -->
-      <div class="card bg-base-100 shadow-sm rounded-none min-h-full">
+
+    <div class="mx-auto max-w-5xl">
+      <!-- API Explorer -->
+      <div class="card bg-base-100 shadow-sm mb-6">
         <div class="card-body p-4">
           <div class="flex items-center justify-between mb-3">
             <h3 class="text-sm font-bold">API Explorer</h3>
@@ -15,20 +16,15 @@
             </button>
           </div>
 
-          <!-- Loading -->
           <div v-if="loadingSwagger" class="space-y-2 animate-pulse">
             <div class="h-4 bg-base-300/50 rounded w-3/4" />
             <div class="h-3 bg-base-300/50 rounded w-1/2" />
             <div class="h-3 bg-base-300/50 rounded w-2/3" />
             <div class="h-3 bg-base-300/50 rounded w-1/2" />
           </div>
-
-          <!-- Error -->
           <p v-else-if="swaggerError" class="text-xs text-error">
             {{ swaggerError }}
           </p>
-
-          <!-- Endpoint Groups -->
           <div v-else-if="endpointGroups.length" class="space-y-1">
             <div
               v-for="(group, gi) in endpointGroups"
@@ -37,9 +33,7 @@
               :class="{ 'collapse-open': !collapseAll }"
             >
               <input type="checkbox" :checked="!collapseAll" />
-              <div
-                class="collapse-title text-xs font-semibold text-base-content/60 min-h-0 py-2 px-2"
-              >
+              <div class="collapse-title text-xs font-semibold text-base-content/60 min-h-0 py-2 px-2">
                 {{ group.tag }} ({{ group.endpoints.length }})
               </div>
               <div class="collapse-content px-1 pb-1">
@@ -63,14 +57,9 @@
               </div>
             </div>
           </div>
-
-          <!-- Empty -->
           <p v-else class="text-xs text-base-content/40">No endpoints found</p>
         </div>
       </div>
-    </template>
-
-    <div class="mx-auto max-w-5xl">
       <!-- Service Selector -->
       <div class="flex flex-row items-center justify-start gap-3 mb-4 pb-4 border-b border-base-300/20">
         <fieldset class="fieldset w-44">

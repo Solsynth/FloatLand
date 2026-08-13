@@ -1,19 +1,5 @@
 <template>
   <aside class="flex h-full flex-col bg-base-100">
-    <!-- Logo -->
-    <div class="flex items-center gap-3 px-5 py-5">
-      <NuxtLink to="/" class="shrink-0">
-        <img src="/favicon.png" alt="Logo" class="h-9 w-9" />
-      </NuxtLink>
-      <div class="min-w-0">
-        <NuxtLink to="/" class="text-base font-bold tracking-tight text-base-content">
-          Solar Network
-        </NuxtLink>
-        <p class="text-[11px] text-base-content/40 font-medium tracking-wide uppercase">
-          {{ t("nav.drive") }}
-        </p>
-      </div>
-    </div>
 
     <!-- Navigation -->
     <nav class="flex-1 overflow-y-auto px-3 py-4 space-y-6 scrollbar-none">

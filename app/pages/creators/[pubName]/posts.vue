@@ -292,20 +292,6 @@
       </AdminDrawer>
     </div>
 
-    <template #rightbar>
-      <div class="card bg-base-100 shadow-sm rounded-none min-h-full">
-        <div class="card-body p-4">
-          <h3 class="font-semibold text-sm mb-3">
-            {{ t("creator.posts.title") }}
-          </h3>
-          <div class="space-y-2 text-xs text-base-content/60">
-            <p>{{ t("creator.posts.selectAll") }}</p>
-            <p>{{ t("creator.posts.batchVisibility") }}</p>
-            <p>{{ t("creator.posts.batchAddToCollection") }}</p>
-          </div>
-        </div>
-      </div>
-    </template>
   </NuxtLayout>
 </template>
 

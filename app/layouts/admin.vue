@@ -1,9 +1,17 @@
 <template>
   <div class="min-h-screen bg-base-200">
+    <AdminHeader
+      class="hidden lg:block"
+      :breadcrumbs="breadcrumbs"
+      :page-title="pageTitle"
+    />
+
     <!-- Desktop Admin Layout -->
-    <div class="hidden lg:flex min-h-screen">
+    <div class="hidden min-h-[calc(100vh-3.5rem)] lg:flex">
       <!-- Sidebar -->
-      <aside class="fixed left-0 top-0 bottom-0 w-[16.5rem] z-40 overflow-y-auto scrollbar-none">
+      <aside
+        class="sticky top-14 z-40 h-[calc(100vh-3.5rem)] w-[16.5rem] shrink-0 overflow-y-auto border-r border-base-300 scrollbar-none"
+      >
         <AdminSidebar
           section-label="Admin Panel"
           :nav-groups="navGroups"
@@ -15,31 +23,15 @@
       </aside>
 
       <!-- Main Area -->
-      <div class="ml-[16.5rem] flex-1 flex flex-col min-h-screen max-h-screen" :class="{ 'mr-[22rem]': $slots.rightbar }">
-        <!-- Header -->
-        <AdminHeader :breadcrumbs="breadcrumbs" :page-title="pageTitle" />
-
-        <!-- Content -->
-        <div class="flex-1 flex min-h-0">
-          <main class="flex-1 min-w-0 overflow-y-auto px-5 py-5 lg:px-6 lg:py-6 scrollbar-none">
-            <div class="mx-auto max-w-6xl">
-              <slot />
-            </div>
-          </main>
-
-          <!-- Right Sidebar -->
-          <aside
-            v-if="$slots.rightbar"
-            class="w-88 shrink-0 overflow-y-auto border-l border-base-300/30 scrollbar-none"
-          >
-            <slot name="rightbar" />
-          </aside>
+      <main class="min-w-0 flex-1 overflow-y-auto px-5 py-5 lg:px-6 lg:py-6 scrollbar-none">
+        <div class="mx-auto max-w-6xl">
+          <slot />
         </div>
-      </div>
+      </main>
     </div>
 
     <!-- Mobile Layout -->
-    <div class="lg:hidden flex flex-col min-h-screen">
+    <div class="flex min-h-screen flex-col lg:hidden">
       <!-- Mobile Header -->
       <header class="fixed top-0 left-0 right-0 z-50 border-b border-base-300 bg-base-100">
         <div class="flex h-14 items-center justify-between px-4">
@@ -82,6 +74,7 @@
         <slot />
       </main>
     </div>
+
   </div>
 </template>
 
