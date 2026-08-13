@@ -11,154 +11,168 @@
         </div>
 
         <nav class="navbar-center hidden lg:flex" aria-label="Primary">
-          <ul class="menu menu-horizontal gap-1 p-0">
-            <li
-              v-for="group in navGroups"
-              :key="group.key"
-              class="dropdown dropdown-center"
-            >
-              <button
-                type="button"
-                class="gap-2"
-                :class="isNavGroupActive(group) ? 'bg-primary/10 text-primary' : ''"
-                aria-haspopup="menu"
+          <NavigationMenuRoot :delay-duration="0" :skip-delay-duration="0">
+            <NavigationMenuList class="menu menu-horizontal gap-1 p-0">
+              <NavigationMenuItem
+                v-for="group in navGroups"
+                :key="group.key"
+                :value="group.key"
+                class="relative"
               >
-                <component :is="group.icon" class="h-4 w-4" />
-                <span>{{ group.label }}</span>
-              </button>
-              <ul
-                tabindex="0"
-                class="menu dropdown-content z-50 mt-2 w-60 rounded-box border border-base-300 bg-base-100 text-base-content p-2 shadow-lg"
-              >
-                <li v-for="item in group.items" :key="item.to">
+                <NavigationMenuTrigger
+                  class="gap-2"
+                  :class="isNavGroupActive(group) ? 'bg-primary/10 text-primary' : ''"
+                >
+                  <component :is="group.icon" class="h-4 w-4" />
+                  <span>{{ group.label }}</span>
+                </NavigationMenuTrigger>
+                <NavigationMenuContent
+                  class="absolute left-1/2 top-full z-50 mt-2 w-60 -translate-x-1/2 rounded-box border border-base-300 bg-base-100 p-2 text-base-content shadow-lg"
+                >
+                  <ul class="menu w-full p-0">
+                    <li v-for="item in group.items" :key="item.to">
+                      <NavigationMenuLink as-child>
+                        <NuxtLink
+                          :to="item.to"
+                          :class="isNavActive(item.to) ? 'bg-primary/10 text-primary' : ''"
+                        >
+                          <span class="relative">
+                            <component :is="item.icon" class="h-4 w-4" />
+                            <span
+                              v-if="item.badge"
+                              class="absolute -top-2 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-error px-1 text-[9px] font-bold text-error-content"
+                            >
+                              {{ item.badge > 99 ? "99+" : item.badge }}
+                            </span>
+                          </span>
+                          {{ item.label }}
+                        </NuxtLink>
+                      </NavigationMenuLink>
+                    </li>
+                  </ul>
+                </NavigationMenuContent>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <NavigationMenuLink as-child>
                   <NuxtLink
-                    :to="item.to"
-                    :class="isNavActive(item.to) ? 'bg-primary/10 text-primary' : ''"
+                    :to="driveNavItem.to"
+                    class="gap-2"
+                    :class="isNavActive(driveNavItem.to) ? 'bg-primary/10 text-primary' : ''"
                   >
-                    <span class="relative">
-                      <component :is="item.icon" class="h-4 w-4" />
-                      <span
-                        v-if="item.badge"
-                        class="absolute -top-2 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-error px-1 text-[9px] font-bold text-error-content"
-                      >
-                        {{ item.badge > 99 ? "99+" : item.badge }}
-                      </span>
-                    </span>
-                    {{ item.label }}
+                    <component :is="driveNavItem.icon" class="h-4 w-4" />
+                    <span>{{ driveNavItem.label }}</span>
                   </NuxtLink>
-                </li>
-              </ul>
-            </li>
-            <li>
-              <NuxtLink
-                :to="driveNavItem.to"
-                class="gap-2"
-                :class="isNavActive(driveNavItem.to) ? 'bg-primary/10 text-primary' : ''"
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+              <NavigationMenuItem
+                value="backstage"
+                class="relative"
               >
-                <component :is="driveNavItem.icon" class="h-4 w-4" />
-                <span>{{ driveNavItem.label }}</span>
-              </NuxtLink>
-            </li>
-            <li class="dropdown dropdown-end">
-              <button
-                type="button"
-                class="gap-2"
-                :class="isBackstageActive ? 'bg-primary/10 text-primary' : ''"
-                aria-haspopup="menu"
-              >
-                <component :is="backstageEntry.icon" class="h-4 w-4" />
-                <span>{{ t(backstageEntry.labelKey) }}</span>
-              </button>
-              <ul
-                tabindex="0"
-                class="menu dropdown-content z-50 mt-2 w-56 rounded-box border border-base-300 bg-base-100 text-base-content p-2 shadow-lg"
-              >
-                <li v-for="item in backstageNavItems" :key="item.to">
-                  <NuxtLink
-                    :to="item.to"
-                    :class="isNavActive(item.to) ? 'bg-primary/10 text-primary' : ''"
-                  >
-                    <component :is="item.icon" class="h-4 w-4" />
-                    {{ item.label }}
-                  </NuxtLink>
-                </li>
-              </ul>
-            </li>
-          </ul>
+                <NavigationMenuTrigger
+                  class="gap-2"
+                  :class="isBackstageActive ? 'bg-primary/10 text-primary' : ''"
+                >
+                  <component :is="backstageEntry.icon" class="h-4 w-4" />
+                  <span>{{ t(backstageEntry.labelKey) }}</span>
+                </NavigationMenuTrigger>
+                <NavigationMenuContent
+                  class="absolute right-0 top-full z-50 mt-2 w-56 rounded-box border border-base-300 bg-base-100 p-2 text-base-content shadow-lg"
+                >
+                  <ul class="menu w-full p-0">
+                    <li v-for="item in backstageNavItems" :key="item.to">
+                      <NavigationMenuLink as-child>
+                        <NuxtLink
+                          :to="item.to"
+                          :class="isNavActive(item.to) ? 'bg-primary/10 text-primary' : ''"
+                        >
+                          <component :is="item.icon" class="h-4 w-4" />
+                          {{ item.label }}
+                        </NuxtLink>
+                      </NavigationMenuLink>
+                    </li>
+                  </ul>
+                </NavigationMenuContent>
+              </NavigationMenuItem>
+            </NavigationMenuList>
+          </NavigationMenuRoot>
         </nav>
-
         <div class="navbar-end gap-1">
           <NotificationBell v-if="isAuthenticated && user" />
-
-          <div v-if="isAuthenticated && user" class="dropdown dropdown-end hidden sm:block">
-            <button
-              type="button"
-              class="btn btn-ghost h-auto min-h-10 gap-2 px-2"
-              aria-haspopup="menu"
-            >
-              <div v-if="avatarUrl" class="avatar">
-                <div class="w-8 rounded-full">
-                  <img :src="avatarUrl" :alt="user.name" />
-                </div>
-              </div>
-              <div v-else class="avatar avatar-placeholder">
-                <div class="w-8 rounded-full bg-primary text-primary-content">
-                  <span class="text-xs font-medium">
-                    {{ (user.name || "?").slice(0, 2).toUpperCase() }}
+          <div v-if="isAuthenticated && user" class="hidden sm:block">
+            <DropdownMenuRoot v-model:open="profileMenuOpen">
+              <DropdownMenuTrigger as-child>
+                <button
+                  type="button"
+                  class="btn btn-ghost h-auto min-h-10 gap-2 px-2"
+                >
+                  <div v-if="avatarUrl" class="avatar">
+                    <div class="w-8 rounded-full">
+                      <img :src="avatarUrl" :alt="user.name" />
+                    </div>
+                  </div>
+                  <div v-else class="avatar avatar-placeholder">
+                    <div class="w-8 rounded-full bg-primary text-primary-content">
+                      <span class="text-xs font-medium">
+                        {{ (user.name || "?").slice(0, 2).toUpperCase() }}
+                      </span>
+                    </div>
+                  </div>
+                  <span class="hidden max-w-32 truncate text-sm font-medium xl:inline">
+                    {{ displayName }}
                   </span>
-                </div>
-              </div>
-              <span class="hidden max-w-32 truncate text-sm font-medium xl:inline">
-                {{ displayName }}
-              </span>
-            </button>
-            <ul
-              tabindex="0"
-              class="menu dropdown-content z-50 mt-2 w-52 gap-1 rounded-box border border-base-300 bg-base-100 text-base-content p-2 shadow-lg"
-            >
-              <li>
-                <NuxtLink to="/accounts/me">
-                  <IconUser class="h-4 w-4" />
-                  {{ t("nav.account") }}
-                </NuxtLink>
-              </li>
-              <li>
-                <NuxtLink to="/workspaces">
-                  <IconBriefcaseBusiness class="h-4 w-4" />
-                  {{ t("nav.workspaces") }}
-                </NuxtLink>
-              </li>
-              <li>
-                <NuxtLink to="/wallets">
-                  <IconWallet class="h-4 w-4" />
-                  {{ t("nav.wallet") }}
-                </NuxtLink>
-              </li>
-              <li>
-                <NuxtLink to="/pricing">
-                  <IconCreditCard class="h-4 w-4" />
-                  {{ t("nav.pricing") }}
-                </NuxtLink>
-              </li>
-              <li>
-                <NuxtLink to="/accounts/me/settings">
-                  <IconSettings class="h-4 w-4" />
-                  {{ t("nav.settings") }}
-                </NuxtLink>
-              </li>
-              <li>
-                <NuxtLink to="/tickets">
-                  <IconTicket class="h-4 w-4" />
-                  {{ t("nav.tickets") }}
-                </NuxtLink>
-              </li>
-              <li>
-                <button type="button" @click="handleLogout">
-                  <IconLogOut class="h-4 w-4" />
-                  {{ t("nav.logout") }}
                 </button>
-              </li>
-</ul>
+              </DropdownMenuTrigger>
+              <DropdownMenuPortal>
+                <DropdownMenuContent
+                  align="end"
+                  :side-offset="8"
+                  class="z-50 w-52 rounded-box border border-base-300 bg-base-100 p-2 text-base-content shadow-lg"
+                >
+                  <DropdownMenuItem as-child>
+                    <NuxtLink to="/accounts/me">
+                      <IconUser class="h-4 w-4" />
+                      {{ t("nav.account") }}
+                    </NuxtLink>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem as-child>
+                    <NuxtLink to="/workspaces">
+                      <IconBriefcaseBusiness class="h-4 w-4" />
+                      {{ t("nav.workspaces") }}
+                    </NuxtLink>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem as-child>
+                    <NuxtLink to="/wallets">
+                      <IconWallet class="h-4 w-4" />
+                      {{ t("nav.wallet") }}
+                    </NuxtLink>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem as-child>
+                    <NuxtLink to="/pricing">
+                      <IconCreditCard class="h-4 w-4" />
+                      {{ t("nav.pricing") }}
+                    </NuxtLink>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem as-child>
+                    <NuxtLink to="/accounts/me/settings">
+                      <IconSettings class="h-4 w-4" />
+                      {{ t("nav.settings") }}
+                    </NuxtLink>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem as-child>
+                    <NuxtLink to="/tickets">
+                      <IconTicket class="h-4 w-4" />
+                      {{ t("nav.tickets") }}
+                    </NuxtLink>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem as-child>
+                    <button type="button" @click="handleLogout">
+                      <IconLogOut class="h-4 w-4" />
+                      {{ t("nav.logout") }}
+                    </button>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenuPortal>
+            </DropdownMenuRoot>
           </div>
 
           <NuxtLink
@@ -180,7 +194,6 @@
             >
               <IconMenu class="h-5 w-5" />
             </button>
-
           </div>
         </div>
       </div>
@@ -386,6 +399,19 @@ import {
   IconSearch,
   IconTags,
 } from "#components";
+import {
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuPortal,
+  DropdownMenuRoot,
+  DropdownMenuTrigger,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuRoot,
+  NavigationMenuTrigger,
+} from "reka-ui";
 type TopbarNavItem = {
   to: string;
   label: string;
@@ -407,6 +433,7 @@ const { isAuthenticated, user } = auth;
 
 const menuOpen = ref(false);
 const composeOpen = ref(false);
+const profileMenuOpen = ref(false);
 
 const {
   navItems: mainNavItems,
@@ -501,11 +528,13 @@ function isNavActive(path: string) {
 }
 
 function toggleMenu() {
+  profileMenuOpen.value = false;
   menuOpen.value = !menuOpen.value;
 }
 
 function closeMenu() {
   menuOpen.value = false;
+  profileMenuOpen.value = false;
 }
 
 function handleLogout() {
@@ -531,5 +560,6 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener("open-compose", handleOpenComposeEvent);
 });
+
 </script>
 
