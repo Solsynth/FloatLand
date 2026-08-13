@@ -306,7 +306,10 @@
 
           <!-- Loading -->
           <div
-            v-if="status === 'pending' && timelineEvents.length === 0"
+            v-if="
+              (status === 'pending' || status === 'idle') &&
+              timelineEvents.length === 0
+            "
             class="flex justify-center py-16"
           >
             <ConfuseSpinner :message="t('home.loadingPosts')" />
@@ -782,6 +785,10 @@ const {
       aggressive: true,
     }),
   {
+    // The Explore feed is personalized and not required for the initial HTML.
+    // Fetch it after hydration so the document response is not blocked by the
+    // timeline API.
+    server: false,
     default: () => ({ items: [], nextCursor: null, mode: "personalized" }),
   },
 );

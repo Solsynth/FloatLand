@@ -15,8 +15,13 @@
                 <!-- Image Header -->
                 <div class="relative h-48 sm:h-56 bg-base-300 overflow-hidden">
                     <img
-                        src="/images/main-visual.webp"
+                        v-if="isOpen"
+                        src="/images/main-visual.jpg"
                         alt="Solar Network"
+                        width="1280"
+                        height="720"
+                        loading="lazy"
+                        decoding="async"
                         class="w-full h-full object-cover"
                     />
                     <div class="absolute inset-0 bg-black/25" />
