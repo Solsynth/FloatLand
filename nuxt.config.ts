@@ -224,6 +224,20 @@ export default defineNuxtConfig({
         { rel: "icon", type: "image/png", href: "/favicon.png" },
         { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
       ],
+      script: [
+        {
+          async: true,
+          src: "https://www.googletagmanager.com/gtag/js?id=G-367XGTWCK9",
+        },
+        {
+          children: [
+            "window.dataLayer = window.dataLayer || [];",
+            "function gtag(){dataLayer.push(arguments);}",
+            "gtag('js', new Date());",
+            "gtag('config', 'G-367XGTWCK9');",
+          ].join("\n"),
+        },
+      ],
     },
   },
   vite: {
