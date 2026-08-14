@@ -192,6 +192,7 @@ export async function createDistributionChannel(
     displayNames?: DistributionLocalizedText;
     description?: string;
     descriptions?: DistributionLocalizedText;
+    artifactRetention?: number | null;
   },
 ): Promise<DistributionChannel> {
   const response = await apiFetch(
@@ -204,6 +205,7 @@ export async function createDistributionChannel(
         display_names: input.displayNames,
         description: input.description,
         descriptions: input.descriptions,
+        artifact_retention: input.artifactRetention,
       }),
     },
   );
@@ -218,6 +220,7 @@ export async function updateDistributionChannel(
     displayNames?: DistributionLocalizedText;
     description?: string;
     descriptions?: DistributionLocalizedText;
+    artifactRetention?: number | null;
   },
 ): Promise<DistributionChannel> {
   const response = await apiFetch(
@@ -231,6 +234,7 @@ export async function updateDistributionChannel(
         display_names: input.displayNames,
         description: input.description,
         descriptions: input.descriptions,
+        artifact_retention: input.artifactRetention,
       }),
     },
   );
@@ -412,6 +416,18 @@ export async function deleteDistributionRelease(
     ),
     { method: "DELETE" },
   );
+}
+export async function yankDistributionRelease(
+  productId: string,
+  releaseId: string,
+): Promise<DistributionRelease> {
+  const response = await apiFetch(
+    distributionPath(
+      `/products/${encodeURIComponent(productId)}/releases/${encodeURIComponent(releaseId)}/yank`,
+    ),
+    { method: "POST" },
+  );
+  return safeJsonParse<DistributionRelease>(response);
 }
 async function postDistributionUpdate(
   endpoint: string,

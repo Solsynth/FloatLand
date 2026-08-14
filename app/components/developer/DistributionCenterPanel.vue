@@ -5,29 +5,22 @@
     </div>
 
     <template v-else-if="product">
-      <div class="flex flex-col gap-4 border border-l-4 border-base-300 border-l-primary bg-base-100 p-5 rounded-box sm:flex-row sm:items-start sm:justify-between">
+      <div class="relative overflow-hidden rounded-box border border-base-300 bg-gradient-to-br from-base-100 via-base-100 to-primary/[0.05] p-5 shadow-sm sm:p-6">
         <div class="min-w-0">
-          <NuxtLink
-            class="link link-hover text-sm text-base-content/60"
-            :to="`/developers/${encodeURIComponent(publisherName)}/distribution`"
-          >
-            {{ t('developer.apps.distribution.backToProducts') }}
-          </NuxtLink>
+          <p class="mb-2 font-mono text-[10px] font-semibold uppercase tracking-[0.24em] text-primary/75">{{ t('developer.apps.distribution.releaseControl') }}</p>
           <h1 class="mt-2 text-xl font-semibold">
             {{ localizedDistributionText(product.names, product.name, localizationLocales) }}
           </h1>
           <p class="mt-1 font-mono text-sm text-base-content/55">{{ product.slug }}</p>
-          <div class="mt-2 inline-flex max-w-full items-center gap-2 rounded-box border border-base-300 bg-base-200/40 px-2 py-1 text-xs">
-            <span class="shrink-0 text-base-content/55">{{ t('developer.apps.distribution.appId') }}</span>
-            <code class="min-w-0 max-w-[14rem] truncate whitespace-nowrap font-mono text-base-content/75">{{ product.id }}</code>
-            <button
-              class="btn btn-ghost btn-xs h-6 min-h-6 px-2"
-              type="button"
-              @click="copyIdentifier(product.id)"
-            >
-              {{ t('ai.copy') }}
-            </button>
-          </div>
+          <button
+            class="btn btn-ghost btn-sm mt-2 h-8 min-h-8 w-8 px-0"
+            type="button"
+            :title="t('developer.apps.distribution.copyAppId')"
+            :aria-label="t('developer.apps.distribution.copyAppId')"
+            @click="copyIdentifier(product.id)"
+          >
+            <IconCopy class="h-4 w-4" />
+          </button>
           <p v-if="product.description || Object.keys(product.descriptions || {}).length" class="mt-3 max-w-2xl text-sm text-base-content/65">
             {{ localizedDistributionText(product.descriptions, product.description, localizationLocales) }}
           </p>
@@ -53,6 +46,28 @@
           </button>
         </div>
       </div>
+      <div class="grid grid-cols-2 gap-3 xl:grid-cols-4">
+        <article class="rounded-box border border-base-300 bg-base-100 p-4 shadow-sm">
+          <p class="text-[10px] font-semibold uppercase tracking-[0.16em] text-base-content/45">{{ t('developer.apps.distribution.channels') }}</p>
+          <p class="mt-2 text-2xl font-semibold tabular-nums">{{ channels.length }}</p>
+          <p class="mt-1 text-xs text-base-content/55">{{ t('developer.apps.distribution.channelsSummary') }}</p>
+        </article>
+        <article class="rounded-box border border-base-300 bg-base-100 p-4 shadow-sm">
+          <p class="text-[10px] font-semibold uppercase tracking-[0.16em] text-base-content/45">{{ t('developer.apps.distribution.releases') }}</p>
+          <p class="mt-2 text-2xl font-semibold tabular-nums">{{ publishedReleaseCount }}</p>
+          <p class="mt-1 text-xs text-base-content/55">{{ selectedChannel?.name || t('developer.apps.distribution.selectChannel') }}</p>
+        </article>
+        <article class="rounded-box border border-base-300 bg-base-100 p-4 shadow-sm">
+          <p class="text-[10px] font-semibold uppercase tracking-[0.16em] text-base-content/45">{{ t('developer.apps.distribution.artifacts') }}</p>
+          <p class="mt-2 text-2xl font-semibold tabular-nums">{{ selectedArtifactCount }}</p>
+          <p class="mt-1 text-xs text-base-content/55">{{ t('developer.apps.distribution.artifactsSummary') }}</p>
+        </article>
+        <article class="rounded-box border border-primary/20 bg-primary/[0.05] p-4 shadow-sm">
+          <p class="text-[10px] font-semibold uppercase tracking-[0.16em] text-primary/70">{{ t('developer.apps.distribution.activeChannel') }}</p>
+          <p class="mt-2 truncate text-lg font-semibold">{{ selectedChannel ? localizedDistributionText(selectedChannel.displayNames, selectedChannel.displayName || selectedChannel.name, localizationLocales) : '—' }}</p>
+          <p v-if="!selectedChannel || selectedChannel.artifactRetention != null" class="mt-1 text-xs text-base-content/55">{{ selectedChannel ? channelRetentionLabel(selectedChannel) : t('developer.apps.distribution.selectChannel') }}</p>
+        </article>
+      </div>
 
       <div class="grid grid-cols-1 gap-6 xl:grid-cols-2">
         <section class="border border-base-300 bg-base-100 p-5 rounded-box">
@@ -74,30 +89,33 @@
               class="flex items-start justify-between gap-3 border border-base-300 p-3 rounded-box transition-colors hover:border-primary/50"
               :class="selectedChannel?.id === channel.id ? 'border-primary/60 bg-primary/5' : ''"
             >
-              <button
-                class="min-w-0 flex-1 text-left"
-                :class="selectedChannel?.id === channel.id ? 'text-primary' : 'hover:text-primary'"
-                type="button"
-                @click="selectChannel(channel)"
-              >
-                <span class="block font-medium">{{ localizedDistributionText(channel.displayNames, channel.displayName || channel.name, localizationLocales) }}</span>
-                <span class="mt-1 block font-mono text-xs text-base-content/50">{{ channel.name }}</span>
-                <span class="mt-1 block max-w-[14rem] truncate whitespace-nowrap font-mono text-[11px] text-base-content/45">{{ t('developer.apps.distribution.channelId') }} · {{ channel.id }}</span>
-              </button>
-              <div class="flex shrink-0 flex-wrap items-center justify-end gap-2">
-                <span class="max-w-[12rem] truncate text-xs text-base-content/55">
-                  <template v-if="channel.latest">
-                    {{ localizedDistributionText(channel.latest.titles, channel.latest.title || channel.latest.version, localizationLocales) }}
-                    · {{ channel.latest.version }} · {{ channel.latest.artifacts.length }} {{ t('developer.apps.distribution.artifactCount') }}
-                  </template>
-                  <template v-else>{{ t('developer.apps.distribution.noRelease') }}</template>
-                </span>
+              <div class="min-w-0 flex-1">
                 <button
-                  class="btn btn-ghost btn-xs"
+                  class="w-full text-left"
+                  :class="selectedChannel?.id === channel.id ? 'text-primary' : 'hover:text-primary'"
                   type="button"
+                  @click="selectChannel(channel)"
+                >
+                  <span class="block font-medium">{{ localizedDistributionText(channel.displayNames, channel.displayName || channel.name, localizationLocales) }}</span>
+                  <span class="mt-1 block font-mono text-xs text-base-content/50">{{ channel.name }}</span>
+                  <span
+                    v-if="channel.artifactRetention != null"
+                    class="mt-2 inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/5 px-2 py-1 text-[11px] font-medium text-primary"
+                  >
+                    <span class="h-1.5 w-1.5 rounded-full bg-current" />
+                    {{ channelRetentionLabel(channel) }}
+                  </span>
+                </button>
+              </div>
+              <div class="flex shrink-0 flex-wrap items-center justify-end gap-2">
+                <button
+                  class="btn btn-ghost btn-xs h-7 min-h-7 w-7 px-0"
+                  type="button"
+                  :title="t('developer.apps.distribution.copyChannelId')"
+                  :aria-label="t('developer.apps.distribution.copyChannelId')"
                   @click.stop="copyIdentifier(channel.id)"
                 >
-                  {{ t('ai.copy') }}
+                  <IconCopy class="h-3.5 w-3.5" />
                 </button>
                 <button class="btn btn-ghost btn-xs" type="button" @click.stop="openChannelEditor(channel)">
                   <IconPencil class="h-3.5 w-3.5" />
@@ -127,17 +145,16 @@
             <div>
               <h2 class="font-semibold">{{ t('developer.apps.distribution.releases') }}</h2>
               <p v-if="selectedChannel" class="mt-1 font-mono text-xs text-base-content/50">{{ selectedChannel.name }}</p>
-              <div v-if="selectedChannel" class="mt-2 inline-flex max-w-full items-center gap-2 rounded-box border border-base-300 bg-base-200/40 px-2 py-1 text-xs">
-                <span class="shrink-0 text-base-content/55">{{ t('developer.apps.distribution.channelId') }}</span>
-                <code class="min-w-0 max-w-[14rem] truncate whitespace-nowrap font-mono text-base-content/75">{{ selectedChannel.id }}</code>
-                <button
-                  class="btn btn-ghost btn-xs h-6 min-h-6 px-2"
-                  type="button"
-                  @click="copyIdentifier(selectedChannel.id)"
-                >
-                  {{ t('ai.copy') }}
-                </button>
-              </div>
+              <button
+                v-if="selectedChannel"
+                class="btn btn-ghost btn-xs mt-2 h-7 min-h-7 w-7 px-0"
+                type="button"
+                :title="t('developer.apps.distribution.copyChannelId')"
+                :aria-label="t('developer.apps.distribution.copyChannelId')"
+                @click="copyIdentifier(selectedChannel.id)"
+              >
+                <IconCopy class="h-3.5 w-3.5" />
+              </button>
             </div>
             <button
               class="btn btn-primary btn-sm shrink-0 self-end sm:self-start"
@@ -154,27 +171,26 @@
             <div
               v-for="release in releases"
               :key="release.id"
-              class="flex flex-col gap-3 border border-base-300 p-3 rounded-box transition-colors hover:border-primary/50 sm:flex-row sm:items-start sm:justify-between"
+              class="group flex flex-col gap-3 rounded-box border border-base-300 bg-base-100 p-3 transition-all hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-sm sm:flex-row sm:items-start sm:justify-between"
             >
               <div class="min-w-0">
-                <div class="font-medium">
-                  {{ localizedDistributionText(release.titles, release.title || release.version, localizationLocales) }}
+                <div v-if="release.title || Object.keys(release.titles || {}).length" class="font-medium">
+                  {{ localizedDistributionText(release.titles, release.title, localizationLocales) }}
                 </div>
                 <div class="mt-1 font-mono text-sm">{{ release.version }}</div>
-                <div class="mt-1 text-xs text-base-content/55">
-                  {{ release.status }} · {{ release.artifacts.length }} {{ t('developer.apps.distribution.artifactCount') }}
+                <div class="mt-2 flex flex-wrap items-center gap-2 text-xs text-base-content/55">
+                  <span class="rounded-full px-2 py-0.5 font-medium" :class="releaseStatusClass(release.status)">{{ release.status }}</span>
+                  <span>{{ release.artifacts.length }} {{ t('developer.apps.distribution.artifactCount') }}</span>
                 </div>
-                <div class="mt-2 inline-flex max-w-full items-center gap-2 rounded-box border border-base-300 bg-base-200/40 px-2 py-1 text-xs">
-                  <span class="shrink-0 text-base-content/55">{{ t('developer.apps.distribution.releaseId') }}</span>
-                  <code class="min-w-0 max-w-[14rem] truncate whitespace-nowrap font-mono text-base-content/75">{{ release.id }}</code>
-                  <button
-                    class="btn btn-ghost btn-xs h-6 min-h-6 px-2"
-                    type="button"
-                    @click.stop="copyIdentifier(release.id)"
-                  >
-                    {{ t('ai.copy') }}
-                  </button>
-                </div>
+                <button
+                  class="btn btn-ghost btn-xs mt-2 h-7 min-h-7 w-7 px-0"
+                  type="button"
+                  :title="t('developer.apps.distribution.copyReleaseId')"
+                  :aria-label="t('developer.apps.distribution.copyReleaseId')"
+                  @click.stop="copyIdentifier(release.id)"
+                >
+                  <IconCopy class="h-3.5 w-3.5" />
+                </button>
               </div>
               <div v-if="release.status !== 'yanked'" class="flex shrink-0 flex-wrap items-center justify-end gap-2 self-end sm:self-start">
                 <button class="btn btn-ghost btn-xs" type="button" @click="openReleaseEditor(release)">
@@ -191,6 +207,17 @@
                   <span v-if="deletingId === release.id" class="loading loading-spinner loading-xs" />
                   <IconTrash v-else class="h-3.5 w-3.5" />
                   <span class="sr-only">{{ t('developer.apps.distribution.deleteRelease') }}</span>
+                </button>
+                <button
+                  v-if="release.status === 'published'"
+                  class="btn btn-ghost btn-xs text-error"
+                  type="button"
+                  :disabled="yankingId === release.id"
+                  @click="yankRelease(release)"
+                >
+                  <span v-if="yankingId === release.id" class="loading loading-spinner loading-xs" />
+                  <IconBan v-else class="h-3.5 w-3.5" />
+                  <span class="sr-only">{{ t('developer.apps.distribution.yankRelease') }}</span>
                 </button>
                 <button
                   v-if="release.status === 'draft'"
@@ -271,8 +298,14 @@
             <div class="font-medium">{{ t('developer.apps.distribution.uploadKeyCreated') }}</div>
             <code class="mt-2 block max-w-[28rem] truncate whitespace-nowrap font-mono text-xs">{{ oneTimeUploadApiKey }}</code>
           </div>
-          <button class="btn btn-warning btn-sm shrink-0" type="button" @click="copyIdentifier(oneTimeUploadApiKey)">
-            {{ t('ai.copy') }}
+          <button
+            class="btn btn-warning btn-sm h-9 min-h-9 w-9 shrink-0 px-0"
+            type="button"
+            :title="t('developer.apps.distribution.copyUploadKey')"
+            :aria-label="t('developer.apps.distribution.copyUploadKey')"
+            @click="copyIdentifier(oneTimeUploadApiKey)"
+          >
+            <IconCopy class="h-4 w-4" />
           </button>
         </div>
         <form class="mt-5 flex flex-col gap-2 sm:flex-row" @submit.prevent="createUploadApiKey">
@@ -418,6 +451,30 @@
             required
             :disabled="Boolean(editingChannelId)"
           />
+        </fieldset>
+        <fieldset class="rounded-box border border-primary/20 bg-primary/[0.04] p-4">
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <legend class="fieldset-legend p-0">{{ t('developer.apps.distribution.retentionLabel') }}</legend>
+              <p class="mt-1 max-w-xl text-xs leading-5 text-base-content/60">{{ t('developer.apps.distribution.retentionHint') }}</p>
+            </div>
+            <label class="flex shrink-0 items-center gap-2 text-sm">
+              <input v-model="channelForm.usePlatformDefault" class="checkbox checkbox-sm" type="checkbox" />
+              <span>{{ t('developer.apps.distribution.retentionUseDefault') }}</span>
+            </label>
+          </div>
+          <div class="mt-3 flex items-center gap-3">
+            <input
+              v-model.number="channelForm.artifactRetention"
+              class="input w-full max-w-48 font-mono"
+              type="number"
+              min="0"
+              step="1"
+              :disabled="channelForm.usePlatformDefault"
+              :aria-label="t('developer.apps.distribution.retentionLabel')"
+            />
+            <span class="shrink-0 text-xs text-base-content/55">{{ t('developer.apps.distribution.retentionReleasesUnit') }}</span>
+          </div>
         </fieldset>
         <div class="space-y-4">
           <div class="flex flex-col gap-3 border border-base-300 bg-base-100 p-4 rounded-box sm:flex-row sm:items-end sm:justify-between">
@@ -766,7 +823,7 @@
 </template>
 
 <script setup lang="ts">
-import { IconPencil, IconPlus, IconRefreshCw, IconTrash } from '#components'
+import { IconBan, IconCopy, IconPencil, IconPlus, IconRefreshCw, IconTrash } from '#components'
 import type { DistributionArtifact, DistributionChannel, DistributionLocalizedText, DistributionMetrics, DistributionProduct, DistributionRelease, DistributionUploadApiKey } from '~/types/distribution'
 import {
   associateDistributionArtifact,
@@ -776,7 +833,6 @@ import {
   deleteDistributionChannel,
   deleteDistributionProduct,
   deleteDistributionRelease,
-  deleteDistributionUploadApiKey,
   fetchDistributionChannels,
   fetchDistributionManagedReleases,
   fetchDistributionMetrics,
@@ -789,6 +845,7 @@ import {
   updateDistributionProduct,
   updateDistributionRelease,
   uploadDistributionArtifact,
+  yankDistributionRelease,
 } from '~/utils/distribution'
 
 type ProductLocalizationEntry = {
@@ -852,6 +909,8 @@ const isLoading = ref(false)
 const channels = ref<DistributionChannel[]>([])
 const selectedChannel = ref<DistributionChannel | null>(null)
 const releases = ref<DistributionRelease[]>([])
+const publishedReleaseCount = computed(() => releases.value.filter((release) => release.status === 'published').length)
+const selectedArtifactCount = computed(() => releases.value.reduce((total, release) => total + (release.artifacts?.length || 0), 0))
 const productDrawerOpen = ref(false)
 const isUpdatingProduct = ref(false)
 const newProductLanguage = ref('')
@@ -861,6 +920,7 @@ const productForm = reactive({
 })
 const newChannelLanguage = ref('')
 const newReleaseLanguage = ref('')
+const yankingId = ref<string | null>(null)
 const metrics = ref<DistributionMetrics | null>(null)
 const isLoadingMetrics = ref(false)
 const uploadApiKeys = ref<DistributionUploadApiKey[]>([])
@@ -882,6 +942,8 @@ const releaseChannels = ref<string[]>([])
 const channelForm = reactive({
   name: '',
   localizations: [] as ChannelLocalizationEntry[],
+  usePlatformDefault: true,
+  artifactRetention: 0,
 })
 const releaseForm = reactive({
   version: '',
@@ -891,7 +953,18 @@ const releaseForm = reactive({
   artifacts: [] as ReleaseArtifactEntry[],
 })
 function isBuiltinChannelName(name: string) {
-  return name === 'stable' || name === 'beta' || name === 'nightly'
+  return name === 'stable' || name === 'beta' || name === 'nightly' || name === 'rolling'
+}
+
+function channelRetentionLabel(channel: DistributionChannel) {
+  if (channel.artifactRetention === 0) return t('developer.apps.distribution.retentionDisabled')
+  if (channel.artifactRetention == null) return ''
+  return t('developer.apps.distribution.retentionCount', { count: channel.artifactRetention })
+}
+function releaseStatusClass(status: string) {
+  if (status === 'published') return 'bg-success/10 text-success'
+  if (status === 'yanked') return 'bg-error/10 text-error'
+  return 'bg-warning/10 text-warning'
 }
 
 
@@ -1221,6 +1294,8 @@ function openCreateChannel() {
   editingChannelId.value = null
   channelForm.name = ''
   channelForm.localizations = [newChannelLocalization()]
+  channelForm.usePlatformDefault = true
+  channelForm.artifactRetention = 0
   newChannelLanguage.value = ''
   channelDrawerOpen.value = true
 }
@@ -1234,6 +1309,8 @@ function openChannelEditor(channel: DistributionChannel) {
     channel.displayName || channel.name,
     channel.description,
   )
+  channelForm.usePlatformDefault = channel.artifactRetention == null
+  channelForm.artifactRetention = channel.artifactRetention ?? 0
   newChannelLanguage.value = ''
   channelDrawerOpen.value = true
 }
@@ -1247,6 +1324,9 @@ async function saveChannel() {
   const isEditing = Boolean(editingChannelId.value)
   isCreatingChannel.value = true
   try {
+    const artifactRetention = channelForm.usePlatformDefault
+      ? undefined
+      : Math.max(0, Math.floor(Number(channelForm.artifactRetention) || 0))
     const displayNames = channelLocalizedMap('displayName')
     const descriptions = channelLocalizedMap('description')
     const input = {
@@ -1254,6 +1334,7 @@ async function saveChannel() {
       displayNames,
       description: localizedFormFallback(descriptions, ''),
       descriptions,
+      artifactRetention,
     }
     const channel = editingChannelId.value
       ? await updateDistributionChannel(product.value.id, editingChannelId.value, input)
@@ -1584,6 +1665,23 @@ async function deleteRelease(release: DistributionRelease) {
     $toast.error(error instanceof Error ? error.message : t('developer.apps.distribution.requestFailed'))
   } finally {
     deletingId.value = null
+  }
+}
+async function yankRelease(release: DistributionRelease) {
+  if (!product.value || release.status !== 'published') return
+  if (!(await confirm(
+    t('developer.apps.distribution.yankRelease'),
+    t('developer.apps.distribution.yankReleaseConfirm', { version: release.version }),
+  ))) return
+  yankingId.value = release.id
+  try {
+    const updatedRelease = await yankDistributionRelease(product.value.id, release.id)
+    releases.value = releases.value.map((item) => item.id === updatedRelease.id ? updatedRelease : item)
+    $toast.success(t('developer.apps.distribution.releaseYanked'))
+  } catch (error) {
+    $toast.error(error instanceof Error ? error.message : t('developer.apps.distribution.requestFailed'))
+  } finally {
+    yankingId.value = null
   }
 }
 

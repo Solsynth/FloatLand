@@ -1,6 +1,13 @@
 <template>
   <NuxtLayout name="developer">
     <div class="mx-auto max-w-5xl">
+      <NuxtLink
+        class="btn btn-ghost btn-sm mb-3 gap-2"
+        :to="`/developers/${encodeURIComponent(pubName)}/distribution`"
+      >
+        <IconArrowLeft class="h-4 w-4" />
+        {{ t('developer.apps.distribution.backToProducts') }}
+      </NuxtLink>
       <AdminPageHeader
         :title="t('developer.apps.distribution.title')"
         :description="t('developer.apps.distribution.detailDescription')"
@@ -21,6 +28,7 @@
 </template>
 
 <script setup lang="ts">
+import { IconArrowLeft } from '#components'
 definePageMeta({ middleware: 'developer' })
 
 const { t } = useI18n()

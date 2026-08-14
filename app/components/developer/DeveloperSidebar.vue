@@ -116,7 +116,7 @@ const navGroups = computed(() => {
         {
           icon: IconStore,
           label: t("developer.apps.distribution.title"),
-          href: `/developers/${p}/distribution`,
+          href: `/developers/${encodeURIComponent(p)}/distribution`,
         },
       ],
     });

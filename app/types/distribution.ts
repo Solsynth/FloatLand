@@ -30,6 +30,11 @@ export interface DistributionChannel {
   displayNames?: DistributionLocalizedText
   description: string
   descriptions?: DistributionLocalizedText
+  /**
+   * Number of published releases retained for this channel.
+   * `undefined` uses the platform default; `0` disables cleanup.
+   */
+  artifactRetention?: number | null
   latest: DistributionRelease | null
 }
 

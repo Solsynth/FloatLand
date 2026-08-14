@@ -29,7 +29,7 @@
                 </NuxtLink>
                 <NuxtLink
                   v-if="dev.publisher?.name"
-                  :to="`/developers/${dev.publisher.name}/distribution`"
+                  :to="`/developers/${encodeURIComponent(dev.publisher.name)}/distribution`"
                   class="btn btn-ghost btn-sm"
                 >
                   <IconStore class="w-4 h-4" />

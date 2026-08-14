@@ -17,12 +17,22 @@
         <span class="loading loading-spinner loading-lg" />
       </div>
 
-      <section v-else class="border-y border-base-300">
-        <div v-if="products.length" class="divide-y divide-base-300">
+      <section v-else class="overflow-hidden rounded-box border border-base-300 bg-base-100 shadow-sm">
+        <div v-if="products.length" class="flex flex-col gap-3 border-b border-base-300 bg-base-200/30 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p class="font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-primary/75">{{ t('developer.apps.distribution.catalog') }}</p>
+            <p class="mt-1 text-xs text-base-content/55">{{ t('developer.apps.distribution.productCount', { count: products.length }) }}</p>
+          </div>
+          <label class="input input-sm flex w-full items-center gap-2 sm:max-w-xs">
+            <IconSearch class="h-4 w-4 text-base-content/45" />
+            <input v-model="searchQuery" type="search" :placeholder="t('developer.apps.distribution.searchProducts')" :aria-label="t('developer.apps.distribution.searchProducts')" />
+          </label>
+        </div>
+        <div v-if="visibleProducts.length" class="divide-y divide-base-300">
           <article
-            v-for="product in products"
+            v-for="product in visibleProducts"
             :key="product.id"
-            class="flex flex-col gap-4 px-1 py-5 sm:flex-row sm:items-center sm:justify-between"
+            class="flex flex-col gap-4 px-4 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6"
           >
             <div class="flex min-w-0 items-start gap-3">
               <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-base-300 bg-base-200">
@@ -63,10 +73,14 @@
           </article>
         </div>
 
-        <div v-else class="flex flex-col items-center py-16 text-center">
-          <IconPackage class="mb-4 h-10 w-10 text-base-content/25" />
-          <p class="text-base-content/60">{{ t('developer.apps.distribution.noProducts') }}</p>
-          <button class="btn btn-primary btn-sm mt-4" type="button" @click="openCreateDrawer">
+        <div v-else class="flex flex-col items-center px-4 py-16 text-center sm:px-6">
+          <IconSearch v-if="products.length" class="mb-4 h-10 w-10 text-base-content/25" />
+          <IconPackage v-else class="mb-4 h-10 w-10 text-base-content/25" />
+          <p class="text-base-content/60">{{ products.length ? t('developer.apps.distribution.noMatches') : t('developer.apps.distribution.noProducts') }}</p>
+          <button v-if="products.length && searchQuery" class="btn btn-ghost btn-sm mt-4" type="button" @click="searchQuery = ''">
+            {{ t('developer.apps.distribution.clearSearch') }}
+          </button>
+          <button v-else class="btn btn-primary btn-sm mt-4" type="button" @click="openCreateDrawer">
             <IconPlus class="h-4 w-4" />
             {{ t('developer.apps.distribution.createProduct') }}
           </button>
@@ -76,6 +90,7 @@
       <AdminDrawer
         :open="createDrawerOpen"
         :title="t('developer.apps.distribution.createProductTitle')"
+        content-class="!w-full !max-w-none sm:!w-[65vw]"
         @update:open="createDrawerOpen = $event"
       >
         <form class="space-y-5" @submit.prevent="createProduct">
@@ -159,8 +174,7 @@
           </fieldset>
           <div class="flex justify-end gap-2 pt-4">
             <button class="btn btn-ghost" type="button" @click="createDrawerOpen = false">
-              {{ t('common.cancel') }}
-            </button>
+</button>
             <button class="btn btn-primary" type="submit" :disabled="isCreatingProduct">
               <span v-if="isCreatingProduct" class="loading loading-spinner loading-sm" />
               {{ t('common.create') }}
@@ -173,7 +187,7 @@
 </template>
 
 <script setup lang="ts">
-import { IconChevronRight, IconPackage, IconPlus, IconTrash } from '#components'
+import { IconChevronRight, IconPackage, IconPlus, IconSearch, IconTrash } from '#components'
 import type { DistributionLocalizedText, DistributionProduct } from '~/types/distribution'
 import { createDistributionProduct, deleteDistributionProduct, fetchDistributionProducts, localizedDistributionText } from '~/utils/distribution'
 
@@ -202,6 +216,18 @@ type ProductLocalizationEntry = {
 }
 
 const products = ref<DistributionProduct[]>([])
+const searchQuery = ref('')
+const visibleProducts = computed(() => {
+  const query = searchQuery.value.trim().toLowerCase()
+  if (!query) return products.value
+  return products.value.filter((product) => {
+    const localizedNames = Object.values(product.names || {}).join(' ')
+    return [product.name, product.slug, product.description, localizedNames]
+      .join(' ')
+      .toLowerCase()
+      .includes(query)
+  })
+})
 const isLoading = ref(false)
 const isCreatingProduct = ref(false)
 const deletingProductId = ref<string | null>(null)
@@ -265,6 +291,7 @@ function openCreateDrawer() {
 }
 
 async function loadData() {
+  searchQuery.value = ''
   isLoading.value = true
   try {
     await developer.loadDevelopers()
