@@ -47,3 +47,35 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+  # Trigger the deploy action on the managed host through MaidCafe via
+  # MaidFlow (https://github.com/Solsynth/MaidFlow).
+  # Requires:
+  #   - secret MAIDCAFE_TOKEN: cloud credential scoped to the daemon + "deploy-floatland" action
+  #   - variable MAIDCAFE_DAEMON_ID: MaidCafe daemon (host) id
+  # The daemon's "deploy-floatland" action receives {"image": "<tag>"} on stdin; adjust
+  # the field to match the daemon script's {{ NAME }} template variables.
+  # Pin `uses: Solsynth/MaidFlow@...` to a full commit SHA once v1.1.0 is pushed.
+  deploy:
+    needs: build
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Compute pushed image tag
+        id: sha
+        run: echo "short_sha=${GITHUB_SHA:0:7}" >> "$GITHUB_OUTPUT"
+
+      - name: Trigger deploy on the managed host
+        id: maidflow
+        uses: Solsynth/MaidFlow@v1
+        with:
+          daemon_id: ${{ vars.MAIDCAFE_DAEMON_ID }}
+          action: deploy-floatland
+          body: '{"image":"ghcr.io/${{ vars.PACKAGE_OWNER }}/floating-island:${{ steps.sha.outputs.short_sha }}"}'
+          token: ${{ secrets.MAIDCAFE_TOKEN }}
+          timeout_minutes: 5
+
+      - name: Print deploy result
+        run: |
+          echo "deploy exit code: ${{ steps.maidflow.outputs.result_code }}"
+          echo "${{ steps.maidflow.outputs.result_body }}" | base64 -d
