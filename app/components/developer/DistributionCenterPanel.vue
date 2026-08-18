@@ -174,6 +174,7 @@
                   <div class="flex flex-wrap items-center gap-2">
                     <span class="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-primary">{{ t('developer.apps.distribution.latestRelease') }}</span>
                     <span class="rounded-full px-2 py-0.5 text-xs font-medium" :class="releaseStatusClass(featuredRelease.status)">{{ featuredRelease.status }}</span>
+                    <span v-if="isReleaseExpired(featuredRelease)" class="rounded-full bg-warning/10 px-2 py-0.5 text-xs font-medium text-warning">{{ t('developer.apps.distribution.expired') }}</span>
                   </div>
                   <div v-if="featuredRelease.title || Object.keys(featuredRelease.titles || {}).length" class="mt-2 font-medium">
                     {{ localizedDistributionText(featuredRelease.titles, featuredRelease.title, localizationLocales) }}
@@ -243,12 +244,12 @@
                   <div
                     v-for="artifact in featuredRelease.artifacts"
                     :key="artifact.id || `${artifact.platform}-${artifact.architecture}`"
-                    class="flex flex-wrap items-center justify-between gap-3 rounded-box border border-base-300 px-3 py-2.5"
+                    class="flex flex-col gap-3 rounded-box border border-base-300 px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between"
                   >
-                    <div class="min-w-0">
-                      <div class="flex flex-wrap items-center gap-2">
-                        <span class="font-mono text-sm">{{ artifact.fileName || artifact.objectKey || `${artifact.platform}-${artifact.architecture}` }}</span>
-                        <span v-if="artifact.expired" class="rounded-full bg-warning/10 px-2 py-0.5 text-[11px] font-medium text-warning">{{ t('developer.apps.distribution.expired') }}</span>
+                    <div class="min-w-0 flex-1">
+                      <div class="flex min-w-0 items-center gap-2">
+                        <span class="truncate font-mono text-sm" :title="artifact.fileName || artifact.objectKey || `${artifact.platform}-${artifact.architecture}`">{{ artifact.fileName || artifact.objectKey || `${artifact.platform}-${artifact.architecture}` }}</span>
+                        <span v-if="artifact.expired" class="shrink-0 rounded-full bg-warning/10 px-2 py-0.5 text-[11px] font-medium text-warning">{{ t('developer.apps.distribution.expired') }}</span>
                       </div>
                       <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-base-content/55">
                         <span>{{ artifact.platform }} / {{ artifact.architecture }}</span>
@@ -272,13 +273,14 @@
                       </button>
                       <a
                         v-if="artifact.downloadUrl && !artifact.expired"
-                        class="btn btn-outline btn-xs"
+                        class="btn btn-outline btn-xs h-7 min-h-7 w-7 px-0"
                         :href="distributionDownloadUrl(artifact.downloadUrl)"
+                        :title="t('developer.apps.distribution.download')"
+                        :aria-label="t('developer.apps.distribution.download')"
                         target="_blank"
                         rel="noopener"
                       >
                         <IconDownload class="h-3.5 w-3.5" />
-                        {{ t('developer.apps.distribution.download') }}
                       </a>
                     </div>
                   </div>
@@ -934,11 +936,17 @@
         >
           <div class="flex items-center justify-between gap-2">
             <span class="font-mono text-sm">{{ release.version }}</span>
-            <span class="rounded-full px-2 py-0.5 text-[11px] font-medium" :class="releaseStatusClass(release.status)">{{ release.status }}</span>
+            <span class="flex shrink-0 items-center gap-1.5">
+              <span v-if="isReleaseExpired(release)" class="rounded-full bg-warning/10 px-2 py-0.5 text-[11px] font-medium text-warning">{{ t('developer.apps.distribution.expired') }}</span>
+              <span class="rounded-full px-2 py-0.5 text-[11px] font-medium" :class="releaseStatusClass(release.status)">{{ release.status }}</span>
+            </span>
           </div>
           <div v-if="release.title || Object.keys(release.titles || {}).length" class="mt-1 truncate text-xs text-base-content/60">
             {{ localizedDistributionText(release.titles, release.title, localizationLocales) }}
           </div>
+          <p v-if="release.releaseNotes || Object.keys(release.descriptions || {}).length" class="mt-1 line-clamp-2 text-xs leading-5 text-base-content/55">
+            {{ localizedDistributionText(release.descriptions, release.releaseNotes, localizationLocales) }}
+          </p>
           <div class="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-base-content/50">
             <span v-if="release.publishedAt">{{ formatRelativeTime(release.publishedAt) }}</span>
             <span v-else-if="release.createdAt">{{ t('developer.apps.distribution.createdAt') }} {{ formatRelativeTime(release.createdAt) }}</span>
@@ -1100,6 +1108,11 @@ function releaseStatusClass(status: string) {
   if (status === 'published') return 'bg-success/10 text-success'
   if (status === 'yanked') return 'bg-error/10 text-error'
   return 'bg-warning/10 text-warning'
+}
+
+/** A release is effectively expired when every artifact was removed by retention cleanup. */
+function isReleaseExpired(release: DistributionRelease) {
+  return release.artifacts.length > 0 && release.artifacts.every((artifact) => artifact.expired)
 }
 
 function selectFeaturedRelease(release: DistributionRelease) {
