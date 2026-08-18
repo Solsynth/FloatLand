@@ -50,6 +50,10 @@ export interface DistributionArtifact {
   slug?: string
   meta?: DistributionMetadata
   downloadUrl?: string
+  /** Downloads counted by the DistributionCenter download endpoint. */
+  downloadCount?: number
+  /** True when artifact retention cleanup removed the stored object. */
+  expired?: boolean
 }
 
 export interface DistributionRelease {
@@ -65,7 +69,9 @@ export interface DistributionRelease {
   metadata?: DistributionMetadata
   forceUpdate?: boolean
   status: 'draft' | 'published' | 'yanked' | string
+  createdAt?: string
   publishedAt: string | null
+  downloadCount?: number
   artifacts: DistributionArtifact[]
 }
 
@@ -79,6 +85,9 @@ export interface DistributionMetrics {
   byPlatform: Record<string, number>
   byArchitecture: Record<string, number>
   byVersion: Record<string, number>
+  byOSVersion: Record<string, number>
+  byClientVersion: Record<string, number>
+  byLocale: Record<string, number>
 }
 
 export interface DistributionUpdateCheckInput {

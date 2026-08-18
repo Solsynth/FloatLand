@@ -11,12 +11,27 @@ import type {
   DistributionUploadApiKey,
   DistributionCreatedUploadApiKey,
 } from "~/types/distribution";
-import { apiFetch, safeJsonParse } from "~/utils/api";
+import { apiFetch, safeJsonParse, API_BASE_URL } from "~/utils/api";
 
 export const DISTRIBUTION_SERVICE_NAME = "dist";
 
 function distributionPath(path: string) {
   return `/${DISTRIBUTION_SERVICE_NAME}${path}`;
+}
+
+/**
+ * Resolve an artifact download URL for the browser.
+ * DistributionCenter returns a service-relative path (`/artifacts/{id}/download`)
+ * or an absolute URL when a download base URL is configured. Relative paths
+ * must go through the gateway service prefix to hit the download endpoint.
+ */
+export function distributionDownloadUrl(downloadUrl: string): string {
+  if (!downloadUrl) return "";
+  if (/^https?:\/\//i.test(downloadUrl)) return downloadUrl;
+  if (downloadUrl.startsWith("/")) {
+    return `${API_BASE_URL}${distributionPath(downloadUrl)}`;
+  }
+  return downloadUrl;
 }
 
 export function localizedDistributionText(

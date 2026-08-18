@@ -167,72 +167,156 @@
             </button>
           </div>
 
-          <div v-if="selectedChannel" class="mt-5 space-y-2">
-            <div
-              v-for="release in releases"
-              :key="release.id"
-              class="group flex flex-col gap-3 rounded-box border border-base-300 bg-base-100 p-3 transition-all hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-sm sm:flex-row sm:items-start sm:justify-between"
-            >
-              <div class="min-w-0">
-                <div v-if="release.title || Object.keys(release.titles || {}).length" class="font-medium">
-                  {{ localizedDistributionText(release.titles, release.title, localizationLocales) }}
+          <div v-if="selectedChannel" class="mt-5">
+            <div v-if="featuredRelease" class="rounded-box border border-base-300 bg-base-100 p-4 shadow-sm">
+              <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div class="min-w-0">
+                  <div class="flex flex-wrap items-center gap-2">
+                    <span class="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-primary">{{ t('developer.apps.distribution.latestRelease') }}</span>
+                    <span class="rounded-full px-2 py-0.5 text-xs font-medium" :class="releaseStatusClass(featuredRelease.status)">{{ featuredRelease.status }}</span>
+                  </div>
+                  <div v-if="featuredRelease.title || Object.keys(featuredRelease.titles || {}).length" class="mt-2 font-medium">
+                    {{ localizedDistributionText(featuredRelease.titles, featuredRelease.title, localizationLocales) }}
+                  </div>
+                  <div class="mt-1 font-mono text-sm">{{ featuredRelease.version }}</div>
+                  <div class="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-base-content/55">
+                    <span v-if="featuredRelease.publishedAt">{{ t('developer.apps.distribution.publishedAt') }} {{ formatRelativeTime(featuredRelease.publishedAt) }}</span>
+                    <span v-else-if="featuredRelease.createdAt">{{ t('developer.apps.distribution.createdAt') }} {{ formatRelativeTime(featuredRelease.createdAt) }}</span>
+                    <span>{{ featuredRelease.artifacts.length }} {{ t('developer.apps.distribution.artifactCount') }}</span>
+                    <span v-if="featuredRelease.downloadCount != null" class="inline-flex items-center gap-1">
+                      <IconDownload class="h-3.5 w-3.5" />
+                      {{ featuredRelease.downloadCount }} {{ t('developer.apps.distribution.downloads') }}
+                    </span>
+                  </div>
+                  <button
+                    class="btn btn-ghost btn-xs mt-2 h-7 min-h-7 w-7 px-0"
+                    type="button"
+                    :title="t('developer.apps.distribution.copyReleaseId')"
+                    :aria-label="t('developer.apps.distribution.copyReleaseId')"
+                    @click="copyIdentifier(featuredRelease.id)"
+                  >
+                    <IconCopy class="h-3.5 w-3.5" />
+                  </button>
                 </div>
-                <div class="mt-1 font-mono text-sm">{{ release.version }}</div>
-                <div class="mt-2 flex flex-wrap items-center gap-2 text-xs text-base-content/55">
-                  <span class="rounded-full px-2 py-0.5 font-medium" :class="releaseStatusClass(release.status)">{{ release.status }}</span>
-                  <span>{{ release.artifacts.length }} {{ t('developer.apps.distribution.artifactCount') }}</span>
+                <div v-if="featuredRelease.status !== 'yanked'" class="flex shrink-0 flex-wrap items-center justify-end gap-2 self-end sm:self-start">
+                  <button class="btn btn-ghost btn-xs" type="button" @click="openReleaseEditor(featuredRelease)">
+                    <IconPencil class="h-3.5 w-3.5" />
+                    <span class="sr-only">{{ t('developer.apps.distribution.editRelease') }}</span>
+                  </button>
+                  <button
+                    v-if="featuredRelease.status === 'draft'"
+                    class="btn btn-ghost btn-xs text-error"
+                    type="button"
+                    :disabled="deletingId === featuredRelease.id"
+                    @click="deleteRelease(featuredRelease)"
+                  >
+                    <span v-if="deletingId === featuredRelease.id" class="loading loading-spinner loading-xs" />
+                    <IconTrash v-else class="h-3.5 w-3.5" />
+                    <span class="sr-only">{{ t('developer.apps.distribution.deleteRelease') }}</span>
+                  </button>
+                  <button
+                    v-if="featuredRelease.status === 'published'"
+                    class="btn btn-ghost btn-xs text-error"
+                    type="button"
+                    :disabled="yankingId === featuredRelease.id"
+                    @click="yankRelease(featuredRelease)"
+                  >
+                    <span v-if="yankingId === featuredRelease.id" class="loading loading-spinner loading-xs" />
+                    <IconBan v-else class="h-3.5 w-3.5" />
+                    <span class="sr-only">{{ t('developer.apps.distribution.yankRelease') }}</span>
+                  </button>
+                  <button
+                    v-if="featuredRelease.status === 'draft'"
+                    class="btn btn-outline btn-xs"
+                    :disabled="publishingId === featuredRelease.id || deletingId === featuredRelease.id || !featuredRelease.artifacts.length"
+                    @click="publishRelease(featuredRelease.id)"
+                  >
+                    <span v-if="publishingId === featuredRelease.id" class="loading loading-spinner loading-xs" />
+                    {{ t('developer.apps.distribution.publish') }}
+                  </button>
                 </div>
-                <button
-                  class="btn btn-ghost btn-xs mt-2 h-7 min-h-7 w-7 px-0"
-                  type="button"
-                  :title="t('developer.apps.distribution.copyReleaseId')"
-                  :aria-label="t('developer.apps.distribution.copyReleaseId')"
-                  @click.stop="copyIdentifier(release.id)"
-                >
-                  <IconCopy class="h-3.5 w-3.5" />
-                </button>
               </div>
-              <div v-if="release.status !== 'yanked'" class="flex shrink-0 flex-wrap items-center justify-end gap-2 self-end sm:self-start">
-                <button class="btn btn-ghost btn-xs" type="button" @click="openReleaseEditor(release)">
-                  <IconPencil class="h-3.5 w-3.5" />
-                  <span class="sr-only">{{ t('developer.apps.distribution.editRelease') }}</span>
-                </button>
-                <button
-                  v-if="release.status === 'draft'"
-                  class="btn btn-ghost btn-xs text-error"
-                  type="button"
-                  :disabled="deletingId === release.id"
-                  @click="deleteRelease(release)"
-                >
-                  <span v-if="deletingId === release.id" class="loading loading-spinner loading-xs" />
-                  <IconTrash v-else class="h-3.5 w-3.5" />
-                  <span class="sr-only">{{ t('developer.apps.distribution.deleteRelease') }}</span>
-                </button>
-                <button
-                  v-if="release.status === 'published'"
-                  class="btn btn-ghost btn-xs text-error"
-                  type="button"
-                  :disabled="yankingId === release.id"
-                  @click="yankRelease(release)"
-                >
-                  <span v-if="yankingId === release.id" class="loading loading-spinner loading-xs" />
-                  <IconBan v-else class="h-3.5 w-3.5" />
-                  <span class="sr-only">{{ t('developer.apps.distribution.yankRelease') }}</span>
-                </button>
-                <button
-                  v-if="release.status === 'draft'"
-                  class="btn btn-outline btn-xs"
-                  :disabled="publishingId === release.id || deletingId === release.id || !release.artifacts.length"
-                  @click="publishRelease(release.id)"
-                >
-                  <span v-if="publishingId === release.id" class="loading loading-spinner loading-xs" />
-                  {{ t('developer.apps.distribution.publish') }}
-                </button>
+
+              <div class="mt-4 border-t border-base-300 pt-4">
+                <h3 class="text-sm font-medium">{{ t('developer.apps.distribution.artifacts') }}</h3>
+                <div v-if="featuredRelease.artifacts.length" class="mt-3 space-y-2">
+                  <div
+                    v-for="artifact in featuredRelease.artifacts"
+                    :key="artifact.id || `${artifact.platform}-${artifact.architecture}`"
+                    class="flex flex-wrap items-center justify-between gap-3 rounded-box border border-base-300 px-3 py-2.5"
+                  >
+                    <div class="min-w-0">
+                      <div class="flex flex-wrap items-center gap-2">
+                        <span class="font-mono text-sm">{{ artifact.fileName || artifact.objectKey || `${artifact.platform}-${artifact.architecture}` }}</span>
+                        <span v-if="artifact.expired" class="rounded-full bg-warning/10 px-2 py-0.5 text-[11px] font-medium text-warning">{{ t('developer.apps.distribution.expired') }}</span>
+                      </div>
+                      <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-base-content/55">
+                        <span>{{ artifact.platform }} / {{ artifact.architecture }}</span>
+                        <span v-if="artifact.size != null">{{ formatBytes(artifact.size) }}</span>
+                        <span v-if="artifact.downloadCount != null" class="inline-flex items-center gap-1">
+                          <IconDownload class="h-3 w-3" />
+                          {{ artifact.downloadCount }}
+                        </span>
+                      </div>
+                    </div>
+                    <div class="flex shrink-0 items-center gap-2">
+                      <button
+                        v-if="artifact.hash"
+                        class="btn btn-ghost btn-xs h-7 min-h-7 w-7 px-0"
+                        type="button"
+                        :title="t('developer.apps.distribution.copyHash')"
+                        :aria-label="t('developer.apps.distribution.copyHash')"
+                        @click="copyIdentifier(artifact.hash)"
+                      >
+                        <IconCopy class="h-3.5 w-3.5" />
+                      </button>
+                      <a
+                        v-if="artifact.downloadUrl && !artifact.expired"
+                        class="btn btn-outline btn-xs"
+                        :href="distributionDownloadUrl(artifact.downloadUrl)"
+                        target="_blank"
+                        rel="noopener"
+                      >
+                        <IconDownload class="h-3.5 w-3.5" />
+                        {{ t('developer.apps.distribution.download') }}
+                      </a>
+                    </div>
+                  </div>
+                </div>
+                <p v-else class="mt-3 text-sm text-base-content/60">
+                  {{ t('developer.apps.distribution.noArtifacts') }}
+                </p>
+              </div>
+
+              <div v-if="featuredRelease.releaseNotes || Object.keys(featuredRelease.descriptions || {}).length" class="mt-4 border-t border-base-300 pt-4">
+                <h3 class="text-sm font-medium">{{ t('developer.apps.distribution.releaseNotes') }}</h3>
+                <p class="mt-2 whitespace-pre-wrap text-sm leading-6 text-base-content/70">{{ localizedDistributionText(featuredRelease.descriptions, featuredRelease.releaseNotes, localizationLocales) }}</p>
               </div>
             </div>
-            <p v-if="!releases.length" class="py-5 text-sm text-base-content/60">
+            <p v-else class="py-5 text-sm text-base-content/60">
               {{ t('developer.apps.distribution.noReleases') }}
             </p>
+            <div v-if="releases.length" class="mt-3 flex flex-wrap items-center justify-between gap-2">
+              <button
+                v-if="featuredRelease && featuredRelease.id !== releases[0]?.id"
+                class="btn btn-ghost btn-xs"
+                type="button"
+                @click="selectFeaturedRelease(releases[0])"
+              >
+                <IconArrowLeft class="h-3.5 w-3.5" />
+                {{ t('developer.apps.distribution.backToLatest') }}
+              </button>
+              <span v-else />
+              <button
+                v-if="releases.length > 1"
+                class="btn btn-outline btn-sm"
+                type="button"
+                @click="releasesDrawerOpen = true"
+              >
+                <IconList class="h-4 w-4" />
+                {{ t('developer.apps.distribution.viewAllReleases', { count: releases.length }) }}
+              </button>
+            </div>
           </div>
           <p v-else class="mt-5 border border-base-300 p-5 rounded-box text-sm text-base-content/60">
             {{ t('developer.apps.distribution.selectChannel') }}
@@ -246,10 +330,21 @@
             <h2 class="font-semibold">{{ t('developer.apps.distribution.metrics') }}</h2>
             <p class="mt-1 text-sm text-base-content/60">{{ t('developer.apps.distribution.metricsHint') }}</p>
           </div>
-          <button class="btn btn-outline btn-sm" :disabled="isLoadingMetrics" @click="loadMetrics">
-            <span v-if="isLoadingMetrics" class="loading loading-spinner loading-xs" />
-            {{ t('developer.apps.distribution.loadMetrics') }}
-          </button>
+          <div class="flex flex-wrap items-center gap-2">
+            <select
+              v-model="metricsRangeDays"
+              class="select select-sm"
+              :aria-label="t('developer.apps.distribution.metricsRange')"
+            >
+              <option :value="7">{{ t('developer.apps.distribution.last7Days') }}</option>
+              <option :value="30">{{ t('developer.apps.distribution.last30Days') }}</option>
+              <option :value="90">{{ t('developer.apps.distribution.last90Days') }}</option>
+            </select>
+            <button class="btn btn-outline btn-sm" :disabled="isLoadingMetrics" @click="loadMetrics">
+              <span v-if="isLoadingMetrics" class="loading loading-spinner loading-xs" />
+              {{ t('developer.apps.distribution.loadMetrics') }}
+            </button>
+          </div>
         </div>
         <div v-if="metrics" class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
           <div class="border border-base-300 p-3 rounded-box">
@@ -265,20 +360,22 @@
             <div class="mt-1 text-xl font-semibold">{{ metrics.mau }}</div>
           </div>
         </div>
-        <div v-if="metrics && Object.keys(metrics.byVersion || {}).length" class="mt-5 border border-base-300 p-4 rounded-box">
-          <h3 class="font-medium">{{ t('developer.apps.distribution.byVersion') }}</h3>
-          <div class="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-            <div
-              v-for="([version, count]) in Object.entries(metrics.byVersion || {})"
-              :key="version"
-              class="flex items-center justify-between gap-3 border border-base-300 px-3 py-2 rounded-box"
-            >
-              <span class="font-mono text-sm">{{ version }}</span>
-              <span class="text-sm font-semibold">{{ count }}</span>
+        <div v-if="metrics && metricGroups.length" class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          <div v-for="group in metricGroups" :key="group.key" class="border border-base-300 p-3 rounded-box">
+            <div class="text-sm text-base-content/60">{{ group.label }}</div>
+            <div v-if="group.entries.length" class="mt-2 space-y-1.5">
+              <div v-for="entry in visibleMetricEntries(group)" :key="entry.key" class="flex items-center justify-between gap-3">
+                <span class="truncate font-mono text-xs">{{ entry.key }}</span>
+                <span class="shrink-0 text-sm font-semibold tabular-nums">{{ entry.count }}</span>
+              </div>
+              <p v-if="group.entries.length > MAX_METRIC_ENTRIES" class="text-xs text-base-content/45">
+                {{ t('developer.apps.distribution.moreCount', { count: group.entries.length - MAX_METRIC_ENTRIES }) }}
+              </p>
             </div>
+            <p v-else class="mt-2 text-xs text-base-content/45">{{ t('developer.apps.distribution.breakdownEmpty') }}</p>
           </div>
         </div>
-        <p v-else class="mt-5 border border-base-300 p-4 rounded-box text-sm text-base-content/60">
+        <p v-else-if="!metrics" class="mt-5 border border-base-300 p-4 rounded-box text-sm text-base-content/60">
           {{ t('developer.apps.distribution.metricsEmpty') }}
         </p>
       </section>
@@ -819,11 +916,43 @@
         </div>
       </form>
     </AdminDrawer>
+
+    <AdminDrawer
+      :open="releasesDrawerOpen"
+      :title="t('developer.apps.distribution.allReleases')"
+      content-class="!w-full !max-w-none sm:!w-[30rem]"
+      @update:open="releasesDrawerOpen = $event"
+    >
+      <div class="space-y-2">
+        <button
+          v-for="release in releases"
+          :key="release.id"
+          class="w-full rounded-box border p-3 text-left transition-colors hover:border-primary/50"
+          :class="[featuredRelease?.id === release.id ? 'border-primary/60 bg-primary/5' : 'border-base-300 bg-base-100']"
+          type="button"
+          @click="selectFeaturedRelease(release)"
+        >
+          <div class="flex items-center justify-between gap-2">
+            <span class="font-mono text-sm">{{ release.version }}</span>
+            <span class="rounded-full px-2 py-0.5 text-[11px] font-medium" :class="releaseStatusClass(release.status)">{{ release.status }}</span>
+          </div>
+          <div v-if="release.title || Object.keys(release.titles || {}).length" class="mt-1 truncate text-xs text-base-content/60">
+            {{ localizedDistributionText(release.titles, release.title, localizationLocales) }}
+          </div>
+          <div class="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-base-content/50">
+            <span v-if="release.publishedAt">{{ formatRelativeTime(release.publishedAt) }}</span>
+            <span v-else-if="release.createdAt">{{ t('developer.apps.distribution.createdAt') }} {{ formatRelativeTime(release.createdAt) }}</span>
+            <span>{{ release.artifacts.length }} {{ t('developer.apps.distribution.artifactCount') }}</span>
+            <span v-if="release.downloadCount != null">{{ release.downloadCount }} {{ t('developer.apps.distribution.downloads') }}</span>
+          </div>
+        </button>
+      </div>
+    </AdminDrawer>
   </section>
 </template>
 
 <script setup lang="ts">
-import { IconBan, IconCopy, IconPencil, IconPlus, IconRefreshCw, IconTrash } from '#components'
+import { IconArrowLeft, IconBan, IconCopy, IconDownload, IconList, IconPencil, IconPlus, IconRefreshCw, IconTrash } from '#components'
 import type { DistributionArtifact, DistributionChannel, DistributionLocalizedText, DistributionMetrics, DistributionProduct, DistributionRelease, DistributionUploadApiKey } from '~/types/distribution'
 import {
   associateDistributionArtifact,
@@ -833,6 +962,7 @@ import {
   deleteDistributionChannel,
   deleteDistributionProduct,
   deleteDistributionRelease,
+  distributionDownloadUrl,
   fetchDistributionChannels,
   fetchDistributionManagedReleases,
   fetchDistributionMetrics,
@@ -847,6 +977,7 @@ import {
   uploadDistributionArtifact,
   yankDistributionRelease,
 } from '~/utils/distribution'
+import { formatRelativeTime } from '~/utils/datetime'
 
 type ProductLocalizationEntry = {
   id: string
@@ -909,6 +1040,8 @@ const isLoading = ref(false)
 const channels = ref<DistributionChannel[]>([])
 const selectedChannel = ref<DistributionChannel | null>(null)
 const releases = ref<DistributionRelease[]>([])
+const featuredRelease = ref<DistributionRelease | null>(null)
+const releasesDrawerOpen = ref(false)
 const publishedReleaseCount = computed(() => releases.value.filter((release) => release.status === 'published').length)
 const selectedArtifactCount = computed(() => releases.value.reduce((total, release) => total + (release.artifacts?.length || 0), 0))
 const productDrawerOpen = ref(false)
@@ -923,6 +1056,8 @@ const newReleaseLanguage = ref('')
 const yankingId = ref<string | null>(null)
 const metrics = ref<DistributionMetrics | null>(null)
 const isLoadingMetrics = ref(false)
+const metricsRangeDays = ref(30)
+const MAX_METRIC_ENTRIES = 8
 const uploadApiKeys = ref<DistributionUploadApiKey[]>([])
 const isLoadingUploadApiKeys = ref(false)
 const isCreatingUploadApiKey = ref(false)
@@ -965,6 +1100,60 @@ function releaseStatusClass(status: string) {
   if (status === 'published') return 'bg-success/10 text-success'
   if (status === 'yanked') return 'bg-error/10 text-error'
   return 'bg-warning/10 text-warning'
+}
+
+function selectFeaturedRelease(release: DistributionRelease) {
+  featuredRelease.value = release
+  releasesDrawerOpen.value = false
+}
+
+function syncFeaturedRelease() {
+  const current = featuredRelease.value
+  if (!current) {
+    featuredRelease.value = releases.value[0] || null
+    return
+  }
+  featuredRelease.value = releases.value.find((item) => item.id === current.id) || releases.value[0] || null
+}
+
+function formatBytes(bytes: number) {
+  if (!Number.isFinite(bytes) || bytes < 0) return ''
+  const units = ['B', 'KB', 'MB', 'GB', 'TB']
+  let value = bytes
+  let unit = 0
+  while (value >= 1024 && unit < units.length - 1) {
+    value /= 1024
+    unit += 1
+  }
+  const formatted = unit === 0 || value >= 10 ? Math.round(value) : value.toFixed(1)
+  return `${formatted} ${units[unit]}`
+}
+
+type MetricGroup = {
+  key: string
+  label: string
+  entries: Array<{ key: string; count: number }>
+}
+
+const metricGroups = computed<MetricGroup[]>(() => {
+  if (!metrics.value) return []
+  const entries = (map: Record<string, number> | undefined) =>
+    Object.entries(map || {})
+      .map(([key, count]) => ({ key, count }))
+      .sort((a, b) => b.count - a.count)
+  return [
+    { key: 'byVersion', label: t('developer.apps.distribution.byVersion'), entries: entries(metrics.value.byVersion) },
+    { key: 'byChannel', label: t('developer.apps.distribution.channelsBreakdown'), entries: entries(metrics.value.byChannel) },
+    { key: 'byPlatform', label: t('developer.apps.distribution.byPlatform'), entries: entries(metrics.value.byPlatform) },
+    { key: 'byArchitecture', label: t('developer.apps.distribution.byArchitecture'), entries: entries(metrics.value.byArchitecture) },
+    { key: 'byOSVersion', label: t('developer.apps.distribution.byOSVersion'), entries: entries(metrics.value.byOSVersion) },
+    { key: 'byClientVersion', label: t('developer.apps.distribution.byClientVersion'), entries: entries(metrics.value.byClientVersion) },
+    { key: 'byLocale', label: t('developer.apps.distribution.byLocale'), entries: entries(metrics.value.byLocale) },
+  ].filter((group) => group.entries.length)
+})
+
+function visibleMetricEntries(group: MetricGroup) {
+  return group.entries.slice(0, MAX_METRIC_ENTRIES)
 }
 
 
@@ -1263,6 +1452,8 @@ async function loadProduct() {
     releases.value = selectedChannel.value && product.value
       ? await fetchDistributionManagedReleases(product.value.id, selectedChannel.value.name)
       : []
+    featuredRelease.value = releases.value[0] || null
+    releasesDrawerOpen.value = false
     metrics.value = null
     uploadApiKeys.value = []
     oneTimeUploadApiKey.value = ''
@@ -1272,6 +1463,8 @@ async function loadProduct() {
     channels.value = []
     selectedChannel.value = null
     releases.value = []
+    featuredRelease.value = null
+    releasesDrawerOpen.value = false
     uploadApiKeys.value = []
     oneTimeUploadApiKey.value = ''
     $toast.error(error instanceof Error ? error.message : t('developer.apps.distribution.requestFailed'))
@@ -1285,6 +1478,7 @@ async function selectChannel(channel: DistributionChannel) {
   if (!product.value) return
   try {
     releases.value = await fetchDistributionManagedReleases(product.value.id, channel.name)
+    featuredRelease.value = releases.value[0] || null
   } catch (error) {
     $toast.error(error instanceof Error ? error.message : t('developer.apps.distribution.requestFailed'))
   }
@@ -1375,6 +1569,7 @@ async function deleteChannel(channel: DistributionChannel) {
       releases.value = nextChannel
         ? await fetchDistributionManagedReleases(product.value.id, nextChannel.name)
         : []
+      featuredRelease.value = releases.value[0] || null
     }
     $toast.success(t('developer.apps.distribution.channelDeleted'))
   } catch (error) {
@@ -1618,6 +1813,7 @@ async function saveRelease() {
       })
       releases.value = [release, ...releases.value]
     }
+    syncFeaturedRelease()
     editingReleaseId.value = null
     releaseChannels.value = []
     releaseForm.version = ''
@@ -1642,6 +1838,7 @@ async function publishRelease(releaseId: string) {
     const release = await publishDistributionRelease(product.value.id, releaseId)
     releases.value = releases.value.map((item) => item.id === release.id ? release : item)
     channels.value = channels.value.map((channel) => channel.id === selectedChannel.value?.id ? { ...channel, latest: release } : channel)
+    syncFeaturedRelease()
     $toast.success(t('developer.apps.distribution.published'))
   } catch (error) {
     $toast.error(error instanceof Error ? error.message : t('developer.apps.distribution.requestFailed'))
@@ -1660,6 +1857,7 @@ async function deleteRelease(release: DistributionRelease) {
   try {
     await deleteDistributionRelease(product.value.id, release.id)
     releases.value = releases.value.filter((item) => item.id !== release.id)
+    syncFeaturedRelease()
     $toast.success(t('developer.apps.distribution.releaseDeleted'))
   } catch (error) {
     $toast.error(error instanceof Error ? error.message : t('developer.apps.distribution.requestFailed'))
@@ -1677,6 +1875,7 @@ async function yankRelease(release: DistributionRelease) {
   try {
     const updatedRelease = await yankDistributionRelease(product.value.id, release.id)
     releases.value = releases.value.map((item) => item.id === updatedRelease.id ? updatedRelease : item)
+    syncFeaturedRelease()
     $toast.success(t('developer.apps.distribution.releaseYanked'))
   } catch (error) {
     $toast.error(error instanceof Error ? error.message : t('developer.apps.distribution.requestFailed'))
@@ -1689,13 +1888,19 @@ async function loadMetrics() {
   if (!product.value) return
   isLoadingMetrics.value = true
   try {
-    metrics.value = await fetchDistributionMetrics(product.value.id)
+    const to = new Date()
+    const from = new Date(to.getTime() - metricsRangeDays.value * 24 * 60 * 60 * 1000)
+    metrics.value = await fetchDistributionMetrics(product.value.id, from.toISOString(), to.toISOString())
   } catch (error) {
     $toast.error(error instanceof Error ? error.message : t('developer.apps.distribution.requestFailed'))
   } finally {
     isLoadingMetrics.value = false
   }
 }
+
+watch(metricsRangeDays, () => {
+  if (metrics.value) loadMetrics()
+})
 
 watch([() => props.publisherName, () => props.productSlug], loadProduct, { immediate: true })
 </script>
