@@ -10,9 +10,14 @@
     <div class="hidden min-h-[calc(100vh-3.5rem)] lg:flex">
       <!-- Sidebar -->
       <aside
-        class="sticky top-14 z-40 h-[calc(100vh-3.5rem)] w-[16.5rem] shrink-0 overflow-y-auto border-r border-base-300 scrollbar-none"
+        class="sticky top-14 z-40 h-[calc(100vh-3.5rem)] shrink-0 overflow-y-auto border-r border-base-300 scrollbar-none transition-[width] duration-200 ease-out motion-reduce:transition-none"
+        :class="sidebarCollapsed ? 'w-16' : 'w-[16.5rem]'"
       >
-        <MerchantSidebar />
+        <MerchantSidebar
+          :collapsed="sidebarCollapsed"
+          :collapsible="true"
+          @toggle-collapse="toggleSidebar"
+        />
       </aside>
 
       <!-- Main Area -->
@@ -64,7 +69,11 @@
           class="fixed right-0 top-14 bottom-0 z-50 w-72 overflow-y-auto border-l border-base-300 bg-base-100 shadow-sm scrollbar-none"
           @click.stop
         >
-          <MerchantSidebar @navigate="mobileMenuOpen = false" />
+          <MerchantSidebar
+            :collapsed="false"
+            :collapsible="false"
+            @navigate="mobileMenuOpen = false"
+          />
         </div>
       </Transition>
 
@@ -82,6 +91,7 @@ import { IconArrowLeft, IconMenu } from "#components";
 const { t } = useI18n();
 const route = useRoute();
 const merchant = useMerchant();
+const { collapsed: sidebarCollapsed, toggleSidebar } = useBackstageSidebar();
 const { currentPublisher } = merchant;
 
 const mobileMenuOpen = ref(false);

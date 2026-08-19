@@ -2,7 +2,7 @@
   <NuxtLayout name="admin">
     <AdminPageHeader title="Dashboard" description="Platform administration overview">
       <template #actions>
-        <button class="btn btn-sm btn-ghost" :disabled="loading" @click="loadAll">
+        <button type="button" class="btn btn-sm btn-ghost" :disabled="loading" @click="loadAll">
           <IconRefreshCw class="w-4 h-4" :class="{ 'animate-spin': loading }" />
           Refresh
         </button>
@@ -82,7 +82,7 @@
 
     <!-- Service breakdowns -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-      <AdminCard v-for="panel in servicePanels" :key="panel.title" no-padding>
+      <AdminCard v-for="panel in servicePanels" :key="panel.title" class="h-full" no-padding>
         <div class="flex items-center gap-3 px-5 py-3">
           <component :is="panel.icon" class="w-4 h-4" :class="panel.iconClass" />
           <span class="text-sm font-semibold">{{ panel.title }}</span>
@@ -106,7 +106,7 @@
       <AdminCard
         v-for="section in sections"
         :key="section.href"
-        class="group cursor-pointer transition-colors hover:bg-base-200"
+        class="group h-full cursor-pointer transition-colors hover:bg-base-200"
         @click="go(section.href)"
       >
         <div class="flex items-start justify-between">

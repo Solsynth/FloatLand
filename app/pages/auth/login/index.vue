@@ -16,14 +16,6 @@
                         <p class="mt-1.5 text-sm leading-relaxed text-base-content/60">
                             {{ t("auth.description") }}
                         </p>
-
-                        <!-- Account chip after lookup -->
-                        <div
-                            v-if="step !== 'lookup' && step !== 'success' && account"
-                            class="mt-4 flex items-center gap-2 rounded-lg border border-base-300 bg-base-100 px-3 py-2"
-                        >
-                            <span class="truncate text-sm font-medium">{{ account }}</span>
-                        </div>
                     </div>
 
                     <div>

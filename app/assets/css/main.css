@@ -137,19 +137,6 @@
     background-color: color-mix(in oklch, var(--color-primary) 5%, var(--color-base-200));
   }
 
-  .auth-rail::before {
-    position: absolute;
-    right: -4.5rem;
-    bottom: -4.5rem;
-    width: 13rem;
-    height: 13rem;
-    border: 1px solid color-mix(in oklch, var(--color-primary) 28%, transparent);
-    border-radius: 50%;
-    content: "";
-    box-shadow: 0 0 0 2rem color-mix(in oklch, var(--color-primary) 5%, transparent), 0 0 0 4rem color-mix(in oklch, var(--color-primary) 3%, transparent);
-    pointer-events: none;
-  }
-
   .auth-rail > * { position: relative; z-index: 1; }
   .auth-brand-mark { width: 2.25rem; height: 2.25rem; border-radius: var(--radius-box); }
 

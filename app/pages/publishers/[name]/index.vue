@@ -187,49 +187,51 @@
           />
 
           <!-- Posts Section with Filters -->
-          <section class="space-y-4">
-            <!-- Filter Controls -->
-            <div class="card">
-              <div class="card-body gap-4 p-4">
-                <div
-                  v-if="isRefreshing"
-                  class="mb-1 flex items-center gap-2 text-sm text-base-content/60"
-                >
-                  <IconLoader class="w-3.5 h-3.5 animate-spin" />
-                  <span>Refreshing feed...</span>
+          <section aria-labelledby="publisher-feed-title" class="space-y-4">
+            <div class="overflow-hidden rounded-box bg-base-100 shadow-sm">
+              <div class="flex flex-wrap items-end justify-between gap-3 border-b border-base-300/60 px-4 py-4">
+                <div>
+                  <p class="text-xs font-bold uppercase tracking-[0.16em] text-primary">Publisher feed</p>
+                  <h2 id="publisher-feed-title" class="mt-1 text-lg font-bold">Posts</h2>
                 </div>
+                <div class="flex items-center gap-2 text-xs text-base-content/45">
+                  <span v-if="isRefreshing" class="inline-flex items-center gap-1.5">
+                    <IconLoader class="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+                    Refreshing
+                  </span>
+                  <span aria-live="polite">{{ posts.length }} shown</span>
+                </div>
+              </div>
 
+              <div class="space-y-4 p-4">
                 <!-- Content Type Tabs -->
-                <div class="join w-full">
+                <div role="tablist" aria-label="Post content type" class="grid grid-cols-3 rounded-box bg-base-200 p-1">
                   <button
-                    class="btn join-item flex-1"
-                    :class="
-                      contentType === 'all'
-                        ? 'btn-primary'
-                        : 'bg-base-100 text-base-content hover:bg-base-200 shadow-sm'
-                    "
+                    type="button"
+                    role="tab"
+                    :aria-selected="contentType === 'all'"
+                    class="btn btn-sm border-0 shadow-none"
+                    :class="contentType === 'all' ? 'bg-base-100 text-primary shadow-sm' : 'bg-transparent text-base-content/55 hover:bg-base-100/60'"
                     @click="setContentType('all')"
                   >
                     All
                   </button>
                   <button
-                    class="btn join-item flex-1"
-                    :class="
-                      contentType === 'posts'
-                        ? 'btn-primary'
-                        : 'bg-base-100 text-base-content hover:bg-base-200 shadow-sm'
-                    "
+                    type="button"
+                    role="tab"
+                    :aria-selected="contentType === 'posts'"
+                    class="btn btn-sm border-0 shadow-none"
+                    :class="contentType === 'posts' ? 'bg-base-100 text-primary shadow-sm' : 'bg-transparent text-base-content/55 hover:bg-base-100/60'"
                     @click="setContentType('posts')"
                   >
                     Posts
                   </button>
                   <button
-                    class="btn join-item flex-1"
-                    :class="
-                      contentType === 'articles'
-                        ? 'btn-primary'
-                        : 'bg-base-100 text-base-content hover:bg-base-200 shadow-sm'
-                    "
+                    type="button"
+                    role="tab"
+                    :aria-selected="contentType === 'articles'"
+                    class="btn btn-sm border-0 shadow-none"
+                    :class="contentType === 'articles' ? 'bg-base-100 text-primary shadow-sm' : 'bg-transparent text-base-content/55 hover:bg-base-100/60'"
                     @click="setContentType('articles')"
                   >
                     Articles
@@ -239,55 +241,50 @@
                 <!-- Filter Buttons -->
                 <div class="grid gap-2 sm:grid-cols-2">
                   <button
-                    class="btn justify-start bg-base-100 text-base-content hover:bg-base-200 shadow-sm"
+                    type="button"
+                    class="btn justify-start bg-base-100 text-base-content shadow-sm hover:bg-base-200"
+                    :aria-pressed="includeReplies === true"
                     @click="cycleRepliesFilter"
                   >
-                    <IconMessageCircle class="w-3.5 h-3.5" />
-                    <span
-                      >Replies:
-                      {{
-                        includeReplies === null
-                          ? "Auto"
-                          : includeReplies
-                            ? "On"
-                            : "Off"
-                      }}</span
-                    >
+                    <IconMessageCircle class="h-3.5 w-3.5" aria-hidden="true" />
+                    <span>Replies: {{ includeReplies === null ? 'Auto' : includeReplies ? 'On' : 'Off' }}</span>
                   </button>
                   <button
-                    class="btn justify-start bg-base-100 text-base-content hover:bg-base-200 shadow-sm"
+                    type="button"
+                    class="btn justify-start bg-base-100 text-base-content shadow-sm hover:bg-base-200"
+                    :aria-pressed="mediaOnly"
                     @click="toggleMediaOnly"
                   >
-                    <IconImage class="w-3.5 h-3.5" />
-                    <span>Media only: {{ mediaOnly ? "On" : "Off" }}</span>
+                    <IconImage class="h-3.5 w-3.5" aria-hidden="true" />
+                    <span>Media only: {{ mediaOnly ? 'On' : 'Off' }}</span>
                   </button>
                   <button
-                    class="btn justify-start bg-base-100 text-base-content hover:bg-base-200 shadow-sm"
+                    type="button"
+                    class="btn justify-start bg-base-100 text-base-content shadow-sm hover:bg-base-200"
+                    :aria-pressed="!orderDesc"
                     @click="toggleOrder"
                   >
-                    <IconArrowDownUp class="w-3.5 h-3.5" />
-                    <span>Order: {{ orderDesc ? "Newest" : "Oldest" }}</span>
+                    <IconArrowDownUp class="h-3.5 w-3.5" aria-hidden="true" />
+                    <span>Order: {{ orderDesc ? 'Newest' : 'Oldest' }}</span>
                   </button>
-                  <div class="join">
+                  <form class="join min-w-0" @submit.prevent="reloadWithFilters">
                     <input
                       v-model="query"
-                      class="input-bordered input join-item w-full"
+                      type="search"
+                      class="input input-bordered join-item w-full"
                       placeholder="Search posts"
-                      @keydown.enter="reloadWithFilters"
-                    />
-                    <button
-                      class="btn join-item btn-primary"
-                      @click="reloadWithFilters"
+                      aria-label="Search posts"
                     >
-                      <IconSearch class="w-3.5 h-3.5" />
+                    <button type="submit" class="btn join-item btn-primary" aria-label="Search posts">
+                      <IconSearch class="h-3.5 w-3.5" aria-hidden="true" />
                     </button>
-                  </div>
+                  </form>
                 </div>
               </div>
             </div>
 
             <!-- Error -->
-            <div v-if="error" class="alert alert-error">
+            <div v-if="error" class="alert alert-error" role="alert">
               <span>{{ error }}</span>
             </div>
 
@@ -308,23 +305,24 @@
             </div>
 
             <!-- Load More -->
-            <div v-if="posts.length > 0" class="py-2 text-center">
+            <div v-if="posts.length > 0" class="flex flex-col items-center gap-2 py-2 text-center">
               <button
                 v-if="hasMore"
+                type="button"
                 class="btn btn-outline"
                 :disabled="isLoading"
                 @click="loadMore"
               >
-                <IconLoader v-if="isLoading" class="w-4 h-4 animate-spin" />
+                <IconLoader v-if="isLoading" class="h-4 w-4 animate-spin" aria-hidden="true" />
                 <span>Load more</span>
               </button>
-              <p v-else class="text-sm text-base-content/50">No more posts</p>
+              <p v-else class="text-sm text-base-content/50">{{ posts.length }} shown · No more posts</p>
             </div>
 
             <!-- Empty State -->
             <div
               v-else-if="!error"
-              class="card shadow-sm p-8 text-center text-base-content/60"
+              class="rounded-box bg-base-100 px-5 py-10 text-center text-sm text-base-content/60 shadow-sm"
             >
               No posts from this publisher with current filters.
             </div>

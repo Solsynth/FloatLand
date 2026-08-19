@@ -1,5 +1,23 @@
 <template>
   <NuxtLayout name="merchant">
+    <div class="mx-auto max-w-7xl space-y-5">
+      <header class="relative isolate overflow-hidden rounded-box bg-base-100 px-5 py-5 shadow-sm sm:px-7">
+        <div class="absolute inset-y-0 right-0 -z-10 w-1/3 bg-primary/[0.06]" aria-hidden="true">
+          <div class="absolute inset-y-0 left-0 w-px bg-primary/15" />
+          <div class="absolute inset-y-0 left-5 w-px bg-primary/10" />
+          <div class="absolute inset-y-0 left-10 w-px bg-primary/10" />
+        </div>
+        <p class="text-xs font-bold uppercase tracking-[0.18em] text-primary">{{ t('merchant.title') }}</p>
+        <div class="mt-2 flex items-end justify-between gap-4">
+          <div class="min-w-0">
+            <h1 class="truncate text-2xl font-black tracking-tight sm:text-3xl">@{{ pubName }}</h1>
+            <p class="mt-1 text-sm text-base-content/55">{{ t('merchant.hubInfo') }}</p>
+          </div>
+          <NuxtLink :to="`/merchants/${encodeURIComponent(pubName)}/settings`" class="btn btn-ghost btn-sm">
+            {{ t('merchant.settings') }}
+          </NuxtLink>
+        </div>
+      </header>
     <MerchantProfileMissing
       v-if="profileMissing"
       :pub-name="pubName"
@@ -8,17 +26,17 @@
 
     <!-- Stats Overview -->
     <div class="mb-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
-      <div class="stat bg-base-100 rounded-box shadow-sm">
+      <div class="stat h-full rounded-box bg-base-100 shadow-sm">
         <div class="stat-title">{{ t('merchant.totalPending') }}</div>
         <div class="stat-value text-primary text-2xl">{{ overview?.totalPending ?? 0 }}</div>
         <div class="stat-desc text-base-content/40">{{ t('merchant.settlements') }}</div>
       </div>
-      <div class="stat bg-base-100 rounded-box shadow-sm">
+      <div class="stat h-full rounded-box bg-base-100 shadow-sm">
         <div class="stat-title">{{ t('merchant.totalSettled') }}</div>
         <div class="stat-value text-primary text-2xl">{{ overview?.totalSettled ?? 0 }}</div>
         <div class="stat-desc text-base-content/40">{{ t('merchant.allTime') }}</div>
       </div>
-      <div class="stat bg-base-100 rounded-box shadow-sm">
+      <div class="stat h-full rounded-box bg-base-100 shadow-sm">
         <div class="stat-title">{{ t('merchant.activeAds') }}</div>
         <div class="stat-value text-primary text-2xl">{{ adStats.filter(a => a.isCurrentlyPlaced).length }}</div>
         <div class="stat-desc text-base-content/40">{{ t('merchant.sponsoredPosts') }}</div>
@@ -28,7 +46,7 @@
     <!-- Quick Actions + Pending Breakdown -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
       <!-- Pending by Currency -->
-      <div class="card bg-base-100 shadow-sm">
+      <div class="card h-full bg-base-100 shadow-sm">
         <div class="card-body p-5">
           <h3 class="text-base font-bold mb-3">{{ t('merchant.pendingByCurrency') }}</h3>
           <div v-if="hasPending" class="space-y-2">
@@ -52,7 +70,7 @@
       </div>
 
       <!-- Recent Ads -->
-      <div class="card bg-base-100 shadow-sm">
+      <div class="card h-full bg-base-100 shadow-sm">
         <div class="card-body p-5">
           <div class="flex items-center justify-between mb-3">
             <h3 class="text-base font-bold">{{ t('merchant.topAds') }}</h3>
@@ -117,6 +135,7 @@
           <p class="text-sm">{{ t('merchant.noIncomeData') }}</p>
         </div>
       </div>
+    </div>
     </div>
   </NuxtLayout>
 </template>

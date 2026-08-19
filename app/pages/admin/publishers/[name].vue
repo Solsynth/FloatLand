@@ -1,8 +1,35 @@
 <template>
   <NuxtLayout name="admin">
-    <div v-if="isLoading" class="flex justify-center py-16">
-      <span class="loading loading-spinner loading-lg" />
+    <div v-if="isLoading" class="space-y-4" aria-busy="true" aria-label="Loading publisher">
+      <div class="skeleton h-16 w-full rounded-box" />
+      <div class="rounded-box bg-base-100 p-5 shadow-sm">
+        <div class="flex items-start gap-4">
+          <div class="skeleton h-14 w-14 rounded-full" />
+          <div class="flex-1 space-y-3">
+            <div class="skeleton h-5 w-48" />
+            <div class="skeleton h-4 w-32" />
+            <div class="skeleton h-3 w-full max-w-xl" />
+          </div>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div v-for="item in 3" :key="item" class="rounded-box bg-base-100 p-5 shadow-sm">
+          <div class="skeleton mb-4 h-5 w-28" />
+          <div class="space-y-3">
+            <div class="skeleton h-9 w-full rounded-xl" />
+            <div class="skeleton h-9 w-full rounded-xl" />
+          </div>
+        </div>
+      </div>
     </div>
+
+    <AdminCard v-else-if="loadError" class="flex flex-col items-center px-5 py-14 text-center">
+      <IconAlertTriangle class="mb-4 h-12 w-12 text-error/60" aria-hidden="true" />
+      <p role="alert" class="text-sm text-base-content/60">Could not load publisher.</p>
+      <button type="button" class="btn btn-outline btn-sm mt-4" @click="load">
+        Retry
+      </button>
+    </AdminCard>
 
     <template v-else-if="detail">
       <AdminPageHeader
@@ -10,7 +37,7 @@
         :description="`@${detail.publisher.name}`"
       >
         <template #actions>
-          <button class="btn btn-sm btn-error" :disabled="actLoading" @click="deletePublisher">
+          <button type="button" class="btn btn-sm btn-error" :disabled="actLoading" @click="deletePublisher">
             <IconTrash2 class="w-4 h-4" />
             Delete
           </button>
@@ -22,9 +49,11 @@
           <div class="avatar shrink-0">
             <div class="w-14 rounded-full">
               <img
-                v-if="getFileUrl(detail.publisher.picture?.id)"
-                :src="getFileUrl(detail.publisher.picture?.id) ?? ''"
+                v-if="detail.publisher.picture?.id"
+                :src="getFileUrl(detail.publisher.picture.id) ?? ''"
                 :alt="detail.publisher.nick || detail.publisher.name"
+                loading="lazy"
+                decoding="async"
               />
               <div
                 v-else
@@ -73,7 +102,7 @@
       </AdminCard>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-        <AdminCard>
+        <AdminCard class="h-full">
           <h3 class="text-sm font-semibold mb-3">Profile</h3>
           <div class="space-y-3">
             <input v-model="editForm.nick" class="input input-sm w-full bg-base-200/60 border-0 rounded-xl" placeholder="Display name" />
@@ -91,7 +120,7 @@
           </div>
         </AdminCard>
 
-        <AdminCard>
+        <AdminCard class="h-full">
           <h3 class="text-sm font-semibold mb-3 flex items-center gap-2">
             <IconEyeOff class="w-4 h-4" />
             Shadowban
@@ -122,7 +151,7 @@
           </button>
         </AdminCard>
 
-        <AdminCard class="sm:col-span-2">
+        <AdminCard class="h-full sm:col-span-2">
           <h3 class="text-sm font-semibold mb-3">Verification</h3>
           <div v-if="detail.publisher.verification" class="mb-3 text-sm">
             <span class="badge badge-success badge-sm mr-2">{{ detail.publisher.verification.type }}</span>
@@ -204,6 +233,7 @@ const route = useRoute()
 const { destructive } = useAlert()
 const detail = ref<AdminPublisherDetail | null>(null)
 const isLoading = ref(true)
+const loadError = ref(false)
 const actLoading = ref(false)
 
 const editForm = ref({
@@ -257,9 +287,9 @@ function formatShadowban(v: PublisherShadowbanReason | string | number | null | 
 function isShadowbanned(v: PublisherShadowbanReason | string | number | null | undefined): boolean {
   return !(v === undefined || v === null || v === 'none' || v === 0)
 }
-
 async function load() {
   isLoading.value = true
+  loadError.value = false
   try {
     detail.value = await fetchAdminPublisher(route.params.name as string)
     const p = detail.value.publisher
@@ -272,6 +302,7 @@ async function load() {
     }
   } catch {
     detail.value = null
+    loadError.value = true
   } finally {
     isLoading.value = false
   }

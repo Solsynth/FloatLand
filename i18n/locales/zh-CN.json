@@ -1502,6 +1502,16 @@
     "settingsDangerZoneDesc": "取消注册将移除您的开发者访问权限。您的项目和应用将保留，但您将无法管理它们。",
     "settingsUnenroll": "取消开发者注册",
     "settingsUnenrollConfirm": "确定要取消开发者注册吗？此操作不可撤销。",
+    "marketplace": {
+      "title": "插件市场",
+      "description": "开发者发布的生产级插件",
+      "searchPlaceholder": "搜索插件",
+      "search": "搜索",
+      "unknownPublisher": "未知发布者",
+      "noDescription": "暂无描述",
+      "noResults": "未找到生产级插件。",
+      "clearSearch": "清除搜索"
+    },
     "overview": "概览",
     "hubDescription": "开发者中心让您可以管理 Solar Network 平台上的项目、应用和机器人。",
     "dashboardDescription": "查看您的开发者统计数据并管理您的项目。",

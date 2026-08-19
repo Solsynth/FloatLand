@@ -5,10 +5,13 @@
     <div v-if="isPublisherSelected && showPortalToggle" class="px-2 pt-3 pb-1">
       <div class="flex rounded-box bg-base-200 p-0.5">
         <button
+          v-if="!collapsed || portalMode === 'creator'"
           type="button"
           class="inline-flex items-center justify-center gap-1.5 rounded-md py-1.5 text-xs font-semibold transition-all duration-150"
           :class="portalMode === 'creator'
-            ? 'flex-[1.4] min-w-0 bg-base-100 px-2 text-primary shadow-sm'
+            ? collapsed
+              ? 'w-full bg-base-100 px-2 text-primary shadow-sm'
+              : 'flex-[1.4] min-w-0 bg-base-100 px-2 text-primary shadow-sm'
             : 'flex-none px-2 text-base-content/45 hover:text-base-content/70'"
           :title="t('portal.creator')"
           :aria-label="t('portal.creator')"
@@ -16,14 +19,20 @@
           :disabled="portalMode === 'creator' || !currentOrg"
           @click="portalMode !== 'creator' && handleTogglePortal('creator')"
         >
-          <IconPalette class="w-3.5 h-3.5 shrink-0" />
+          <IconPalette
+            class="shrink-0"
+            :class="collapsed ? 'h-3 w-3' : 'h-3.5 w-3.5'"
+          />
           <span v-if="portalMode === 'creator' && !collapsed" class="truncate">{{ t('portal.creator') }}</span>
         </button>
         <button
+          v-if="!collapsed || portalMode === 'developer'"
           type="button"
           class="inline-flex items-center justify-center gap-1.5 rounded-md py-1.5 text-xs font-semibold transition-all duration-150"
           :class="portalMode === 'developer'
-            ? 'flex-[1.4] min-w-0 bg-base-100 px-2 text-primary shadow-sm'
+            ? collapsed
+              ? 'w-full bg-base-100 px-2 text-primary shadow-sm'
+              : 'flex-[1.4] min-w-0 bg-base-100 px-2 text-primary shadow-sm'
             : 'flex-none px-2 text-base-content/45 hover:text-base-content/70'"
           :title="t('portal.developer')"
           :aria-label="t('portal.developer')"
@@ -31,14 +40,20 @@
           :disabled="portalMode === 'developer' || !currentOrg"
           @click="portalMode !== 'developer' && handleTogglePortal('developer')"
         >
-          <IconCode class="w-3.5 h-3.5 shrink-0" />
+          <IconCode
+            class="shrink-0"
+            :class="collapsed ? 'h-3 w-3' : 'h-3.5 w-3.5'"
+          />
           <span v-if="portalMode === 'developer' && !collapsed" class="truncate">{{ t('portal.developer') }}</span>
         </button>
         <button
+          v-if="!collapsed || portalMode === 'merchant'"
           type="button"
           class="inline-flex items-center justify-center gap-1.5 rounded-md py-1.5 text-xs font-semibold transition-all duration-150"
           :class="portalMode === 'merchant'
-            ? 'flex-[1.4] min-w-0 bg-base-100 px-2 text-primary shadow-sm'
+            ? collapsed
+              ? 'w-full bg-base-100 px-2 text-primary shadow-sm'
+              : 'flex-[1.4] min-w-0 bg-base-100 px-2 text-primary shadow-sm'
             : 'flex-none px-2 text-base-content/45 hover:text-base-content/70'"
           :title="t('portal.merchant')"
           :aria-label="t('portal.merchant')"
@@ -46,7 +61,10 @@
           :disabled="portalMode === 'merchant' || !currentOrg"
           @click="portalMode !== 'merchant' && handleTogglePortal('merchant')"
         >
-          <IconWallet class="w-3.5 h-3.5 shrink-0" />
+          <IconWallet
+            class="shrink-0"
+            :class="collapsed ? 'h-3 w-3' : 'h-3.5 w-3.5'"
+          />
           <span v-if="portalMode === 'merchant' && !collapsed" class="truncate">{{ t('portal.merchant') }}</span>
         </button>
       </div>

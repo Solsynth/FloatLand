@@ -12,11 +12,14 @@
     :show-portal-toggle="!!currentPublisher"
     :show-enroll-prompt="showEnrollPrompt"
     :enrolling="enrolling"
+    :collapsed="props.collapsed"
+    :collapsible="props.collapsible"
     @navigate="$emit('navigate')"
     @clear-selection="clearSelection(); $emit('navigate')"
     @toggle-portal="handleTogglePortal"
     @enroll-developer="handleEnroll"
     @dismiss-enroll="showEnrollPrompt = false"
+    @toggle-collapse="$emit('toggleCollapse')"
   />
 </template>
 
@@ -35,7 +38,17 @@ import {
 } from '#components'
 import { enrollDeveloper } from '~/utils/developer'
 
-defineEmits<{ navigate: [] }>()
+defineEmits<{ navigate: []; toggleCollapse: [] }>()
+const props = withDefaults(
+  defineProps<{
+    collapsed?: boolean
+    collapsible?: boolean
+  }>(),
+  {
+    collapsed: false,
+    collapsible: false,
+  },
+)
 
 const { t } = useI18n()
 const { $toast } = useNuxtApp()

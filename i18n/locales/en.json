@@ -1504,6 +1504,16 @@
     "settingsDangerZoneDesc": "Unenrolling will remove your developer access. Your projects and apps will remain but you won't be able to manage them.",
     "settingsUnenroll": "Unenroll as Developer",
     "settingsUnenrollConfirm": "Are you sure you want to unenroll as a developer? This action cannot be undone.",
+    "marketplace": {
+      "title": "Plugin Marketplace",
+      "description": "Production plugins published by developers",
+      "searchPlaceholder": "Search plugins",
+      "search": "Search",
+      "unknownPublisher": "Unknown publisher",
+      "noDescription": "No description",
+      "noResults": "No production plugins found.",
+      "clearSearch": "Clear search"
+    },
     "overview": "Overview",
     "hubDescription": "The Developer Hub lets you manage your projects, apps, and bots for the Solar Network platform.",
     "dashboardDescription": "View your developer statistics and manage your projects.",

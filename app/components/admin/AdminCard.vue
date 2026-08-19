@@ -1,6 +1,6 @@
 <template>
   <div
-    class="rounded-box bg-base-100 shadow-sm"
+    class="rounded-box border border-base-300/60 bg-base-100 shadow-sm"
     :class="[
       hoverable
         ? 'cursor-pointer transition-colors duration-150 hover:bg-base-200'
@@ -10,8 +10,7 @@
     <!-- Header -->
     <div
       v-if="$slots.header || $slots.actions || title"
-      class="flex items-center justify-between gap-3 bg-base-200/60"
-      :class="[compact ? 'px-4 py-3' : 'px-5 py-3.5']"
+      class="flex items-center justify-between gap-3 border-b border-base-300/60 bg-base-200/40"
     >
       <div v-if="title" class="min-w-0">
         <h3 class="font-semibold text-sm text-base-content leading-snug">

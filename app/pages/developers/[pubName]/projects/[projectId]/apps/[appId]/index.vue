@@ -1,66 +1,99 @@
 <template>
   <NuxtLayout name="developer">
-    <div>
-      <div v-if="isLoading" class="flex justify-center py-8">
-        <span class="loading loading-spinner loading-lg" />
+    <div class="mx-auto max-w-7xl space-y-5">
+      <div v-if="isLoading" class="space-y-5" aria-busy="true" :aria-label="t('common.loading')">
+        <div class="skeleton h-8 w-32" />
+        <section class="rounded-box bg-base-100 p-6 shadow-sm">
+          <div class="flex items-start gap-4">
+            <div class="skeleton h-16 w-16 rounded-2xl" />
+            <div class="flex-1 space-y-3">
+              <div class="skeleton h-7 w-56" />
+              <div class="skeleton h-4 w-32" />
+              <div class="skeleton h-6 w-16 rounded-full" />
+            </div>
+          </div>
+        </section>
+        <div class="grid grid-cols-1 gap-5 lg:grid-cols-2">
+          <div v-for="item in 3" :key="item" class="rounded-box bg-base-100 p-5 shadow-sm">
+            <div class="skeleton mb-5 h-5 w-32" />
+            <div class="space-y-3">
+              <div v-for="row in 2" :key="row" class="skeleton h-12 w-full rounded-xl" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div v-else-if="loadError" class="flex flex-col items-center rounded-box bg-base-100 px-5 py-14 text-center shadow-sm">
+        <IconBoxes class="mb-4 h-12 w-12 text-error/60" aria-hidden="true" />
+        <p role="alert" class="text-sm text-base-content/60">{{ t('common.error') }}</p>
+        <button type="button" class="btn btn-outline btn-sm mt-4" @click="loadData">
+          {{ t('common.retry') }}
+        </button>
       </div>
 
       <template v-else-if="app">
-        <!-- App Header -->
-        <div class="flex items-center gap-4 mb-6 -mx-4">
-          <NuxtLink :to="`/developers/${pubName}/projects/${projectId}/apps`" class="btn btn-ghost btn-sm">
-            <IconArrowLeft class="w-4 h-4" />
-            {{ t('developer.apps.title') }}
-          </NuxtLink>
-        </div>
+        <NuxtLink :to="`/developers/${encodeURIComponent(pubName)}/projects/${projectId}/apps`" class="btn btn-ghost btn-sm -ml-2">
+          <IconArrowLeft class="h-4 w-4" aria-hidden="true" />
+          {{ t('developer.apps.title') }}
+        </NuxtLink>
 
-        <div class="card bg-base-100 shadow-sm mb-6">
-          <div class="card-body p-5">
-            <div class="flex items-start gap-4">
-              <div class="avatar">
-                <div class="w-16 rounded-full">
-                  <img v-if="getFileUrl(app.picture?.id)" :src="getFileUrl(app.picture?.id)" :alt="app.name" />
-                  <div v-else class="flex h-16 w-16 items-center justify-center rounded-full bg-primary text-primary-content text-xl font-bold">
-                    {{ app.name?.slice(0, 2).toUpperCase() }}
+        <section class="relative isolate overflow-hidden rounded-box bg-base-100 shadow-sm">
+          <div class="absolute inset-y-0 right-0 -z-10 w-1/3 bg-primary/[0.06]" aria-hidden="true">
+            <div class="absolute inset-y-0 left-0 w-px bg-primary/15" />
+            <div class="absolute inset-y-0 left-5 w-px bg-primary/10" />
+            <div class="absolute inset-y-0 left-10 w-px bg-primary/10" />
+          </div>
+          <div class="p-5 sm:p-7">
+            <div class="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+              <div class="flex min-w-0 items-start gap-4">
+                <div class="avatar shrink-0">
+                  <div class="w-16 rounded-2xl">
+                    <img v-if="app.picture?.id" :src="getFileUrl(app.picture.id)!" :alt="app.name" loading="lazy" decoding="async">
+                    <div v-else class="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary text-xl font-black text-primary-content">
+                      {{ app.name?.slice(0, 2).toUpperCase() || '?' }}
+                    </div>
                   </div>
                 </div>
+                <div class="min-w-0">
+                  <p class="text-xs font-bold uppercase tracking-[0.16em] text-primary">
+                    {{ t('developer.apps.detail') }}
+                  </p>
+                  <h1 class="mt-2 break-words text-2xl font-black tracking-tight sm:text-3xl">{{ app.name }}</h1>
+                  <code class="mt-2 inline-block rounded bg-base-200 px-2 py-1 text-xs text-base-content/55">{{ app.slug }}</code>
+                  <span
+                    class="badge badge-sm ml-2 align-middle"
+                    :class="{
+                      'badge-success': app.status === 1,
+                      'badge-warning': app.status === 0,
+                      'badge-error': app.status === -1,
+                    }"
+                  >
+                    {{ app.status === 1 ? t('developer.apps.statusActive') : app.status === 0 ? t('developer.apps.statusDraft') : t('developer.apps.statusDisabled') }}
+                  </span>
+                  <p v-if="app.description" class="mt-4 max-w-2xl text-sm leading-relaxed text-base-content/65">
+                    {{ app.description }}
+                  </p>
+                </div>
               </div>
-              <div class="flex-1">
-                <h2 class="text-2xl font-bold">{{ app.name }}</h2>
-                <p class="text-base-content/50 mt-1">{{ app.slug }}</p>
-                <span
-                  class="badge badge-sm mt-2"
-                  :class="{
-                    'badge-success': app.status === 1,
-                    'badge-warning': app.status === 0,
-                    'badge-error': app.status === -1,
-                  }"
-                >
-                  {{ app.status === 1 ? 'Active' : app.status === 0 ? 'Draft' : 'Disabled' }}
-                </span>
-              </div>
-              <div class="flex gap-2">
-                <button class="btn btn-ghost btn-sm" @click="openEditModal">
-                  <IconEdit class="w-4 h-4" />
+              <div class="flex shrink-0 gap-2">
+                <button type="button" class="btn btn-ghost btn-sm" @click="openEditModal">
+                  <IconEdit class="h-4 w-4" aria-hidden="true" />
                   {{ t('common.edit') }}
                 </button>
-                <button class="btn btn-ghost btn-sm text-error" @click="handleDelete">
-                  <IconTrash class="w-4 h-4" />
+                <button type="button" class="btn btn-ghost btn-sm text-error" @click="handleDelete">
+                  <IconTrash class="h-4 w-4" aria-hidden="true" />
                   {{ t('common.delete') }}
                 </button>
               </div>
             </div>
-            <p v-if="app.description" class="mt-4 text-base-content/70">
-              {{ app.description }}
-            </p>
           </div>
-        </div>
+        </section>
 
 
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-3">
           <!-- Secrets Section -->
-          <div class="card bg-base-100 shadow-sm">
+          <div class="card h-full bg-base-100 shadow-sm">
             <div class="card-body p-4">
               <div class="flex items-center justify-between mb-4">
                 <h3 class="card-title text-base">{{ t('developer.apps.secrets.title') }}</h3>
@@ -101,7 +134,7 @@
           </div>
 
           <!-- Products Section -->
-          <div class="card bg-base-100 shadow-sm lg:col-span-2">
+          <div class="card h-full bg-base-100 shadow-sm">
             <div class="card-body p-4">
               <div class="flex items-center justify-between mb-4">
                 <div>
@@ -172,7 +205,7 @@
           </div>
 
           <!-- OAuth Config -->
-          <div v-if="app.oauthConfig" class="card bg-base-100 shadow-sm">
+          <div v-if="app.oauthConfig" class="card h-full bg-base-100 shadow-sm">
             <div class="card-body p-4 flex flex-col">
               <h3 class="card-title text-base mb-4">{{ t('developer.apps.oauth.title') }}</h3>
               <div class="space-y-3 flex-1">
@@ -216,7 +249,7 @@
           </div>
 
           <!-- Links -->
-          <div v-if="app.links" class="card bg-base-100 shadow-sm">
+          <div v-if="app.links" class="card h-full bg-base-100 shadow-sm">
             <div class="card-body p-4 flex flex-col">
               <h3 class="card-title text-base mb-4">{{ t('developer.apps.links.title') }}</h3>
               <div class="space-y-2 flex-1">
@@ -240,7 +273,7 @@
           </div>
 
           <!-- Notifications Section -->
-          <div class="card bg-base-100 shadow-sm">
+          <div class="card h-full bg-base-100 shadow-sm">
             <div class="card-body p-4 flex flex-col">
               <div class="flex items-center justify-between mb-4">
                 <h3 class="card-title text-base">
@@ -276,7 +309,7 @@
           </div>
 
           <!-- Board Widgets Section -->
-          <div class="card bg-base-100 shadow-sm">
+          <div class="card h-full bg-base-100 shadow-sm">
             <div class="card-body p-4 flex flex-col">
               <div class="flex items-center justify-between mb-4">
                 <h3 class="card-title text-base">
@@ -337,10 +370,18 @@
         </div>
       </template>
 
-      <div v-else class="flex flex-col items-center py-8 text-center">
-        <IconBoxes class="w-12 h-12 text-base-content/20 mb-4" />
-        <p class="text-base-content/60">{{ t('developer.apps.notFound') }}</p>
-        <NuxtLink :to="`/developers/${pubName}/projects/${projectId}/apps`" class="btn btn-primary btn-sm mt-4">
+      <div v-else-if="loadError" class="flex flex-col items-center rounded-box bg-base-100 px-5 py-14 text-center shadow-sm">
+        <IconBoxes class="mb-4 h-12 w-12 text-error/60" aria-hidden="true" />
+        <p role="alert" class="text-sm text-base-content/60">{{ t('common.error') }}</p>
+        <button type="button" class="btn btn-outline btn-sm mt-4" @click="loadData">
+          {{ t('common.retry') }}
+        </button>
+      </div>
+
+      <div v-else class="flex flex-col items-center rounded-box bg-base-100 px-5 py-14 text-center shadow-sm">
+        <IconBoxes class="mb-4 h-12 w-12 text-base-content/20" aria-hidden="true" />
+        <p class="text-sm text-base-content/60">{{ t('developer.apps.notFound') }}</p>
+        <NuxtLink :to="`/developers/${encodeURIComponent(pubName)}/projects/${projectId}/apps`" class="btn btn-primary btn-sm mt-4">
           {{ t('developer.apps.backToList') }}
         </NuxtLink>
       </div>
@@ -818,6 +859,7 @@ const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const pubName = computed(() => route.params.pubName as string)
+const loadError = ref(false)
 const projectId = computed(() => route.params.projectId as string)
 const appId = computed(() => route.params.appId as string)
 const developer = useDeveloper()
@@ -959,18 +1001,13 @@ useSolarSeo({ title: `${t('developer.apps.detail')} · ${pubName.value}` })
 
 const productPicturePreview = computed(() => getFileUrl(productPictureId.value))
 const productBackgroundPreview = computed(() => getFileUrl(productBackgroundId.value))
-
-function formatAmount(amount: number | undefined | null) {
-  if (amount == null) return '0'
-  return new Intl.NumberFormat().format(amount)
-}
-
 function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString()
 }
 
 async function loadData() {
   isLoading.value = true
+  loadError.value = false
   try {
     await developer.loadDevelopers()
     developer.selectByPublisherName(pubName.value)
@@ -982,18 +1019,23 @@ async function loadData() {
       developer.currentApp.value = { id: appData.id, name: appData.name, slug: appData.slug }
     }
 
-    const secretsResult = await fetchAppSecrets(pubName.value, projectId.value, appId.value)
+    const [secretsResult, productsResult] = await Promise.all([
+      fetchAppSecrets(pubName.value, projectId.value, appId.value),
+      fetchAppProducts(pubName.value, projectId.value, appId.value),
+    ])
     secrets.value = secretsResult
-
-    const productsResult = await fetchAppProducts(pubName.value, projectId.value, appId.value)
     products.value = productsResult
-
   } catch (e) {
     console.error(e)
+    app.value = null
+    secrets.value = []
+    products.value = []
+    loadError.value = true
   } finally {
     isLoading.value = false
   }
 }
+
 
 function pickPicture() {
   picturePickerOpen.value = true
@@ -1107,7 +1149,7 @@ async function handleUpdateLinks() {
 }
 
 async function handleDelete() {
-  if (!(await useAlert().confirm('Confirm', t('developer.apps.deleteConfirm')))) return
+  if (!(await useAlert().confirm(t('common.confirm'), t('developer.apps.deleteConfirm')))) return
   try {
     await deleteCustomApp(pubName.value, projectId.value, appId.value)
     router.push(`/developers/${pubName.value}/projects/${projectId.value}/apps`)
@@ -1148,7 +1190,7 @@ function secretTypeLabel(type: number) {
 }
 
 async function handleDeleteSecret(secretId: string) {
-  if (!(await useAlert().confirm('Confirm', t('developer.apps.secrets.deleteConfirm')))) return
+  if (!(await useAlert().confirm(t('common.confirm'), t('developer.apps.secrets.deleteConfirm')))) return
   try {
     await deleteAppSecret(pubName.value, projectId.value, appId.value, secretId)
     secrets.value = await fetchAppSecrets(pubName.value, projectId.value, appId.value)
@@ -1275,7 +1317,7 @@ async function handleSaveProduct() {
 }
 
 async function handleDeleteProduct(productId: string) {
-  if (!(await useAlert().confirm('Confirm', t('developer.apps.products.deleteConfirm')))) return
+  if (!(await useAlert().confirm(t('common.confirm'), t('developer.apps.products.deleteConfirm')))) return
   try {
     await deleteAppProduct(pubName.value, projectId.value, appId.value, productId)
     products.value = await fetchAppProducts(pubName.value, projectId.value, appId.value)

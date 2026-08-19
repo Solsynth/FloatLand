@@ -1,62 +1,90 @@
 <template>
   <NuxtLayout name="developer">
-    <div>
-      <div v-if="isLoading" class="flex justify-center py-8">
-        <span class="loading loading-spinner loading-lg" />
+    <div class="mx-auto max-w-5xl space-y-5">
+      <div v-if="isLoading" class="space-y-5" aria-busy="true" :aria-label="t('common.loading')">
+        <div class="skeleton h-8 w-32" />
+        <section class="rounded-box bg-base-100 p-6 shadow-sm">
+          <div class="flex items-start gap-4">
+            <div class="skeleton h-16 w-16 rounded-full" />
+            <div class="flex-1 space-y-3">
+              <div class="skeleton h-7 w-56" />
+              <div class="skeleton h-4 w-32" />
+              <div class="skeleton h-6 w-20 rounded-full" />
+            </div>
+          </div>
+        </section>
+        <div class="grid grid-cols-1 gap-5 lg:grid-cols-2">
+          <div v-for="item in 3" :key="item" class="rounded-box bg-base-100 p-5 shadow-sm">
+            <div class="skeleton mb-5 h-5 w-32" />
+            <div class="space-y-3">
+              <div v-for="row in 2" :key="row" class="skeleton h-12 w-full rounded-xl" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div v-else-if="loadError" class="flex flex-col items-center rounded-box bg-base-100 px-5 py-14 text-center shadow-sm">
+        <IconBot class="mb-4 h-12 w-12 text-error/60" aria-hidden="true" />
+        <p role="alert" class="text-sm text-base-content/60">{{ t('common.error') }}</p>
+        <button type="button" class="btn btn-outline btn-sm mt-4" @click="loadData">
+          {{ t('common.retry') }}
+        </button>
       </div>
 
       <template v-else-if="bot">
-        <!-- Bot Header -->
-        <div class="flex items-center gap-4 mb-6 -mx-4">
-          <NuxtLink :to="`/developers/${pubName}/projects/${projectId}/bots`" class="btn btn-ghost btn-sm">
-            <IconArrowLeft class="w-4 h-4" />
-            {{ t('developer.bots.title') }}
-          </NuxtLink>
-        </div>
+        <NuxtLink :to="`/developers/${encodeURIComponent(pubName)}/projects/${projectId}/bots`" class="btn btn-ghost btn-sm -ml-2">
+          <IconArrowLeft class="h-4 w-4" aria-hidden="true" />
+          {{ t('developer.bots.title') }}
+        </NuxtLink>
 
-        <div class="card bg-base-100 shadow-sm mb-6">
-          <div class="card-body p-5">
-            <div class="flex items-start gap-4">
-              <div class="avatar">
-                <div class="w-16 rounded-full">
-                  <img v-if="getFileUrl(bot.account.profile?.picture?.id)" :src="getFileUrl(bot.account.profile?.picture?.id)" :alt="bot.account.nick" />
-                  <div v-else class="flex h-16 w-16 items-center justify-center rounded-full bg-info text-info-content text-xl font-bold">
-                    {{ bot.account.nick?.slice(0, 2).toUpperCase() }}
+        <section class="relative isolate overflow-hidden rounded-box bg-base-100 shadow-sm">
+          <div class="absolute inset-y-0 right-0 -z-10 w-1/3 bg-info/[0.07]" aria-hidden="true">
+            <div class="absolute inset-y-0 left-0 w-px bg-info/15" />
+            <div class="absolute inset-y-0 left-5 w-px bg-info/10" />
+            <div class="absolute inset-y-0 left-10 w-px bg-info/10" />
+          </div>
+          <div class="p-5 sm:p-7">
+            <div class="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+              <div class="flex min-w-0 items-start gap-4">
+                <div class="avatar shrink-0">
+                  <div class="w-16 rounded-full">
+                    <img v-if="bot.account.profile?.picture?.id" :src="getFileUrl(bot.account.profile.picture.id)!" :alt="bot.account.nick" loading="lazy" decoding="async">
+                    <div v-else class="flex h-16 w-16 items-center justify-center rounded-full bg-info text-xl font-black text-info-content">
+                      {{ bot.account.nick?.slice(0, 2).toUpperCase() || '?' }}
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div class="flex-1">
-                <h2 class="text-2xl font-bold">{{ bot.account.nick }}</h2>
-                <p class="text-base-content/50 mt-1">@{{ bot.account.name }}</p>
-                <div class="flex items-center gap-2 mt-2">
-                  <span
-                    class="badge badge-sm"
-                    :class="bot.isActive ? 'badge-success' : 'badge-warning'"
-                  >
-                    {{ bot.isActive ? 'Active' : 'Inactive' }}
+                <div class="min-w-0">
+                  <p class="text-xs font-bold uppercase tracking-[0.16em] text-info">
+                    {{ t('developer.bots.detail') }}
+                  </p>
+                  <h1 class="mt-2 break-words text-2xl font-black tracking-tight sm:text-3xl">{{ bot.account.nick }}</h1>
+                  <p class="mt-2 text-sm text-base-content/50">@{{ bot.account.name }}</p>
+                  <span class="badge badge-sm mt-3" :class="bot.isActive ? 'badge-success' : 'badge-warning'">
+                    {{ bot.isActive ? t('developer.bots.active') : t('common.disabled') }}
                   </span>
+                  <p v-if="bot.account.profile?.bio" class="mt-4 max-w-2xl text-sm leading-relaxed text-base-content/65">
+                    {{ bot.account.profile.bio }}
+                  </p>
                 </div>
               </div>
-              <div class="flex gap-2">
-                <button class="btn btn-ghost btn-sm" @click="openEditModal">
-                  <IconEdit class="w-4 h-4" />
+              <div class="flex shrink-0 gap-2">
+                <button type="button" class="btn btn-ghost btn-sm" @click="openEditModal">
+                  <IconEdit class="h-4 w-4" aria-hidden="true" />
                   {{ t('common.edit') }}
                 </button>
-                <button class="btn btn-ghost btn-sm text-error" @click="handleDelete">
-                  <IconTrash class="w-4 h-4" />
+                <button type="button" class="btn btn-ghost btn-sm text-error" @click="handleDelete">
+                  <IconTrash class="h-4 w-4" aria-hidden="true" />
                   {{ t('common.delete') }}
                 </button>
               </div>
             </div>
-            <p v-if="bot.account.profile?.bio" class="mt-3 text-sm text-base-content/70">
-              {{ bot.account.profile.bio }}
-            </p>
-            <div class="mt-4 text-sm text-base-content/50">
-              <p>{{ t('developer.bots.createdAt') }}: {{ formatDate(bot.createdAt) }}</p>
-              <p>{{ t('developer.bots.updatedAt') }}: {{ formatDate(bot.updatedAt) }}</p>
+            <div class="mt-6 flex flex-wrap gap-x-6 gap-y-2 border-t border-base-300/60 pt-4 text-xs text-base-content/50">
+              <span>{{ t('developer.bots.createdAt') }}: {{ formatDate(bot.createdAt) }}</span>
+              <span>{{ t('developer.bots.updatedAt') }}: {{ formatDate(bot.updatedAt) }}</span>
             </div>
           </div>
-        </div>
+        </section>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <!-- Keys Section -->
@@ -186,10 +214,18 @@
         </div>
       </template>
 
-      <div v-else class="flex flex-col items-center py-8 text-center">
-        <IconBot class="w-12 h-12 text-base-content/20 mb-4" />
-        <p class="text-base-content/60">{{ t('developer.bots.notFound') }}</p>
-        <NuxtLink :to="`/developers/${pubName}/projects/${projectId}/bots`" class="btn btn-primary btn-sm mt-4">
+      <div v-else-if="loadError" class="flex flex-col items-center rounded-box bg-base-100 px-5 py-14 text-center shadow-sm">
+        <IconBot class="mb-4 h-12 w-12 text-error/60" aria-hidden="true" />
+        <p role="alert" class="text-sm text-base-content/60">{{ t('common.error') }}</p>
+        <button type="button" class="btn btn-outline btn-sm mt-4" @click="loadData">
+          {{ t('common.retry') }}
+        </button>
+      </div>
+
+      <div v-else class="flex flex-col items-center rounded-box bg-base-100 px-5 py-14 text-center shadow-sm">
+        <IconBot class="mb-4 h-12 w-12 text-base-content/20" aria-hidden="true" />
+        <p class="text-sm text-base-content/60">{{ t('developer.bots.notFound') }}</p>
+        <NuxtLink :to="`/developers/${encodeURIComponent(pubName)}/projects/${projectId}/bots`" class="btn btn-primary btn-sm mt-4">
           {{ t('developer.bots.backToList') }}
         </NuxtLink>
       </div>
@@ -411,6 +447,7 @@ const bot = ref<Bot | null>(null)
 const keys = ref<BotKey[]>([])
 const chatConfig = ref<BotChatConfig | null>(null)
 const isLoading = ref(false)
+const loadError = ref(false)
 const keyModalOpen = ref(false)
 const isCreatingKey = ref(false)
 const editModalOpen = ref(false)
@@ -467,6 +504,7 @@ function formatDate(dateStr: string) {
 
 async function loadData() {
   isLoading.value = true
+  loadError.value = false
   try {
     await developer.loadDevelopers()
     developer.selectByPublisherName(pubName.value)
@@ -486,6 +524,10 @@ async function loadData() {
     chatConfig.value = chatResult.status === 'fulfilled' ? chatResult.value : null
   } catch (e) {
     console.error(e)
+    bot.value = null
+    keys.value = []
+    chatConfig.value = null
+    loadError.value = true
   } finally {
     isLoading.value = false
   }
@@ -549,7 +591,7 @@ async function handleUpdate() {
 }
 
 async function handleDelete() {
-  if (!(await useAlert().confirm('Confirm', t('developer.bots.deleteConfirm')))) return
+  if (!(await useAlert().confirm(t('common.confirm'), t('developer.bots.deleteConfirm')))) return
   try {
     await deleteBot(pubName.value, projectId.value, botId.value)
     router.push(`/developers/${pubName.value}/projects/${projectId.value}/bots`)
@@ -584,7 +626,7 @@ function copyKey(value: string | null) {
 }
 
 async function handleDeleteKey(keyId: string) {
-  if (!(await useAlert().confirm('Confirm', t('developer.bots.keys.deleteConfirm')))) return
+  if (!(await useAlert().confirm(t('common.confirm'), t('developer.bots.keys.deleteConfirm')))) return
   try {
     await deleteBotKey(pubName.value, projectId.value, botId.value, keyId)
     keys.value = await fetchBotKeys(pubName.value, projectId.value, botId.value)

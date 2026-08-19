@@ -10,9 +10,12 @@
     portal-mode="merchant"
     :is-publisher-selected="!!currentPublisher"
     :show-portal-toggle="!!currentPublisher"
+    :collapsed="props.collapsed"
+    :collapsible="props.collapsible"
     @navigate="$emit('navigate')"
     @clear-selection="clearSelection(); $emit('navigate')"
     @toggle-portal="handleTogglePortal"
+    @toggle-collapse="$emit('toggleCollapse')"
   />
 </template>
 
@@ -25,7 +28,17 @@ import {
   IconPackage,
 } from '#components'
 
-defineEmits<{ navigate: [] }>()
+defineEmits<{ navigate: []; toggleCollapse: [] }>()
+const props = withDefaults(
+  defineProps<{
+    collapsed?: boolean
+    collapsible?: boolean
+  }>(),
+  {
+    collapsed: false,
+    collapsible: false,
+  },
+)
 
 const { t } = useI18n()
 const { $toast } = useNuxtApp()

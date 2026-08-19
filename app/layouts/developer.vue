@@ -24,7 +24,7 @@
       <main
         class="min-w-0 flex-1 overflow-y-auto px-5 py-5 lg:px-6 lg:py-6 scrollbar-none"
       >
-        <div class="mx-auto max-w-5xl">
+        <div class="mx-auto max-w-7xl">
           <slot />
         </div>
       </main>

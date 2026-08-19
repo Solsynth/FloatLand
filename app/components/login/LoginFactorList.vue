@@ -88,6 +88,7 @@ const availableFactors = computed(() => {
     return props.factors.filter((f) => {
         if (FACTOR_TYPES[f.type]?.webUnavailable) return false;
         if (f.type === 8) return false; // QrLogin — use /auth/login QR panel instead
+        if (f.type === 7) return false; // Passkey, use seperate way
         return true;
     });
 });
