@@ -10,12 +10,15 @@
     portal-mode="developer"
     :is-publisher-selected="!!currentDeveloper"
     :show-portal-toggle="!!currentDeveloper"
+    :collapsed="props.collapsed"
+    :collapsible="props.collapsible"
     @navigate="$emit('navigate')"
     @clear-selection="
       clearSelection();
       $emit('navigate');
     "
     @toggle-portal="handleTogglePortal"
+    @toggle-collapse="$emit('toggleCollapse')"
   />
 </template>
 
@@ -29,7 +32,17 @@ import {
 } from "#components";
 import type { Developer } from "~/types/developer";
 
-defineEmits<{ navigate: [] }>();
+defineEmits<{ navigate: []; toggleCollapse: [] }>();
+const props = withDefaults(
+  defineProps<{
+    collapsed?: boolean;
+    collapsible?: boolean;
+  }>(),
+  {
+    collapsed: false,
+    collapsible: false,
+  },
+);
 
 const route = useRoute();
 const { t } = useI18n();

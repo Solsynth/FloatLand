@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "FloatingIsland",
+      "name": "FloatLand",
       "dependencies": {
         "@fingerprintjs/fingerprintjs": "^5.2.0",
         "@internationalized/date": "^3.12.2",

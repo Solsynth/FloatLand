@@ -2,7 +2,7 @@
   <aside class="flex h-full flex-col bg-base-100">
 
     <!-- Portal Toggle (only when a publisher is selected) -->
-    <div v-if="isPublisherSelected && showPortalToggle" class="px-3 pt-3 pb-1">
+    <div v-if="isPublisherSelected && showPortalToggle" class="px-2 pt-3 pb-1">
       <div class="flex rounded-box bg-base-200 p-0.5">
         <button
           type="button"
@@ -17,7 +17,7 @@
           @click="portalMode !== 'creator' && handleTogglePortal('creator')"
         >
           <IconPalette class="w-3.5 h-3.5 shrink-0" />
-          <span v-if="portalMode === 'creator'" class="truncate">{{ t('portal.creator') }}</span>
+          <span v-if="portalMode === 'creator' && !collapsed" class="truncate">{{ t('portal.creator') }}</span>
         </button>
         <button
           type="button"
@@ -32,7 +32,7 @@
           @click="portalMode !== 'developer' && handleTogglePortal('developer')"
         >
           <IconCode class="w-3.5 h-3.5 shrink-0" />
-          <span v-if="portalMode === 'developer'" class="truncate">{{ t('portal.developer') }}</span>
+          <span v-if="portalMode === 'developer' && !collapsed" class="truncate">{{ t('portal.developer') }}</span>
         </button>
         <button
           type="button"
@@ -47,13 +47,13 @@
           @click="portalMode !== 'merchant' && handleTogglePortal('merchant')"
         >
           <IconWallet class="w-3.5 h-3.5 shrink-0" />
-          <span v-if="portalMode === 'merchant'" class="truncate">{{ t('portal.merchant') }}</span>
+          <span v-if="portalMode === 'merchant' && !collapsed" class="truncate">{{ t('portal.merchant') }}</span>
         </button>
       </div>
 
       <!-- Enroll Prompt -->
       <div
-        v-if="showEnrollPrompt"
+        v-if="showEnrollPrompt && !collapsed"
         class="mt-2 rounded-box bg-warning/10 p-3"
       >
         <div class="flex items-start gap-2">
@@ -86,14 +86,27 @@
           </div>
         </div>
       </div>
+      <button
+        v-if="showEnrollPrompt && collapsed"
+        type="button"
+        class="btn btn-ghost btn-square btn-sm mt-2 w-full text-warning hover:bg-warning/10"
+        :aria-label="t('developer.enroll.enrollNow')"
+        :title="t('developer.enroll.enrollNow')"
+        :disabled="enrolling"
+        @click="handleEnrollDeveloper"
+      >
+        <IconAlertTriangle class="h-4 w-4" />
+      </button>
     </div>
 
     <!-- Organization Selector -->
-    <div v-if="organizations.length > 0" class="px-3 pt-3 pb-1">
+    <div v-if="organizations.length > 0" class="px-2 pt-3 pb-1">
       <div class="dropdown dropdown-end w-full">
         <label
           tabindex="0"
           class="flex w-full cursor-pointer items-center gap-2.5 rounded-box bg-base-200 px-2.5 py-2 transition-colors duration-150 hover:bg-base-300"
+          :class="collapsed ? 'justify-center px-2' : ''"
+          :title="collapsed ? (currentOrgName || selectPlaceholder) : undefined"
         >
           <div class="avatar shrink-0">
             <div class="w-8 rounded-full">
@@ -110,7 +123,7 @@
               </div>
             </div>
           </div>
-          <div class="min-w-0 flex-1">
+          <div v-if="!collapsed" class="min-w-0 flex-1">
             <div class="truncate text-sm font-semibold leading-tight">
               {{ currentOrgName || selectPlaceholder }}
             </div>
@@ -121,7 +134,10 @@
               @{{ currentOrgSubtitle }}
             </div>
           </div>
-          <IconChevronDown class="w-4 h-4 shrink-0 text-base-content/40" />
+          <IconChevronDown
+            v-if="!collapsed"
+            class="w-4 h-4 shrink-0 text-base-content/40"
+          />
         </label>
         <ul
           tabindex="0"
@@ -166,10 +182,10 @@
     </div>
 
     <!-- Navigation -->
-    <nav class="flex-1 overflow-y-auto px-3 py-3 space-y-5 scrollbar-none">
+    <nav class="flex-1 overflow-y-auto px-2 py-3 space-y-5 scrollbar-none">
       <div v-for="(group, gi) in navGroups" :key="gi">
         <p
-          v-if="group.label"
+          v-if="group.label && !collapsed"
           class="px-2.5 mb-1.5 text-[11px] font-semibold text-base-content/35"
         >
           {{ group.label }}
@@ -179,10 +195,14 @@
             v-for="item in group.items"
             :key="item.href"
             :to="item.href"
-            class="group flex items-center gap-2.5 rounded-box px-2.5 py-2 text-sm font-medium transition-colors duration-150"
-            :class="isActiveRoute(item.href)
-              ? 'bg-primary/10 text-primary'
-              : 'text-base-content/65 hover:bg-base-200 hover:text-base-content'"
+            class="group relative flex items-center gap-2.5 rounded-box px-2.5 py-2 text-sm font-medium transition-colors duration-150"
+            :class="[
+              collapsed ? 'justify-center px-2.5' : '',
+              isActiveRoute(item.href)
+                ? 'bg-primary/10 text-primary'
+                : 'text-base-content/65 hover:bg-base-200 hover:text-base-content',
+            ]"
+            :title="collapsed ? item.label : undefined"
             @click="handleNavigate"
           >
             <component
@@ -190,9 +210,9 @@
               class="w-[18px] h-[18px] shrink-0 transition-colors duration-150"
               :class="isActiveRoute(item.href) ? 'text-primary' : 'text-base-content/40 group-hover:text-base-content/65'"
             />
-            <span class="truncate">{{ item.label }}</span>
+            <span v-if="!collapsed" class="truncate">{{ item.label }}</span>
             <span
-              v-if="item.badge"
+              v-if="item.badge && !collapsed"
               class="ml-auto text-[11px] font-semibold px-1.5 py-0.5 rounded-md tabular-nums"
               :class="isActiveRoute(item.href) ? 'bg-primary/15 text-primary' : 'bg-base-200 text-base-content/50'"
             >
@@ -202,13 +222,43 @@
         </div>
       </div>
     </nav>
+    <div v-if="collapsible" class="shrink-0 px-2 pb-1">
+      <button
+        v-if="!collapsed"
+        type="button"
+        class="btn btn-ghost btn-sm w-full justify-end gap-2 text-base-content/45 hover:text-base-content"
+        aria-label="Collapse sidebar"
+        :aria-expanded="!collapsed"
+        title="Collapse sidebar"
+        @click="handleToggleCollapse"
+      >
+        <span class="text-xs font-medium">Collapse</span>
+        <IconPanelLeftClose class="h-4 w-4" />
+      </button>
+      <button
+        v-else
+        type="button"
+        class="btn btn-ghost btn-square btn-sm w-full text-base-content/55 hover:text-base-content"
+        aria-label="Expand sidebar"
+        :aria-expanded="!collapsed"
+        title="Expand sidebar"
+        @click="handleToggleCollapse"
+      >
+        <IconPanelLeftClose class="h-4 w-4 rotate-180" />
+      </button>
+    </div>
 
     <!-- User Profile -->
-    <div class="mt-auto shrink-0 px-3 pb-3 pt-2">
+    <div
+      class="mt-auto shrink-0 px-2 pb-3 pt-2"
+      :class="collapsed ? 'px-1' : ''"
+    >
       <div v-if="isAuthenticated && user" class="dropdown dropdown-end dropdown-top w-full">
         <button
           type="button"
           class="flex w-full items-center gap-2.5 rounded-box px-2.5 py-2 transition-colors duration-150 hover:bg-base-200"
+          :class="collapsed ? 'justify-center px-2' : ''"
+          :title="collapsed ? displayName : undefined"
         >
           <div v-if="avatarUrl" class="avatar shrink-0">
             <div class="w-8 rounded-full">
@@ -220,11 +270,11 @@
               <span class="text-xs font-bold">{{ fallbackInitials }}</span>
             </div>
           </div>
-          <div class="min-w-0 flex-1 text-left">
+          <div v-if="!collapsed" class="min-w-0 flex-1 text-left">
             <div class="truncate text-sm font-semibold leading-tight">{{ displayName }}</div>
             <div class="truncate text-[11px] text-base-content/45 leading-tight mt-0.5">@{{ username }}</div>
           </div>
-          <IconChevronUp class="w-3.5 h-3.5 shrink-0 text-base-content/30" />
+          <IconChevronUp v-if="!collapsed" class="w-3.5 h-3.5 shrink-0 text-base-content/30" />
         </button>
         <ul class="dropdown-content menu mb-1.5 w-full min-w-[200px] rounded-box bg-base-200 p-1.5 shadow-sm">
           <li>
@@ -251,13 +301,15 @@
         v-else
         to="/auth/login"
         class="flex items-center gap-2.5 rounded-box px-2.5 py-2 transition-colors duration-150 hover:bg-base-200"
+        :class="collapsed ? 'justify-center px-2' : ''"
+        :title="collapsed ? t('nav.signIn') : undefined"
       >
         <div class="avatar avatar-placeholder shrink-0">
           <div class="w-8 rounded-full bg-base-200 text-base-content/55">
             <IconLogIn class="w-4 h-4" />
           </div>
         </div>
-        <div class="text-left min-w-0">
+        <div v-if="!collapsed" class="text-left min-w-0">
           <div class="text-sm font-semibold">{{ t('nav.signIn') }}</div>
           <div class="text-[11px] text-base-content/45">{{ t('nav.joinCommunity') }}</div>
         </div>
@@ -280,6 +332,7 @@ import {
   IconCode,
   IconWallet,
   IconAlertTriangle,
+  IconPanelLeftClose,
 } from '#components'
 
 const { t } = useI18n()
@@ -327,6 +380,10 @@ const props = withDefaults(defineProps<{
   isPublisherSelected?: boolean
   /** Whether to show the portal toggle */
   showPortalToggle?: boolean
+  /** Whether the sidebar can collapse on desktop */
+  collapsible?: boolean
+  /** Whether the sidebar is currently collapsed */
+  collapsed?: boolean
   /** Whether to show the enroll prompt */
   showEnrollPrompt?: boolean
   /** Whether enrollment is in progress */
@@ -336,16 +393,20 @@ const props = withDefaults(defineProps<{
   portalMode: 'creator' as 'creator' | 'developer' | 'merchant',
   isPublisherSelected: false,
   showPortalToggle: true,
+  collapsible: false,
+  collapsed: false,
   showEnrollPrompt: false,
   enrolling: false,
 })
-
+const collapsed = computed(() => props.collapsed)
+const collapsible = computed(() => props.collapsible)
 const emit = defineEmits<{
   navigate: []
   clearSelection: []
   togglePortal: [mode: 'creator' | 'developer' | 'merchant']
   enrollDeveloper: []
   dismissEnroll: []
+  toggleCollapse: []
 }>()
 
 const currentOrgId = computed(() => props.currentOrg?.id ?? null)
@@ -383,6 +444,9 @@ function handleTogglePortal(mode: 'creator' | 'developer' | 'merchant') {
 
 function handleEnrollDeveloper() {
   emit('enrollDeveloper')
+}
+function handleToggleCollapse() {
+  emit('toggleCollapse')
 }
 
 function dismissEnrollPrompt() {

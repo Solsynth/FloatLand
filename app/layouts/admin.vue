@@ -10,7 +10,8 @@
     <div class="hidden min-h-[calc(100vh-3.5rem)] lg:flex">
       <!-- Sidebar -->
       <aside
-        class="sticky top-14 z-40 h-[calc(100vh-3.5rem)] w-[16.5rem] shrink-0 overflow-y-auto border-r border-base-300 scrollbar-none"
+        class="sticky top-14 z-40 h-[calc(100vh-3.5rem)] shrink-0 overflow-y-auto border-r border-base-300 scrollbar-none transition-[width] duration-200 ease-out motion-reduce:transition-none"
+        :class="sidebarCollapsed ? 'w-16' : 'w-[16.5rem]'"
       >
         <AdminSidebar
           section-label="Admin Panel"
@@ -19,6 +20,9 @@
           select-placeholder=""
           clear-label=""
           :show-portal-toggle="false"
+          :collapsed="sidebarCollapsed"
+          :collapsible="true"
+          @toggle-collapse="toggleSidebar"
         />
       </aside>
 
@@ -64,6 +68,8 @@
             select-placeholder=""
             clear-label=""
             :show-portal-toggle="false"
+            :collapsed="false"
+            :collapsible="false"
             @navigate="mobileMenuOpen = false"
           />
         </div>
@@ -105,6 +111,7 @@ import {
 
 const route = useRoute()
 const mobileMenuOpen = ref(false)
+const { collapsed: sidebarCollapsed, toggleSidebar } = useBackstageSidebar()
 
 const navGroups = [
   {

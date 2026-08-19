@@ -431,7 +431,7 @@
     "attachFile": "Attach file",
     "confirmDeleteMessage": "Are you sure you want to delete this message? This action cannot be undone.",
     "betaTitle": "Beta: ",
-    "betaDescription": "Chat on FloatingIsland is in beta. For the best experience, please use "
+    "betaDescription": "Chat on FloatLand is in beta. For the best experience, please use "
   },
   "home": {
     "seoTitle": "Explore",
@@ -439,7 +439,7 @@
     "composePlaceholder": "What's on your mind?",
     "loadingPosts": "Loading posts...",
     "loadFailed": "Failed to load posts: {error}",
-    "sharePostFallbackTitle": "Post on FloatingIsland",
+    "sharePostFallbackTitle": "Post on FloatLand",
     "featuredPosts": "Featured Posts",
     "featuredPostsFailed": "Could not load featured posts",
     "emptyTitle": "Nothing here yet",
@@ -511,7 +511,7 @@
     "seoDescriptionCreateAccount": "Create a new account on Solar Network.",
     "signIn": "Sign in",
     "welcomeBack": "Welcome back",
-    "description": "Use your Solarpass account to login the FloatingIsland.",
+    "description": "Use your Solarpass account to login the FloatLand.",
     "loginToContinue": "Login to continue",
     "noAccount": "No account?",
     "createOne": "Create one",
@@ -546,7 +546,7 @@
     "qrFailed": "Failed to start QR login",
     "failedSelectFactor": "Failed to select factor",
     "verificationFailed": "Verification failed",
-    "footer": "FloatingIsland — Solar Network",
+    "footer": "FloatLand — Solar Network",
     "createAccount": {
       "title": "Create your account",
       "subtitle": "Fast setup with username, email, password, captcha, and terms confirmation.",
@@ -782,7 +782,7 @@
     "categories": "Categories",
     "viewAll": "View all",
     "tags": "Tags",
-    "floatingNote": "You're accessing FloatingIsland, the Solar Network client specialized for browsing content on the web. It does not contain all the features of Solar Network.",
+    "floatingNote": "You're accessing FloatLand, the Solar Network client specialized for browsing content on the web. It does not contain all the features of Solar Network.",
     "floatingNoteCta": "If you want to experience the full features of Solar Network, please use the Solian instead.",
     "openWebVersion": "Open web version",
     "copyright": "© {year} Solar Network. All rights reserved.",
@@ -797,7 +797,7 @@
     "solarNetworkDesc": "The open-source social platform that powers everything. It's the backend and API that connects all clients together.",
     "solianTitle": "Solian",
     "solianDesc": "The official Flutter client for iOS & Android. Full-featured, fast, and the recommended way to use Solar Network on mobile.",
-    "floatingIslandTitle": "FloatingIsland",
+    "floatingIslandTitle": "FloatLand",
     "floatingIslandDesc": "This web client, built for browsing and light interaction. Great for desktop users who want quick access without installing an app.",
     "openSolian": "Try Solian",
     "gotIt": "Got it",

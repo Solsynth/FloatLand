@@ -27,7 +27,8 @@ import { camelToSnake } from "~/utils/case";
 
 export async function fetchDevelopers(): Promise<Developer[]> {
   const response = await apiFetch("/develop/developers");
-  return safeJsonParse<Developer[]>(response);
+  const developers = await safeJsonParse<Developer[] | null>(response);
+  return Array.isArray(developers) ? developers : [];
 }
 
 export async function fetchDeveloperStats(

@@ -438,7 +438,7 @@
     "attachFile": "添加附件",
     "confirmDeleteMessage": "确定要删除这条消息吗？此操作无法撤销。",
     "betaTitle": "测试版：",
-    "betaDescription": "FloatingIsland 的聊天功能目前处于测试阶段。如需最佳体验，请使用 "
+    "betaDescription": "FloatLand 的聊天功能目前处于测试阶段。如需最佳体验，请使用 "
   },
   "home": {
     "seoTitle": "探索",
@@ -446,7 +446,7 @@
     "composePlaceholder": "有什么新鲜事？",
     "loadingPosts": "正在加载帖子...",
     "loadFailed": "加载帖子失败：{error}",
-    "sharePostFallbackTitle": "FloatingIsland 上的帖子",
+    "sharePostFallbackTitle": "FloatLand 上的帖子",
     "featuredPosts": "精选帖子",
     "featuredPostsFailed": "无法加载精选帖子",
     "emptyTitle": "这里还空空如也",
@@ -518,7 +518,7 @@
     "seoDescriptionCreateAccount": "在 Solar Network 上创建一个新账户。",
     "signIn": "登录",
     "welcomeBack": "欢迎回来",
-    "description": "使用你的 Solarpass 账户登录 FloatingIsland。",
+    "description": "使用你的 Solarpass 账户登录 FloatLand。",
     "loginToContinue": "登录以继续",
     "noAccount": "还没有账号？",
     "createOne": "创建账号",
@@ -553,7 +553,7 @@
     "qrFailed": "无法开始二维码登录",
     "failedSelectFactor": "选择验证方式失败",
     "verificationFailed": "验证失败",
-    "footer": "FloatingIsland — Solar Network",
+    "footer": "FloatLand — Solar Network",
     "createAccount": {
       "title": "创建你的账户",
       "subtitle": "快速设置：用户名、邮箱、密码、验证码及条款确认。",
@@ -789,7 +789,7 @@
     "categories": "分类",
     "viewAll": "查看全部",
     "tags": "标签",
-    "floatingNote": "你正在访问 FloatingIsland，这是一个专注于网页浏览的 Solar Network 客户端，不包含 Solar Network 的全部功能。",
+    "floatingNote": "你正在访问 FloatLand，这是一个专注于网页浏览的 Solar Network 客户端，不包含 Solar Network 的全部功能。",
     "floatingNoteCta": "如需体验 Solar Network 的全部功能，请使用 Solian。",
     "openWebVersion": "打开网页版",
     "copyright": "© {year} Solar Network。保留所有权利。",
@@ -804,7 +804,7 @@
     "solarNetworkDesc": "驱动一切的开源社交平台。它是连接所有客户端的后端和 API。",
     "solianTitle": "Solian",
     "solianDesc": "适用于 iOS 和 Android 的官方 Flutter 客户端。功能齐全、速度快，是移动端使用 Solar Network 的推荐方式。",
-    "floatingIslandTitle": "FloatingIsland",
+    "floatingIslandTitle": "FloatLand",
     "floatingIslandDesc": "这个网页客户端专为浏览和轻量交互而构建。非常适合希望快速访问而无需安装应用的桌面用户。",
     "openSolian": "试试 Solian",
     "gotIt": "知道了",

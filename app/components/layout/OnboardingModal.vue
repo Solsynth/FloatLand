@@ -112,7 +112,7 @@
                                 </p>
                             </div>
 
-                            <!-- Step 3: FloatingIsland -->
+                            <!-- Step 3: FloatLand -->
                             <div v-if="currentStep === 3">
                                 <div class="flex items-center gap-2 mb-1">
                                     <div
