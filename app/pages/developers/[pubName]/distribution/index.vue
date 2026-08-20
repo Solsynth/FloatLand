@@ -1,26 +1,48 @@
 <template>
   <NuxtLayout name="developer">
-    <div class="mx-auto max-w-5xl">
-      <AdminPageHeader
-        :title="t('developer.apps.distribution.title')"
-        :description="t('developer.apps.distribution.description')"
-      >
-        <template #actions>
-          <button class="btn btn-primary btn-sm" type="button" @click="openCreateDrawer">
+    <div class="mx-auto max-w-7xl space-y-5">
+      <header class="relative isolate overflow-hidden rounded-box bg-base-100 px-5 py-5 shadow-sm sm:px-6">
+        <div class="absolute inset-y-0 right-0 -z-10 w-1/3 bg-primary/[0.06]" aria-hidden="true">
+          <div class="absolute inset-y-0 left-0 w-px bg-primary/15" />
+          <div class="absolute inset-y-0 left-5 w-px bg-primary/10" />
+          <div class="absolute inset-y-0 left-10 w-px bg-primary/10" />
+        </div>
+        <p class="text-xs font-bold uppercase tracking-[0.16em] text-primary">{{ t('developer.apps.distribution.title') }}</p>
+        <div class="mt-2 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div class="min-w-0">
+            <h1 class="text-2xl font-black tracking-tight">{{ t('developer.apps.distribution.title') }}</h1>
+            <p class="mt-1 max-w-xl text-sm text-base-content/55">{{ t('developer.apps.distribution.description') }}</p>
+          </div>
+          <button class="btn btn-primary btn-sm shrink-0" type="button" @click="openCreateDrawer">
             <IconPlus class="h-4 w-4" />
             {{ t('developer.apps.distribution.createProduct') }}
           </button>
-        </template>
-      </AdminPageHeader>
+        </div>
+      </header>
 
-      <div v-if="isLoading" class="flex justify-center py-12">
-        <span class="loading loading-spinner loading-lg" />
+      <div v-if="isLoading" class="space-y-3" aria-busy="true" :aria-label="t('common.loading')">
+        <div v-for="item in 4" :key="item" class="flex items-center gap-4 rounded-box bg-base-100 p-4 shadow-sm sm:p-5">
+          <div class="skeleton h-10 w-10 shrink-0 rounded-lg" />
+          <div class="flex-1 space-y-2">
+            <div class="skeleton h-4 w-48" />
+            <div class="skeleton h-3 w-32" />
+          </div>
+          <div class="skeleton h-8 w-20 rounded-btn" />
+        </div>
       </div>
 
-      <section v-else class="overflow-hidden rounded-box border border-base-300 bg-base-100 shadow-sm">
-        <div v-if="products.length" class="flex flex-col gap-3 border-b border-base-300 bg-base-200/30 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+      <div v-else-if="loadError" class="flex flex-col items-center gap-3 rounded-box bg-base-100 px-5 py-14 text-center shadow-sm">
+        <IconPackage class="h-10 w-10 text-error/60" aria-hidden="true" />
+        <p role="alert" class="text-sm text-base-content/60">{{ t('common.error') }}</p>
+        <button type="button" class="btn btn-outline btn-sm" @click="loadData">
+          {{ t('common.retry') }}
+        </button>
+      </div>
+
+      <section v-else aria-labelledby="distribution-products-title" class="rounded-box bg-base-100 shadow-sm">
+        <div v-if="products.length" class="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
           <div>
-            <p class="font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-primary/75">{{ t('developer.apps.distribution.catalog') }}</p>
+            <p class="text-xs font-bold uppercase tracking-[0.16em] text-base-content/40">{{ t('developer.apps.distribution.catalog') }}</p>
             <p class="mt-1 text-xs text-base-content/55">{{ t('developer.apps.distribution.productCount', { count: products.length }) }}</p>
           </div>
           <label class="input input-sm flex w-full items-center gap-2 sm:max-w-xs">
@@ -28,14 +50,15 @@
             <input v-model="searchQuery" type="search" :placeholder="t('developer.apps.distribution.searchProducts')" :aria-label="t('developer.apps.distribution.searchProducts')" />
           </label>
         </div>
-        <div v-if="visibleProducts.length" class="divide-y divide-base-300">
+
+        <div v-if="visibleProducts.length" class="space-y-3 p-4 sm:p-5">
           <article
             v-for="product in visibleProducts"
             :key="product.id"
-            class="flex flex-col gap-4 px-4 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6"
+            class="group flex flex-col gap-4 rounded-box bg-base-200/40 p-4 transition-colors hover:bg-base-200 sm:flex-row sm:items-center sm:justify-between sm:p-5"
           >
             <div class="flex min-w-0 items-start gap-3">
-              <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-base-300 bg-base-200">
+              <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-base-300/40">
                 <IconPackage class="h-5 w-5 text-base-content/60" />
               </div>
               <div class="min-w-0">
@@ -53,14 +76,14 @@
             </div>
             <div class="flex shrink-0 flex-wrap justify-end gap-2 self-start sm:self-center">
               <NuxtLink
-                class="btn btn-outline btn-sm"
+                class="btn btn-outline btn-sm outline-offset-2 focus-visible:outline-2 focus-visible:outline-primary"
                 :to="productPath(product.slug)"
               >
                 {{ t('developer.apps.distribution.manage') }}
                 <IconChevronRight class="h-4 w-4" />
               </NuxtLink>
               <button
-                class="btn btn-ghost btn-sm text-error"
+                class="btn btn-ghost btn-sm text-error outline-offset-2 focus-visible:outline-2 focus-visible:outline-error"
                 type="button"
                 :disabled="deletingProductId === product.id"
                 @click="deleteProduct(product)"
@@ -94,8 +117,8 @@
         @update:open="createDrawerOpen = $event"
       >
         <form class="space-y-5" @submit.prevent="createProduct">
-          <div class="space-y-4">
-            <div class="flex flex-col gap-3 border-b border-base-300 pb-4 sm:flex-row sm:items-end sm:justify-between">
+          <div class="space-y-5">
+            <div class="flex flex-col gap-3 pb-5 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <h2 class="font-medium">{{ t('developer.apps.distribution.localizedMetadata') }}</h2>
                 <p class="mt-1 text-sm text-base-content/60">{{ t('developer.apps.distribution.localizationRequired') }}</p>
@@ -108,7 +131,7 @@
                   </option>
                 </select>
                 <button
-                  class="btn btn-outline btn-sm"
+                  class="btn btn-outline btn-sm outline-offset-2 focus-visible:outline-2 focus-visible:outline-primary"
                   type="button"
                   :disabled="!newProductLanguage"
                   @click="addProductLocalization"
@@ -121,7 +144,7 @@
             <div
               v-for="(entry, index) in productForm.localizations"
               :key="entry.id"
-              class="grid gap-4 border-b border-base-300 pb-4 last:border-0 last:pb-0 sm:grid-cols-2"
+              class="grid gap-4 pb-5 last:pb-0 sm:grid-cols-2"
             >
               <fieldset class="fieldset">
                 <legend class="fieldset-legend">{{ t('developer.apps.distribution.productName') }}</legend>
@@ -152,7 +175,7 @@
               </fieldset>
               <button
                 v-if="productForm.localizations.length > 1"
-                class="btn btn-ghost btn-sm justify-self-start text-error sm:col-span-2"
+                class="btn btn-ghost btn-sm justify-self-start text-error outline-offset-2 focus-visible:outline-2 focus-visible:outline-error sm:col-span-2"
                 type="button"
                 @click="removeProductLocalization(index)"
               >
@@ -172,9 +195,10 @@
             />
             <p class="label">{{ t('developer.apps.distribution.productSlugHint') }}</p>
           </fieldset>
-          <div class="flex justify-end gap-2 pt-4">
-            <button class="btn btn-ghost" type="button" @click="createDrawerOpen = false">
-</button>
+          <div class="flex justify-end gap-2 pt-1">
+            <button class="btn btn-ghost outline-offset-2 focus-visible:outline-2 focus-visible:outline-base-content" type="button" @click="createDrawerOpen = false">
+              {{ t('common.cancel') }}
+            </button>
             <button class="btn btn-primary" type="submit" :disabled="isCreatingProduct">
               <span v-if="isCreatingProduct" class="loading loading-spinner loading-sm" />
               {{ t('common.create') }}
@@ -207,6 +231,7 @@ const contentLocaleOptions = computed(() =>
     name: item.name || item.language || item.code,
   })),
 )
+const loadError = ref(false)
 
 type ProductLocalizationEntry = {
   id: string
@@ -284,7 +309,6 @@ function localizedMap(entries: ProductLocalizationEntry[], field: 'name' | 'desc
 }
 
 function openCreateDrawer() {
-  productForm.slug = ''
   productForm.localizations = [newProductLocalization()]
   newProductLanguage.value = ''
   createDrawerOpen.value = true
@@ -292,6 +316,7 @@ function openCreateDrawer() {
 
 async function loadData() {
   searchQuery.value = ''
+  loadError.value = false
   isLoading.value = true
   try {
     await developer.loadDevelopers()
@@ -299,6 +324,7 @@ async function loadData() {
     products.value = await fetchDistributionProducts(currentDeveloper.value?.publisher?.name || pubName.value)
   } catch (error) {
     products.value = []
+    loadError.value = true
     $toast.error(error instanceof Error ? error.message : t('developer.apps.distribution.requestFailed'))
   } finally {
     isLoading.value = false
