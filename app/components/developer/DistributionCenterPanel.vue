@@ -916,6 +916,13 @@
             </span>
           </label>
         </div>
+        <div class="flex justify-end gap-2 pt-4">
+          <button class="btn btn-ghost" type="button" @click="releaseDrawerOpen = false">{{ t('common.cancel') }}</button>
+          <button class="btn btn-primary" type="submit" :disabled="isCreatingRelease">
+            <span v-if="isCreatingRelease" class="loading loading-spinner loading-sm" />
+            {{ editingReleaseId ? t('common.save') : t('common.create') }}
+          </button>
+        </div>
       </form>
     </AdminDrawer>
 
