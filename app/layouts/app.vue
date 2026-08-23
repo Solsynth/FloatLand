@@ -125,43 +125,43 @@
                   class="z-50 w-52 rounded-box border border-base-300 bg-base-100 p-2 text-base-content shadow-lg"
                 >
                   <DropdownMenuItem as-child>
-                    <NuxtLink to="/accounts/me">
+                    <NuxtLink to="/accounts/me" class="flex items-center gap-2 rounded-box px-2.5 py-2 text-sm outline-none cursor-pointer hover:bg-base-200 data-[highlighted]:bg-base-200">
                       <IconUser class="h-4 w-4" />
                       {{ t("nav.account") }}
                     </NuxtLink>
                   </DropdownMenuItem>
                   <DropdownMenuItem as-child>
-                    <NuxtLink to="/workspaces">
+                    <NuxtLink to="/workspaces" class="flex items-center gap-2 rounded-box px-2.5 py-2 text-sm outline-none cursor-pointer hover:bg-base-200 data-[highlighted]:bg-base-200">
                       <IconBriefcaseBusiness class="h-4 w-4" />
                       {{ t("nav.workspaces") }}
                     </NuxtLink>
                   </DropdownMenuItem>
                   <DropdownMenuItem as-child>
-                    <NuxtLink to="/wallets">
+                    <NuxtLink to="/wallets" class="flex items-center gap-2 rounded-box px-2.5 py-2 text-sm outline-none cursor-pointer hover:bg-base-200 data-[highlighted]:bg-base-200">
                       <IconWallet class="h-4 w-4" />
                       {{ t("nav.wallet") }}
                     </NuxtLink>
                   </DropdownMenuItem>
                   <DropdownMenuItem as-child>
-                    <NuxtLink to="/pricing">
+                    <NuxtLink to="/pricing" class="flex items-center gap-2 rounded-box px-2.5 py-2 text-sm outline-none cursor-pointer hover:bg-base-200 data-[highlighted]:bg-base-200">
                       <IconCreditCard class="h-4 w-4" />
                       {{ t("nav.pricing") }}
                     </NuxtLink>
                   </DropdownMenuItem>
                   <DropdownMenuItem as-child>
-                    <NuxtLink to="/accounts/me/settings">
+                    <NuxtLink to="/accounts/me/settings" class="flex items-center gap-2 rounded-box px-2.5 py-2 text-sm outline-none cursor-pointer hover:bg-base-200 data-[highlighted]:bg-base-200">
                       <IconSettings class="h-4 w-4" />
                       {{ t("nav.settings") }}
                     </NuxtLink>
                   </DropdownMenuItem>
                   <DropdownMenuItem as-child>
-                    <NuxtLink to="/tickets">
+                    <NuxtLink to="/tickets" class="flex items-center gap-2 rounded-box px-2.5 py-2 text-sm outline-none cursor-pointer hover:bg-base-200 data-[highlighted]:bg-base-200">
                       <IconTicket class="h-4 w-4" />
                       {{ t("nav.tickets") }}
                     </NuxtLink>
                   </DropdownMenuItem>
                   <DropdownMenuItem as-child>
-                    <button type="button" @click="handleLogout">
+                    <button type="button" @click="handleLogout" class="mt-1 flex items-center gap-2 rounded-box px-2.5 py-2 text-sm outline-none cursor-pointer hover:bg-error/10 data-[highlighted]:bg-error/10 text-error">
                       <IconLogOut class="h-4 w-4" />
                       {{ t("nav.logout") }}
                     </button>
