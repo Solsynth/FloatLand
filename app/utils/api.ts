@@ -53,6 +53,12 @@ import type {
   RealmChatRoom,
 } from "~/types/realm";
 import type { FlywheelAuditEntry, FlywheelOwnerApp, FlywheelOwnerBlob, FlywheelStorageQuota, Workspace, WorkspaceCustomDomain, WorkspaceCustomDomainUsage, WorkspaceMailbox, WorkspaceMailboxAlias, WorkspaceMailboxForwardingRule, WorkspaceMailboxQuota, WorkspaceMailboxUsage, WorkspaceMailCredential, WorkspaceMailCredentialCreated, WorkspaceMember, WorkspacePlanOrder, WorkspacePlanStatus, WorkspaceSendUsage } from "~/types/workspace";
+import type {
+  NameChangeCardOrder,
+  QuotaOrder,
+  QuotaPurchaseConfig,
+  WalletProductCatalogItem,
+} from "~/types/shop";
 
 import { snakeToCamel, camelToSnake } from "~/utils/case";
 import {
@@ -1823,6 +1829,162 @@ export interface WalletPinStatus {
 export async function fetchWalletPinStatus(): Promise<WalletPinStatus> {
   const response = await apiFetch("/stargate/accounts/me/pin-status");
   return safeJsonParse<WalletPinStatus>(response);
+}
+
+// ── Stellar Program subscriptions ────────────────────────────────────────
+
+export const STELLAR_SUBSCRIPTION_GROUP = "solian.stellar";
+
+/**
+ * Fetch the Stellar Program subscription group (catalog + active membership).
+ * Returns null when the caller is not authenticated.
+ */
+export async function fetchSubscriptionGroup(
+  groupId: string = STELLAR_SUBSCRIPTION_GROUP,
+): Promise<SubscriptionGroup | null> {
+  try {
+    const response = await apiFetch(
+      `/wallet/subscriptions/groups/${encodeURIComponent(groupId)}`,
+    );
+    return safeJsonParse<SubscriptionGroup>(response);
+  } catch {
+    return null;
+  }
+}
+
+/** Fetch the currently active Stellar subscription, if any. */
+export async function fetchActiveStellarSubscription(): Promise<StellarSubscription | null> {
+  try {
+    const response = await apiFetch(
+      `/wallet/subscriptions/groups/${STELLAR_SUBSCRIPTION_GROUP}/active`,
+    );
+    return safeJsonParse<StellarSubscription>(response);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Open a new wallet subscription for a catalog identifier.
+ * Returns an already-active subscription when one is running.
+ */
+export async function createStellarSubscription(
+  identifier: string,
+  cycleDurationDays = 30,
+): Promise<StellarSubscription> {
+  const response = await apiFetch("/wallet/subscriptions", {
+    method: "POST",
+    body: JSON.stringify({
+      identifier,
+      cycle_duration_days: cycleDurationDays,
+      payment_details: { currency: "points" },
+    }),
+  });
+  return safeJsonParse<StellarSubscription>(response);
+}
+
+/** Create an unpaid order for a subscription; pay it with `payOrder`. */
+export async function createSubscriptionOrder(
+  subscriptionId: string,
+): Promise<WalletOrder> {
+  const response = await apiFetch(
+    `/wallet/subscriptions/${encodeURIComponent(subscriptionId)}/order`,
+    { method: "POST" },
+  );
+  return safeJsonParse<WalletOrder>(response);
+}
+
+/** Cancel an active wallet subscription. */
+export async function cancelStellarSubscription(
+  subscriptionId: string,
+): Promise<void> {
+  await apiFetch(
+    `/wallet/subscriptions/${encodeURIComponent(subscriptionId)}/cancel`,
+    { method: "POST" },
+  );
+}
+
+export interface AfdianCheckout {
+  checkoutUrl: string;
+  providerReferenceId: string | null;
+  planId: string | null;
+}
+
+/** Create an Afdian checkout URL for a catalog identifier. */
+export async function createAfdianCheckout(
+  identifier: string,
+): Promise<AfdianCheckout> {
+  const response = await apiFetch(
+    `/wallet/subscriptions/${encodeURIComponent(identifier)}/checkout/afdian`,
+    { method: "POST" },
+  );
+  const data = await safeJsonParse<{
+    checkoutUrl?: string;
+    providerReferenceId?: string | null;
+    planId?: string | null;
+  }>(response);
+  if (!data.checkoutUrl) {
+    throw new ApiError("Missing checkout URL", 502);
+  }
+  return {
+    checkoutUrl: data.checkoutUrl,
+    providerReferenceId: data.providerReferenceId ?? null,
+    planId: data.planId ?? null,
+  };
+}
+
+// ── Shop products: golds, name change card, storage quota ────────────────
+
+/** Wallet product catalog (Golden Solar Points pack and friends). */
+export async function fetchWalletProductCatalog(): Promise<WalletProductCatalogItem[]> {
+  try {
+    const response = await apiFetch("/wallet/wallet-products/catalog");
+    return safeJsonParse<WalletProductCatalogItem[]>(response);
+  } catch {
+    return [];
+  }
+}
+
+/** Create an Afdian checkout URL for the Golden Solar Points pack. */
+export async function createGoldsAfdianCheckout(): Promise<AfdianCheckout> {
+  const response = await apiFetch(
+    "/wallet/wallet-products/golds-resupply-pack/checkout/afdian",
+    { method: "POST" },
+  );
+  const data = await safeJsonParse<{ checkoutUrl?: string }>(response);
+  if (!data.checkoutUrl) {
+    throw new ApiError("Missing checkout URL", 502);
+  }
+  return { checkoutUrl: data.checkoutUrl, providerReferenceId: null, planId: null };
+}
+
+/** Quota purchase pricing. Returns null when unavailable or unauthenticated. */
+export async function fetchQuotaPurchaseConfig(): Promise<QuotaPurchaseConfig | null> {
+  try {
+    const response = await apiFetch("/drive/billing/quota/purchase");
+    return safeJsonParse<QuotaPurchaseConfig>(response);
+  } catch {
+    return null;
+  }
+}
+
+/** Create a storage quota order; pay it with `payOrder`. */
+export async function createQuotaPurchaseOrder(
+  quantityGb: number,
+): Promise<QuotaOrder> {
+  const response = await apiFetch("/drive/billing/quota/purchase", {
+    method: "POST",
+    body: JSON.stringify({ quantity_gb: quantityGb }),
+  });
+  return safeJsonParse<QuotaOrder>(response);
+}
+
+/** Order a name change card; pay the returned order with `payOrder`. */
+export async function orderNameChangeCard(): Promise<NameChangeCardOrder> {
+  const response = await apiFetch("/accounts/me/name-change-card/order", {
+    method: "POST",
+  });
+  return safeJsonParse<NameChangeCardOrder>(response);
 }
 
 export async function fetchTransactions(

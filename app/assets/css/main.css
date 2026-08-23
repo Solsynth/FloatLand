@@ -678,6 +678,38 @@
   transform: translateX(100%);
 }
 
+/* Modal dialogs (shop sheets, PIN, quota) — fade the overlay, pop the panel.
+   Driven by Vue <Transition> around forceMount'd reka-ui parts. */
+.dialog-fade-enter-active,
+.dialog-fade-leave-active {
+  transition: opacity 180ms ease;
+}
+.dialog-fade-enter-from,
+.dialog-fade-leave-to {
+  opacity: 0;
+}
+
+.dialog-pop-enter-active,
+.dialog-pop-leave-active {
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
+}
+.dialog-pop-enter-from,
+.dialog-pop-leave-to {
+  opacity: 0;
+  transform: scale(0.96);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dialog-fade-enter-active,
+  .dialog-fade-leave-active,
+  .dialog-pop-enter-active,
+  .dialog-pop-leave-active {
+    transition: none;
+  }
+}
+
 @supports (view-transition-name: root) {
   :root {
     view-transition-name: root;
