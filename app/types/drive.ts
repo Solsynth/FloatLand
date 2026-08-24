@@ -58,6 +58,45 @@ export interface DriveUsage {
   }>;
 }
 
+export interface SnStorageNode {
+  id: string
+  name: string
+  machineId: string
+  endpoint: string
+  status: string
+  lastSeenAt: string | null
+  poolId: string | null
+  accountId: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface CreateDriveNodePayload {
+  name: string
+  machineId: string
+  endpoint: string
+  authToken: string
+  pool: {
+    name: string
+    description?: string
+    bucket: string
+    accessKey: string
+    secretKey: string
+    enableSigned: boolean
+    isHidden?: boolean
+  }
+}
+
+export interface CreateDriveNodeResponse {
+  node: SnStorageNode
+  poolId: string
+}
+
+export interface UpdateDriveNodePayload {
+  name?: string
+  poolName?: string
+}
+
 export interface DriveQuota {
   basedQuota: number;
   extraQuota: number;

@@ -3171,6 +3171,10 @@ export async function fetchEventCalendar(
 import type {
   SnCloudFile,
   SnFilePool,
+  SnStorageNode,
+  CreateDriveNodePayload,
+  CreateDriveNodeResponse,
+  UpdateDriveNodePayload,
   DriveUsage,
   DriveQuota,
   DriveFilePermission,
@@ -3344,6 +3348,38 @@ export async function fetchDriveQuota(): Promise<DriveQuota> {
 export async function fetchDrivePools(): Promise<SnFilePool[]> {
   const response = await apiFetch("/drive/pools");
   return safeJsonParse<SnFilePool[]>(response);
+}
+
+export async function fetchDriveNodes(): Promise<SnStorageNode[]> {
+  const response = await apiFetch("/drive/nodes");
+  return safeJsonParse<SnStorageNode[]>(response);
+}
+
+export async function createDriveNode(
+  payload: CreateDriveNodePayload,
+): Promise<CreateDriveNodeResponse> {
+  const response = await apiFetch("/drive/nodes", {
+    method: "POST",
+    body: JSON.stringify(camelToSnake(payload)),
+  });
+  return safeJsonParse<CreateDriveNodeResponse>(response);
+}
+
+export async function updateDriveNode(
+  nodeId: string,
+  payload: UpdateDriveNodePayload,
+): Promise<SnStorageNode> {
+  const response = await apiFetch(`/drive/nodes/${encodeURIComponent(nodeId)}`, {
+    method: "PATCH",
+    body: JSON.stringify(camelToSnake(payload)),
+  });
+  return safeJsonParse<SnStorageNode>(response);
+}
+
+export async function deleteDriveNode(nodeId: string): Promise<void> {
+  await apiFetch(`/drive/nodes/${encodeURIComponent(nodeId)}`, {
+    method: "DELETE",
+  });
 }
 
 export async function fetchDriveUnindexedFiles(

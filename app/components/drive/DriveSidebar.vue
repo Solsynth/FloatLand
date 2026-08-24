@@ -55,6 +55,39 @@
           <span>{{ t("drive.trash") }}</span>
         </NuxtLink>
       </div>
+
+      <!-- Storage -->
+      <div class="space-y-0.5">
+        <p class="px-3 mb-2 text-[11px] font-semibold uppercase tracking-wider text-base-content/30">
+          {{ t("drive.storageManagement") }}
+        </p>
+        <NuxtLink
+          to="/drive/pools"
+          class="group flex items-center gap-3 rounded-box px-3 py-2.5 text-sm font-medium transition-colors"
+          :class="isPoolsActive
+            ? 'bg-primary/10 text-primary shadow-sm'
+            : 'text-base-content/70 hover:bg-base-200/80 hover:text-base-content'"
+        >
+          <IconDatabase
+            class="w-5 h-5 shrink-0 transition-all"
+            :class="isPoolsActive ? 'text-primary' : 'text-base-content/40 group-hover:text-base-content/70'"
+          />
+          <span>{{ t("drive.pools") }}</span>
+        </NuxtLink>
+        <NuxtLink
+          to="/drive/nodes"
+          class="group flex items-center gap-3 rounded-box px-3 py-2.5 text-sm font-medium transition-colors"
+          :class="isNodesActive
+            ? 'bg-primary/10 text-primary shadow-sm'
+            : 'text-base-content/70 hover:bg-base-200/80 hover:text-base-content'"
+        >
+          <IconServer
+            class="w-5 h-5 shrink-0 transition-all"
+            :class="isNodesActive ? 'text-primary' : 'text-base-content/40 group-hover:text-base-content/70'"
+          />
+          <span>{{ t("drive.nodes") }}</span>
+        </NuxtLink>
+      </div>
     </nav>
 
     <!-- Storage Bar -->
@@ -135,9 +168,10 @@ import {
   IconLogIn,
   IconUser,
   IconSettings,
+  IconDatabase,
+  IconServer,
 } from "#components";
 import type { DriveUsage } from "~/types/drive";
-
 const { t } = useI18n();
 const route = useRoute();
 const { isAuthenticated, user, displayName: authDisplayName, logout } = useAuth();
@@ -157,6 +191,8 @@ const isRootActive = computed(() => {
 
 const isRecentActive = computed(() => route.path.startsWith("/drive/recent"));
 const isTrashActive = computed(() => route.path.startsWith("/drive/trash"));
+const isPoolsActive = computed(() => route.path.startsWith("/drive/pools"));
+const isNodesActive = computed(() => route.path.startsWith("/drive/nodes"));
 
 const displayName = computed(() => authDisplayName.value || user.value?.nick || user.value?.name || "");
 const username = computed(() => user.value?.name || "");
