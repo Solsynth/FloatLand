@@ -468,6 +468,84 @@
             required
           />
         </fieldset>
+        <div class="grid gap-4 border border-base-300 bg-base-100 p-4 rounded-box">
+          <div>
+            <h2 class="font-medium">{{ t('developer.apps.distribution.productMedia') }}</h2>
+            <p class="mt-1 text-sm text-base-content/60">{{ t('developer.apps.distribution.productMediaHint') }}</p>
+          </div>
+          <div class="grid gap-4 sm:grid-cols-2">
+            <fieldset class="fieldset">
+              <legend class="fieldset-legend">{{ t('developer.apps.distribution.productIcon') }}</legend>
+              <div class="flex items-center gap-3">
+                <img
+                  v-if="getFileUrl(productForm.icon?.id)"
+                  :src="getFileUrl(productForm.icon?.id) ?? ''"
+                  class="h-16 w-16 shrink-0 rounded-box object-cover"
+                  alt=""
+                />
+                <div v-else class="flex h-16 w-16 shrink-0 items-center justify-center rounded-box bg-base-200 text-base-content/40">
+                  <IconImage class="h-6 w-6" />
+                </div>
+                <button class="btn btn-outline btn-sm" type="button" @click="pickProductIcon">
+                  {{ t('developer.apps.distribution.chooseImage') }}
+                </button>
+                <button v-if="productForm.icon" class="btn btn-ghost btn-sm text-error" type="button" @click="removeProductIcon">
+                  {{ t('common.remove') }}
+                </button>
+              </div>
+            </fieldset>
+            <fieldset class="fieldset">
+              <legend class="fieldset-legend">{{ t('developer.apps.distribution.productBackground') }}</legend>
+              <div class="flex items-center gap-3">
+                <img
+                  v-if="getFileUrl(productForm.background?.id)"
+                  :src="getFileUrl(productForm.background?.id) ?? ''"
+                  class="h-16 w-16 shrink-0 rounded-box object-cover"
+                  alt=""
+                />
+                <div v-else class="flex h-16 w-16 shrink-0 items-center justify-center rounded-box bg-base-200 text-base-content/40">
+                  <IconImage class="h-6 w-6" />
+                </div>
+                <button class="btn btn-outline btn-sm" type="button" @click="pickProductBackground">
+                  {{ t('developer.apps.distribution.chooseImage') }}
+                </button>
+                <button v-if="productForm.background" class="btn btn-ghost btn-sm text-error" type="button" @click="removeProductBackground">
+                  {{ t('common.remove') }}
+                </button>
+              </div>
+            </fieldset>
+          </div>
+          <div>
+            <div class="flex items-center justify-between gap-3">
+              <span class="text-sm font-medium">{{ t('developer.apps.distribution.productPreviews') }}</span>
+              <button class="btn btn-outline btn-sm" type="button" @click="pickProductPreviews">
+                {{ t('developer.apps.distribution.chooseImages') }}
+              </button>
+            </div>
+            <div v-if="productForm.previews.length" class="mt-3 grid grid-cols-3 gap-3 sm:grid-cols-4">
+              <div v-for="(preview, index) in productForm.previews" :key="preview.id || index" class="group relative">
+                <img
+                  v-if="getFileUrl(preview.id)"
+                  :src="getFileUrl(preview.id) ?? ''"
+                  class="aspect-video w-full rounded-box object-cover"
+                  alt=""
+                />
+                <div v-else class="flex aspect-video w-full items-center justify-center rounded-box bg-base-200 text-base-content/40">
+                  <IconImage class="h-5 w-5" />
+                </div>
+                <button
+                  class="btn btn-circle btn-xs btn-error absolute right-1 top-1 opacity-0 transition-opacity group-hover:opacity-100"
+                  type="button"
+                  :title="t('common.remove')"
+                  :aria-label="t('common.remove')"
+                  @click="removeProductPreview(index)"
+                >
+                  <IconX class="h-3 w-3" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
         <div class="space-y-4">
           <div class="flex flex-col gap-3 border border-base-300 bg-base-100 p-4 rounded-box sm:flex-row sm:items-end sm:justify-between">
             <div>
@@ -736,6 +814,51 @@
             </button>
           </div>
         </div>
+        <div class="space-y-4 border border-base-300 bg-base-100 p-4 rounded-box">
+          <div class="flex items-center justify-between gap-3">
+            <div>
+              <h2 class="font-medium">{{ t('developer.apps.distribution.releaseAttachments') }}</h2>
+              <p class="mt-1 text-xs text-base-content/55">{{ t('developer.apps.distribution.releaseAttachmentsHint') }}</p>
+            </div>
+            <button class="btn btn-outline btn-sm" type="button" @click="pickReleaseAttachments">
+              <IconPlus class="h-4 w-4" />
+              {{ t('developer.apps.distribution.chooseFiles') }}
+            </button>
+          </div>
+          <div v-if="releaseForm.attachments.length" class="space-y-2">
+            <div
+              v-for="(attachment, index) in releaseForm.attachments"
+              :key="attachment.id || attachment.url || index"
+              class="flex items-center justify-between gap-3 border border-base-300 p-3 rounded-box"
+            >
+              <div class="flex min-w-0 items-center gap-3">
+                <img
+                  v-if="attachment.mimeType?.startsWith('image/') && getFileUrl(attachment.id)"
+                  :src="getFileUrl(attachment.id) ?? ''"
+                  class="h-10 w-10 shrink-0 rounded-box object-cover"
+                  alt=""
+                />
+                <div v-else class="flex h-10 w-10 shrink-0 items-center justify-center rounded-box bg-base-200 text-base-content/40">
+                  <IconImage class="h-5 w-5" />
+                </div>
+                <div class="min-w-0">
+                  <p class="truncate text-sm font-medium">{{ attachment.name || attachment.id || attachment.url }}</p>
+                  <p v-if="attachment.mimeType || attachment.size != null" class="font-mono text-xs text-base-content/55">
+                    {{ [attachment.mimeType, attachment.size != null ? formatBytes(attachment.size) : ''].filter(Boolean).join(' · ') }}
+                  </p>
+                </div>
+              </div>
+              <button
+                class="btn btn-ghost btn-sm text-error"
+                type="button"
+                :title="t('common.remove')"
+                @click="removeReleaseAttachment(index)"
+              >
+                {{ t('common.remove') }}
+              </button>
+            </div>
+          </div>
+        </div>
         <div v-if="editingReleaseId" class="space-y-4 border border-base-300 bg-base-100 p-4 rounded-box">
           <div class="flex items-center justify-between gap-3">
             <h2 class="font-medium">{{ t('developer.apps.distribution.file') }}</h2>
@@ -963,12 +1086,40 @@
         </button>
       </div>
     </AdminDrawer>
+  <CloudFileDrawer
+    v-model:open="productIconPickerOpen"
+    :allowed-types="['image']"
+    :crop-aspect-ratio="1"
+    usage="distribution.product.icon"
+    @select="onProductIconSelected"
+  />
+  <CloudFileDrawer
+    v-model:open="productBackgroundPickerOpen"
+    :allowed-types="['image']"
+    :crop-aspect-ratio="16 / 7"
+    usage="distribution.product.background"
+    @select="onProductBackgroundSelected"
+  />
+  <CloudFileDrawer
+    v-model:open="productPreviewsPickerOpen"
+    :allowed-types="['image']"
+    :allow-multiple="true"
+    usage="distribution.product.previews"
+    @select="onProductPreviewsSelected"
+  />
+  <CloudFileDrawer
+    v-model:open="releaseAttachmentsPickerOpen"
+    :allowed-types="['image', 'file']"
+    :allow-multiple="true"
+    usage="distribution.release.attachments"
+    @select="onReleaseAttachmentsSelected"
+  />
   </section>
 </template>
 
 <script setup lang="ts">
-import { IconArrowLeft, IconBan, IconCopy, IconDownload, IconList, IconPencil, IconPlus, IconRefreshCw, IconTrash } from '#components'
-import type { DistributionArtifact, DistributionChannel, DistributionLocalizedText, DistributionMetrics, DistributionProduct, DistributionRelease, DistributionUploadApiKey } from '~/types/distribution'
+import { IconArrowLeft, IconBan, IconCopy, IconDownload, IconImage, IconList, IconPencil, IconPlus, IconRefreshCw, IconTrash, IconX } from '#components'
+import type { DistributionArtifact, DistributionChannel, DistributionCloudFileReference, DistributionLocalizedText, DistributionMetrics, DistributionProduct, DistributionRelease, DistributionUploadApiKey } from '~/types/distribution'
 import {
   associateDistributionArtifact,
   createDistributionChannel,
@@ -993,6 +1144,8 @@ import {
   yankDistributionRelease,
 } from '~/utils/distribution'
 import { formatRelativeTime } from '~/utils/datetime'
+import { getFileUrl } from '~/utils/files'
+import type { SnCloudFile } from '~/types/drive'
 
 type ProductLocalizationEntry = {
   id: string
@@ -1065,6 +1218,9 @@ const newProductLanguage = ref('')
 const productForm = reactive({
   slug: '',
   localizations: [] as ProductLocalizationEntry[],
+  icon: null as DistributionCloudFileReference | null,
+  background: null as DistributionCloudFileReference | null,
+  previews: [] as DistributionCloudFileReference[],
 })
 const newChannelLanguage = ref('')
 const newReleaseLanguage = ref('')
@@ -1088,7 +1244,10 @@ const channelDrawerOpen = ref(false)
 const releaseDrawerOpen = ref(false)
 const editingChannelId = ref<string | null>(null)
 const editingReleaseId = ref<string | null>(null)
-const releaseChannels = ref<string[]>([])
+const productIconPickerOpen = ref(false)
+const productBackgroundPickerOpen = ref(false)
+const productPreviewsPickerOpen = ref(false)
+const releaseAttachmentsPickerOpen = ref(false)
 const channelForm = reactive({
   name: '',
   localizations: [] as ChannelLocalizationEntry[],
@@ -1101,6 +1260,7 @@ const releaseForm = reactive({
   metadataEntries: [] as ReleaseMetadataEntry[],
   forceUpdate: false,
   artifacts: [] as ReleaseArtifactEntry[],
+  attachments: [] as DistributionCloudFileReference[],
 })
 function isBuiltinChannelName(name: string) {
   return name === 'stable' || name === 'beta' || name === 'nightly' || name === 'rolling'
@@ -1279,8 +1439,62 @@ function addProductLocalization() {
   newProductLanguage.value = ''
 }
 
-function removeProductLocalization(index: number) {
-  if (productForm.localizations.length > 1) productForm.localizations.splice(index, 1)
+function cloudFileReference(file: SnCloudFile): DistributionCloudFileReference {
+  return {
+    id: file.id,
+    name: file.name,
+    mimeType: file.mimeType,
+    hash: file.hash || undefined,
+    size: file.size,
+    width: file.fileMeta?.width ?? null,
+    height: file.fileMeta?.height ?? null,
+    blurhash: file.blurhash || undefined,
+    usage: file.usage || undefined,
+    applicationType: file.applicationType || undefined,
+    hasCompression: file.hasCompression,
+  }
+}
+
+function pickProductIcon() {
+  productIconPickerOpen.value = true
+}
+function onProductIconSelected(file: SnCloudFile | SnCloudFile[] | null) {
+  if (file && !Array.isArray(file)) productForm.icon = cloudFileReference(file)
+}
+function removeProductIcon() {
+  productForm.icon = null
+}
+
+function pickProductBackground() {
+  productBackgroundPickerOpen.value = true
+}
+function onProductBackgroundSelected(file: SnCloudFile | SnCloudFile[] | null) {
+  if (file && !Array.isArray(file)) productForm.background = cloudFileReference(file)
+}
+function removeProductBackground() {
+  productForm.background = null
+}
+
+function pickProductPreviews() {
+  productPreviewsPickerOpen.value = true
+}
+function onProductPreviewsSelected(files: SnCloudFile | SnCloudFile[] | null) {
+  if (!files) return
+  productForm.previews = (Array.isArray(files) ? files : [files]).map(cloudFileReference)
+}
+function removeProductPreview(index: number) {
+  productForm.previews.splice(index, 1)
+}
+
+function pickReleaseAttachments() {
+  releaseAttachmentsPickerOpen.value = true
+}
+function onReleaseAttachmentsSelected(files: SnCloudFile | SnCloudFile[] | null) {
+  if (!files) return
+  releaseForm.attachments = (Array.isArray(files) ? files : [files]).map(cloudFileReference)
+}
+function removeReleaseAttachment(index: number) {
+  releaseForm.attachments.splice(index, 1)
 }
 
 function productLocalizedMap(field: 'name' | 'description') {
@@ -1414,6 +1628,9 @@ function openProductEditor() {
     product.value.name,
     product.value.description,
   )
+  productForm.icon = product.value.icon ?? null
+  productForm.background = product.value.background ?? null
+  productForm.previews = product.value.previews ? [...product.value.previews] : []
   newProductLanguage.value = ''
   productDrawerOpen.value = true
 }
@@ -1434,6 +1651,9 @@ async function saveProduct() {
       names,
       description: localizedFormFallback(descriptions, ''),
       descriptions,
+      icon: productForm.icon ?? undefined,
+      background: productForm.background ?? undefined,
+      previews: productForm.previews,
     })
     product.value = updatedProduct
     productDrawerOpen.value = false
@@ -1768,6 +1988,7 @@ function openCreateRelease() {
   releaseForm.forceUpdate = false
   newReleaseLanguage.value = ''
   releaseForm.artifacts = []
+  releaseForm.attachments = []
   releaseDrawerOpen.value = true
 }
 
@@ -1787,6 +2008,7 @@ function openReleaseEditor(release: DistributionRelease) {
   releaseForm.metadataEntries = releaseMetadataEntries(release.metadata)
   releaseForm.forceUpdate = release.forceUpdate === true
   releaseForm.artifacts = releaseArtifactEntries(release.artifacts || [])
+  releaseForm.attachments = release.attachments ? [...release.attachments] : []
   newReleaseLanguage.value = ''
   releaseDrawerOpen.value = true
 }
@@ -1815,6 +2037,7 @@ async function saveRelease() {
         descriptions,
         metadata,
         forceUpdate: releaseForm.forceUpdate,
+        attachments: releaseForm.attachments,
       })
       await associateNewReleaseArtifacts(product.value.id, release.id)
       releases.value = selectedChannel.value
@@ -1830,6 +2053,7 @@ async function saveRelease() {
         descriptions,
         metadata,
         forceUpdate: releaseForm.forceUpdate,
+        attachments: releaseForm.attachments,
       })
       releases.value = [release, ...releases.value]
     }
@@ -1841,6 +2065,7 @@ async function saveRelease() {
     releaseForm.metadataEntries = []
     releaseForm.forceUpdate = false
     releaseForm.artifacts = []
+    releaseForm.attachments = []
     newReleaseLanguage.value = ''
     releaseDrawerOpen.value = false
     $toast.success(t(isEditing ? 'developer.apps.distribution.releaseUpdated' : 'developer.apps.distribution.draftCreated'))

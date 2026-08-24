@@ -1,5 +1,29 @@
 export type DistributionMetadata = Record<string, unknown>
 
+/**
+ * Reference to a Solar Network Drive cloud file, mirroring the
+ * DistributionCenter cloud-file profile object. Either `id` (a Drive file)
+ * or `url` (an external file) identifies the asset.
+ */
+export interface DistributionCloudFileReference {
+  id?: string
+  name?: string
+  fileMeta?: Record<string, unknown>
+  userMeta?: Record<string, unknown>
+  mimeType?: string
+  hash?: string
+  size?: number
+  hasCompression?: boolean
+  url?: string
+  width?: number | null
+  height?: number | null
+  blurhash?: string
+  usage?: string
+  applicationType?: string
+  createdAt?: string
+  updatedAt?: string
+}
+
 export interface DistributionProduct {
   id: string
   publisherId: string
@@ -8,9 +32,13 @@ export interface DistributionProduct {
   names?: DistributionLocalizedText
   description: string
   descriptions?: DistributionLocalizedText
+  icon?: DistributionCloudFileReference
+  background?: DistributionCloudFileReference
+  previews?: DistributionCloudFileReference[]
   createdAt: string
   updatedAt: string
 }
+
 export interface DistributionUploadApiKey {
   id: string
   name: string
@@ -73,6 +101,7 @@ export interface DistributionRelease {
   publishedAt: string | null
   downloadCount?: number
   artifacts: DistributionArtifact[]
+  attachments?: DistributionCloudFileReference[]
 }
 
 export interface DistributionMetrics {

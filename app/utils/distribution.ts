@@ -1,5 +1,6 @@
 import type {
   DistributionChannel,
+  DistributionCloudFileReference,
   DistributionLocalizedText,
   DistributionMetadata,
   DistributionMetrics,
@@ -17,6 +18,31 @@ export const DISTRIBUTION_SERVICE_NAME = "dist";
 
 function distributionPath(path: string) {
   return `/${DISTRIBUTION_SERVICE_NAME}${path}`;
+}
+
+/**
+ * Map a camelCase cloud-file reference onto the snake_case body expected by
+ * the DistributionCenter API.
+ */
+function cloudFileReferenceBody(ref: DistributionCloudFileReference) {
+  return {
+    id: ref.id,
+    name: ref.name,
+    file_meta: ref.fileMeta,
+    user_meta: ref.userMeta,
+    mime_type: ref.mimeType,
+    hash: ref.hash,
+    size: ref.size,
+    has_compression: ref.hasCompression,
+    url: ref.url,
+    width: ref.width,
+    height: ref.height,
+    blurhash: ref.blurhash,
+    usage: ref.usage,
+    application_type: ref.applicationType,
+    created_at: ref.createdAt,
+    updated_at: ref.updatedAt,
+  };
 }
 
 /**
@@ -88,6 +114,9 @@ export interface DistributionProductInput {
   names?: DistributionLocalizedText;
   description?: string;
   descriptions?: DistributionLocalizedText;
+  icon?: DistributionCloudFileReference;
+  background?: DistributionCloudFileReference;
+  previews?: DistributionCloudFileReference[];
 }
 
 export async function createDistributionProduct(
@@ -353,6 +382,7 @@ export async function createDistributionRelease(
     descriptions?: DistributionLocalizedText;
     metadata?: DistributionMetadata;
     forceUpdate?: boolean;
+    attachments?: DistributionCloudFileReference[];
     artifacts?: Array<{
       objectKey: string;
       platform: string;
@@ -370,6 +400,9 @@ export async function createDistributionRelease(
     metadata: input.metadata,
     force_update: input.forceUpdate,
   };
+  if (input.attachments) {
+    body.attachments = input.attachments.map(cloudFileReferenceBody);
+  }
   if (input.artifacts?.length) {
     body.artifacts = input.artifacts.map((artifact) => ({
       object_key: artifact.objectKey,
@@ -386,6 +419,7 @@ export async function createDistributionRelease(
   );
   return safeJsonParse<DistributionRelease>(response);
 }
+
 export async function updateDistributionRelease(
   productId: string,
   releaseId: string,
@@ -398,6 +432,7 @@ export async function updateDistributionRelease(
     descriptions?: DistributionLocalizedText;
     metadata?: DistributionMetadata;
     forceUpdate?: boolean;
+    attachments?: DistributionCloudFileReference[];
   },
 ): Promise<DistributionRelease> {
   const response = await apiFetch(
@@ -415,6 +450,7 @@ export async function updateDistributionRelease(
         descriptions: input.descriptions,
         metadata: input.metadata,
         force_update: input.forceUpdate,
+        attachments: input.attachments?.map(cloudFileReferenceBody),
       }),
     },
   );
