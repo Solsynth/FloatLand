@@ -3556,6 +3556,18 @@ export async function fetchChatRoom(roomId: string): Promise<SnChatRoom> {
   return safeJsonParse<SnChatRoom>(response);
 }
 
+export async function fetchChatRoomBySlug(
+  scope: string,
+  slug: string,
+): Promise<SnChatRoom | null> {
+  const response = await apiFetch(
+    `/messager/chat/by-slug/${encodeURIComponent(scope)}/${encodeURIComponent(slug)}`,
+  );
+  if (response.status === 404) return null;
+  const data = safeJsonParse<SnChatRoom>(response);
+  return snakeToCamel(data) as SnChatRoom;
+ }
+
 export async function fetchChatMessages(
   roomId: string,
   offset = 0,
