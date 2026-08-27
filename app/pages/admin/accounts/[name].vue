@@ -205,21 +205,6 @@
           </AdminCard>
 
           <!-- Verification -->
-          <!-- Name History -->
-          <AdminCard title="Name History">
-            <template #actions>
-              <button class="btn btn-ghost btn-xs" @click="loadNameHistory">
-                <IconRefreshCw class="w-3.5 h-3.5" /> Refresh
-              </button>
-            </template>
-            <div v-if="nameHistory.length" class="space-y-1">
-              <div v-for="(entry, i) in nameHistory" :key="i" class="flex items-center gap-2 text-xs p-1.5">
-                <span class="font-mono text-base-content/60">{{ entry.name }}</span>
-                <span v-if="entry.createdAt" class="text-base-content/30 ml-auto">{{ formatDateTime(entry.createdAt) }}</span>
-              </div>
-            </div>
-            <p v-else class="text-sm text-base-content/40">No name history</p>
-          </AdminCard>
           <AdminCard title="Verification">
             <div class="space-y-3">
               <div v-if="profileVerification" class="flex items-center justify-between p-3 rounded-lg bg-success/5 border border-success/20">
@@ -238,6 +223,22 @@
               <p v-else class="text-sm text-base-content/40">Not verified</p>
               <button class="btn btn-ghost btn-xs" @click="verifyOpen = true">Set Verification</button>
             </div>
+          </AdminCard>
+
+          <!-- Name History -->
+          <AdminCard title="Name History">
+            <template #actions>
+              <button class="btn btn-ghost btn-xs" @click="loadNameHistory">
+                <IconRefreshCw class="w-3.5 h-3.5" /> Refresh
+              </button>
+            </template>
+            <div v-if="nameHistory.length" class="space-y-1">
+              <div v-for="(entry, i) in nameHistory" :key="i" class="flex items-center gap-2 text-xs p-1.5">
+                <span class="font-mono text-base-content/60">{{ entry.name }}</span>
+                <span v-if="entry.createdAt" class="text-base-content/30 ml-auto">{{ formatDateTime(entry.createdAt) }}</span>
+              </div>
+            </div>
+            <p v-else class="text-sm text-base-content/40">No name history</p>
           </AdminCard>
 
           <!-- Contacts -->
@@ -286,6 +287,43 @@
           </AdminCard>
 
           <!-- Connected Platforms (public) -->
+          <AdminCard title="Connected Platforms">
+            <template #actions>
+              <button class="btn btn-ghost btn-xs" @click="loadConnections">
+                <IconRefreshCw class="w-3.5 h-3.5" /> Refresh
+              </button>
+            </template>
+            <div v-if="connectionsLoading" class="flex justify-center py-4">
+              <span class="loading loading-spinner loading-sm" />
+            </div>
+            <div v-else-if="connections.length" class="space-y-2">
+              <div
+                v-for="(conn, ci) in connections"
+                :key="`${conn.provider}-${conn.providedIdentifier}-${ci}`"
+                class="flex items-center gap-3 p-2 rounded-lg bg-base-200/50"
+              >
+                <IconLink class="w-4 h-4 text-base-content/40 shrink-0" />
+                <div class="min-w-0 flex-1">
+                  <p class="text-sm font-medium capitalize">{{ conn.provider }}</p>
+                  <p class="text-xs text-base-content/40 font-mono truncate">{{ conn.providedIdentifier }}</p>
+                </div>
+                <a
+                  v-if="conn.url"
+                  :href="conn.url"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="btn btn-ghost btn-xs"
+                >
+                  Open
+                </a>
+              </div>
+            </div>
+            <p v-else class="text-sm text-base-content/40">No public connections</p>
+            <p class="text-[10px] text-base-content/30 mt-2">
+              Shows only connections the account has marked public.
+            </p>
+          </AdminCard>
+
           <!-- Passkeys -->
           <AdminCard title="Passkeys">
             <template #actions>
@@ -328,87 +366,8 @@
             </div>
             <p v-else class="text-sm text-base-content/40">No connections</p>
           </AdminCard>
-          <AdminCard title="Connected Platforms">
-            <template #actions>
-              <button class="btn btn-ghost btn-xs" @click="loadConnections">
-                <IconRefreshCw class="w-3.5 h-3.5" /> Refresh
-              </button>
-            </template>
-            <div v-if="connectionsLoading" class="flex justify-center py-4">
-              <span class="loading loading-spinner loading-sm" />
-            </div>
-            <div v-else-if="connections.length" class="space-y-2">
-              <div
-                v-for="(conn, ci) in connections"
-                :key="`${conn.provider}-${conn.providedIdentifier}-${ci}`"
-                class="flex items-center gap-3 p-2 rounded-lg bg-base-200/50"
-              >
-                <IconLink class="w-4 h-4 text-base-content/40 shrink-0" />
-                <div class="min-w-0 flex-1">
-                  <p class="text-sm font-medium capitalize">{{ conn.provider }}</p>
-                  <p class="text-xs text-base-content/40 font-mono truncate">{{ conn.providedIdentifier }}</p>
-                </div>
-                <a
-                  v-if="conn.url"
-                  :href="conn.url"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="btn btn-ghost btn-xs"
-                >
-                  Open
-                </a>
-              </div>
-            </div>
-            <p v-else class="text-sm text-base-content/40">No public connections</p>
-            <p class="text-[10px] text-base-content/30 mt-2">
-              Shows only connections the account has marked public.
-            </p>
-          </AdminCard>
 
           <!-- Magic Spells -->
-          <!-- Relationships -->
-          <AdminCard title="Relationships">
-            <template #actions>
-              <button class="btn btn-ghost btn-xs" @click="loadRelationships">
-                <IconRefreshCw class="w-3.5 h-3.5" /> Refresh
-              </button>
-            </template>
-            <div v-if="relationships.length" class="space-y-2">
-              <div v-for="rel in relationships" :key="`${rel.accountId}-${rel.relatedId}`" class="flex items-center gap-3 p-2 rounded-lg bg-base-200/50">
-                <IconUsers class="w-4 h-4 text-base-content/40" />
-                <div class="min-w-0 flex-1">
-                  <p class="text-sm font-mono text-xs">{{ rel.relatedId.slice(0, 16) }}…</p>
-                  <p class="text-[10px] text-base-content/40">Status: {{ rel.status }}</p>
-                </div>
-                <span v-if="rel.alias" class="badge badge-ghost badge-xs">{{ rel.alias }}</span>
-                <span v-if="rel.createdAt" class="text-xs text-base-content/40">{{ formatDateTime(rel.createdAt) }}</span>
-              </div>
-            </div>
-            <p v-else class="text-sm text-base-content/40">No relationships</p>
-          </AdminCard>
-
-          <!-- Action Logs -->
-          <AdminCard title="Action Logs">
-            <template #actions>
-              <button class="btn btn-ghost btn-xs" @click="loadActionLogs">
-                <IconRefreshCw class="w-3.5 h-3.5" /> Refresh
-              </button>
-            </template>
-            <div v-if="actionLogsLoading" class="flex justify-center py-4">
-              <span class="loading loading-spinner loading-sm" />
-            </div>
-            <div v-else-if="actionLogs.length" class="space-y-2">
-              <div v-for="log in actionLogs" :key="log.id" class="p-2 rounded-lg bg-base-200/50 text-xs">
-                <div class="flex items-center gap-2">
-                  <span class="font-mono text-primary">{{ log.action }}</span>
-                  <span v-if="log.ipAddress" class="text-base-content/40">{{ log.ipAddress }}</span>
-                  <span class="text-base-content/30 ml-auto">{{ formatDateTime(log.createdAt) }}</span>
-                </div>
-                <pre v-if="log.meta && Object.keys(log.meta).length" class="text-[10px] font-mono bg-base-100/60 rounded p-1.5 mt-1 overflow-x-auto max-h-16">{{ JSON.stringify(log.meta, null, 2) }}</pre>
-              </div>
-            </div>
-            <p v-else class="text-sm text-base-content/40">No action logs</p>
-          </AdminCard>
           <AdminCard title="Magic Spells">
             <template #actions>
               <button class="btn btn-ghost btn-xs" @click="loadSpells">
@@ -463,6 +422,50 @@
             <p class="text-[10px] text-base-content/30 mt-2">
               Spell secrets are never returned by the API. Resend clears the delivery throttle.
             </p>
+          </AdminCard>
+
+          <!-- Relationships -->
+          <AdminCard title="Relationships">
+            <template #actions>
+              <button class="btn btn-ghost btn-xs" @click="loadRelationships">
+                <IconRefreshCw class="w-3.5 h-3.5" /> Refresh
+              </button>
+            </template>
+            <div v-if="relationships.length" class="space-y-2">
+              <div v-for="rel in relationships" :key="`${rel.accountId}-${rel.relatedId}`" class="flex items-center gap-3 p-2 rounded-lg bg-base-200/50">
+                <IconUsers class="w-4 h-4 text-base-content/40" />
+                <div class="min-w-0 flex-1">
+                  <p class="text-sm font-mono text-xs">{{ rel.relatedId.slice(0, 16) }}…</p>
+                  <p class="text-[10px] text-base-content/40">Status: {{ rel.status }}</p>
+                </div>
+                <span v-if="rel.alias" class="badge badge-ghost badge-xs">{{ rel.alias }}</span>
+                <span v-if="rel.createdAt" class="text-xs text-base-content/40">{{ formatDateTime(rel.createdAt) }}</span>
+              </div>
+            </div>
+            <p v-else class="text-sm text-base-content/40">No relationships</p>
+          </AdminCard>
+
+          <!-- Action Logs -->
+          <AdminCard title="Action Logs">
+            <template #actions>
+              <button class="btn btn-ghost btn-xs" @click="loadActionLogs">
+                <IconRefreshCw class="w-3.5 h-3.5" /> Refresh
+              </button>
+            </template>
+            <div v-if="actionLogsLoading" class="flex justify-center py-4">
+              <span class="loading loading-spinner loading-sm" />
+            </div>
+            <div v-else-if="actionLogs.length" class="space-y-2">
+              <div v-for="log in actionLogs" :key="log.id" class="p-2 rounded-lg bg-base-200/50 text-xs">
+                <div class="flex items-center gap-2">
+                  <span class="font-mono text-primary">{{ log.action }}</span>
+                  <span v-if="log.ipAddress" class="text-base-content/40">{{ log.ipAddress }}</span>
+                  <span class="text-base-content/30 ml-auto">{{ formatDateTime(log.createdAt) }}</span>
+                </div>
+                <pre v-if="log.meta && Object.keys(log.meta).length" class="text-[10px] font-mono bg-base-100/60 rounded p-1.5 mt-1 overflow-x-auto max-h-16">{{ JSON.stringify(log.meta, null, 2) }}</pre>
+              </div>
+            </div>
+            <p v-else class="text-sm text-base-content/40">No action logs</p>
           </AdminCard>
 
           <!-- Auth Factors -->
