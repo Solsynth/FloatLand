@@ -139,6 +139,14 @@ import type {
   IdeaskBoard,
   IdeaskTask,
   FlywheelAuditEntry,
+  AdminActionLog,
+  AdminNameHistory,
+  AdminPasskey,
+  AdminAccountConnection,
+  AdminAccountRelationship,
+  AdminProfileUpdatePayload,
+  BatchRevokeDevicePayload,
+  BatchVerifyContactsPayload,
 } from '~/types/admin'
 
 // Stargate service: auth, sessions, punishments, suspend, delete, notifications, emails
@@ -1751,4 +1759,93 @@ export async function deleteAdminFlywheelBlob(
 ): Promise<void> {
   const q = buildQuery({ workspaceId, appId })
   await fetchJson(`${FLYWHEEL_ADMIN}/blobs/${blobId}?${q}`, { method: 'DELETE' })
+}
+
+// ============ Account Action Logs (Padlock) ============
+
+export async function fetchAccountActionLogs(
+  name: string,
+  params: { action?: string; take?: number; offset?: number } = {},
+): Promise<{ items: AdminActionLog[]; total: number }> {
+  const query = buildQuery(params)
+  const url = `${PADLOCK_BASE}/${encodeURIComponent(name)}/action-logs${query ? '?' + query : ''}`
+  return fetchPaginated<AdminActionLog>(url)
+}
+
+// ============ Profile Update (Padlock) ============
+
+export async function updateAccountProfile(
+  name: string,
+  payload: AdminProfileUpdatePayload,
+): Promise<void> {
+  await fetchJson(`${PADLOCK_BASE}/${encodeURIComponent(name)}/profile`, {
+    method: 'PATCH',
+    body: JSON.stringify(camelToSnake(payload)),
+  })
+}
+
+// ============ Name History (Padlock) ============
+
+export async function fetchAccountNameHistory(
+  name: string,
+): Promise<AdminNameHistory[]> {
+  return fetchJson<AdminNameHistory[]>(`${PADLOCK_BASE}/${encodeURIComponent(name)}/name-history`)
+}
+
+// ============ Connections (Padlock admin view) ============
+
+export async function fetchAccountAdminConnections(
+  name: string,
+): Promise<AdminAccountConnection[]> {
+  return fetchJson<AdminAccountConnection[]>(`${PADLOCK_BASE}/${encodeURIComponent(name)}/connections`)
+}
+
+// ============ Passkeys (Padlock admin view) ============
+
+export async function fetchAccountPasskeys(
+  name: string,
+): Promise<AdminPasskey[]> {
+  return fetchJson<AdminPasskey[]>(`${PADLOCK_BASE}/${encodeURIComponent(name)}/passkeys`)
+}
+
+export async function deleteAccountPasskey(
+  name: string,
+  passkeyId: string,
+): Promise<void> {
+  await fetchJson(`${PADLOCK_BASE}/${encodeURIComponent(name)}/passkeys/${encodeURIComponent(passkeyId)}`, {
+    method: 'DELETE',
+  })
+}
+
+// ============ Batch Operations (Padlock) ============
+
+export async function batchRevokeDeviceSessions(
+  name: string,
+  payload: BatchRevokeDevicePayload,
+): Promise<{ revoked: number }> {
+  return fetchJson<{ revoked: number }>(
+    `${PADLOCK_BASE}/${encodeURIComponent(name)}/devices/batch/revoke`,
+    { method: 'POST', body: JSON.stringify(payload) },
+  )
+}
+
+export async function batchVerifyContacts(
+  name: string,
+  payload: BatchVerifyContactsPayload,
+): Promise<{ verified: number }> {
+  return fetchJson<{ verified: number }>(
+    `${PADLOCK_BASE}/${encodeURIComponent(name)}/contacts/batch/verify`,
+    { method: 'POST', body: JSON.stringify(payload) },
+  )
+}
+
+// ============ Relationships (Padlock admin view) ============
+
+export async function fetchAccountRelationships(
+  name: string,
+  params: { status?: number; take?: number; offset?: number } = {},
+): Promise<{ items: AdminAccountRelationship[]; total: number }> {
+  const query = buildQuery(params)
+  const url = `${PADLOCK_BASE}/${encodeURIComponent(name)}/relationships${query ? '?' + query : ''}`
+  return fetchPaginated<AdminAccountRelationship>(url)
 }

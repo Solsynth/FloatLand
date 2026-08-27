@@ -127,6 +127,11 @@
 
           <!-- Profile -->
           <AdminCard v-if="detail.account.profile" title="Profile">
+            <template #actions>
+              <button class="btn btn-ghost btn-xs" @click="openProfileEdit">
+                <IconPencil class="w-3.5 h-3.5" /> Edit
+              </button>
+            </template>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
               <div v-if="profileFullName" class="sm:col-span-2">
                 <span class="text-xs text-base-content/40 uppercase tracking-wider">Legal / Display Name</span>
@@ -200,6 +205,21 @@
           </AdminCard>
 
           <!-- Verification -->
+          <!-- Name History -->
+          <AdminCard title="Name History">
+            <template #actions>
+              <button class="btn btn-ghost btn-xs" @click="loadNameHistory">
+                <IconRefreshCw class="w-3.5 h-3.5" /> Refresh
+              </button>
+            </template>
+            <div v-if="nameHistory.length" class="space-y-1">
+              <div v-for="(entry, i) in nameHistory" :key="i" class="flex items-center gap-2 text-xs p-1.5">
+                <span class="font-mono text-base-content/60">{{ entry.name }}</span>
+                <span v-if="entry.createdAt" class="text-base-content/30 ml-auto">{{ formatDateTime(entry.createdAt) }}</span>
+              </div>
+            </div>
+            <p v-else class="text-sm text-base-content/40">No name history</p>
+          </AdminCard>
           <AdminCard title="Verification">
             <div class="space-y-3">
               <div v-if="profileVerification" class="flex items-center justify-between p-3 rounded-lg bg-success/5 border border-success/20">
@@ -266,6 +286,48 @@
           </AdminCard>
 
           <!-- Connected Platforms (public) -->
+          <!-- Passkeys -->
+          <AdminCard title="Passkeys">
+            <template #actions>
+              <button class="btn btn-ghost btn-xs" @click="loadPasskeys">
+                <IconRefreshCw class="w-3.5 h-3.5" /> Refresh
+              </button>
+            </template>
+            <div v-if="passkeys.length" class="space-y-2">
+              <div v-for="pk in passkeys" :key="pk.id" class="flex items-center gap-3 p-2 rounded-lg bg-base-200/50">
+                <IconKeyRound class="w-4 h-4 text-base-content/40" />
+                <div class="min-w-0 flex-1">
+                  <p class="text-sm font-medium">{{ pk.label || 'Unnamed Passkey' }}</p>
+                  <p class="text-[10px] text-base-content/40 font-mono">{{ pk.id.slice(0, 16) }}…</p>
+                </div>
+                <span v-if="pk.createdAt" class="text-xs text-base-content/40">{{ formatDateTime(pk.createdAt) }}</span>
+                <button class="btn btn-ghost btn-xs text-error" @click="doDeletePasskey(pk.id)">Delete</button>
+              </div>
+            </div>
+            <p v-else class="text-sm text-base-content/40">No passkeys</p>
+          </AdminCard>
+
+          <!-- All Connections (admin view) -->
+          <AdminCard title="All Connections">
+            <template #actions>
+              <button class="btn btn-ghost btn-xs" @click="loadAdminConnections">
+                <IconRefreshCw class="w-3.5 h-3.5" /> Refresh
+              </button>
+            </template>
+            <div v-if="adminConnections.length" class="space-y-2">
+              <div v-for="conn in adminConnections" :key="conn.id" class="flex items-center gap-3 p-2 rounded-lg bg-base-200/50">
+                <IconLink class="w-4 h-4 text-base-content/40" />
+                <div class="min-w-0 flex-1">
+                  <p class="text-sm font-medium capitalize">{{ conn.provider }}</p>
+                  <p class="text-xs text-base-content/40 font-mono truncate">{{ conn.providedIdentifier }}</p>
+                </div>
+                <span v-if="conn.isPublic" class="badge badge-ghost badge-xs">Public</span>
+                <span v-if="conn.registeredAt" class="badge badge-primary badge-xs">Registration</span>
+                <span v-if="conn.lastUsedAt" class="text-xs text-base-content/40">{{ formatTimeAgo(conn.lastUsedAt) }}</span>
+              </div>
+            </div>
+            <p v-else class="text-sm text-base-content/40">No connections</p>
+          </AdminCard>
           <AdminCard title="Connected Platforms">
             <template #actions>
               <button class="btn btn-ghost btn-xs" @click="loadConnections">
@@ -304,6 +366,49 @@
           </AdminCard>
 
           <!-- Magic Spells -->
+          <!-- Relationships -->
+          <AdminCard title="Relationships">
+            <template #actions>
+              <button class="btn btn-ghost btn-xs" @click="loadRelationships">
+                <IconRefreshCw class="w-3.5 h-3.5" /> Refresh
+              </button>
+            </template>
+            <div v-if="relationships.length" class="space-y-2">
+              <div v-for="rel in relationships" :key="`${rel.accountId}-${rel.relatedId}`" class="flex items-center gap-3 p-2 rounded-lg bg-base-200/50">
+                <IconUsers class="w-4 h-4 text-base-content/40" />
+                <div class="min-w-0 flex-1">
+                  <p class="text-sm font-mono text-xs">{{ rel.relatedId.slice(0, 16) }}…</p>
+                  <p class="text-[10px] text-base-content/40">Status: {{ rel.status }}</p>
+                </div>
+                <span v-if="rel.alias" class="badge badge-ghost badge-xs">{{ rel.alias }}</span>
+                <span v-if="rel.createdAt" class="text-xs text-base-content/40">{{ formatDateTime(rel.createdAt) }}</span>
+              </div>
+            </div>
+            <p v-else class="text-sm text-base-content/40">No relationships</p>
+          </AdminCard>
+
+          <!-- Action Logs -->
+          <AdminCard title="Action Logs">
+            <template #actions>
+              <button class="btn btn-ghost btn-xs" @click="loadActionLogs">
+                <IconRefreshCw class="w-3.5 h-3.5" /> Refresh
+              </button>
+            </template>
+            <div v-if="actionLogsLoading" class="flex justify-center py-4">
+              <span class="loading loading-spinner loading-sm" />
+            </div>
+            <div v-else-if="actionLogs.length" class="space-y-2">
+              <div v-for="log in actionLogs" :key="log.id" class="p-2 rounded-lg bg-base-200/50 text-xs">
+                <div class="flex items-center gap-2">
+                  <span class="font-mono text-primary">{{ log.action }}</span>
+                  <span v-if="log.ipAddress" class="text-base-content/40">{{ log.ipAddress }}</span>
+                  <span class="text-base-content/30 ml-auto">{{ formatDateTime(log.createdAt) }}</span>
+                </div>
+                <pre v-if="log.meta && Object.keys(log.meta).length" class="text-[10px] font-mono bg-base-100/60 rounded p-1.5 mt-1 overflow-x-auto max-h-16">{{ JSON.stringify(log.meta, null, 2) }}</pre>
+              </div>
+            </div>
+            <p v-else class="text-sm text-base-content/40">No action logs</p>
+          </AdminCard>
           <AdminCard title="Magic Spells">
             <template #actions>
               <button class="btn btn-ghost btn-xs" @click="loadSpells">
@@ -701,6 +806,14 @@
                 <span class="text-sm font-semibold">{{ badges.length }}</span>
               </div>
               <div class="flex items-center justify-between">
+                <span class="text-sm text-base-content/60">Connections</span>
+                <span class="text-sm font-semibold">{{ adminConnections.length || (detail.connectionCount ?? '—') }}</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-sm text-base-content/60">Passkeys</span>
+                <span class="text-sm font-semibold">{{ passkeys.length || (detail.passkeyCount ?? '—') }}</span>
+              </div>
+              <div class="flex items-center justify-between">
                 <span class="text-sm text-base-content/60">Active Punishment</span>
                 <span
                   class="text-sm font-semibold"
@@ -971,6 +1084,46 @@
       </AdminDrawer>
 
       <!-- Delete Dialog -->
+      <!-- Profile Edit Drawer -->
+      <AdminDrawer :open="profileEditOpen" title="Edit Profile" @update:open="profileEditOpen = $event">
+        <form class="space-y-3" @submit.prevent="doUpdateProfile">
+          <div>
+            <label class="text-xs text-base-content/50">First Name</label>
+            <input v-model="profileEditForm.first_name" type="text" class="input input-sm w-full bg-base-200/60 border-0 rounded-xl" />
+          </div>
+          <div>
+            <label class="text-xs text-base-content/50">Middle Name</label>
+            <input v-model="profileEditForm.middle_name" type="text" class="input input-sm w-full bg-base-200/60 border-0 rounded-xl" />
+          </div>
+          <div>
+            <label class="text-xs text-base-content/50">Last Name</label>
+            <input v-model="profileEditForm.last_name" type="text" class="input input-sm w-full bg-base-200/60 border-0 rounded-xl" />
+          </div>
+          <div>
+            <label class="text-xs text-base-content/50">Bio</label>
+            <textarea v-model="profileEditForm.bio" class="textarea textarea-sm w-full bg-base-200/60 border-0 rounded-xl" rows="3" />
+          </div>
+          <div>
+            <label class="text-xs text-base-content/50">Gender</label>
+            <input v-model="profileEditForm.gender" type="text" class="input input-sm w-full bg-base-200/60 border-0 rounded-xl" />
+          </div>
+          <div>
+            <label class="text-xs text-base-content/50">Pronouns</label>
+            <input v-model="profileEditForm.pronouns" type="text" class="input input-sm w-full bg-base-200/60 border-0 rounded-xl" />
+          </div>
+          <div>
+            <label class="text-xs text-base-content/50">Time Zone</label>
+            <input v-model="profileEditForm.time_zone" type="text" class="input input-sm w-full bg-base-200/60 border-0 rounded-xl" />
+          </div>
+          <div>
+            <label class="text-xs text-base-content/50">Location</label>
+            <input v-model="profileEditForm.location" type="text" class="input input-sm w-full bg-base-200/60 border-0 rounded-xl" />
+          </div>
+          <button class="btn btn-sm btn-primary w-full" :disabled="profileEditLoading">
+            {{ profileEditLoading ? 'Saving...' : 'Save Profile' }}
+          </button>
+        </form>
+      </AdminDrawer>
       <AdminDrawer :open="deleteOpen" title="Delete Account" @update:open="deleteOpen = $event">
         <div class="space-y-4">
           <div class="rounded-xl bg-error/5 border border-error/20 p-4">
@@ -1022,6 +1175,7 @@ import {
   IconLink,
   IconLayoutGrid,
   IconSparkles,
+  IconUsers,
 } from '#components'
 import { getFileUrl } from '~/utils/files'
 import {
@@ -1067,6 +1221,13 @@ import {
   createAccountSpell,
   resendAccountSpell,
   deleteAccountSpell,
+  fetchAccountActionLogs,
+  updateAccountProfile,
+  fetchAccountNameHistory,
+  fetchAccountAdminConnections,
+  fetchAccountPasskeys,
+  deleteAccountPasskey,
+  fetchAccountRelationships,
 } from '~/utils/admin'
 import type {
   AdminAuthFactor,
@@ -1075,6 +1236,11 @@ import type {
   AdminMagicSpell,
   AdminPublicConnection,
   AdminSession,
+  AdminActionLog,
+  AdminAccountConnection,
+  AdminAccountRelationship,
+  AdminNameHistory,
+  AdminPasskey,
   MagicSpellType,
   SnContact,
   PunishmentType,
@@ -1189,6 +1355,120 @@ async function loadConnections() {
   }
 }
 
+// Action Logs
+const actionLogs = ref<AdminActionLog[]>([])
+const actionLogsLoading = ref(false)
+
+async function loadActionLogs() {
+  actionLogsLoading.value = true
+  try {
+    const { items } = await fetchAccountActionLogs(identifier.value)
+    actionLogs.value = items
+  } catch {
+    actionLogs.value = []
+  } finally {
+    actionLogsLoading.value = false
+  }
+}
+
+// Name History
+const nameHistory = ref<AdminNameHistory[]>([])
+
+async function loadNameHistory() {
+  try {
+    nameHistory.value = await fetchAccountNameHistory(identifier.value)
+  } catch {
+    nameHistory.value = []
+  }
+}
+
+// Admin Connections
+const adminConnections = ref<AdminAccountConnection[]>([])
+
+async function loadAdminConnections() {
+  try {
+    adminConnections.value = await fetchAccountAdminConnections(identifier.value)
+  } catch {
+    adminConnections.value = []
+  }
+}
+
+// Passkeys
+const passkeys = ref<AdminPasskey[]>([])
+
+async function loadPasskeys() {
+  try {
+    passkeys.value = await fetchAccountPasskeys(identifier.value)
+  } catch {
+    passkeys.value = []
+  }
+}
+
+async function doDeletePasskey(passkeyId: string) {
+  if (!(await useAlert().confirm('Confirm', 'Delete this passkey?'))) return
+  try {
+    await deleteAccountPasskey(identifier.value, passkeyId)
+    await loadPasskeys()
+    useNuxtApp().$toast.success('Passkey deleted')
+  } catch {
+    useNuxtApp().$toast.error('Failed to delete passkey')
+  }
+}
+
+// Relationships
+const relationships = ref<AdminAccountRelationship[]>([])
+
+async function loadRelationships() {
+  try {
+    const { items } = await fetchAccountRelationships(identifier.value)
+    relationships.value = items
+  } catch {
+    relationships.value = []
+  }
+}
+
+// Profile Edit
+const profileEditOpen = ref(false)
+const profileEditLoading = ref(false)
+const profileEditForm = ref({
+  first_name: '',
+  middle_name: '',
+  last_name: '',
+  bio: '',
+  gender: '',
+  pronouns: '',
+  time_zone: '',
+  location: '',
+})
+
+function openProfileEdit() {
+  const p = detail.value?.account?.profile
+  profileEditForm.value = {
+    first_name: p?.firstName || '',
+    middle_name: p?.middleName || '',
+    last_name: p?.lastName || '',
+    bio: p?.bio || '',
+    gender: p?.gender || '',
+    pronouns: p?.pronouns || '',
+    time_zone: p?.timeZone || '',
+    location: p?.location || '',
+  }
+  profileEditOpen.value = true
+}
+
+async function doUpdateProfile() {
+  profileEditLoading.value = true
+  try {
+    await updateAccountProfile(identifier.value, profileEditForm.value)
+    profileEditOpen.value = false
+    await loadAccountDetail(identifier.value)
+    useNuxtApp().$toast.success('Profile updated')
+  } catch {
+    useNuxtApp().$toast.error('Failed to update profile')
+  } finally {
+    profileEditLoading.value = false
+  }
+}
 // Profile board
 const boardItems = ref<AdminBoardItem[]>([])
 const boardLoading = ref(false)
@@ -1602,6 +1882,11 @@ onMounted(() => {
   loadBoard()
   loadDevices()
   loadSessions()
+  loadActionLogs()
+  loadNameHistory()
+  loadAdminConnections()
+  loadPasskeys()
+  loadRelationships()
 })
 
 onUnmounted(() => {

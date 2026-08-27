@@ -44,6 +44,20 @@
           Clear
         </button>
       </div>
+      <div class="flex flex-wrap gap-2 mt-3">
+        <select v-model="filterActivated" class="select select-sm rounded-box border-0 bg-base-200" @change="handleSearch">
+          <option value="">All statuses</option>
+          <option value="true">Activated</option>
+          <option value="false">Not activated</option>
+        </select>
+        <select v-model="filterHasPunishment" class="select select-sm rounded-box border-0 bg-base-200" @change="handleSearch">
+          <option value="">All</option>
+          <option value="true">Has punishment</option>
+          <option value="false">No punishment</option>
+        </select>
+        <input v-model="filterCreatedAfter" type="date" class="input input-sm rounded-box border-0 bg-base-200" @change="handleSearch" />
+        <input v-model="filterCreatedBefore" type="date" class="input input-sm rounded-box border-0 bg-base-200" @change="handleSearch" />
+      </div>
       <p v-if="activeQuery" class="text-xs text-base-content/40 mt-2">
         Filtering by “{{ activeQuery }}” · ordered by {{ orderLabel }}
       </p>
@@ -250,6 +264,10 @@ const searchQuery = ref('')
 const activeQuery = ref('')
 const orderBy = ref<OrderByField>('created_at_desc')
 const pageSize = 50
+const filterActivated = ref('')
+const filterHasPunishment = ref('')
+const filterCreatedAfter = ref('')
+const filterCreatedBefore = ref('')
 const offset = ref(0)
 
 const orderLabel = computed(() => {
@@ -266,6 +284,10 @@ function listParams(overrides: Partial<AdminAccountQuery> = {}): AdminAccountQue
     take: pageSize,
     offset: offset.value,
     orderBy: orderBy.value,
+    activated: filterActivated.value ? filterActivated.value === 'true' : undefined,
+    hasPunishment: filterHasPunishment.value ? filterHasPunishment.value === 'true' : undefined,
+    createdAfter: filterCreatedAfter.value || undefined,
+    createdBefore: filterCreatedBefore.value || undefined,
     ...overrides,
   }
 }
@@ -279,6 +301,10 @@ function handleSearch() {
 function clearSearch() {
   searchQuery.value = ''
   activeQuery.value = ''
+  filterActivated.value = ''
+  filterHasPunishment.value = ''
+  filterCreatedAfter.value = ''
+  filterCreatedBefore.value = ''
   offset.value = 0
   loadAccounts(listParams({ offset: 0, query: undefined }))
 }

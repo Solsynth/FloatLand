@@ -71,6 +71,8 @@ export interface AdminAccountDetail {
   activities?: SnActivity[]
   badges?: SnAccountBadge[]
   badgeCount?: number
+  connectionCount: number
+  passkeyCount: number
   board?: Record<string, unknown>[]
 }
 
@@ -125,6 +127,10 @@ export interface AdminAccountQuery {
   take?: number
   offset?: number
   orderBy?: OrderByField
+  activated?: boolean
+  hasPunishment?: boolean
+  createdAfter?: string
+  createdBefore?: string
 }
 
 // ============ Device & Session Management ============
@@ -1575,5 +1581,89 @@ export interface FlywheelAdminAppQuery {
   workspaceId?: string
   take?: number
   offset?: number
+}
+
+// ============ Account Action Logs (Padlock) ============
+
+export interface AdminActionLog {
+  id: string
+  action: string
+  meta?: Record<string, unknown>
+  userAgent?: string
+  ipAddress?: string
+  location?: { latitude: number; longitude: number; country?: string; city?: string }
+  accountId: string
+  sessionId?: string
+  createdAt?: string
+  updatedAt?: string
+}
+
+// ============ Account Name History (Padlock) ============
+
+export interface AdminNameHistory {
+  name: string
+  accountId: string
+  createdAt?: string
+}
+
+// ============ Account Passkeys (Padlock admin view) ============
+
+export interface AdminPasskey {
+  id: string
+  accountId: string
+  label: string
+  createdAt?: string
+  updatedAt?: string
+}
+
+// ============ Account Connections (Padlock admin view) ============
+
+export interface AdminAccountConnection {
+  id: string
+  provider: string
+  providedIdentifier: string
+  meta?: Record<string, unknown>
+  lastUsedAt?: string
+  isPublic: boolean
+  accountId: string
+  registeredAt?: string
+  createdAt?: string
+  updatedAt?: string
+}
+
+// ============ Account Relationships (Padlock admin view) ============
+
+export interface AdminAccountRelationship {
+  accountId: string
+  relatedId: string
+  alias?: string
+  status: number
+  degradeToStatus?: number
+  createdAt?: string
+  updatedAt?: string
+  expiredAt?: string
+}
+
+// ============ Profile Update (Padlock) ============
+
+export interface AdminProfileUpdatePayload {
+  first_name?: string
+  middle_name?: string
+  last_name?: string
+  bio?: string
+  gender?: string
+  pronouns?: string
+  time_zone?: string
+  location?: string
+}
+
+// ============ Batch Operations (Padlock) ============
+
+export interface BatchRevokeDevicePayload {
+  device_ids: string[]
+}
+
+export interface BatchVerifyContactsPayload {
+  contact_ids: string[]
 }
 
