@@ -5,7 +5,7 @@
       <div class="space-y-4 min-w-0">
         <!-- Search Bar -->
         <div class="relative">
-          <IconSearch class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-base-content/40" />
+          <IconSearch class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-base-content/40 z-10" />
           <input
             ref="searchInputRef"
             v-model="searchQuery"

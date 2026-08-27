@@ -14,7 +14,7 @@
       <div class="lg:col-span-1 space-y-4">
         <AdminCard>
           <div class="relative">
-            <IconSearch class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-base-content/40" />
+            <IconSearch class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-base-content/40 z-10" />
             <input
               v-model="groupQuery"
               type="text"
@@ -159,7 +159,13 @@
                 {{ membersLoading ? 'Loading...' : `Load more (${detail.memberTotal - detail.members.length} remaining)` }}
               </button>
             </div>
-            <p v-else class="text-sm text-base-content/40">No members</p>
+            <div v-else class="flex flex-col items-center gap-3 py-6">
+              <IconUser class="w-8 h-8 text-base-content/20" />
+              <p class="text-sm text-base-content/40">No members yet</p>
+              <button class="btn btn-ghost btn-sm" @click="openAddMember">
+                <IconPlus class="w-3.5 h-3.5" /> Add first member
+              </button>
+            </div>
           </AdminCard>
         </template>
 

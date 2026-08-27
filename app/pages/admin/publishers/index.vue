@@ -9,7 +9,7 @@
       </div>
       <form class="space-y-3" @submit.prevent="handleSearch">
         <div class="relative">
-          <IconSearch class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/40" aria-hidden="true" />
+          <IconSearch class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/40 z-10" aria-hidden="true" />
           <input
             v-model="searchQuery"
             type="search"

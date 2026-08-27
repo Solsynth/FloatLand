@@ -91,7 +91,7 @@
       <AdminCard class="mb-4">
         <div class="flex flex-col sm:flex-row gap-3">
           <div class="relative flex-1">
-            <IconSearch class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-base-content/40" />
+            <IconSearch class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-base-content/40 z-10" />
             <input
               v-model="filters.workspaceId"
               type="text"
@@ -202,7 +202,7 @@
       <AdminCard class="mb-4">
         <div class="flex flex-col sm:flex-row gap-3">
           <div class="relative flex-1">
-            <IconSearch class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-base-content/40" />
+            <IconSearch class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-base-content/40 z-10" />
             <input
               v-model="auditFilters.workspaceId"
               type="text"
@@ -212,7 +212,7 @@
             />
           </div>
           <div class="relative flex-1">
-            <IconSearch class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-base-content/40" />
+            <IconSearch class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-base-content/40 z-10" />
             <input
               v-model="auditFilters.appId"
               type="text"

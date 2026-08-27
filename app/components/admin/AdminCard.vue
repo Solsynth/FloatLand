@@ -11,6 +11,7 @@
     <div
       v-if="$slots.header || $slots.actions || title"
       class="flex items-center justify-between gap-3 border-b border-base-300/60 bg-base-200/40"
+      :class="[compact ? 'px-4 py-3' : 'px-5 py-3.5']"
     >
       <div v-if="title" class="min-w-0">
         <h3 class="font-semibold text-sm text-base-content leading-snug">

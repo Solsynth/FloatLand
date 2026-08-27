@@ -1276,7 +1276,7 @@ const contactLoading = ref(false)
 const contactForm = ref({ type: 0, content: '' })
 
 async function loadContacts() {
-  try { contacts.value = await fetchAccountContacts(identifier.value) } catch { contacts.value = [] }
+  try { contacts.value = (await fetchAccountContacts(identifier.value)) ?? [] } catch { contacts.value = [] }
 }
 
 function editContact(c: SnContact) {
@@ -1350,7 +1350,7 @@ const connectionsLoading = ref(false)
 async function loadConnections() {
   connectionsLoading.value = true
   try {
-    connections.value = await fetchAccountPublicConnections(identifier.value)
+    connections.value = (await fetchAccountPublicConnections(identifier.value)) ?? []
   } catch {
     connections.value = []
   } finally {
@@ -1379,7 +1379,7 @@ const nameHistory = ref<AdminNameHistory[]>([])
 
 async function loadNameHistory() {
   try {
-    nameHistory.value = await fetchAccountNameHistory(identifier.value)
+    nameHistory.value = (await fetchAccountNameHistory(identifier.value)) ?? []
   } catch {
     nameHistory.value = []
   }
@@ -1390,7 +1390,7 @@ const adminConnections = ref<AdminAccountConnection[]>([])
 
 async function loadAdminConnections() {
   try {
-    adminConnections.value = await fetchAccountAdminConnections(identifier.value)
+    adminConnections.value = (await fetchAccountAdminConnections(identifier.value)) ?? []
   } catch {
     adminConnections.value = []
   }
@@ -1401,7 +1401,7 @@ const passkeys = ref<AdminPasskey[]>([])
 
 async function loadPasskeys() {
   try {
-    passkeys.value = await fetchAccountPasskeys(identifier.value)
+    passkeys.value = (await fetchAccountPasskeys(identifier.value)) ?? []
   } catch {
     passkeys.value = []
   }
@@ -1488,7 +1488,7 @@ function boardKindLabel(kind: AdminBoardItem['kind']): string {
 async function loadBoard() {
   boardLoading.value = true
   try {
-    boardItems.value = await fetchAdminAccountBoard(identifier.value)
+    boardItems.value = (await fetchAdminAccountBoard(identifier.value)) ?? []
   } catch {
     boardItems.value = []
   } finally {
@@ -1537,7 +1537,7 @@ const factorCreateForm = ref({ type: 0 })
 const passwordResetForm = ref({ newPassword: '', revokeSessions: true })
 
 async function loadFactors() {
-  try { factors.value = await fetchAccountFactors(identifier.value) } catch { factors.value = [] }
+  try { factors.value = (await fetchAccountFactors(identifier.value)) ?? [] } catch { factors.value = [] }
 }
 
 async function doCreateFactor() {
@@ -1621,7 +1621,7 @@ const spellContactMethod = ref('email')
 async function loadSpells() {
   spellsLoading.value = true
   try {
-    spells.value = await fetchAccountSpells(identifier.value)
+    spells.value = (await fetchAccountSpells(identifier.value)) ?? []
   } catch {
     spells.value = []
   } finally {
