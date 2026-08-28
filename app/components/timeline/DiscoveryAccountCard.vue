@@ -56,6 +56,7 @@
 <script setup lang="ts">
 import type { DiscoveryItem } from "~/types/post";
 import { getFileUrl } from "~/utils/files";
+import { getInitials } from "~/utils/identity";
 import { IconSparkles } from "#components";
 
 const { t } = useI18n();
@@ -64,33 +65,11 @@ const props = defineProps<{
   item: DiscoveryItem;
 }>();
 
-const account = computed(() => {
-  const data = props.item.data as unknown as {
-    id: string;
-    name: string;
-    nick?: string;
-    profile?: {
-      bio?: string;
-      picture?: { id: string };
-    };
-  };
-  return data;
-});
-
 const accountPictureUrl = computed(() => {
   if (!account.value.profile?.picture) return undefined;
   return getFileUrl(account.value.profile.picture.id) ?? undefined;
 });
-
+ 
 const reasons = computed(() => props.item.reasons ?? []);
 
-function getInitials(name: string): string {
-  if (!name || name === "Unknown") return "?";
-  return name
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
-}
 </script>

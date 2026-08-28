@@ -7,7 +7,7 @@
     <ClientOnly>
       <PopoverRoot v-if="showAddButton" v-model:open="showReactionPicker">
         <PopoverTrigger
-          class="btn btn-ghost btn-xs h-7 gap-1 px-2"
+          class="react-trigger btn btn-ghost btn-xs h-7 gap-1 !pl-0"
           aria-label="Add reaction"
         >
           <IconSmilePlus class="h-3.5 w-3.5" />
@@ -125,15 +125,24 @@ const showReactionPicker = ref(false);
 const showAll = ref(false);
 
 const availableReactions = [
-  { symbol: "thumb_up", emoji: "👍", label: "Like" },
-  { symbol: "heart", emoji: "❤️", label: "Love" },
-  { symbol: "clap", emoji: "👏", label: "Clap" },
-  { symbol: "party", emoji: "🎉", label: "Party" },
-  { symbol: "laugh", emoji: "😂", label: "Laugh" },
-  { symbol: "cry", emoji: "😢", label: "Cry" },
-  { symbol: "angry", emoji: "😠", label: "Angry" },
-  { symbol: "confuse", emoji: "😕", label: "Confused" },
-  { symbol: "pray", emoji: "🙏", label: "Pray" },
+  // Positive (attitude: 0)
+  { symbol: "thumb_up", emoji: "👍", label: "Like", attitude: 0 },
+  { symbol: "heart", emoji: "❤️", label: "Love", attitude: 0 },
+  { symbol: "clap", emoji: "👏", label: "Clap", attitude: 0 },
+  { symbol: "laugh", emoji: "😂", label: "Laugh", attitude: 0 },
+  { symbol: "party", emoji: "🎉", label: "Party", attitude: 0 },
+  { symbol: "salute", emoji: "🫡", label: "Salute", attitude: 0 },
+  // Neutral (attitude: 1)
+  { symbol: "pray", emoji: "🙏", label: "Pray", attitude: 1 },
+  { symbol: "hello", emoji: "👋", label: "Hello", attitude: 1 },
+  { symbol: "shock", emoji: "😱", label: "Shock", attitude: 1 },
+  { symbol: "confuse", emoji: "🧐", label: "Confused", attitude: 1 },
+  { symbol: "cry", emoji: "😭", label: "Cry", attitude: 1 },
+  { symbol: "speechless", emoji: "😶", label: "Speechless", attitude: 1 },
+  { symbol: "ridicule", emoji: "😏", label: "Ridicule", attitude: 1 },
+  // Negative (attitude: 2)
+  { symbol: "angry", emoji: "😡", label: "Angry", attitude: 2 },
+  { symbol: "thumb_down", emoji: "👎", label: "Dislike", attitude: 2 },
 ];
 
 const stickerSymbols = new Set([
@@ -154,6 +163,9 @@ const stickerSymbols = new Set([
   "onegai",
   "sleepy",
   "sorry",
+  "ridicule",
+  "salute",
+  "shock",
 ]);
 
 const displayReactions = computed(() => {
@@ -203,7 +215,8 @@ function addReaction(symbol: string) {
   if (isReactionSelected(symbol)) {
     emit("remove", symbol);
   } else {
-    emit("react", symbol, 0);
+    const reaction = availableReactions.find((r) => r.symbol === symbol);
+    emit("react", symbol, reaction?.attitude ?? 0);
   }
   showReactionPicker.value = false;
 }
@@ -211,6 +224,12 @@ function addReaction(symbol: string) {
 </script>
 
 <style scoped>
+/* React "Add reaction" trigger: pull icon flush to content edge.
+   DaisyUI `btn` adds 1px border-left that nudges the icon 1px right. */
+.react-trigger {
+  border-left: none;
+}
+
 :global(.reaction-popover-content) {
   transform-origin: var(--reka-popover-content-transform-origin);
 }
@@ -245,3 +264,4 @@ function addReaction(symbol: string) {
   }
 }
 </style>
+

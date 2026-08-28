@@ -1,145 +1,76 @@
 <template>
   <article :class="rootClass">
     <div :class="bodyClass">
-      <!-- Reference Post (Reply/Forward) -->
+      <!-- Reference post (reply / forward) -->
       <div v-if="showReference && hasReference" class="mb-2">
         <button
           type="button"
-          class="flex w-full items-center gap-1.5 text-left text-xs font-medium text-base-content/50 hover:text-base-content/70 transition-colors"
+          class="flex w-full items-center gap-1.5 text-left text-xs font-medium text-base-content/50 transition-colors hover:text-base-content/70"
+          :aria-expanded="!referenceCollapsed"
           @click.stop="referenceCollapsed = !referenceCollapsed"
         >
           <IconReply v-if="referenceIsReply" class="h-3.5 w-3.5" />
           <IconForward v-else class="h-3.5 w-3.5" />
           <span>{{ referenceIsReply ? "Replied to" : "Forwarded" }}</span>
           <IconChevronDown
-            v-if="referenceCollapsed"
-            class="h-3.5 w-3.5 ml-auto"
+            class="ml-auto h-3.5 w-3.5 transition-transform"
+            :class="{ 'rotate-180': referenceCollapsed }"
           />
-          <IconChevronUp v-else class="h-3.5 w-3.5 ml-auto" />
         </button>
 
         <div
           v-if="!referenceCollapsed && referencePost"
           class="mt-2 grid grid-cols-[40px_1fr] gap-3"
         >
-          <!-- Publisher avatar + threading line -->
           <div class="flex flex-col items-center">
-            <component
-              :is="referencePost.publisher ? 'NuxtLink' : 'div'"
-              class="shrink-0"
-              :to="
-                referencePost.publisher
-                  ? `/publishers/${referencePost.publisher.name}`
-                  : undefined
-              "
+            <PublisherAvatar
+              :publisher="referencePost.publisher"
+              size="sm"
+              linked
               @click.stop
-            >
-              <div v-if="getAvatarUrl(referencePost)" class="avatar">
-                <div class="h-7 w-7 rounded-full">
-                  <img
-                    :src="getAvatarUrl(referencePost)"
-                    :alt="getDisplayName(referencePost.publisher)"
-                    class="h-full w-full rounded-full object-cover"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </div>
-              </div>
-              <div v-else class="avatar avatar-placeholder">
-                <div
-                  class="h-7 w-7 rounded-full bg-primary text-primary-content"
-                >
-                  <span class="text-[10px] font-medium">
-                    {{ getInitials(getDisplayName(referencePost.publisher)) }}
-                  </span>
-                </div>
-              </div>
-            </component>
-            <div class="w-px flex-1 min-h-2 bg-base-300/80 mt-1" />
+            />
+            <div class="mt-1 min-h-2 w-px flex-1 bg-base-300/80" />
           </div>
 
-          <!-- Referenced post content -->
-          <div
-            class="min-w-0 pb-2 cursor-pointer"
-            @click.stop="navigateToReference"
-          >
-            <!-- Author info -->
-            <div class="flex items-center gap-2 mb-1 min-h-7">
+          <div class="min-w-0 cursor-pointer pb-2" @click.stop="navigateToReference">
+            <div class="mb-1 flex min-h-7 items-center gap-2">
               <AccountName
-                :account="
-                  referencePost.publisher.account || referencePost.publisher
-                "
+                :account="referencePost.publisher.account || referencePost.publisher"
                 :text-override="getDisplayName(referencePost.publisher)"
                 size="sm"
                 hide-verification-mark
               />
             </div>
-
-            <!-- Content preview -->
-            <!-- eslint-disable vue/no-v-html -->
+            <!-- eslint-disable-next-line vue/no-v-html -->
             <div
               v-if="referencePost.content"
-              class="prose prose-xs max-w-none break-words text-xs line-clamp-3 prose-p:my-0.5 prose-headings:mb-1 prose-headings:mt-1 prose-a:text-primary prose-a:no-underline"
+              class="prose prose-xs line-clamp-3 max-w-none break-words text-xs prose-a:text-primary prose-a:no-underline prose-headings:mb-1 prose-headings:mt-1 prose-p:my-0.5"
               v-html="renderedReferenceContent"
             />
-            <!-- eslint-enable vue/no-v-html -->
-
-            <!-- Truncated hint -->
             <div
               v-if="referencePost.isTruncated"
-              class="mt-1 inline-flex items-center gap-1 text-xs text-base-content/50 italic"
+              class="mt-1 inline-flex items-center gap-1 text-xs italic text-base-content/50"
             >
               <IconEllipsis class="h-3 w-3" />
               <span>Post truncated</span>
             </div>
-
-            <!-- Attachments indicator -->
-            <div
-              v-if="referencePost.attachments.length > 0"
-              class="mt-1 inline-flex items-center gap-1 text-xs text-base-content/50"
-            >
-              <IconPaperclip class="h-3 w-3" />
-              <span>{{ referencePost.attachments.length }} attachment(s)</span>
-            </div>
-          </div>
+                      </div>
+        </div>
+        <div
+          v-if="!referenceCollapsed && referencePost && referencePost.attachments.length > 0"
+          class="mt-1 inline-flex items-center gap-1 text-xs text-base-content/50"
+        >
+          <IconPaperclip class="h-3 w-3" />
+          <span>{{ referencePost.attachments.length }} attachment(s)</span>
         </div>
       </div>
 
-      <!-- Post Header -->
+      <!-- Header -->
       <div class="flex items-start gap-3">
-        <!-- Avatar -->
-        <component
-          :is="post.publisher ? 'NuxtLink' : 'div'"
-          type="button"
-          class="shrink-0"
-          :to="
-            post.publisher ? `/publishers/${post.publisher.name}` : undefined
-          "
-          @click.stop
-        >
-          <div v-if="getAvatarUrl(post)" class="avatar">
-            <div class="h-10 w-10 rounded-full">
-                <img
-                  :src="getAvatarUrl(post)"
-                  :alt="getDisplayName(post.publisher)"
-                  class="h-full w-full rounded-full object-cover"
-                  loading="lazy"
-                  decoding="async"
-                />
-            </div>
-          </div>
-          <div v-else class="avatar avatar-placeholder">
-            <div class="h-10 w-10 rounded-full bg-primary text-primary-content">
-              <span class="text-sm font-medium">
-                {{ getInitials(getDisplayName(post.publisher)) }}
-              </span>
-            </div>
-          </div>
-        </component>
+        <PublisherAvatar :publisher="post.publisher" size="md" linked @click.stop />
 
-        <!-- Author info -->
-        <div class="flex-1 min-w-0">
-          <div class="flex items-center gap-1.5 min-w-0">
+        <div class="min-w-0 flex-1">
+          <div class="flex min-w-0 items-center gap-1.5">
             <NuxtLink
               v-if="post.publisher"
               :to="`/publishers/${post.publisher.name}`"
@@ -152,16 +83,15 @@
                 size="sm"
               />
             </NuxtLink>
-            <span v-else class="text-sm leading-tight font-semibold truncate">
+            <span v-else class="truncate text-sm font-semibold leading-tight">
               {{ getDisplayName(post.publisher) }}
             </span>
 
-            <!-- Realm -->
             <template v-if="post.realm">
-              <IconChevronRight class="h-3 w-3 text-base-content/40 shrink-0" />
+              <IconChevronRight class="h-3 w-3 shrink-0 text-base-content/40" />
               <NuxtLink
                 :to="`/realms/${post.realm.slug}`"
-                class="flex items-center gap-1 text-xs text-base-content/60 hover:underline truncate"
+                class="flex items-center gap-1 truncate text-xs text-base-content/60 hover:underline"
                 @click.stop
               >
                 <span>{{ post.realm.name }}</span>
@@ -179,9 +109,10 @@
         </div>
 
         <!-- Menu -->
-        <div class="relative shrink-0">
+        <div ref="menuWrapper" class="relative shrink-0">
           <button
             class="btn btn-circle btn-ghost btn-sm"
+            aria-label="Post options"
             @click.stop="showMenu = !showMenu"
           >
             <IconMoreHorizontal class="h-5 w-5" />
@@ -190,7 +121,6 @@
             v-if="showMenu"
             class="absolute top-full right-0 z-50 mt-1"
             role="menu"
-            tabindex="-1"
             @click.stop
           >
             <ul class="menu w-48 rounded-box bg-base-100 shadow-lg">
@@ -237,14 +167,14 @@
         </div>
       </div>
 
-      <!-- Article type header (only in list view) -->
+      <!-- Article card (list view) -->
       <div
         v-if="isArticle && !isDetail"
         class="mt-2 overflow-hidden rounded-lg border border-base-300/70 bg-base-200/40"
       >
         <NuxtLink
           :to="`/posts/${post.id}`"
-          class="block hover:bg-base-200/50 transition-colors"
+          class="block transition-colors hover:bg-base-200/50"
         >
           <div v-if="thumbnailUrl" class="aspect-video w-full overflow-hidden">
             <img
@@ -257,12 +187,12 @@
           </div>
           <div class="p-3">
             <div class="badge badge-primary badge-sm mb-2">Article</div>
-            <h3 v-if="post.title" class="text-base font-bold line-clamp-2">
+            <h3 v-if="post.title" class="line-clamp-2 text-base font-bold">
               {{ post.title }}
             </h3>
             <p
               v-if="post.description"
-              class="text-sm text-base-content/70 line-clamp-2 mt-1"
+              class="mt-1 line-clamp-2 text-sm text-base-content/70"
             >
               {{ post.description }}
             </p>
@@ -270,53 +200,34 @@
         </NuxtLink>
       </div>
 
-      <!-- Content (shown for all posts, or for articles in detail view) -->
+      <!-- Body -->
       <div v-if="!isArticle || isDetail" class="mt-2">
         <div v-if="isArticle && isDetail" class="mb-3">
           <div class="badge badge-primary badge-sm mb-2">Article</div>
           <h3 v-if="post.title" class="text-xl font-bold">
             {{ post.title }}
           </h3>
-          <p
-            v-if="post.description"
-            class="text-base text-base-content/70 mt-2"
-          >
+          <p v-if="post.description" class="mt-2 text-base text-base-content/70">
             {{ post.description }}
           </p>
         </div>
-        <h3
-          v-else-if="post.title"
-          class="mb-2 text-base font-bold line-clamp-2"
-        >
+        <h3 v-else-if="post.title" class="mb-2 line-clamp-2 text-base font-bold">
           {{ post.title }}
         </h3>
-        <!-- eslint-disable vue/no-v-html -->
+        <!-- eslint-disable-next-line vue/no-v-html -->
         <div
-          class="prose prose-sm max-w-none break-words prose-headings:mb-2 prose-headings:mt-4 prose-p:my-1.5 prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-a:break-all prose-code:text-primary prose-code:bg-base-200 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-base-200 prose-pre:text-sm prose-pre:overflow-x-auto prose-blockquote:border-l-4 prose-blockquote:border-primary/30 prose-blockquote:pl-4 prose-blockquote:italic prose-ul:my-1.5 prose-ol:my-1.5"
+          class="prose prose-sm max-w-none break-words prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-a:break-all prose-blockquote:border-l-4 prose-blockquote:border-primary/30 prose-blockquote:pl-4 prose-blockquote:italic prose-code:bg-base-200 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-primary prose-headings:mb-2 prose-headings:mt-4 prose-ol:my-1.5 prose-p:my-1.5 prose-pre:bg-base-200 prose-pre:overflow-x-auto prose-pre:text-sm prose-ul:my-1.5"
           :class="{ 'prose-lg': isArticle && isDetail }"
-          v-html="renderedContent"
           @click="handleMarkdownClick"
+          v-html="renderedContent"
         />
-        <!-- eslint-enable vue/no-v-html -->
-
-        <!-- Read more link -->
-        <NuxtLink
-          v-if="!isDetail"
-          :to="`/posts/${post.id}`"
-          class="mt-2 inline-flex items-center gap-1.5 text-sm btn btn-link btn-xs -mx-2"
-        >
-          <span>Read more</span>
-          <IconArrowRight class="h-4 w-4" />
-        </NuxtLink>
       </div>
 
-      <!-- Attachments (hidden for articles — thumbnail is shown in the article card) -->
       <AttachmentGrid
         v-if="!isArticle && post.attachments.length > 0"
         :attachments="post.attachments"
       />
 
-      <!-- Tags -->
       <div v-if="post.tags.length > 0" class="mt-3 flex flex-wrap gap-1.5">
         <NuxtLink
           v-for="tag in displayTags"
@@ -338,7 +249,6 @@
       <!-- Embeds -->
       <div v-if="embeds.length > 0" class="mt-3 space-y-2">
         <div v-for="(embed, idx) in embeds" :key="idx">
-          <!-- Link Embed -->
           <button
             v-if="getEmbedType(embed) === 'link'"
             type="button"
@@ -350,9 +260,7 @@
               class="aspect-video w-full overflow-hidden rounded-t-xl"
             >
               <img
-                :src="
-                  resolveAssetUrl(getEmbedUrl(embed)!, getEmbedImage(embed)!)
-                "
+                :src="resolveAssetUrl(getEmbedUrl(embed)!, getEmbedImage(embed)!)"
                 :alt="getEmbedTitle(embed) || 'Link preview'"
                 class="h-full w-full object-cover"
                 loading="lazy"
@@ -362,12 +270,7 @@
               <div class="flex items-center gap-2 text-xs text-base-content/60">
                 <img
                   v-if="getEmbedFavicon(embed)"
-                  :src="
-                    resolveAssetUrl(
-                      getEmbedUrl(embed)!,
-                      getEmbedFavicon(embed)!,
-                    )
-                  "
+                  :src="resolveAssetUrl(getEmbedUrl(embed)!, getEmbedFavicon(embed)!)"
                   alt="Site icon"
                   class="h-4 w-4 rounded object-cover"
                   loading="lazy"
@@ -378,10 +281,7 @@
                 </span>
                 <IconExternalLink class="ml-auto h-3.5 w-3.5" />
               </div>
-              <div
-                v-if="getEmbedTitle(embed)"
-                class="line-clamp-2 text-sm font-semibold"
-              >
+              <div v-if="getEmbedTitle(embed)" class="line-clamp-2 text-sm font-semibold">
                 {{ getEmbedTitle(embed) }}
               </div>
               <div
@@ -393,7 +293,6 @@
             </div>
           </button>
 
-          <!-- Poll Embed -->
           <div
             v-else-if="getEmbedType(embed) === 'poll'"
             class="rounded-lg border border-base-300/70 bg-base-200/40"
@@ -402,10 +301,7 @@
               <div class="flex items-center gap-2 text-sm font-medium">
                 <IconVote class="h-4 w-4" /> Poll
               </div>
-              <div
-                v-if="getEmbedTitle(embed)"
-                class="text-sm text-base-content/80"
-              >
+              <div v-if="getEmbedTitle(embed)" class="text-sm text-base-content/80">
                 {{ getEmbedTitle(embed) }}
               </div>
             </div>
@@ -428,7 +324,6 @@
         </span>
       </div>
 
-      <!-- Reactions -->
       <PostReactionList
         :reactions="formattedReactions"
         :post-id="post.id"
@@ -437,7 +332,6 @@
         @remove="handleRemoveReaction"
       />
 
-      <!-- Reply Preview -->
       <PostReplyPreview
         v-if="!isDetail && post.repliesCount > 0"
         :post-id="post.id"
@@ -450,27 +344,23 @@
       <!-- Actions -->
       <div
         class="mt-3 flex items-center justify-between"
-        :class="isFeed ? 'pt-2' : 'pt-3 border-t border-base-200'"
+        :class="isFeed ? 'pt-2' : 'border-t border-base-200 pt-3'"
       >
         <div class="flex items-center gap-0.5">
           <button
-            class="btn gap-1.5 btn-ghost btn-sm text-base-content/60 hover:bg-primary/10 hover:text-primary"
+            class="btn btn-ghost btn-sm gap-1.5 !pl-0 text-base-content/60 hover:bg-primary/10 hover:text-primary"
             @click.stop="handleReply"
           >
             <IconMessageCircle class="h-4 w-4" />
-            <span class="text-xs tabular-nums">{{
-              formatNumber(post.repliesCount)
-            }}</span>
+            <span class="text-xs tabular-nums">{{ formatNumber(post.repliesCount) }}</span>
           </button>
           <button
-            class="btn gap-1.5 btn-ghost btn-sm text-base-content/60 hover:bg-success/10 hover:text-success"
+            class="btn btn-ghost btn-sm gap-1.5 text-base-content/60 hover:bg-success/10 hover:text-success"
             :class="{ 'text-success': hasBoosted }"
             @click.stop="handleBoost"
           >
             <IconRepeat2 class="h-4 w-4" />
-            <span class="text-xs tabular-nums">{{
-              formatNumber(post.boostCount)
-            }}</span>
+            <span class="text-xs tabular-nums">{{ formatNumber(post.boostCount) }}</span>
           </button>
         </div>
       </div>
@@ -482,20 +372,13 @@
 import type { Post } from "~/types/post";
 import { getFileUrl } from "~/utils/files";
 import { renderMarkdown } from "~/utils/markdown";
+import { getDisplayName } from "~/utils/identity";
 import {
   IconMessageCircle,
   IconRepeat2,
   IconMoreHorizontal,
   IconShare,
   IconFlag,
-  IconLink,
-  IconReply,
-  IconForward,
-  IconChevronDown,
-  IconChevronUp,
-  IconChevronRight,
-  IconEllipsis,
-  IconArrowRight,
   IconPaperclip,
   IconPenLine,
   IconPencil,
@@ -535,12 +418,8 @@ const props = withDefaults(defineProps<Props>(), {
 const isFeed = computed(() => props.variant === "feed");
 
 const rootClass = computed(() => {
-  if (isFeed.value) {
-    return "feed-post";
-  }
-  if (props.embedded) {
-    return "card bg-base-200 transition-shadow";
-  }
+  if (isFeed.value) return "feed-post";
+  if (props.embedded) return "card bg-base-200 transition-shadow";
   return "card bg-base-100 shadow-sm transition-shadow hover:shadow-md";
 });
 
@@ -580,8 +459,17 @@ watch(
 const showMenu = ref(false);
 const referenceCollapsed = ref(false);
 const hasBoosted = ref(false);
-const hasUpvoted = ref(false);
-const hasDownvoted = ref(false);
+const menuWrapper = ref<HTMLElement | null>(null);
+
+// Close the menu when clicking outside of it
+function handleDocumentClick(e: MouseEvent) {
+  if (showMenu.value && menuWrapper.value && !menuWrapper.value.contains(e.target as Node)) {
+    showMenu.value = false;
+  }
+}
+
+onMounted(() => document.addEventListener("click", handleDocumentClick));
+onUnmounted(() => document.removeEventListener("click", handleDocumentClick));
 
 // Check if current user is the author
 const isAuthor = computed(() => {
@@ -608,6 +496,25 @@ const displayContent = computed(() => {
 const renderedContent = computed(() => renderMarkdown(displayContent.value));
 
 // Handle markdown element clicks
+const { open: openLightbox } = useLightbox();
+
+// Open the shared lightbox viewer for a markdown-embedded image.
+function openMarkdownImage(img: HTMLImageElement) {
+  const fileId = img.dataset.fileId;
+  const src = img.getAttribute("src") || "";
+  openLightbox([
+    {
+      id: fileId || src,
+      name: fileId || src,
+      url: src,
+      mimeType: "image/*",
+      hasCompression: false,
+      hasThumbnail: false,
+      fileMeta: {},
+    },
+  ]);
+}
+
 const handleMarkdownClick = (e: MouseEvent) => {
   const target = e.target as HTMLElement;
 
@@ -624,6 +531,30 @@ const handleMarkdownClick = (e: MouseEvent) => {
   // Handle spoiler toggles
   if (target.classList.contains("spoiler")) {
     target.classList.toggle("revealed");
+    return;
+  }
+
+  // Let links and buttons behave natively
+  if (target.closest("a") || target.closest("button")) {
+    return;
+  }
+
+  // Open markdown-embedded images in the lightbox
+  if (target.tagName === "IMG") {
+    e.preventDefault();
+    openMarkdownImage(target as HTMLImageElement);
+    return;
+  }
+
+  // Respect ongoing text selection — never navigate while selecting
+  const selection = window.getSelection();
+  if (selection && !selection.isCollapsed) {
+    return;
+  }
+
+  // Click anywhere else on the body opens the post detail page
+  if (!props.isDetail) {
+    navigateTo(`/posts/${props.post.id}`);
   }
 };
 
@@ -636,14 +567,10 @@ const referenceIsReply = computed(() => Boolean(props.post.repliedPost));
 const renderedReferenceContent = computed(() => {
   if (!referencePost.value) return "";
   const content = referencePost.value.content ?? "";
-  const displayContent = referencePost.value.isTruncated
-    ? `${content}...`
-    : content;
-  return renderMarkdown(displayContent);
+  const preview = referencePost.value.isTruncated ? `${content}...` : content;
+  return renderMarkdown(preview);
 });
 
-// Scores
-const netScore = computed(() => props.post.upvotes - props.post.downvotes);
 const hasEdits = computed(() => props.post.editedAt != null);
 
 // Reactions
@@ -651,7 +578,7 @@ const formattedReactions = computed(() => {
   return Object.entries(localReactionsCount.value).map(([symbol, count]) => ({
     symbol,
     attitude: 0,
-    count: count as number,
+    count,
     userReacted: localReactionsMade.value[symbol] || false,
   }));
 });
@@ -708,13 +635,6 @@ function getEmbedUrl(embed: EmbedItem): string | null {
   return getEmbedString(embed, ["url", "uri", "href"]);
 }
 
-function getEmbedId(embed: EmbedItem): string | null {
-  const raw = embed.id;
-  if (typeof raw === "string" && raw.trim() !== "") return raw;
-  if (typeof raw === "number") return String(raw);
-  return null;
-}
-
 function getEmbedTitle(embed: EmbedItem): string | null {
   return getEmbedString(embed, ["title"]);
 }
@@ -762,18 +682,17 @@ function openExternal(url: string): void {
 }
 
 function formatNumber(num: number): string {
-  if (num >= 1000000) return (num / 1000000).toFixed(1) + "M";
-  if (num >= 1000) return (num / 1000).toFixed(1) + "K";
+  if (num >= 1_000_000) return (num / 1_000_000).toFixed(1) + "M";
+  if (num >= 1_000) return (num / 1_000).toFixed(1) + "K";
   return num.toString();
 }
 
-function formatDate(dateStr: string, isDetailMode: boolean = false): string {
+function formatDate(dateStr: string, isDetailMode = false): string {
   const date = new Date(dateStr);
-  const now = new Date();
-  const diff = now.getTime() - date.getTime();
-  const minutes = Math.floor(diff / 60000);
-  const hours = Math.floor(diff / 3600000);
-  const days = Math.floor(diff / 86400000);
+  const diff = Date.now() - date.getTime();
+  const minutes = Math.floor(diff / 60_000);
+  const hours = Math.floor(diff / 3_600_000);
+  const days = Math.floor(diff / 86_400_000);
 
   if (isDetailMode) {
     return date.toLocaleDateString("en-US", {
@@ -793,26 +712,6 @@ function formatDate(dateStr: string, isDetailMode: boolean = false): string {
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
-function getInitials(name: string): string {
-  if (!name || name === "Unknown") return "?";
-  return name
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
-}
-
-function getDisplayName(target: Post["publisher"]): string {
-  if (!target) return "Unknown";
-  return target.nick || target.name || "Unknown";
-}
-
-function getAvatarUrl(target: Post): string {
-  if (!target.publisher) return "";
-  return getFileUrl(target.publisher.picture?.id) || "";
-}
-
 // Navigation
 function navigateToReference() {
   if (referencePost.value) {
@@ -821,79 +720,62 @@ function navigateToReference() {
 }
 
 // Actions
-function handleShare() {
+function closeMenu() {
   showMenu.value = false;
+}
+
+function handleShare() {
+  closeMenu();
   emit("share", props.post);
 }
 
 function handleCopyLink() {
   const url = `${window.location.origin}/posts/${props.post.id}`;
   navigator.clipboard.writeText(url);
-  showMenu.value = false;
+  closeMenu();
 }
 
 function handleReply() {
-  showMenu.value = false;
+  closeMenu();
   const compose = useCompose();
   compose.initializeFromState({
     content: "",
     replyingTo: props.post,
   });
   emit("reply", props.post);
-  const event = new CustomEvent("open-compose");
-  window.dispatchEvent(event);
+  window.dispatchEvent(new CustomEvent("open-compose"));
 }
 
 function handleForward() {
-  showMenu.value = false;
+  closeMenu();
   const compose = useCompose();
   compose.initializeFromState({
     content: "",
     forwardingTo: props.post,
   });
-  const event = new CustomEvent("open-compose");
-  window.dispatchEvent(event);
+  window.dispatchEvent(new CustomEvent("open-compose"));
 }
 
 function handleEdit() {
-  showMenu.value = false;
+  closeMenu();
   const compose = useCompose();
   compose.initializeFromPost(props.post);
-  const event = new CustomEvent("open-compose");
-  window.dispatchEvent(event);
+  window.dispatchEvent(new CustomEvent("open-compose"));
 }
 
 function handleDelete() {
-  showMenu.value = false;
+  closeMenu();
   // TODO: Implement delete
 }
 
 function handleReport() {
-  showMenu.value = false;
+  closeMenu();
   // TODO: Implement report
 }
 
 function handleBoost() {
   hasBoosted.value = !hasBoosted.value;
   emit("boost", props.post);
-}
-
-function handleUpvote() {
-  if (hasUpvoted.value) {
-    hasUpvoted.value = false;
-  } else {
-    hasUpvoted.value = true;
-    hasDownvoted.value = false;
-  }
-}
-
-function handleDownvote() {
-  if (hasDownvoted.value) {
-    hasDownvoted.value = false;
-  } else {
-    hasDownvoted.value = true;
-    hasUpvoted.value = false;
-  }
 }
 
 async function handleReact(symbol: string, attitude: number) {
@@ -922,10 +804,7 @@ async function handleReact(symbol: string, attitude: number) {
 
 async function handleRemoveReaction(symbol: string) {
   // Optimistic update
-  const updatedCount = Math.max(
-    0,
-    (localReactionsCount.value[symbol] || 1) - 1,
-  );
+  const updatedCount = Math.max(0, (localReactionsCount.value[symbol] || 1) - 1);
   const { [symbol]: _, ...restCounts } = localReactionsCount.value;
   localReactionsCount.value =
     updatedCount > 0 ? { ...restCounts, [symbol]: updatedCount } : restCounts;
@@ -946,18 +825,18 @@ async function handleRemoveReaction(symbol: string) {
     $toast.error("Failed to remove reaction");
   }
 }
-
-// Close menu when clicking outside
-onMounted(() => {
-  const handleClickOutside = (e: MouseEvent) => {
-    const target = e.target as HTMLElement;
-    if (!target.closest(".relative")) {
-      showMenu.value = false;
-    }
-  };
-  document.addEventListener("click", handleClickOutside);
-  onUnmounted(() => {
-    document.removeEventListener("click", handleClickOutside);
-  });
-});
 </script>
+<style scoped>
+/* Pixel-perfect left alignment of footer controls with the content edge.
+   DaisyUI `btn` adds 1px border-left + padding, nudging icons right of the
+   prose edge. Pull them back so icon/text start exactly at content edge. */
+.feed-post .btn-ghost {
+  border-left: none;
+  padding-left: 0;
+}
+
+/* Tag / category chips: box flush with content edge, chip padding intact. */
+.feed-post .badge {
+  margin-left: 0;
+}
+</style>

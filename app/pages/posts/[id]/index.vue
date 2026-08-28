@@ -419,6 +419,7 @@ const interactionTabs = computed(() => [
 const stickerSymbols = new Set([
 	'thumb_up', 'heart', 'clap', 'party', 'laugh', 'cry', 'angry', 'confuse', 'pray',
 	'thumb_down', 'thinking', 'speechless', 'hello', 'eat', 'onegai', 'sleepy', 'sorry',
+	'ridicule', 'salute', 'shock',
 ]);
 
 function hasSticker(symbol: string): boolean {
@@ -436,10 +437,15 @@ function getReactionEmoji(symbol: string): string {
 		clap: '👏',
 		party: '🎉',
 		laugh: '😂',
-		cry: '😢',
-		angry: '😠',
-		confuse: '😕',
+		cry: '😭',
+		angry: '😡',
+		confuse: '🧐',
 		pray: '🙏',
+		hello: '👋',
+		shock: '😱',
+		speechless: '😶',
+		ridicule: '😏',
+		salute: '🫡',
 		thumb_down: '👎',
 	};
 	return emojiMap[symbol.toLowerCase()] || '❓';
@@ -464,6 +470,9 @@ function getReactionLabel(symbol: string): string {
 		onegai: t('post.reactionPlease'),
 		sleepy: t('post.reactionSleepy'),
 		sorry: t('post.reactionSorry'),
+		ridicule: t('post.reactionRidicule'),
+		salute: t('post.reactionSalute'),
+		shock: t('post.reactionShock'),
 	};
 	return labelMap[symbol.toLowerCase()] || symbol;
 }

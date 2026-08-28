@@ -1545,7 +1545,10 @@
     "reactionEat": "Eat",
     "reactionPlease": "Please",
     "reactionSleepy": "Sleepy",
-    "reactionSorry": "Sorry"
+    "reactionSorry": "Sorry",
+    "reactionRidicule": "Ridicule",
+    "reactionSalute": "Salute",
+    "reactionShock": "Shock"
   },
   "categories": {
     "title": "Categories & Tags",

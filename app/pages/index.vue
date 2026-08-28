@@ -12,7 +12,7 @@
           >
             <form
               class="flex items-start gap-3"
-              @click="publisherPickerOpen = false; attachMenuOpen = false"
+              @click="dismissInlinePopovers"
               @submit.prevent="submitInlinePost"
             >
               <div class="relative mt-0.5 shrink-0">
@@ -403,8 +403,6 @@
         <ExploreSidebar />
       </aside>
     </div>
-
-
   </NuxtLayout>
 </template>
 
@@ -468,12 +466,7 @@ const hasMore = ref(true);
 const fetchingMore = ref(false);
 const loadMoreSentinel = ref<HTMLElement | null>(null);
 
-const userName = computed(() => user.value?.nick || user.value?.name || "");
 const userAvatar = computed(() => getFileUrl(user.value?.profile?.picture?.id));
-const userInitials = computed(() => {
-  const name = user.value?.name || "?";
-  return name.slice(0, 2).toUpperCase();
-});
 
 const compose = useCompose();
 const {
@@ -525,6 +518,11 @@ async function loadComposePublishers() {
 function selectInlinePublisher(publisher: Publisher) {
   compose.setCurrentPublisher(publisher);
   publisherPickerOpen.value = false;
+}
+
+function dismissInlinePopovers() {
+  publisherPickerOpen.value = false;
+  attachMenuOpen.value = false;
 }
 
 function clearInlineReply() {
@@ -712,15 +710,6 @@ async function uploadInlineAttachments(): Promise<ComposeAttachment[]> {
   }
 
   return results;
-}
-
-function getPublisherInitials(name: string) {
-  return name
-    .split(" ")
-    .map((part) => part[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
 }
 
 async function submitInlinePost() {
@@ -924,5 +913,21 @@ function handleReply(post: Post) {
     replyingTo: post,
   });
   inlineComposeExpanded.value = true;
+}
+function handleBoost(_post: Post) {
+  // TODO: Implement boost
+}
+
+function handleShare(post: Post) {
+  const url = `${window.location.origin}/posts/${post.id}`;
+  if (navigator.share) {
+    navigator.share({
+      title: post.title || t("home.sharePostFallbackTitle"),
+      text: post.content.slice(0, 100),
+      url,
+    });
+  } else {
+    navigator.clipboard.writeText(url);
+  }
 }
 </script>

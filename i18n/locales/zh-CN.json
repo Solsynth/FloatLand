@@ -1543,7 +1543,10 @@
     "reactionEat": "吃",
     "reactionPlease": "拜托",
     "reactionSleepy": "困倦",
-    "reactionSorry": "抱歉"
+    "reactionSorry": "抱歉",
+    "reactionRidicule": "嘲讽",
+    "reactionSalute": "敬礼",
+    "reactionShock": "震惊"
   },
   "categories": {
     "title": "分类与标签",
