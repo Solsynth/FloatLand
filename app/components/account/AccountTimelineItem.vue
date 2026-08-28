@@ -59,9 +59,13 @@
           :src="`https://cdn.cloudflare.steamstatic.com/steam/apps/${item.activity.meta.gameId}/library_hero.jpg`"
           class="w-full h-full object-cover rounded-t-2xl"
           alt=""
-          @error="($event.target as HTMLImageElement).style.display = 'none'"
+          @load="steamBgLoaded = true"
+          @error="steamBgError = true"
         />
-        <div v-if="!isSteam" class="absolute inset-0 flex items-center justify-center">
+        <div v-if="!steamBgLoaded && !steamBgError" class="absolute inset-0 flex items-center justify-center">
+          <div class="w-6 h-6 border-2 border-white/30 border-t-white/70 rounded-full animate-spin" />
+        </div>
+        <div v-if="steamBgError" class="absolute inset-0 flex items-center justify-center">
           <IconGamepad class="w-8 h-8 text-white/70" />
         </div>
       </div>
@@ -83,7 +87,7 @@
             v-if="isSteam"
             class="absolute bottom-0 right-0 w-4 h-4 rounded-full bg-[#1B2838] flex items-center justify-center"
           >
-            <IconPlay class="w-2.5 h-2.5 text-white" />
+            <IconGamepad class="w-2.5 h-2.5 text-white" />
           </span>
         </div>
         <img
@@ -163,6 +167,20 @@ import {
   IconClock,
   IconExternalLink,
   IconGamepad,
+  IconCode,
+  IconGlobe,
+  IconPalette,
+  IconMessageCircle,
+  IconCheckSquare,
+  IconFileEdit,
+  IconBug,
+  IconUsers,
+  IconRocket,
+  IconBookOpen,
+  IconCheckCircle,
+  IconFilm,
+  IconGrid,
+  IconDumbbell,
 } from "#components";
 
 const props = defineProps<{
@@ -173,6 +191,102 @@ const props = defineProps<{
 
 const isSpotify = computed(() => props.item.activity?.manualId === "spotify");
 const isSteam = computed(() => props.item.activity?.manualId === "steam");
+const steamBgLoaded = ref(false);
+const steamBgError = ref(false);
+
+// --- Activity type → icon/color/label lookup maps (Solian pattern) ---
+// Maps numeric activity types (and manualId variants) to display properties.
+// FloatLand uses numeric types: 1=playing, 2=listening, 3=exercising.
+// Solian uses string slugs: 'gaming', 'music', 'workout', 'fitness', etc.
+
+const ACTIVITY_COLOR_MAP: Record<string, string> = {
+  "1": "info",    // playing
+  "2": "primary", // listening
+  "3": "warning", // exercising
+  gaming: "info",
+  music: "primary",
+  workout: "warning",
+  fitness: "warning",
+  coding: "info",
+  browsing: "base-content",
+  designing: "primary",
+  communicating: "base-content",
+  planning: "base-content",
+  writing_docs: "base-content",
+  code_reviewing: "info",
+  debugging: "warning",
+  meeting: "base-content",
+  building: "info",
+  reading: "base-content",
+  productivity: "base-content",
+  entertainment: "info",
+  social: "primary",
+  other: "base-content",
+};
+
+const ACTIVITY_ICON_MAP: Record<string, any> = {
+  "1": IconPlay,           // playing
+  "2": IconMusic,          // listening
+  "3": IconDumbbell,       // exercising
+  gaming: IconGamepad,
+  music: IconMusic,
+  workout: IconDumbbell,
+  fitness: IconDumbbell,
+  coding: IconCode,
+  browsing: IconGlobe,
+  designing: IconPalette,
+  communicating: IconMessageCircle,
+  planning: IconCheckSquare,
+  writing_docs: IconFileEdit,
+  code_reviewing: IconCode,
+  debugging: IconBug,
+  meeting: IconUsers,
+  building: IconRocket,
+  reading: IconBookOpen,
+  productivity: IconCheckCircle,
+  entertainment: IconFilm,
+  social: IconUsers,
+  other: IconGrid,
+};
+
+const ACTIVITY_LABEL_MAP: Record<string, string> = {
+  "1": "Playing",
+  "2": "Listening",
+  "3": "Exercising",
+  gaming: "Gaming",
+  music: "Music",
+  workout: "Workout",
+  fitness: "Fitness",
+  coding: "Coding",
+  browsing: "Browsing",
+  designing: "Designing",
+  communicating: "Communicating",
+  planning: "Planning",
+  writing_docs: "Writing Docs",
+  code_reviewing: "Code Reviewing",
+  debugging: "Debugging",
+  meeting: "Meeting",
+  building: "Building",
+  reading: "Reading",
+  productivity: "Productivity",
+  entertainment: "Entertainment",
+  social: "Social",
+  other: "Activity",
+};
+
+function resolveActivityColor(type: number | undefined): string {
+  return ACTIVITY_COLOR_MAP[String(type)] ?? "base-content";
+}
+
+function resolveActivityIcon(type: number | undefined) {
+  return ACTIVITY_ICON_MAP[String(type)] ?? IconMoreHorizontal;
+}
+
+function resolveActivityTypeLabel(type: number | undefined): string {
+  return ACTIVITY_LABEL_MAP[String(type)] ?? "Activity";
+}
+
+// --- Status icon/bg resolution ---
 
 const statusIcon = computed(() => {
   if (!props.item.status) return IconCircle;
@@ -204,45 +318,12 @@ const statusIconClass = computed(() => {
   }
 });
 
-const activityIcon = computed(() => {
-  if (!props.item.activity) return IconMoreHorizontal;
-  switch (props.item.activity.type) {
-    case 1: return IconPlay; // playing
-    case 2: return IconMusic; // listening
-    case 3: return IconHeart; // exercising
-    default: return IconMoreHorizontal;
-  }
-});
+// --- Activity computed (using lookup maps) ---
 
-const activityBgClass = computed(() => {
-  if (!props.item.activity) return "bg-base-200";
-  switch (props.item.activity.type) {
-    case 1: return "bg-info/15"; // playing
-    case 2: return "bg-primary/15"; // listening
-    case 3: return "bg-warning/15"; // exercising
-    default: return "bg-base-200";
-  }
-});
-
-const activityIconClass = computed(() => {
-  if (!props.item.activity) return "text-base-content/50";
-  switch (props.item.activity.type) {
-    case 1: return "text-info";
-    case 2: return "text-primary";
-    case 3: return "text-warning";
-    default: return "text-base-content/50";
-  }
-});
-
-const activityTypeLabel = computed(() => {
-  if (!props.item.activity) return "Activity";
-  switch (props.item.activity.type) {
-    case 1: return "Playing";
-    case 2: return "Listening";
-    case 3: return "Exercising";
-    default: return "Activity";
-  }
-});
+const activityIcon = computed(() => resolveActivityIcon(props.item.activity?.type));
+const activityBgClass = computed(() => `bg-${resolveActivityColor(props.item.activity?.type)}/15`);
+const activityIconClass = computed(() => `text-${resolveActivityColor(props.item.activity?.type)}`);
+const activityTypeLabel = computed(() => resolveActivityTypeLabel(props.item.activity?.type));
 
 const activityImageUrl = computed(() => {
   const imageUri = props.item.activity?.largeImage || props.item.activity?.smallImage;
