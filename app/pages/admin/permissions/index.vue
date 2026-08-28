@@ -432,6 +432,11 @@ async function selectGroup(id: string) {
   detail.value = null
   try {
     detail.value = await fetchPermissionGroup(id)
+    if (!detail.value) detail.value = { group: { id: '', key: '' }, nodes: [], nodeTotal: 0, members: [], memberTotal: 0 }
+    if (!detail.value.members) detail.value.members = []
+    if (!detail.value.nodes) detail.value.nodes = []
+    if (detail.value.memberTotal == null) detail.value.memberTotal = 0
+    if (detail.value.nodeTotal == null) detail.value.nodeTotal = 0
   } catch {
     detail.value = null
     useNuxtApp().$toast.error('Failed to load group detail')
