@@ -428,7 +428,7 @@
     .feed-stream { border: 1px solid color-mix(in oklch, var(--color-base-300) 85%, transparent); border-radius: var(--radius-box); }
   }
 
-  @media (min-width: 1280px) {
+  @media (min-width: 1024px) {
     .feed-layout { grid-template-columns: minmax(0, 1fr) 20rem; column-gap: 1.5rem; }
     .feed-sidebar { display: block; }
   }

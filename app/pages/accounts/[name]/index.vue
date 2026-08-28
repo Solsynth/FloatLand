@@ -26,7 +26,7 @@
     </div>
 
     <!-- Account Profile -->
-    <div v-else-if="account" class="mx-auto max-w-6xl min-w-0">
+    <div v-else-if="account" class="mx-auto max-w-6xl min-w-0 xl:max-w-[80rem]">
       <!-- Header Section -->
       <section class="relative overflow-hidden px-4 pt-4 lg:px-6">
         <div

@@ -159,13 +159,6 @@
                 {{ membersLoading ? 'Loading...' : `Load more (${detail.memberTotal - detail.members.length} remaining)` }}
               </button>
             </div>
-            <div v-else class="flex flex-col items-center gap-3 py-6">
-              <IconUser class="w-8 h-8 text-base-content/20" />
-              <p class="text-sm text-base-content/40">No members yet</p>
-              <button class="btn btn-ghost btn-sm" @click="openAddMember">
-                <IconPlus class="w-3.5 h-3.5" /> Add first member
-              </button>
-            </div>
           </AdminCard>
         </template>
 
