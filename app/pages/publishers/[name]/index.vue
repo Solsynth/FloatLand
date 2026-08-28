@@ -26,7 +26,7 @@
     </div>
 
     <!-- Publisher Profile -->
-    <div v-else-if="publisher" class="mx-auto max-w-5xl">
+    <div v-else-if="publisher" class="mx-auto min-w-0">
       <!-- Header Section -->
       <section class="relative overflow-hidden px-4 pt-4 lg:px-6">
         <div
