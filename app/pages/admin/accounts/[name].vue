@@ -221,7 +221,7 @@
                 <button class="btn btn-ghost btn-xs text-error" @click="clearVerify">Clear</button>
               </div>
               <p v-else class="text-sm text-base-content/40">Not verified</p>
-              <button class="btn btn-ghost btn-xs" @click="verifyOpen = true">Set Verification</button>
+              <button class="btn btn-ghost btn-xs" @click="openVerify">Set Verification</button>
             </div>
           </AdminCard>
 
@@ -917,9 +917,10 @@
           <div>
             <label class="text-xs text-base-content/50">Type</label>
             <select v-model="verifyForm.type" class="select select-sm w-full bg-base-200/60 border-0 rounded-xl">
-              <option :value="0">Official</option>
-              <option :value="1">Partner</option>
-              <option :value="2">Creator</option>
+              <option :value="0">Staff</option>
+              <option :value="1">Official</option>
+              <option :value="2">Partner</option>
+              <option :value="3">Creator</option>
             </select>
           </div>
           <div>
@@ -1566,6 +1567,17 @@ async function doResetPassword() {
 const verifyOpen = ref(false)
 const verifyLoading = ref(false)
 const verifyForm = ref({ type: 0, title: '', description: '', verifiedBy: '' })
+
+function openVerify() {
+  const v = profileVerification.value
+  verifyForm.value = {
+    type: v?.type ?? 0,
+    title: v?.title ?? '',
+    description: v?.description ?? '',
+    verifiedBy: v?.verifiedBy ?? '',
+  }
+  verifyOpen.value = true
+}
 
 async function doSetVerification() {
   verifyLoading.value = true

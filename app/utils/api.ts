@@ -3561,10 +3561,10 @@ export async function fetchChatRoomBySlug(
   slug: string,
 ): Promise<SnChatRoom | null> {
   const response = await apiFetch(
-    `/messager/chat/by-slug/${encodeURIComponent(scope)}/${encodeURIComponent(slug)}`,
+    `/messager/chat/public/${encodeURIComponent(scope)}/${encodeURIComponent(slug)}`,
   );
   if (response.status === 404) return null;
-  const data = safeJsonParse<SnChatRoom>(response);
+  const data = await safeJsonParse<SnChatRoom>(response);
   return snakeToCamel(data) as SnChatRoom;
  }
 

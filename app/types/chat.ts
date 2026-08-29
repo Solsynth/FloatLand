@@ -1,4 +1,4 @@
-import type { SnAccount } from './auth'
+import type { Realm } from './realm'
 
 export interface SnChatRoom {
   id: string
@@ -6,7 +6,9 @@ export interface SnChatRoom {
   description?: string
   type: number
   realmId?: string
+  realm?: Realm | null
   members?: SnChatMember[]
+  background?: { id: string }
   picture?: { id: string }
   encryptionMode?: number
   createdAt: string
