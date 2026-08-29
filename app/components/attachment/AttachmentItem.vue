@@ -2,14 +2,14 @@
   <div class="relative overflow-hidden rounded-box bg-base-300" :class="{ 'cursor-pointer': props.clickable }" @click="handleClick">
     <!-- Image -->
     <template v-if="isImage">
-      <img
+      <FileImage
         v-if="fileUrl"
-        :src="fileUrl"
+        :file="attachment"
         :alt="attachment.name"
         class="w-full h-full object-cover"
         loading="lazy"
         decoding="async"
-      >
+      />
       <div v-else class="p-8 flex flex-col items-center justify-center">
         <IconFileImage class="w-12 h-12 text-base-content/30 mb-2" />
         <span class="text-sm text-base-content/50">{{ attachment.name }}</span>

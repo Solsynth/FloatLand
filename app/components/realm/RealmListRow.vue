@@ -5,9 +5,9 @@
   >
     <div class="avatar shrink-0">
       <div class="h-10 w-10 rounded-full">
-        <img
+        <FileImage
           v-if="pictureUrl"
-          :src="pictureUrl"
+          :file="pictureUrl"
           :alt="realm.name"
           class="h-full w-full object-cover"
           loading="lazy"
@@ -57,7 +57,6 @@
 
 <script setup lang="ts">
 import type { Realm } from "~/types/realm";
-import { getFileUrl } from "~/utils/files";
 import { IconLock, IconRocket, IconChevronRight } from "#components";
 
 const { t } = useI18n();
@@ -66,5 +65,5 @@ const props = defineProps<{
   realm: Realm;
 }>();
 
-const pictureUrl = computed(() => getFileUrl(props.realm.picture?.id));
+const pictureUrl = computed(() => props.realm.picture ?? null);
 </script>

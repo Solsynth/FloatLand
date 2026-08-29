@@ -77,13 +77,13 @@
               >
                 <div class="avatar shrink-0">
                   <div class="w-10 rounded-full">
-                    <img
-                      v-if="dev.publisher?.picture?.id"
-                      :src="getFileUrl(dev.publisher.picture.id)!"
+                    <FileImage
+                      v-if="dev.publisher?.picture"
+                      :file="dev.publisher.picture"
                       :alt="dev.publisher?.nick"
                       loading="lazy"
                       decoding="async"
-                    >
+                    />
                     <div v-else class="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-content">
                       {{ dev.publisher?.nick?.slice(0, 2).toUpperCase() || '?' }}
                     </div>
@@ -159,13 +159,13 @@
           >
             <div class="avatar shrink-0">
               <div class="w-9 rounded-full">
-                <img
-                  v-if="pub.picture?.id"
-                  :src="getFileUrl(pub.picture.id)!"
+                <FileImage
+                  v-if="pub.picture"
+                  :file="pub.picture"
                   :alt="pub.nick"
                   loading="lazy"
                   decoding="async"
-                >
+                />
                 <div v-else class="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-content">
                   {{ pub.nick?.slice(0, 2).toUpperCase() || '?' }}
                 </div>
@@ -193,7 +193,6 @@ import {
   IconChevronRight,
   IconPlus,
 } from '#components'
-import { getFileUrl } from '~/utils/files'
 import { enrollDeveloper } from '~/utils/developer'
 import { fetchManagedPublishers } from '~/utils/creator'
 import type { PublisherManaged } from '~/types/creator'

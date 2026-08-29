@@ -21,9 +21,10 @@
       :class="iconBgClass"
     >
       <IconFolder v-if="file.isFolder" class="w-5 h-5 text-primary" />
-      <img
+      <FileImage
         v-else-if="isImage && thumbnailUrl"
         :src="thumbnailUrl"
+        :file="file"
         class="w-10 h-10 rounded-lg object-cover"
         alt=""
       />

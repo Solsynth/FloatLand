@@ -23,12 +23,12 @@
 					>
 						<div class="avatar">
 							<div class="w-11 h-11 rounded-full overflow-hidden">
-								<img
+								<FileImage
 									v-if="userAvatarUrl"
-									:src="userAvatarUrl"
+									:file="userAvatarUrl"
 									loading="lazy"
 									class="w-full h-full object-cover"
-								>
+								/>
 								<div
 									v-else
 									class="w-full h-full flex items-center justify-center bg-primary/15 text-primary"
@@ -67,12 +67,12 @@
 							<div class="flex flex-col items-start text-left mb-6">
 								<div class="avatar self-start mb-2">
 									<div class="w-11 h-11 overflow-hidden rounded-md border border-base-300">
-										<img
+										<FileImage
 											v-if="clientPictureUrl"
-											:src="clientPictureUrl"
+											:file="clientPictureUrl"
 											loading="lazy"
 											class="w-full h-full object-cover"
-										>
+										/>
 										<div
 											v-else
 											class="w-full h-full flex items-center justify-center bg-primary/15 text-primary"
@@ -266,13 +266,11 @@ const clientInfo = ref<{
 
 // Cached image URLs
 const userAvatarUrl = computed(() => {
-	const fileId = auth.user.value?.profile?.picture?.id;
-	return fileId ? `https://api.solian.app/drive/files/${fileId}` : null;
+	return auth.user.value?.profile?.picture ?? null;
 });
 
 const clientPictureUrl = computed(() => {
-	const fileId = clientInfo.value?.picture?.id;
-	return fileId ? `https://api.solian.app/drive/files/${fileId}` : null;
+	return clientInfo.value?.picture ?? null;
 });
 
 // User-friendly scope labels

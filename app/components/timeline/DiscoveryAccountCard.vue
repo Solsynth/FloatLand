@@ -3,10 +3,10 @@
     class="feed-discovery-card flex h-full flex-col p-3"
   >
     <div class="flex items-center gap-2.5">
-      <div v-if="accountPictureUrl" class="avatar shrink-0">
+      <div v-if="accountPicture" class="avatar shrink-0">
         <div class="h-11 w-11 rounded-full">
-          <img
-            :src="accountPictureUrl"
+          <FileImage
+            :file="accountPicture"
             :alt="account.nick || account.name"
             class="h-full w-full rounded-full object-cover"
           />
@@ -55,7 +55,6 @@
 
 <script setup lang="ts">
 import type { DiscoveryItem } from "~/types/post";
-import { getFileUrl } from "~/utils/files";
 import { getInitials } from "~/utils/identity";
 import { IconSparkles } from "#components";
 
@@ -65,9 +64,8 @@ const props = defineProps<{
   item: DiscoveryItem;
 }>();
 
-const accountPictureUrl = computed(() => {
-  if (!account.value.profile?.picture) return undefined;
-  return getFileUrl(account.value.profile.picture.id) ?? undefined;
+const accountPicture = computed(() => {
+  return account.value.profile?.picture ?? undefined;
 });
  
 const reasons = computed(() => props.item.reasons ?? []);

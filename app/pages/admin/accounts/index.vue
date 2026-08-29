@@ -97,9 +97,9 @@
                 >
                   <div class="avatar">
                     <div class="w-8 rounded-full">
-                      <img
-                        v-if="getFileUrl(entry.account.profile?.picture?.id)"
-                        :src="getFileUrl(entry.account.profile?.picture?.id)"
+                      <FileImage
+                        v-if="entry.account.profile?.picture"
+                        :file="entry.account.profile.picture"
                         :alt="entry.account.nick"
                       />
                       <div
@@ -252,7 +252,6 @@ import {
   IconChevronRight,
   IconUsers,
 } from '#components'
-import { getFileUrl } from '~/utils/files'
 import type { AdminAccountQuery, OrderByField } from '~/types/admin'
 
 definePageMeta({ middleware: 'auth' })

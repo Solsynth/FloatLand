@@ -12,7 +12,7 @@
       <!-- DM: Show member avatar -->
       <div v-if="isDirect" class="avatar">
         <div v-if="dmAvatarUrl" class="w-10 rounded-full">
-          <img :src="dmAvatarUrl" :alt="dmName" />
+          <FileImage :src="dmAvatarUrl" :alt="dmName" />
         </div>
         <div v-else class="w-10 rounded-full bg-primary text-primary-content">
           <span class="flex h-full w-full items-center justify-center text-xs font-bold">

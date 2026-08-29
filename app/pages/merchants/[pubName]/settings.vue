@@ -14,11 +14,11 @@
             <div class="flex items-center gap-4">
               <div class="avatar shrink-0">
                 <div class="w-14 rounded-full">
-                  <img
+                  <FileImage
                     v-if="avatarUrl"
-                    :src="avatarUrl"
+                    :file="avatarUrl"
                     :alt="displayNick"
-                  >
+                  />
                   <div
                     v-else
                     class="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary text-lg font-bold"
@@ -175,7 +175,6 @@
 
 <script setup lang="ts">
 import { IconWallet } from '#components'
-import { getFileUrl } from '~/utils/files'
 import type { PublisherManaged } from '~/types/creator'
 import type { Merchant } from '~/types/merchant'
 import type { Wallet } from '~/utils/api'
@@ -206,7 +205,7 @@ const selectedWalletId = ref<string | null>(null)
 const currentWalletId = ref<string | null>(null)
 const isSaving = ref(false)
 
-const avatarUrl = computed(() => getFileUrl(publisher.value?.picture?.id) || '')
+const avatarUrl = computed(() => publisher.value?.picture ?? null)
 const displayNick = computed(
   () => publisher.value?.nick || merchantRoute.currentPublisher.value?.nick || pubName.value,
 )

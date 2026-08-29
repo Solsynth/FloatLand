@@ -22,7 +22,7 @@
           <NuxtLink v-for="workspace in workspaces" :key="workspace.id" :to="`/workspaces/${encodeURIComponent(workspace.slug)}`" class="workspace-row">
             <div class="flex min-w-0 flex-1 items-center gap-3">
               <div class="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-md bg-base-200 text-sm font-bold text-base-content/70">
-                <img v-if="getFileUrl(workspace.picture?.id)" :src="getFileUrl(workspace.picture?.id)!" :alt="workspace.name" class="h-full w-full object-cover" />
+                <FileImage v-if="workspace.picture" :file="workspace.picture" :alt="workspace.name" class="h-full w-full object-cover" />
                 <span v-else>{{ workspace.name.slice(0, 1).toUpperCase() }}</span>
               </div>
               <div class="min-w-0"><h2 class="truncate text-sm font-semibold">{{ workspace.name }}</h2><p class="mt-0.5 truncate text-xs text-base-content/50">{{ workspace.description || `@${workspace.slug}` }}</p></div>
@@ -44,7 +44,6 @@
 import type { Workspace } from "~/types/workspace";
 import { WorkspacePlan, WorkspaceType } from "~/types/workspace";
 import { createWorkspace, fetchWorkspaces } from "~/utils/api";
-import { getFileUrl } from "~/utils/files";
 import { IconAlertCircle, IconArrowRight, IconBuilding, IconLoader, IconPlus, IconRefreshCw, IconX } from "#components";
 
 definePageMeta({ middleware: "auth" });

@@ -9,12 +9,12 @@
       <!-- Icon Upload -->
       <div class="flex items-start gap-4 mb-5 p-4 rounded-box bg-base-200/50">
         <div class="w-20 h-20 rounded-box bg-base-200 overflow-hidden shrink-0">
-          <img
+          <FileImage
             v-if="iconUrl"
             :src="iconUrl"
             class="w-full h-full object-cover"
             alt="Pack Icon"
-          >
+          />
           <div v-else class="flex items-center justify-center h-full">
             <IconSticker class="w-8 h-8 text-base-content/20" />
           </div>

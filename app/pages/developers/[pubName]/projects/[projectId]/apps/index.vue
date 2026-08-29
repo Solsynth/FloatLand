@@ -32,7 +32,7 @@
               >
                 <div class="avatar">
                   <div class="w-10 rounded-full">
-                    <img v-if="getFileUrl(app.picture?.id)" :src="getFileUrl(app.picture?.id)" :alt="app.name" />
+                    <FileImage v-if="app.picture" :file="app.picture" :alt="app.name" />
                     <div v-else class="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-content text-sm font-bold">
                       {{ app.name?.slice(0, 2).toUpperCase() }}
                     </div>
@@ -119,7 +119,6 @@ import {
   Boxes as IconBoxes,
   ChevronRight as IconChevronRight,
 } from '@lucide/vue'
-import { getFileUrl } from '~/utils/files'
 import type { CustomApp } from '~/types/developer'
 import { fetchCustomApps, createCustomApp } from '~/utils/developer'
 

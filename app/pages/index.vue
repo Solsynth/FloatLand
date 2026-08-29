@@ -25,9 +25,9 @@
                   <div
                     class="h-9 w-9 overflow-hidden rounded-full ring-1 ring-base-300"
                   >
-                    <img
+                    <FileImage
                       v-if="publisherAvatar"
-                      :src="publisherAvatar"
+                      :file="publisherAvatar"
                       :alt="currentPublisher?.nick || userName"
                       class="block h-full w-full object-cover"
                     />
@@ -56,9 +56,9 @@
                     @click="selectInlinePublisher(publisher)"
                   >
                     <div class="h-7 w-7 shrink-0 overflow-hidden rounded-full">
-                      <img
-                        v-if="publisher.picture?.id"
-                        :src="getFileUrl(publisher.picture.id)"
+                      <FileImage
+                        v-if="publisher.picture"
+                        :file="publisher.picture"
                         :alt="publisher.nick || publisher.name"
                         class="h-full w-full object-cover"
                       />
@@ -416,7 +416,6 @@ import type {
   SnTimelineEvent,
 } from "~/types/post";
 import { API_BASE_URL, fetchJson, fetchTimeline } from "~/utils/api";
-import { getFileUrl } from "~/utils/files";
 import { getValidToken } from "~/utils/token";
 import {
   IconAlertCircle,
@@ -466,7 +465,7 @@ const hasMore = ref(true);
 const fetchingMore = ref(false);
 const loadMoreSentinel = ref<HTMLElement | null>(null);
 
-const userAvatar = computed(() => getFileUrl(user.value?.profile?.picture?.id));
+const userAvatar = computed(() => user.value?.profile?.picture ?? null);
 
 const compose = useCompose();
 const {
@@ -492,7 +491,7 @@ const localFileAccept = ref("*/*");
 const contentRef = ref<HTMLTextAreaElement | null>(null);
 const localFileInput = ref<HTMLInputElement | null>(null);
 const publisherAvatar = computed(
-  () => getFileUrl(currentPublisher.value?.picture?.id) || userAvatar.value,
+  () => currentPublisher.value?.picture ?? userAvatar.value,
 );
 const publisherInitials = computed(() =>
   getPublisherInitials(currentPublisher.value?.nick || userName.value || "?"),

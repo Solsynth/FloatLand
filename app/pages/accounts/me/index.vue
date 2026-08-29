@@ -38,12 +38,12 @@
 						<div
 							class="h-32 w-full overflow-hidden rounded-box bg-base-200 sm:h-40"
 						>
-							<img
+							<FileImage
 								v-if="backgroundUrl"
-								:src="backgroundUrl"
+								:file="backgroundUrl"
 								:alt="`${displayName} background`"
 								class="h-full w-full object-cover"
-							>
+							/>
 						</div>
 						<div
 							class="mx-auto -mt-16 flex flex-col gap-3 px-4 pb-4 sm:-mt-16 sm:flex-row sm:items-end"
@@ -53,10 +53,10 @@
 									<div
 										class="h-20 w-20 rounded-full ring ring-base-300 ring-offset-2 ring-offset-base-100 sm:h-24 sm:w-24"
 									>
-										<img
-											:src="avatarUrl"
+										<FileImage
+											:file="avatarUrl"
 											:alt="displayName"
-										>
+										/>
 									</div>
 								</div>
 								<div v-else class="avatar avatar-placeholder">
@@ -320,7 +320,6 @@
 </template>
 
 <script setup lang="ts">
-import { getFileUrl } from '~/utils/files';
 import { renderMarkdown } from '~/utils/markdown';
 import { useAuthStore } from '~/stores/auth';
 import {
@@ -347,12 +346,8 @@ const unreadCount = ref(0);
 const displayName = computed(
 	() => authStore.user?.nick || authStore.user?.name || 'Unknown'
 );
-const avatarUrl = computed(() =>
-	getFileUrl(authStore.user?.profile?.picture?.id)
-);
-const backgroundUrl = computed(() =>
-	getFileUrl(authStore.user?.profile?.background?.id)
-);
+const avatarUrl = computed(() => authStore.user?.profile?.picture ?? null);
+const backgroundUrl = computed(() => authStore.user?.profile?.background ?? null);
 const bioHtml = computed(() => {
 	if (!authStore.user?.profile?.bio) return '';
 	return renderMarkdown(authStore.user.profile.bio);

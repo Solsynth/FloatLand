@@ -20,9 +20,10 @@
         @click="$emit('select', file)"
       >
         <!-- Image preview -->
-        <img
+        <FileImage
           v-if="file.mimeType?.startsWith('image/')"
           :src="(file.hasThumbnail ? getFileUrl(file.id, 'thumbnail') : getFileUrl(file.id)) ?? undefined"
+          :file="file"
           class="w-full h-full object-cover"
         />
         <!-- Video preview -->

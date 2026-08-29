@@ -18,9 +18,9 @@
         <div class="flex items-start gap-4">
           <div class="avatar shrink-0">
             <div class="w-14 rounded-full">
-              <img
-                v-if="getFileUrl(detail.realm.picture?.id)"
-                :src="getFileUrl(detail.realm.picture?.id) ?? ''"
+              <FileImage
+                v-if="detail.realm.picture"
+                :file="detail.realm.picture"
                 :alt="detail.realm.name"
               />
               <div
@@ -232,7 +232,6 @@ import {
   removeAdminRealmMember,
   deleteAdminRealm,
 } from '~/utils/admin'
-import { getFileUrl } from '~/utils/files'
 
 definePageMeta({ middleware: 'auth' })
 

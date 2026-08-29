@@ -21,11 +21,11 @@
           <div class="flex items-center gap-2 mb-1">
             <div v-if="getAvatarUrl(featuredReply)" class="avatar">
               <div class="h-6 w-6 rounded-full">
-                <img
-                  :src="getAvatarUrl(featuredReply)"
+                <FileImage
+                  :file="getAvatarUrl(featuredReply)"
                   :alt="getDisplayName(featuredReply.publisher)"
                   class="h-full w-full rounded-full object-cover"
-                >
+                />
               </div>
             </div>
             <div v-else class="avatar avatar-placeholder">
@@ -92,11 +92,11 @@
           >
             <div v-if="getAvatarUrl(node.reply)" class="avatar">
               <div class="h-8 w-8 rounded-full">
-                <img
-                  :src="getAvatarUrl(node.reply)"
+                <FileImage
+                  :file="getAvatarUrl(node.reply)"
                   :alt="getDisplayName(node.reply.publisher)"
                   class="h-full w-full rounded-full object-cover"
-                >
+                />
               </div>
             </div>
             <div v-else class="avatar avatar-placeholder">
@@ -200,7 +200,6 @@
 import type { Post } from '~/types/post';
 import { useIntersectionObserver } from '@vueuse/core';
 import { fetchPostRepliesThreaded, reactToPost, removeReaction } from '~/utils/api';
-import { getFileUrl } from '~/utils/files';
 import { renderMarkdown } from '~/utils/markdown';
 import {
   IconPaperclip,
@@ -308,9 +307,9 @@ function getDisplayName(target: Post['publisher']): string {
   return target.nick || target.name || 'Unknown';
 }
 
-function getAvatarUrl(post: Post): string {
-  if (!post.publisher) return '';
-  return getFileUrl(post.publisher.picture?.id) || '';
+function getAvatarUrl(post: Post) {
+  if (!post.publisher) return null;
+  return post.publisher.picture;
 }
 
 function getInitials(name: string): string {

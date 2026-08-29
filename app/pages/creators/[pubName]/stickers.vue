@@ -25,7 +25,7 @@
           <div class="card-body p-4 flex-row items-center gap-4">
             <div class="avatar">
               <div class="w-12 rounded-lg">
-                <img v-if="getFileUrl(pack.icon?.id)" :src="getFileUrl(pack.icon?.id)" :alt="pack.name" />
+                <FileImage v-if="pack.icon" :file="pack.icon" :alt="pack.name" />
                 <div v-else class="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
                   <IconSticker class="w-6 h-6" />
                 </div>
@@ -63,7 +63,6 @@
 import { IconPlus, IconSticker, IconChevronRight } from '#components'
 import type { SnStickerPack } from '~/types/creator'
 import { fetchStickerPacks } from '~/utils/creator'
-import { getFileUrl } from '~/utils/files'
 
 definePageMeta({ middleware: 'creator' })
 

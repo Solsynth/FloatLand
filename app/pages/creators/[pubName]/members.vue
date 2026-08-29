@@ -24,7 +24,7 @@
           <div class="card-body p-4 flex-row items-center gap-4">
             <div class="avatar">
               <div class="w-10 rounded-full">
-                <img v-if="getFileUrl(member.account?.profile?.picture?.id)" :src="getFileUrl(member.account?.profile?.picture?.id)" :alt="member.account?.nick" />
+                <FileImage v-if="member.account?.profile?.picture" :file="member.account.profile.picture" :alt="member.account?.nick" />
                 <div v-else class="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-content text-sm font-bold">
                   {{ (member.account?.nick || '?').slice(0, 2).toUpperCase() }}
                 </div>
@@ -106,7 +106,6 @@ import {
   removeMember,
   updateMemberRole,
 } from '~/utils/creator'
-import { getFileUrl } from '~/utils/files'
 
 definePageMeta({ middleware: 'creator' })
 

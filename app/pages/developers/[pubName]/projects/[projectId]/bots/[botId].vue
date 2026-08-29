@@ -48,7 +48,7 @@
               <div class="flex min-w-0 items-start gap-4">
                 <div class="avatar shrink-0">
                   <div class="w-16 rounded-full">
-                    <img v-if="bot.account.profile?.picture?.id" :src="getFileUrl(bot.account.profile.picture.id)!" :alt="bot.account.nick" loading="lazy" decoding="async">
+                    <FileImage v-if="bot.account.profile?.picture" :file="bot.account.profile.picture" :alt="bot.account.nick" loading="lazy" decoding="async"/>
                     <div v-else class="flex h-16 w-16 items-center justify-center rounded-full bg-info text-xl font-black text-info-content">
                       {{ bot.account.nick?.slice(0, 2).toUpperCase() || '?' }}
                     </div>
@@ -244,7 +244,7 @@
             <div class="relative group">
               <div class="avatar cursor-pointer" @click="pickPicture">
                 <div class="w-16 rounded-full">
-                  <img v-if="picturePreview" :src="picturePreview" />
+                  <FileImage v-if="picturePreview" :src="picturePreview" />
                   <div v-else class="flex h-16 w-16 items-center justify-center rounded-full bg-base-300 text-base-content/50">
                     <IconCamera class="w-6 h-6" />
                   </div>
@@ -256,7 +256,7 @@
             </div>
             <div class="flex-1">
               <div class="relative group cursor-pointer rounded-lg overflow-hidden h-20 bg-base-300" @click="pickBackground">
-                <img v-if="backgroundPreview" :src="backgroundPreview" class="w-full h-full object-cover" />
+                <FileImage v-if="backgroundPreview" :src="backgroundPreview" class="w-full h-full object-cover" />
                 <div v-else class="flex h-full items-center justify-center text-base-content/50">
                   <span class="text-xs">{{ t('developer.bots.background') }}</span>
                 </div>

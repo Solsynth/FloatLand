@@ -94,7 +94,7 @@
               <div class="shrink-0">
                 <div v-if="getAvatarUrl(result)" class="avatar">
                   <div class="w-12 h-12 rounded-full">
-                    <img :src="getAvatarUrl(result)" :alt="getName(result)" class="object-cover">
+                    <FileImage :src="getAvatarUrl(result)" :alt="getName(result)" class="object-cover"/>
                   </div>
                 </div>
                 <div v-else class="avatar avatar-placeholder">

@@ -144,10 +144,10 @@
                             <!-- Avatar -->
                             <div v-if="entry.account?.avatar?.id" class="avatar">
                                 <div class="w-12 h-12 rounded-xl">
-                                    <img
-                                        :src="getFileUrl(entry.account.avatar.id)"
+                                    <FileImage
+                                        :file="entry.account.avatar"
                                         :alt="entry.account.nick || entry.account.name"
-                                    >
+                                    />
                                 </div>
                             </div>
                             <div v-else class="avatar avatar-placeholder">
@@ -207,7 +207,6 @@
 <script setup lang="ts">
 import type { Realm, RealmBoostStatus, RealmBoostLeaderboardEntry, RealmMember } from '~/types/realm'
 import { fetchRealm, fetchRealmBoostStatus, fetchRealmBoostLeaderboard, getMyRealmMembership, boostRealm } from '~/utils/api'
-import { getFileUrl } from '~/utils/files'
 
 const { t } = useI18n();
 

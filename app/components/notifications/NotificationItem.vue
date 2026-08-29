@@ -11,7 +11,7 @@
         class="avatar"
       >
         <div class="w-10 rounded-full">
-          <img :src="pfpUrl" alt="" />
+          <FileImage :src="pfpUrl" alt="" />
         </div>
       </div>
       <div

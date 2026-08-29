@@ -86,13 +86,13 @@
                 >
                   <div class="avatar shrink-0">
                     <div class="w-8 rounded-full">
-                      <img
-                        v-if="pub.picture?.id"
-                        :src="getFileUrl(pub.picture.id) ?? ''"
+                      <FileImage
+                        v-if="pub.picture"
+                        :file="pub.picture"
                         :alt="pub.nick || pub.name"
                         loading="lazy"
                         decoding="async"
-                      >
+                      />
                       <div v-else class="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
                         {{ (pub.nick || pub.name).slice(0, 2).toUpperCase() }}
                       </div>
@@ -168,7 +168,6 @@ import {
 } from '#components'
 import type { AdminPublisherSummary, PublisherShadowbanReason } from '~/types/admin'
 import { fetchAdminPublishers } from '~/utils/admin'
-import { getFileUrl } from '~/utils/files'
 
 definePageMeta({ middleware: 'auth' })
 

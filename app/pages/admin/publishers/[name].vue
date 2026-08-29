@@ -48,9 +48,9 @@
         <div class="flex items-start gap-4">
           <div class="avatar shrink-0">
             <div class="w-14 rounded-full">
-              <img
-                v-if="detail.publisher.picture?.id"
-                :src="getFileUrl(detail.publisher.picture.id) ?? ''"
+              <FileImage
+                v-if="detail.publisher.picture"
+                :file="detail.publisher.picture"
                 :alt="detail.publisher.nick || detail.publisher.name"
                 loading="lazy"
                 decoding="async"
@@ -225,7 +225,6 @@ import {
   clearAdminPublisherVerification,
   deleteAdminPublisher,
 } from '~/utils/admin'
-import { getFileUrl } from '~/utils/files'
 
 definePageMeta({ middleware: 'auth' })
 

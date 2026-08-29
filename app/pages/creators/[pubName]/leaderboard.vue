@@ -33,7 +33,7 @@
             </div>
             <div class="avatar">
               <div class="w-10 rounded-full">
-                <img v-if="getFileUrl(entry.picture?.id)" :src="getFileUrl(entry.picture?.id)" :alt="entry.nick" />
+                <FileImage v-if="entry.picture" :file="entry.picture" :alt="entry.nick" />
                 <div v-else class="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-content text-sm font-bold">
                   {{ (entry.nick || entry.name || '?').slice(0, 2).toUpperCase() }}
                 </div>
@@ -68,7 +68,6 @@
 
 <script setup lang="ts">
 import { fetchPublisherLeaderboard } from '~/utils/creator'
-import { getFileUrl } from '~/utils/files'
 
 definePageMeta({ middleware: 'creator' })
 

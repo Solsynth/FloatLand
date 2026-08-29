@@ -45,6 +45,7 @@ function solianPlugin(md: MarkdownIt): void {
       token.attrSet('data-file-id', fileId)
       token.attrSet('class', 'cloud-file-image')
       token.attrSet('loading', 'lazy')
+      token.attrSet('decoding', 'async')
     }
 
     return defaultImage(tokens, idx, options, env, self)

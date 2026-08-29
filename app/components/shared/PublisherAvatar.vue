@@ -2,7 +2,7 @@
   <component :is="linked && publisher ? 'NuxtLink' : 'span'" :to="avatarLink" class="block shrink-0">
     <div v-if="avatarUrl" class="avatar">
       <div class="overflow-hidden rounded-full" :class="sizeClass">
-        <img
+        <FileImage
           :src="avatarUrl"
           :alt="displayName"
           class="h-full w-full rounded-full object-cover"

@@ -12,12 +12,12 @@
           class="aspect-[16/7] rounded-box overflow-hidden bg-base-200 cursor-pointer hover:bg-base-300 transition-colors duration-150 group"
           @click="pickBackground"
         >
-          <img
+          <FileImage
             v-if="backgroundUrl"
             :src="backgroundUrl"
             class="w-full h-full object-cover"
             alt="Background"
-          >
+          />
           <div
             v-else
             class="flex flex-col items-center justify-center h-full gap-2"
@@ -39,7 +39,7 @@
         >
           <div class="avatar">
             <div class="w-20 rounded-full ring-4 ring-base-100">
-              <img v-if="pictureUrl" :src="pictureUrl" alt="Avatar">
+              <FileImage v-if="pictureUrl" :src="pictureUrl" alt="Avatar"/>
               <div
                 v-else
                 class="flex h-20 w-20 items-center justify-center rounded-full bg-primary/10 text-primary text-xl font-bold"

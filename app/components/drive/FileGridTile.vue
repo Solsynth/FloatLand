@@ -25,14 +25,15 @@
       </div>
 
       <!-- Image preview -->
-      <img
+      <FileImage
         v-if="isImage && thumbnailUrl"
         :src="thumbnailUrl"
+        :file="file"
         :width="file.fileMeta?.width"
         :height="file.fileMeta?.height"
         class="w-full h-full object-cover"
         alt=""
-      >
+      />
       <!-- Video preview -->
       <div v-else-if="isVideo" class="relative w-full h-full">
         <div class="w-full h-full bg-base-300 flex items-center justify-center">

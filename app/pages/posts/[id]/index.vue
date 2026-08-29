@@ -61,11 +61,11 @@
 									<div class="flex gap-3">
 										<div v-if="userAvatar" class="avatar shrink-0">
 											<div class="h-8 w-8 rounded-full">
-												<img
-													:src="userAvatar"
+												<FileImage
+													:file="userAvatar"
 													:alt="userName"
 													class="h-full w-full rounded-full object-cover"
-												>
+												/>
 											</div>
 										</div>
 										<div v-else class="avatar avatar-placeholder shrink-0">
@@ -159,12 +159,12 @@
 											class="avatar"
 										>
 											<div class="h-10 w-10 rounded-full">
-												<img
+												<FileImage
 													v-if="getAccountAvatar(boost.account)"
-													:src="getAccountAvatar(boost.account)"
+													:file="getAccountAvatar(boost.account)"
 													:alt="boost.account.nick || boost.account.name"
 													class="h-full w-full rounded-full object-cover"
-												>
+												/>
 												<div
 													v-else
 													class="h-10 w-10 rounded-full bg-primary text-primary-content flex items-center justify-center"
@@ -215,12 +215,12 @@
 											class="avatar"
 										>
 											<div class="h-10 w-10 rounded-full">
-												<img
+												<FileImage
 													v-if="getAccountAvatar(reaction.account)"
-													:src="getAccountAvatar(reaction.account)"
+													:file="getAccountAvatar(reaction.account)"
 													:alt="reaction.account.nick || reaction.account.name"
 													class="h-full w-full rounded-full object-cover"
-												>
+												/>
 												<div
 													v-else
 													class="h-10 w-10 rounded-full bg-primary text-primary-content flex items-center justify-center"
@@ -329,7 +329,7 @@ const submittingReply = ref(false);
 
 // User info
 const userName = computed(() => user.value?.nick || user.value?.name || '');
-const userAvatar = computed(() => getFileUrl(user.value?.profile?.picture?.id));
+const userAvatar = computed(() => user.value?.profile?.picture ?? null);
 const userInitials = computed(() => {
 	const name = user.value?.name || '?';
 	return name.slice(0, 2).toUpperCase();
@@ -478,8 +478,8 @@ function getReactionLabel(symbol: string): string {
 }
 
 // Helper functions
-function getAccountAvatar(account: { profile?: { picture?: { id: string } } }): string {
-	return getFileUrl(account.profile?.picture?.id) || '';
+function getAccountAvatar(account: { profile?: { picture?: { id: string } } }) {
+	return account.profile?.picture ?? null;
 }
 
 function getInitials(name: string): string {

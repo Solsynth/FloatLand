@@ -245,13 +245,13 @@ onMounted(async () => {
         v-if="backgroundUrl"
         class="relative aspect-[16/7] w-full"
       >
-        <img
+        <FileImage
           :src="backgroundUrl"
           :alt="room.realm?.name ?? displayName"
           class="absolute inset-0 h-full w-full object-cover"
           loading="lazy"
           decoding="async"
-        >
+        />
         <div
           class="absolute inset-0 bg-gradient-to-b from-black/10 via-base-100/20 to-base-100"
           aria-hidden="true"
@@ -273,13 +273,13 @@ onMounted(async () => {
               v-if="avatarUrl"
               class="h-20 w-20 rounded-2xl"
             >
-              <img
+              <FileImage
                 :src="avatarUrl"
                 :alt="displayName"
                 class="rounded-2xl"
                 loading="lazy"
                 decoding="async"
-              >
+              />
             </div>
             <div
               v-else
@@ -311,14 +311,14 @@ onMounted(async () => {
             class="inline-flex items-center gap-2 rounded-full border border-base-content/10 bg-base-200/70 px-3 py-1.5 text-xs font-medium text-base-content/70 transition-colors hover:border-primary/30 hover:bg-base-200"
             :aria-label="`${realm.name} ${t('chat.openRealm')}`"
           >
-            <img
+            <FileImage
               v-if="realm.picture"
-              :src="getFileUrl(realm.picture.id)"
+              :file="realm.picture"
               :alt="realm.name"
               class="h-4 w-4 rounded-full"
               loading="lazy"
               decoding="async"
-            >
+            />
             <span
               v-else
               class="flex h-4 w-4 items-center justify-center rounded-full bg-primary/15 text-[9px] font-bold text-primary"
@@ -334,7 +334,7 @@ onMounted(async () => {
               v-if="visibleRealmMemberAvatars.length > 0"
               class="flex -space-x-2"
             >
-              <img
+              <FileImage
                 v-for="m in visibleRealmMemberAvatars"
                 :key="m.id"
                 :src="m.url"
@@ -343,7 +343,7 @@ onMounted(async () => {
                 class="h-8 w-8 rounded-full border-2 border-base-100 object-cover"
                 loading="lazy"
                 decoding="async"
-              >
+              />
               <span
                 v-if="hiddenRealmMemberCount > 0"
                 class="flex h-8 w-8 items-center justify-center rounded-full border-2 border-base-100 bg-base-200 text-[11px] font-semibold text-base-content/60"

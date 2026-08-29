@@ -83,10 +83,10 @@
 							<NuxtLink :to="`/@${member.account?.name}`" class="shrink-0">
 								<div v-if="member.account?.profile.picture?.id" class="avatar">
 									<div class="w-12 h-12 rounded-full">
-										<img
-											:src="getFileUrl(member.account.profile.picture.id)!"
+										<FileImage
+											:file="member.account.profile.picture"
 											:alt="member.nick || member.account?.nick || member.account?.name"
-										>
+										/>
 									</div>
 								</div>
 								<div v-else class="avatar avatar-placeholder">
@@ -206,7 +206,6 @@
 <script setup lang="ts">
 import type { Realm, RealmMember, RealmLabel } from '~/types/realm';
 import { fetchRealm, fetchRealmMembers, getMyRealmMembership } from '~/utils/api';
-import { getFileUrl } from '~/utils/files';
 import { renderMarkdown } from '~/utils/markdown';
 
 const { t } = useI18n();

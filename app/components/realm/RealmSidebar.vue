@@ -144,9 +144,9 @@
             </span>
             <div class="avatar shrink-0">
               <div class="h-7 w-7 rounded-md">
-                <img
-                  v-if="entry.account?.profile?.picture?.id"
-                  :src="getFileUrl(entry.account.profile.picture.id)!"
+                <FileImage
+                  v-if="entry.account?.profile?.picture"
+                  :file="entry.account.profile.picture"
                   :alt="entry.account.nick || entry.account.name"
                   class="h-full w-full object-cover"
                 />
@@ -219,9 +219,9 @@
           <div class="flex items-start gap-2.5">
             <div class="avatar shrink-0">
               <div class="h-9 w-9 rounded-box">
-                <img
-                  v-if="auth.user.value?.profile?.picture?.id"
-                  :src="getFileUrl(auth.user.value.profile.picture.id)!"
+                <FileImage
+                  v-if="auth.user.value?.profile?.picture"
+                  :file="auth.user.value.profile.picture"
                   :alt="membership.nick || auth.user.value.name"
                   class="h-full w-full object-cover"
                 />
@@ -309,7 +309,6 @@ import {
   fetchRealmBoostLeaderboard,
   fetchRealmLabels,
 } from "~/utils/api";
-import { getFileUrl } from "~/utils/files";
 import {
   IconRocket,
   IconZap,

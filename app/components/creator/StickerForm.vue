@@ -9,12 +9,12 @@
       <!-- Image Upload -->
       <div class="flex items-start gap-4 mb-5 p-4 rounded-box bg-base-200/50">
         <div class="w-20 h-20 rounded-box bg-base-200 overflow-hidden shrink-0">
-          <img
+          <FileImage
             v-if="imageUrl"
             :src="imageUrl"
             class="w-full h-full object-contain"
             alt="Sticker"
-          >
+          />
           <div v-else class="flex items-center justify-center h-full">
             <IconImage class="w-8 h-8 text-base-content/20" />
           </div>

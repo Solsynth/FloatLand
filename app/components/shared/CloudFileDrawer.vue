@@ -75,7 +75,7 @@
                     :key="idx"
                     class="group relative aspect-square overflow-hidden rounded-box bg-base-200"
                   >
-                    <img v-if="file.preview" :src="file.preview" class="w-full h-full object-cover" >
+                    <FileImage v-if="file.preview" :src="file.preview" class="w-full h-full object-cover" />
                     <div v-else class="w-full h-full flex items-center justify-center bg-base-200">
                       <IconFile class="w-8 h-8 text-base-content/40" />
                     </div>

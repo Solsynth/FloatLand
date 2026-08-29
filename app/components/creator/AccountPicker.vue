@@ -49,9 +49,9 @@
         </div>
         <div class="avatar">
           <div class="w-9 rounded-full">
-            <img
-              v-if="getFileUrl(account.profile?.picture?.id)"
-              :src="getFileUrl(account.profile?.picture?.id) ?? ''"
+            <FileImage
+              v-if="account.profile?.picture"
+              :file="account.profile.picture"
               :alt="account.nick || 'Account'"
             />
             <div
@@ -83,7 +83,6 @@
 import { IconSearch, IconUsers } from '#components'
 import { searchAccounts } from '~/utils/api'
 import type { SnAccount } from '~/types/auth'
-import { getFileUrl } from '~/utils/files'
 
 const props = withDefaults(defineProps<{
   allowMultiple?: boolean

@@ -4,9 +4,9 @@
     <div v-if="publisher" class="card w-full overflow-hidden bg-base-100">
       <!-- Background Banner -->
       <div class="h-20 w-full bg-base-200">
-        <img
+        <FileImage
           v-if="backgroundUrl"
-          :src="backgroundUrl"
+          :file="backgroundUrl"
           :alt="`${displayName} background`"
           class="h-full w-full object-cover"
         />
@@ -18,7 +18,7 @@
           <NuxtLink :to="`/publishers/${publisher.name}`" class="shrink-0">
             <div v-if="avatarUrl" class="avatar">
               <div class="w-16 h-16 rounded-full ring-4 ring-base-100">
-                <img :src="avatarUrl" :alt="displayName" />
+                <FileImage :file="avatarUrl" :alt="displayName" />
               </div>
             </div>
             <div v-else class="avatar avatar-placeholder">
@@ -79,7 +79,6 @@
 
 <script setup lang="ts">
 import type { Publisher } from "~/types/post";
-import { getFileUrl } from "~/utils/files";
 import { renderMarkdown } from "~/utils/markdown";
 
 const props = defineProps<{
@@ -89,10 +88,8 @@ const props = defineProps<{
 const displayName = computed(
   () => props.publisher?.nick || props.publisher?.name || "Unknown",
 );
-const avatarUrl = computed(() => getFileUrl(props.publisher?.picture?.id));
-const backgroundUrl = computed(() =>
-  getFileUrl(props.publisher?.background?.id),
-);
+const avatarUrl = computed(() => props.publisher?.picture ?? null);
+const backgroundUrl = computed(() => props.publisher?.background ?? null);
 const bioHtml = computed(() => {
   if (!props.publisher?.bio) return "";
   return renderMarkdown(props.publisher.bio);

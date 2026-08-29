@@ -7,7 +7,7 @@
     />
   </div>
   <div v-else-if="!appId && widgetKey === 'attachment'" class="space-y-2 w-full">
-    <img
+    <FileImage
       v-for="(src, i) in attachmentSrcs"
       :key="i"
       :src="src"
@@ -37,14 +37,14 @@
       v-if="backgroundSrc"
       class="absolute inset-0 w-full overflow-hidden"
     >
-      <img :src="backgroundSrc" alt="" class="h-full w-full object-cover" />
+      <FileImage :src="backgroundSrc" alt="" class="h-full w-full object-cover" />
       <div class="absolute inset-0 bg-base-100/80" />
     </div>
     <div
       class="relative w-full space-y-1"
       :class="backgroundSrc ? 'p-3' : 'p-4'"
     >
-      <img
+      <FileImage
         v-if="imageSrc"
         :src="imageSrc"
         alt=""
@@ -69,7 +69,7 @@
   </div>
 
   <div v-else-if="rendererType === 'inline'" class="flex items-center gap-3 w-full min-w-0">
-    <img
+    <FileImage
       v-if="imageSrc"
       :src="imageSrc"
       alt=""
@@ -96,7 +96,7 @@
 
   <div v-else-if="rendererType === 'data'" class="p-4 space-y-2 w-full min-w-0">
     <div class="flex flex-wrap gap-3 w-full">
-      <img
+      <FileImage
         v-if="imageSrc"
         :src="imageSrc"
         alt=""
@@ -123,7 +123,7 @@
       v-if="backgroundSrc || imageSrc"
       class="relative w-full h-32 overflow-hidden"
     >
-      <img
+      <FileImage
         v-if="backgroundSrc"
         :src="backgroundSrc"
         alt=""
@@ -134,7 +134,7 @@
         class="absolute inset-0 bg-base-200"
       />
       <div class="absolute inset-0 bg-black/20" />
-      <img
+      <FileImage
         v-if="imageSrc"
         :src="imageSrc"
         alt=""
@@ -160,7 +160,7 @@
 
   <!-- Default list layout -->
   <div v-else class="space-y-2.5 w-full min-w-0">
-    <img
+    <FileImage
       v-if="imageSrc"
       :src="imageSrc"
       alt=""

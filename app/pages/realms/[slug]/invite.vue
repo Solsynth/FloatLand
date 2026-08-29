@@ -26,9 +26,9 @@
     >
       <!-- Banner -->
       <div class="h-28 w-full bg-base-200">
-        <img
+        <FileImage
           v-if="bgUrl"
-          :src="bgUrl"
+          :file="bgUrl"
           :alt="`${realm.name} background`"
           class="h-full w-full object-cover"
         />
@@ -47,7 +47,7 @@
             <div
               class="h-14 w-14 rounded-box ring ring-base-300 ring-offset-2 ring-offset-base-100"
             >
-              <img :src="avatarUrl" :alt="realm.name" />
+              <FileImage :file="avatarUrl" :alt="realm.name" />
             </div>
           </div>
           <div v-else class="avatar avatar-placeholder">
@@ -128,7 +128,6 @@
 
 <script setup lang="ts">
 import { fetchRealm, apiFetch } from "~/utils/api";
-import { getFileUrl } from "~/utils/files";
 import type { Realm } from "~/types/realm";
 import {
   IconUsers,
@@ -160,8 +159,8 @@ const isJoining = ref(false);
 const isCheckingMembership = ref(false);
 const isMember = ref(false);
 
-const bgUrl = computed(() => getFileUrl(realm.value?.background?.id));
-const avatarUrl = computed(() => getFileUrl(realm.value?.picture?.id));
+const bgUrl = computed(() => realm.value?.background ?? null);
+const avatarUrl = computed(() => realm.value?.picture ?? null);
 
 function getInitials(name: string): string {
   return (

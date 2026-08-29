@@ -12,9 +12,9 @@
           class="settings-profile-cover aspect-16/7 bg-base-200 overflow-hidden cursor-pointer group"
           @click="triggerBackgroundUpload"
         >
-          <img
+          <FileImage
             v-if="backgroundUrl"
-            :src="backgroundUrl"
+            :file="backgroundUrl"
             class="w-full h-full object-cover"
             alt="Background"
           />
@@ -41,9 +41,9 @@
             @click="triggerAvatarUpload"
           >
             <div class="w-full h-full rounded-full overflow-hidden relative">
-              <img
+              <FileImage
                 v-if="avatarUrl"
-                :src="avatarUrl"
+                :file="avatarUrl"
                 class="w-full h-full object-cover"
                 alt="Avatar"
               />
@@ -360,7 +360,6 @@ import {
   IconPlus,
   IconLocate,
 } from "#components";
-import { getFileUrl } from "~/utils/files";
 import { updateAccount, updateProfile } from "~/utils/api";
 
 const { t } = useI18n();
@@ -375,10 +374,8 @@ const isDetectingTimezone = ref(false);
 const displayName = computed(
   () => user.value?.nick || user.value?.name || "Unknown",
 );
-const avatarUrl = computed(() => getFileUrl(user.value?.profile?.picture?.id));
-const backgroundUrl = computed(() =>
-  getFileUrl(user.value?.profile?.background?.id),
-);
+const avatarUrl = computed(() => user.value?.profile?.picture ?? null);
+const backgroundUrl = computed(() => user.value?.profile?.background ?? null);
 
 const avatarInput = ref<HTMLInputElement>();
 const backgroundInput = ref<HTMLInputElement>();

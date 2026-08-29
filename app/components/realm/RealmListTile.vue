@@ -5,9 +5,9 @@
   >
     <!-- Banner + overlapping avatar (Flutter RealmListTile card) -->
     <div class="relative aspect-[16/7] w-full bg-base-200">
-      <img
+      <FileImage
         v-if="backgroundUrl"
-        :src="backgroundUrl"
+        :file="backgroundUrl"
         :alt="`${realm.name} background`"
         class="h-full w-full object-cover"
         loading="lazy"
@@ -15,9 +15,9 @@
       <div
         class="absolute -bottom-6 left-4 h-12 w-12 overflow-hidden rounded-full ring-4 ring-base-100 sm:h-14 sm:w-14"
       >
-        <img
+        <FileImage
           v-if="pictureUrl"
-          :src="pictureUrl"
+          :file="pictureUrl"
           :alt="realm.name"
           class="h-full w-full object-cover"
           loading="lazy"
@@ -73,7 +73,6 @@
 
 <script setup lang="ts">
 import type { Realm } from "~/types/realm";
-import { getFileUrl } from "~/utils/files";
 import { IconLock, IconRocket, IconChevronRight } from "#components";
 
 const { t } = useI18n();
@@ -82,6 +81,6 @@ const props = defineProps<{
   realm: Realm;
 }>();
 
-const pictureUrl = computed(() => getFileUrl(props.realm.picture?.id));
-const backgroundUrl = computed(() => getFileUrl(props.realm.background?.id));
+const pictureUrl = computed(() => props.realm.picture ?? null);
+const backgroundUrl = computed(() => props.realm.background ?? null);
 </script>

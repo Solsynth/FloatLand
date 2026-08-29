@@ -103,7 +103,7 @@
                 >
                   <div v-if="avatarUrl" class="avatar">
                     <div class="w-8 rounded-full">
-                      <img :src="avatarUrl" :alt="user.name" />
+                      <FileImage :file="avatarUrl" :alt="user.name" />
                     </div>
                   </div>
                   <div v-else class="avatar avatar-placeholder">
@@ -284,7 +284,7 @@
         >
           <div v-if="avatarUrl" class="avatar shrink-0">
             <div class="w-9 rounded-full">
-              <img :src="avatarUrl" :alt="user.name" />
+              <FileImage :file="avatarUrl" :alt="user.name" />
             </div>
           </div>
           <div v-else class="avatar avatar-placeholder shrink-0">
@@ -380,7 +380,6 @@
 </template>
 
 <script setup lang="ts">
-import { getFileUrl } from "~/utils/files";
 import {
   IconHardDrive,
   IconBriefcaseBusiness,
@@ -505,7 +504,7 @@ const driveNavItem = computed<TopbarNavItem>(() => ({
 }));
 
 const displayName = computed(() => user.value?.nick || user.value?.name || "");
-const avatarUrl = computed(() => getFileUrl(user.value?.profile?.picture?.id));
+const avatarUrl = computed(() => user.value?.profile?.picture ?? null);
 const isBackstageActive = computed(() =>
   backstageNavItems.value.some((item) => isNavActive(item.to)),
 );

@@ -123,19 +123,19 @@
                     <!-- User Profile Card -->
                     <div v-if="account" class="card bg-base-100 overflow-hidden">
                         <div class="h-16 w-full bg-base-200">
-                            <img
+                            <FileImage
                                 v-if="backgroundUrl"
-                                :src="backgroundUrl"
+                                :file="backgroundUrl"
                                 :alt="`${displayName} background`"
                                 class="h-full w-full object-cover"
-                            >
+                            />
                         </div>
                         <div class="card-body p-4">
                             <div class="flex items-center gap-3 -mt-6 mb-2">
                                 <NuxtLink :to="`/accounts/${accountName}`" class="shrink-0">
                                     <div v-if="avatarUrl" class="avatar">
                                         <div class="w-12 h-12 rounded-full ring-2 ring-base-100">
-                                            <img :src="avatarUrl" :alt="displayName">
+                                            <FileImage :file="avatarUrl" :alt="displayName"/>
                                         </div>
                                     </div>
                                     <div v-else class="avatar avatar-placeholder">
@@ -250,7 +250,7 @@
                                 <NuxtLink :to="`/accounts/${accountName}`" class="shrink-0">
                                     <div v-if="avatarUrl" class="avatar">
                                         <div class="w-10 h-10 rounded-full">
-                                            <img :src="avatarUrl" :alt="displayName">
+                                            <FileImage :file="avatarUrl" :alt="displayName"/>
                                         </div>
                                     </div>
                                     <div v-else class="avatar avatar-placeholder">
@@ -369,7 +369,6 @@ import {
 } from "#components";
 import type { EventCalendarEntry, FortuneTip } from "~/utils/api";
 import { fetchEventCalendar, fetchAccount } from "~/utils/api";
-import { getFileUrl } from "~/utils/files";
 import type { SnAccount } from "~/types/auth";
 
 const route = useRoute();
@@ -395,8 +394,8 @@ const dateParam = computed(() => {
 });
 
 const displayName = computed(() => account.value?.nick || account.value?.name || accountName.value);
-const avatarUrl = computed(() => getFileUrl(account.value?.profile?.picture?.id));
-const backgroundUrl = computed(() => getFileUrl(account.value?.profile?.background?.id));
+const avatarUrl = computed(() => account.value?.profile?.picture ?? null);
+const backgroundUrl = computed(() => account.value?.profile?.background ?? null);
 
 function getInitials(name: string): string {
     return (

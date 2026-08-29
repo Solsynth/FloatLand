@@ -553,11 +553,19 @@
     margin-inline: 3px;
   }
 
-  .cloud-file-image {
-    border-radius: 0.5rem;
-    max-height: 24rem;
-    object-fit: contain;
+  /* Unlazy-powered images: fade the real image in over its blurhash
+     placeholder once loaded. */
+  .file-image-loaded {
+    animation: file-image-in 0.45s ease-out both;
   }
+
+
+  @media (prefers-reduced-motion: reduce) {
+    .file-image-loaded {
+      animation: none;
+    }
+  }
+
 
   /* Hide scrollbars in admin portal sections (keeps scrolling functional) */
   .scrollbar-none {

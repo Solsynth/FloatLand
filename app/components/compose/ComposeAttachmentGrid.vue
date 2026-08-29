@@ -11,12 +11,13 @@
         <!-- Image Preview -->
         <template v-if="isImage(attachment)">
           <div class="aspect-video relative">
-            <img
+            <FileImage
               v-if="attachment.preview || attachment.cloudFile?.id"
-              :src="getPreviewUrl(attachment)"
+              :file="attachment.cloudFile ?? undefined"
+              :src="attachment.preview"
               class="w-full h-full object-cover"
               alt="Attachment preview"
-            >
+            />
             <div v-else class="w-full h-full flex items-center justify-center">
               <IconImage class="w-8 h-8 text-base-content/30" />
             </div>

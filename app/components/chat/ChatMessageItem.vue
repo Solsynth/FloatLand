@@ -17,7 +17,7 @@
       >
         <div v-if="senderAvatarUrl" class="avatar">
           <div class="w-8 rounded-full">
-            <img :src="senderAvatarUrl" :alt="senderName" />
+            <FileImage :src="senderAvatarUrl" :alt="senderName" />
           </div>
         </div>
         <div v-else class="avatar avatar-placeholder">

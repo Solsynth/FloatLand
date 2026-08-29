@@ -3,10 +3,10 @@
     class="feed-discovery-card flex h-full flex-col p-3"
   >
     <div class="flex items-center gap-2.5">
-      <div v-if="publisherPictureUrl" class="avatar shrink-0">
+      <div v-if="publisherPicture" class="avatar shrink-0">
         <div class="h-11 w-11 rounded-full">
-          <img
-            :src="publisherPictureUrl"
+          <FileImage
+            :file="publisherPicture"
             :alt="publisher.nick || publisher.name"
             class="h-full w-full rounded-full object-cover"
           />
@@ -61,7 +61,6 @@
 
 <script setup lang="ts">
 import type { DiscoveryItem } from "~/types/post";
-import { getFileUrl } from "~/utils/files";
 import { getInitials } from "~/utils/identity";
 import { IconBadgeCheck, IconSparkles } from "#components";
 
@@ -83,9 +82,8 @@ const publisher = computed(() => {
   return data;
 });
 
-const publisherPictureUrl = computed(() => {
-  if (!publisher.value.picture) return undefined;
-  return getFileUrl(publisher.value.picture.id) ?? undefined;
+const publisherPicture = computed(() => {
+  return publisher.value.picture ?? undefined;
 });
 
 const reasons = computed(() => props.item.reasons ?? []);

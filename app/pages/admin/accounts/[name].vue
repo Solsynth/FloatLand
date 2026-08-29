@@ -11,9 +11,9 @@
         </NuxtLink>
         <div class="avatar">
           <div class="w-10 rounded-full">
-            <img
-              v-if="getFileUrl(detail.account.profile?.picture?.id)"
-              :src="getFileUrl(detail.account.profile?.picture?.id)"
+            <FileImage
+              v-if="detail.account.profile?.picture"
+              :file="detail.account.profile.picture"
               :alt="detail.account.nick"
             />
             <div
@@ -1181,7 +1181,6 @@ import {
   IconSparkles,
   IconUsers,
 } from '#components'
-import { getFileUrl } from '~/utils/files'
 import {
   revokeAccountSessions,
   activateAdminAccount,

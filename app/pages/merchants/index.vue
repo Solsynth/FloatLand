@@ -44,7 +44,7 @@
           >
             <div class="avatar shrink-0">
               <div class="w-10 rounded-full">
-                <img v-if="pub.picture?.id" :src="getFileUrl(pub.picture.id)!" :alt="pub.nick" loading="lazy" decoding="async">
+                <FileImage v-if="pub.picture" :file="pub.picture" :alt="pub.nick" loading="lazy" decoding="async"/>
                 <div v-else class="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-content">
                   {{ pub.nick?.slice(0, 2).toUpperCase() || '?' }}
                 </div>
@@ -72,7 +72,6 @@ import {
   IconInfo,
   IconChevronRight,
 } from "#components";
-import { getFileUrl } from "~/utils/files";
 
 definePageMeta({ middleware: "merchant" });
 

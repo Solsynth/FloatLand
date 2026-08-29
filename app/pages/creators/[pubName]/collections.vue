@@ -29,7 +29,7 @@
           <div class="card-body p-4 flex-row items-center gap-4">
             <div class="avatar">
               <div class="w-10 rounded">
-                <img v-if="getFileUrl(col.icon?.id)" :src="getFileUrl(col.icon?.id)" :alt="col.name || col.slug" />
+                <FileImage v-if="col.icon" :file="col.icon" :alt="col.name || col.slug" />
                 <div v-else class="flex h-10 w-10 items-center justify-center rounded bg-primary/10 text-primary">
                   <IconFolder class="w-5 h-5" />
                 </div>
@@ -97,7 +97,6 @@ import {
 } from '#components'
 import type { SnPostCollection } from '~/types/creator'
 import { fetchCollections, deleteCollection } from '~/utils/creator'
-import { getFileUrl } from '~/utils/files'
 
 definePageMeta({ middleware: 'creator' })
 

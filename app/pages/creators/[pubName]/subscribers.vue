@@ -24,7 +24,7 @@
             >
               <div class="avatar">
                 <div class="w-9 rounded-full">
-                  <img v-if="getFileUrl(req.account?.profile?.picture?.id)" :src="getFileUrl(req.account?.profile?.picture?.id)" :alt="req.account?.nick" />
+                  <FileImage v-if="req.account?.profile?.picture" :file="req.account.profile.picture" :alt="req.account?.nick" />
                   <div v-else class="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-content text-xs font-bold">
                     {{ (req.account?.nick || '?').slice(0, 2).toUpperCase() }}
                   </div>
@@ -63,7 +63,7 @@
           <div class="card-body p-4 flex-row items-center gap-4">
             <div class="avatar">
               <div class="w-10 rounded-full">
-                <img v-if="getFileUrl(sub.account?.profile?.picture?.id)" :src="getFileUrl(sub.account?.profile?.picture?.id)" :alt="sub.account?.nick" />
+                <FileImage v-if="sub.account?.profile?.picture" :file="sub.account.profile.picture" :alt="sub.account?.nick" />
                 <div v-else class="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-content text-sm font-bold">
                   {{ (sub.account?.nick || '?').slice(0, 2).toUpperCase() }}
                 </div>
@@ -124,7 +124,6 @@ import {
   addSubscriber,
   removeSubscriber,
 } from '~/utils/creator'
-import { getFileUrl } from '~/utils/files'
 
 definePageMeta({ middleware: 'creator' })
 

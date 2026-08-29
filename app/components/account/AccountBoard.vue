@@ -37,7 +37,7 @@
 
       <!-- Prebuilt widgets with card chrome -->
       <div v-else class="card w-full overflow-hidden relative">
-        <img
+        <FileImage
           v-if="payloadString(item.payload, 'background')"
           :src="resolveImageSrc(payloadString(item.payload, 'background')!)"
           alt=""
@@ -51,7 +51,7 @@
           v-if="payloadImage(item.payload)"
           class="relative aspect-[16/5] w-full overflow-hidden"
         >
-          <img
+          <FileImage
             :src="resolveImageSrc(payloadImage(item.payload)!)"
             alt=""
             class="h-full w-full object-cover"
@@ -369,9 +369,9 @@
               >
                 <div class="avatar">
                   <div class="w-9 h-9 rounded-full">
-                    <img
-                      v-if="pub.picture?.id"
-                      :src="getFileUrl(pub.picture.id) ?? undefined"
+                    <FileImage
+                      v-if="pub.picture"
+                      :file="pub.picture"
                       :alt="pub.nick ?? undefined"
                     />
                     <div

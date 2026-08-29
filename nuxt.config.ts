@@ -47,9 +47,7 @@ export default defineNuxtConfig({
     "nuxt-seo-utils",
     "nuxt-schema-org",
     "@nuxtjs/sitemap",
-    "@nuxtjs/robots",
-    "vue-sonner/nuxt",
-    "nuxt-email-renderer",
+    "@unlazy/nuxt",
   ],
   site: {
     url: "https://solian.app",

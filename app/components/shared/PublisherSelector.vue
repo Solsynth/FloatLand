@@ -3,9 +3,9 @@
     <label tabindex="0" class="flex items-center gap-3 rounded-box px-3 py-2.5 transition-colors cursor-pointer hover:bg-base-200/80" :class="{ 'w-full': fullWidth }">
       <div class="avatar">
         <div class="w-8 rounded-full">
-          <img
-            v-if="currentPictureUrl"
-            :src="currentPictureUrl"
+          <FileImage
+            v-if="currentPicture"
+            :file="currentPicture"
             :alt="currentName || 'Publisher'"
           />
           <div
@@ -40,9 +40,9 @@
         >
           <div class="avatar">
             <div class="w-7 rounded-full">
-              <img
-                v-if="getPictureUrl(pub)"
-                :src="getPictureUrl(pub)"
+              <FileImage
+                v-if="getPicture(pub)"
+                :file="getPicture(pub)"
                 :alt="getName(pub)"
               />
               <div
@@ -69,7 +69,6 @@
 
 <script setup lang="ts">
 import { IconChevronDown, IconX, IconCheck } from '#components'
-import { getFileUrl } from '~/utils/files'
 
 interface PublisherLike {
   id: string
@@ -102,9 +101,8 @@ defineEmits<{
 const currentName = computed(() => props.modelValue?.name || '')
 const currentNick = computed(() => props.modelValue?.nick || '')
 const currentHandle = computed(() => currentNick.value || currentName.value)
-const currentPictureUrl = computed(() => {
-  const id = props.modelValue?.picture?.id
-  return id ? getFileUrl(id) ?? undefined : undefined
+const currentPicture = computed(() => {
+  return props.modelValue?.picture ?? undefined
 })
 const currentInitials = computed(() => {
   const name = currentNick.value || currentName.value || '?'
@@ -119,8 +117,7 @@ function getNick(pub: PublisherLike): string {
   return pub.nick || ''
 }
 
-function getPictureUrl(pub: PublisherLike): string | undefined {
-  const id = pub.picture?.id
-  return id ? getFileUrl(id) ?? undefined : undefined
+function getPicture(pub: PublisherLike) {
+  return pub.picture ?? undefined
 }
 </script>

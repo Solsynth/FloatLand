@@ -176,9 +176,9 @@
           :to="`/posts/${post.id}`"
           class="block transition-colors hover:bg-base-200/50"
         >
-          <div v-if="thumbnailUrl" class="aspect-video w-full overflow-hidden">
-            <img
-              :src="thumbnailUrl"
+          <div v-if="thumbnailAttachment" class="aspect-video w-full overflow-hidden">
+            <FileImage
+              :file="thumbnailAttachment"
               :alt="post.title || 'Article thumbnail'"
               class="h-full w-full object-cover"
               loading="lazy"
@@ -370,7 +370,6 @@
 
 <script setup lang="ts">
 import type { Post } from "~/types/post";
-import { getFileUrl } from "~/utils/files";
 import { renderMarkdown } from "~/utils/markdown";
 import { getDisplayName } from "~/utils/identity";
 import {
@@ -481,11 +480,10 @@ const isAuthor = computed(() => {
 const isArticle = computed(() => props.post.type === 1);
 
 // Thumbnail for articles
-const thumbnailUrl = computed(() => {
+const thumbnailAttachment = computed(() => {
   const thumbnailId = props.post.meta?.thumbnail as string | undefined;
   if (!thumbnailId) return null;
-  const attachment = props.post.attachments.find((a) => a.id === thumbnailId);
-  return attachment ? getFileUrl(attachment.id) : null;
+  return props.post.attachments.find((a) => a.id === thumbnailId) ?? null;
 });
 
 // Content

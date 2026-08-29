@@ -1,6 +1,6 @@
 <template>
   <div v-if="resolvedUrls.length" class="space-y-2">
-    <img
+    <FileImage
       v-for="(url, i) in resolvedUrls"
       :key="`${url}-${i}`"
       :src="url"

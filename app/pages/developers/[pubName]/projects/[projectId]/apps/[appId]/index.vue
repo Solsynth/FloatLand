@@ -48,7 +48,7 @@
               <div class="flex min-w-0 items-start gap-4">
                 <div class="avatar shrink-0">
                   <div class="w-16 rounded-2xl">
-                    <img v-if="app.picture?.id" :src="getFileUrl(app.picture.id)!" :alt="app.name" loading="lazy" decoding="async">
+                    <FileImage v-if="app.picture" :file="app.picture" :alt="app.name" loading="lazy" decoding="async"/>
                     <div v-else class="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary text-xl font-black text-primary-content">
                       {{ app.name?.slice(0, 2).toUpperCase() || '?' }}
                     </div>
@@ -154,7 +154,7 @@
                 >
                   <div class="avatar">
                     <div class="w-10 rounded">
-                      <img v-if="getFileUrl(product.picture?.id)" :src="getFileUrl(product.picture?.id)" :alt="product.displayName" />
+                      <FileImage v-if="product.picture" :file="product.picture" :alt="product.displayName" />
                       <div v-else class="flex h-10 w-10 items-center justify-center rounded bg-base-300 text-base-content/50 text-xs">
                         {{ product.displayName?.slice(0, 2).toUpperCase() }}
                       </div>
@@ -415,7 +415,7 @@
             <div class="relative group">
               <div class="avatar cursor-pointer" @click="pickPicture">
                 <div class="w-16 rounded-full">
-                  <img v-if="picturePreview" :src="picturePreview" />
+                  <FileImage v-if="picturePreview" :src="picturePreview" />
                   <div v-else class="flex h-16 w-16 items-center justify-center rounded-full bg-base-300 text-base-content/50">
                     <IconCamera class="w-6 h-6" />
                   </div>
@@ -427,7 +427,7 @@
             </div>
             <div class="flex-1">
               <div class="relative group cursor-pointer rounded-lg overflow-hidden h-20 bg-base-300" @click="pickBackground">
-                <img v-if="backgroundPreview" :src="backgroundPreview" class="w-full h-full object-cover" />
+                <FileImage v-if="backgroundPreview" :src="backgroundPreview" class="w-full h-full object-cover" />
                 <div v-else class="flex h-full items-center justify-center text-base-content/50">
                   <span class="text-xs">{{ t('developer.apps.background') ?? 'Background' }}</span>
                 </div>
@@ -603,7 +603,7 @@
           <div class="relative group">
             <div class="avatar cursor-pointer" @click="pickProductPicture">
               <div class="w-16 rounded">
-                <img v-if="productPicturePreview" :src="productPicturePreview" />
+                <FileImage v-if="productPicturePreview" :src="productPicturePreview" />
                 <div v-else class="flex h-16 w-16 items-center justify-center rounded bg-base-300 text-base-content/50">
                   <IconCamera class="w-6 h-6" />
                 </div>
@@ -615,7 +615,7 @@
           </div>
           <div class="flex-1">
             <div class="relative group cursor-pointer rounded-lg overflow-hidden h-16 bg-base-300" @click="pickProductBackground">
-              <img v-if="productBackgroundPreview" :src="productBackgroundPreview" class="w-full h-full object-cover" />
+              <FileImage v-if="productBackgroundPreview" :src="productBackgroundPreview" class="w-full h-full object-cover" />
               <div v-else class="flex h-full items-center justify-center text-base-content/50">
                 <span class="text-xs">{{ t('developer.apps.products.background') }}</span>
               </div>

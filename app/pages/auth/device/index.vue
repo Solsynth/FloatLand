@@ -17,12 +17,12 @@
 						<div class="mt-4 flex items-center gap-3 text-left">
 							<div class="avatar">
 								<div class="w-11 h-11 overflow-hidden rounded-md border border-base-300">
-									<img
+									<FileImage
 										v-if="clientPictureUrl"
-										:src="clientPictureUrl"
+										:file="clientPictureUrl"
 										loading="lazy"
 										class="w-full h-full object-cover"
-									>
+									/>
 									<div
 										v-else
 										class="w-full h-full flex items-center justify-center bg-primary/15 text-primary"
@@ -152,8 +152,7 @@ const status = ref<{
 const clientInfo = ref<AuthorizeClientInfo | null>(null);
 
 const clientPictureUrl = computed(() => {
-	const fileId = clientInfo.value?.picture?.id || status.value?.picture?.id;
-	return fileId ? `https://api.solian.app/drive/files/${fileId}` : null;
+	return clientInfo.value?.picture || status.value?.picture || null;
 });
 
 const scopeLabels: Record<string, string> = {

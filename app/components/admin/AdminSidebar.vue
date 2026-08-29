@@ -128,11 +128,11 @@
         >
           <div class="avatar shrink-0">
             <div class="w-8 rounded-full">
-              <img
-                v-if="getFileUrl(currentOrg?.picture?.id)"
-                :src="getFileUrl(currentOrg?.picture?.id) ?? ''"
+              <FileImage
+                v-if="currentOrg?.picture"
+                :file="currentOrg.picture"
                 :alt="currentOrgName ?? 'Organization'"
-              >
+              />
               <div
                 v-else
                 class="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-bold"
@@ -176,11 +176,11 @@
             >
               <div class="avatar shrink-0">
                 <div class="w-7 rounded-full">
-                  <img
-                    v-if="getFileUrl(org.picture?.id)"
-                    :src="getFileUrl(org.picture?.id) ?? ''"
+                  <FileImage
+                    v-if="org.picture"
+                    :file="org.picture"
                     :alt="getOrgDisplayName(org) || 'Organization'"
-                  >
+                  />
                   <div
                     v-else
                     class="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-primary text-[10px] font-bold"
@@ -280,7 +280,7 @@
         >
           <div v-if="avatarUrl" class="avatar shrink-0">
             <div class="w-8 rounded-full">
-              <img :src="avatarUrl ?? ''" :alt="displayName || 'User'">
+              <FileImage :file="avatarUrl" :alt="displayName || 'User'"/>
             </div>
           </div>
           <div v-else class="avatar avatar-placeholder shrink-0">
@@ -337,7 +337,6 @@
 </template>
 
 <script setup lang="ts">
-import { getFileUrl } from '~/utils/files'
 import {
   IconChevronDown,
   IconChevronUp,
@@ -473,7 +472,7 @@ function dismissEnrollPrompt() {
 
 const displayName = computed(() => authDisplayName.value || user.value?.nick || user.value?.name || '')
 const username = computed(() => user.value?.name || '')
-const avatarUrl = computed(() => getFileUrl(user.value?.profile?.picture?.id))
+const avatarUrl = computed(() => user.value?.profile?.picture ?? null)
 const fallbackInitials = computed(() => (username.value || '?').slice(0, 2).toUpperCase())
 
 /** All nav hrefs flattened for longest-match active detection */

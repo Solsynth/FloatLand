@@ -10,11 +10,11 @@
             <div class="flex items-center gap-4">
               <div class="avatar shrink-0">
                 <div class="w-14 rounded-full">
-                  <img
-                    v-if="getFileUrl(developerInfo.publisher?.picture?.id)"
-                    :src="getFileUrl(developerInfo.publisher?.picture?.id)"
+                  <FileImage
+                    v-if="developerInfo.publisher?.picture"
+                    :file="developerInfo.publisher.picture"
                     :alt="developerInfo.publisher?.nick"
-                  >
+                  />
                   <div
                     v-else
                     class="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary text-lg font-bold"
@@ -66,7 +66,6 @@
 </template>
 
 <script setup lang="ts">
-import { getFileUrl } from '~/utils/files'
 import type { DeveloperStats } from '~/types/developer'
 import { fetchDeveloperStats } from '~/utils/developer'
 

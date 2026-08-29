@@ -32,7 +32,7 @@
               >
                 <div class="avatar">
                   <div class="w-10 rounded-full">
-                    <img v-if="getFileUrl(bot.account.profile?.picture?.id)" :src="getFileUrl(bot.account.profile?.picture?.id)" :alt="bot.account.nick" />
+                    <FileImage v-if="bot.account.profile?.picture" :file="bot.account.profile.picture" :alt="bot.account.nick" />
                     <div v-else class="flex h-10 w-10 items-center justify-center rounded-full bg-info text-info-content text-sm font-bold">
                       {{ bot.account.nick?.slice(0, 2).toUpperCase() }}
                     </div>
@@ -109,7 +109,6 @@ import {
   IconBot,
   IconChevronRight,
 } from '#components'
-import { getFileUrl } from '~/utils/files'
 import type { Bot } from '~/types/developer'
 import { fetchBots, createBot } from '~/utils/developer'
 

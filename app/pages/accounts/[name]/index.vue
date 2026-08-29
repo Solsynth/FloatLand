@@ -32,9 +32,9 @@
         <div
           class="h-40 w-full overflow-hidden rounded-box bg-base-200 sm:h-52"
         >
-          <img
+          <FileImage
             v-if="backgroundUrl"
-            :src="backgroundUrl"
+            :file="backgroundUrl"
             :alt="`${displayName} background`"
             class="h-full w-full object-cover"
           />
@@ -47,7 +47,7 @@
               <div
                 class="h-24 w-24 rounded-full ring ring-base-300 ring-offset-2 ring-offset-base-100 sm:h-28 sm:w-28 sm:mb-8"
               >
-                <img :src="avatarUrl" :alt="displayName" />
+                <FileImage :file="avatarUrl" :alt="displayName" />
               </div>
             </div>
             <div v-else class="avatar avatar-placeholder">
@@ -381,12 +381,8 @@ const isCurrentUser = computed(() => {
 const displayName = computed(
   () => account.value?.nick || account.value?.name || "Unknown",
 );
-const avatarUrl = computed(() =>
-  getFileUrl(account.value?.profile?.picture?.id),
-);
-const backgroundUrl = computed(() =>
-  getFileUrl(account.value?.profile?.background?.id),
-);
+const avatarUrl = computed(() => account.value?.profile?.picture ?? null);
+const backgroundUrl = computed(() => account.value?.profile?.background ?? null);
 const bioHtml = computed(() => {
   if (!account.value?.profile?.bio) return "";
   return renderMarkdown(account.value.profile.bio);

@@ -117,10 +117,10 @@
                                             class="avatar"
                                         >
                                             <div class="w-12 h-12 rounded-xl">
-                                                <img
-                                                    :src="getFileUrl(getAccount(rel)?.profile?.picture?.id)"
+                                                <FileImage
+                                                    :file="getAccount(rel)?.profile?.picture"
                                                     :alt="getAccountName(rel)"
-                                                >
+                                                />
                                             </div>
                                         </div>
                                         <div
@@ -418,10 +418,10 @@
                             class="avatar"
                         >
                             <div class="w-10 h-10 rounded-lg">
-                                <img
-                                    :src="getFileUrl(req.account.profile.picture.id)"
+                                <FileImage
+                                    :file="req.account.profile.picture"
                                     :alt="req.account.name"
-                                >
+                                />
                             </div>
                         </div>
                         <div v-else class="avatar avatar-placeholder">
@@ -477,7 +477,6 @@
 </template>
 
 <script setup lang="ts">
-import { getFileUrl } from "~/utils/files";
 import {
     IconArrowLeft,
     IconUserPlus,

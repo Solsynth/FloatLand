@@ -35,9 +35,9 @@
           class="overflow-hidden rounded-box bg-base-100"
         >
           <div class="relative h-36 w-full bg-base-200 sm:h-44">
-            <img
+            <FileImage
               v-if="backgroundUrl"
-              :src="backgroundUrl"
+              :file="backgroundUrl"
               :alt="`${displayName} background`"
               class="h-full w-full object-cover"
             />
@@ -50,8 +50,8 @@
               >
                 <div v-if="avatarUrl" class="avatar">
                   <div class="h-20 w-20 sm:h-24 sm:w-24">
-                    <img
-                      :src="avatarUrl"
+                    <FileImage
+                      :file="avatarUrl"
                       :alt="displayName"
                       class="h-full w-full object-cover"
                     />
@@ -364,7 +364,6 @@ import {
   joinRealm,
   fetchRealmMembers,
 } from "~/utils/api";
-import { getFileUrl } from "~/utils/files";
 import { useIntersectionObserver } from "@vueuse/core";
 import {
   IconSearch,
@@ -454,8 +453,8 @@ useHead({
 });
 
 const displayName = computed(() => realm.value?.name || "Unknown Realm");
-const avatarUrl = computed(() => getFileUrl(realm.value?.picture?.id));
-const backgroundUrl = computed(() => getFileUrl(realm.value?.background?.id));
+const avatarUrl = computed(() => realm.value?.picture ?? null);
+const backgroundUrl = computed(() => realm.value?.background ?? null);
 
 const repliesLabel = computed(() => {
   if (includeReplies.value === null) return t("realms.auto");

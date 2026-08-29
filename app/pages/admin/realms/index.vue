@@ -59,9 +59,9 @@
                 <NuxtLink :to="`/admin/realms/${realm.slug}`" class="flex items-center gap-3">
                   <div class="avatar">
                     <div class="w-8 rounded-full">
-                      <img
-                        v-if="getFileUrl(realm.picture?.id)"
-                        :src="getFileUrl(realm.picture?.id) ?? ''"
+                      <FileImage
+                        v-if="realm.picture"
+                        :file="realm.picture"
                         :alt="realm.name"
                       />
                       <div
@@ -132,7 +132,6 @@ import {
 } from '#components'
 import type { AdminRealm } from '~/types/admin'
 import { fetchAdminRealms } from '~/utils/admin'
-import { getFileUrl } from '~/utils/files'
 
 definePageMeta({ middleware: 'auth' })
 

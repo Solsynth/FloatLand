@@ -91,7 +91,7 @@
               <div class="mt-0.5 flex items-center gap-2">
                 <div class="avatar">
                   <div class="h-5 w-5 rounded-full">
-                    <img
+                    <FileImage
                       v-if="replyingTo.publisher?.picture?.id"
                       :src="getFileUrlSafe(replyingTo.publisher.picture.id)"
                       alt=""
@@ -129,7 +129,7 @@
               <div class="mt-0.5 flex items-center gap-2">
                 <div class="avatar">
                   <div class="h-5 w-5 rounded-full">
-                    <img
+                    <FileImage
                       v-if="forwardingTo.publisher?.picture?.id"
                       :src="getFileUrlSafe(forwardingTo.publisher.picture.id)"
                       alt=""
@@ -182,7 +182,7 @@
                     @click.stop="publisherPickerOpen = !publisherPickerOpen"
                   >
                     <div class="h-10 w-10 rounded-full ring-1 ring-base-300">
-                      <img
+                      <FileImage
                         v-if="currentPublisher?.picture?.id"
                         :src="getFileUrlSafe(currentPublisher.picture.id)"
                         alt=""
@@ -219,7 +219,7 @@
                     >
                       <div class="avatar">
                         <div class="h-7 w-7 rounded-full">
-                          <img
+                          <FileImage
                             v-if="pub.picture?.id"
                             :src="getFileUrlSafe(pub.picture.id)"
                             alt=""
@@ -315,7 +315,7 @@
                         <div
                           class="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-md bg-base-200 text-[10px] font-semibold text-base-content/50"
                         >
-                          <img
+                          <FileImage
                             v-if="item.pictureId"
                             :src="getFileUrlSafe(item.pictureId)"
                             alt=""

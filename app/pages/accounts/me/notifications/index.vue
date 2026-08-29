@@ -89,7 +89,7 @@
                                         class="avatar shrink-0"
                                     >
                                         <div class="w-12 h-12 rounded-xl">
-                                            <img
+                                            <FileImage
                                                 :src="
                                                     getFileUrl(
                                                         notification.meta
@@ -97,7 +97,7 @@
                                                     )!
                                                 "
                                                 alt=""
-                                            >
+                                            />
                                         </div>
                                     </div>
                                     <div
@@ -166,7 +166,7 @@
                                             "
                                             class="flex gap-2 mt-2"
                                         >
-                                            <img
+                                            <FileImage
                                                 v-for="imgId in (
                                                     notification.meta
                                                         .images as string[]
@@ -174,7 +174,7 @@
                                                 :key="imgId"
                                                 :src="getFileUrl(imgId)!"
                                                 class="w-16 h-16 rounded-lg object-cover"
-                                            >
+                                            />
                                         </div>
 
                                         <!-- Meta -->

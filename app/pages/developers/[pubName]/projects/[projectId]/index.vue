@@ -98,7 +98,7 @@
               >
                 <div class="avatar shrink-0">
                   <div class="w-9 rounded-xl">
-                    <img v-if="app.picture?.id" :src="getFileUrl(app.picture.id)!" :alt="app.name" loading="lazy" decoding="async">
+                    <FileImage v-if="app.picture" :file="app.picture" :alt="app.name" loading="lazy" decoding="async"/>
                     <div v-else class="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-xs font-bold text-primary-content">
                       {{ app.name?.slice(0, 2).toUpperCase() || '?' }}
                     </div>
@@ -135,7 +135,7 @@
               >
                 <div class="avatar shrink-0">
                   <div class="w-9 rounded-full">
-                    <img v-if="bot.account.profile?.picture?.id" :src="getFileUrl(bot.account.profile.picture.id)!" :alt="bot.account.nick" loading="lazy" decoding="async">
+                    <FileImage v-if="bot.account.profile?.picture" :file="bot.account.profile.picture" :alt="bot.account.nick" loading="lazy" decoding="async"/>
                     <div v-else class="flex h-9 w-9 items-center justify-center rounded-full bg-info text-xs font-bold text-info-content">
                       {{ bot.account.nick?.slice(0, 2).toUpperCase() || '?' }}
                     </div>
@@ -218,7 +218,6 @@ import {
 	Pencil as IconEdit,
 	Trash as IconTrash
 } from '@lucide/vue';
-import { getFileUrl } from '~/utils/files';
 import type { Bot, CustomApp, DevProject } from '~/types/developer';
 import { deleteDevProject, fetchBots, fetchCustomApps, fetchDevProject, updateDevProject } from '~/utils/developer';
 

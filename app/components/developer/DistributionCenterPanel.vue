@@ -477,9 +477,9 @@
             <fieldset class="fieldset">
               <legend class="fieldset-legend">{{ t('developer.apps.distribution.productIcon') }}</legend>
               <div class="flex items-center gap-3">
-                <img
-                  v-if="getFileUrl(productForm.icon?.id)"
-                  :src="getFileUrl(productForm.icon?.id) ?? ''"
+                <FileImage
+                  v-if="productForm.icon"
+                  :file="productForm.icon"
                   class="h-16 w-16 shrink-0 rounded-box object-cover"
                   alt=""
                 />
@@ -497,9 +497,9 @@
             <fieldset class="fieldset">
               <legend class="fieldset-legend">{{ t('developer.apps.distribution.productBackground') }}</legend>
               <div class="flex items-center gap-3">
-                <img
-                  v-if="getFileUrl(productForm.background?.id)"
-                  :src="getFileUrl(productForm.background?.id) ?? ''"
+                <FileImage
+                  v-if="productForm.background"
+                  :file="productForm.background"
                   class="h-16 w-16 shrink-0 rounded-box object-cover"
                   alt=""
                 />
@@ -524,8 +524,8 @@
             </div>
             <div v-if="productForm.previews.length" class="mt-3 grid grid-cols-3 gap-3 sm:grid-cols-4">
               <div v-for="(preview, index) in productForm.previews" :key="preview.id || index" class="group relative">
-                <img
-                  v-if="getFileUrl(preview.id)"
+                <FileImage
+                  v-if="preview.id"
                   :src="getFileUrl(preview.id) ?? ''"
                   class="aspect-video w-full rounded-box object-cover"
                   alt=""
@@ -832,7 +832,7 @@
               class="flex items-center justify-between gap-3 border border-base-300 p-3 rounded-box"
             >
               <div class="flex min-w-0 items-center gap-3">
-                <img
+                <FileImage
                   v-if="attachment.mimeType?.startsWith('image/') && getFileUrl(attachment.id)"
                   :src="getFileUrl(attachment.id) ?? ''"
                   class="h-10 w-10 shrink-0 rounded-box object-cover"

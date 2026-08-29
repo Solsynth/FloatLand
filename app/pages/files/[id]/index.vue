@@ -70,9 +70,10 @@
         @mouseup.stop="handleMouseUp"
         @mouseleave.stop="handleMouseUp"
       >
-        <img
+        <FileImage
           v-if="isImage"
           :src="fileUrl"
+          :file="file"
           :alt="file.name"
           class="max-h-full max-w-full object-contain select-none"
           :style="imageStyle"
@@ -205,8 +206,9 @@
                 class="relative group cursor-pointer"
                 @click="toggleFullscreen"
               >
-                <img
+                <FileImage
                   :src="fileUrl"
+                  :file="file"
                   :alt="file.name"
                   class="max-w-full max-h-[80vh] object-contain rounded-lg"
                 />
@@ -331,8 +333,9 @@
                 v-if="isImage"
                 class="mb-4 rounded-lg overflow-hidden bg-base-200"
               >
-                <img
+                <FileImage
                   :src="thumbnailUrl || fileUrl"
+                  :file="file"
                   class="w-full h-auto"
                   alt=""
                 />
@@ -462,7 +465,7 @@
 
         <!-- File preview thumbnail -->
         <div v-if="isImage" class="mb-4 rounded-lg overflow-hidden bg-base-200">
-          <img :src="thumbnailUrl || fileUrl" class="w-full h-auto" alt="" />
+          <FileImage :src="thumbnailUrl || fileUrl" :file="file" class="w-full h-auto" alt="" />
         </div>
 
         <!-- File details -->

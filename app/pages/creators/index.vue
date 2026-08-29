@@ -85,13 +85,13 @@
           >
             <div class="avatar shrink-0">
               <div class="w-10 rounded-full">
-                <img
-                  v-if="pub.picture?.id"
-                  :src="getFileUrl(pub.picture.id)!"
+                <FileImage
+                  v-if="pub.picture"
+                  :file="pub.picture"
                   :alt="pub.nick"
                   loading="lazy"
                   decoding="async"
-                >
+                />
                 <div v-else class="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
                   {{ pub.nick?.slice(0, 2).toUpperCase() || '?' }}
                 </div>
@@ -120,13 +120,13 @@
           >
             <div class="avatar shrink-0">
               <div class="w-9 rounded-full">
-                <img
-                  v-if="invite.publisher?.picture?.id"
-                  :src="getFileUrl(invite.publisher.picture.id)!"
+                <FileImage
+                  v-if="invite.publisher?.picture"
+                  :file="invite.publisher.picture"
                   :alt="invite.publisher?.nick"
                   loading="lazy"
                   decoding="async"
-                >
+                />
                 <div v-else class="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
                   {{ invite.publisher?.nick?.slice(0, 2).toUpperCase() || '?' }}
                 </div>
@@ -184,7 +184,6 @@ import {
   IconCheck,
   IconX,
 } from "#components";
-import { getFileUrl } from "~/utils/files";
 import {
   fetchPublisherQuota,
   acceptInvite,

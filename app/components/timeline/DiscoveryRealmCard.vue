@@ -3,10 +3,10 @@
     class="feed-discovery-card flex h-full flex-col p-3"
   >
     <div class="flex items-center gap-2.5">
-      <div v-if="realmPictureUrl" class="avatar shrink-0">
+      <div v-if="realmPicture" class="avatar shrink-0">
         <div class="h-11 w-11 rounded-lg">
-          <img
-            :src="realmPictureUrl"
+          <FileImage
+            :file="realmPicture"
             :alt="realm.name"
             class="h-full w-full rounded-lg object-cover"
           />
@@ -52,7 +52,6 @@
 
 <script setup lang="ts">
 import type { DiscoveryItem } from "~/types/post";
-import { getFileUrl } from "~/utils/files";
 import { IconGlobe, IconSparkles } from "#components";
 
 const { t } = useI18n();
@@ -72,9 +71,8 @@ const realm = computed(() => {
   return data;
 });
 
-const realmPictureUrl = computed(() => {
-  if (!realm.value.picture) return undefined;
-  return getFileUrl(realm.value.picture.id) ?? undefined;
+const realmPicture = computed(() => {
+  return realm.value.picture ?? undefined;
 });
 
 const reasons = computed(() => props.item.reasons ?? []);

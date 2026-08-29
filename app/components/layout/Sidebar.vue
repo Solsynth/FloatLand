@@ -147,7 +147,7 @@
                 >
                     <div v-if="avatarUrl" class="avatar shrink-0">
                         <div class="w-10 rounded-full">
-                            <img :src="avatarUrl" :alt="username" />
+                            <FileImage :file="avatarUrl" :alt="username" />
                         </div>
                     </div>
                     <div v-else class="avatar avatar-placeholder shrink-0">
@@ -231,7 +231,6 @@ import {
     IconSettings,
     IconPanelLeftClose,
 } from "#components";
-import { getFileUrl } from "~/utils/files";
 
 const { t } = useI18n();
 const route = useRoute();
@@ -278,7 +277,7 @@ const isBackstageActive = computed(() =>
 
 const displayName = computed(() => authDisplayName.value);
 const username = computed(() => user.value?.name || "");
-const avatarUrl = computed(() => getFileUrl(user.value?.profile?.picture?.id));
+const avatarUrl = computed(() => user.value?.profile?.picture ?? null);
 const fallbackInitials = computed(() =>
     (username.value || "?").slice(0, 2).toUpperCase(),
 );

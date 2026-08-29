@@ -87,9 +87,9 @@
                         <div
                             class="w-14 h-14 rounded-full bg-base-200 overflow-hidden shrink-0 flex items-center justify-center ring-2 ring-base-100"
                         >
-                            <img
+                            <FileImage
                                 v-if="merchantIconUrl"
-                                :src="merchantIconUrl"
+                                :file="merchantIconUrl"
                                 :alt="merchantName"
                                 class="w-full h-full object-cover"
                             />
@@ -134,9 +134,9 @@
                         <div
                             class="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-box bg-base-200 ring-2 ring-base-100"
                         >
-                            <img
+                            <FileImage
                                 v-if="appIconUrl"
-                                :src="appIconUrl"
+                                :file="appIconUrl"
                                 :alt="order.app?.name"
                                 class="w-full h-full object-cover"
                             />
@@ -211,13 +211,9 @@
                                 <div
                                     class="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-box bg-base-200"
                                 >
-                                    <img
-                                        v-if="findProduct(item)?.picture?.id"
-                                        :src="
-                                            getFileUrl(
-                                                findProduct(item)!.picture!.id,
-                                            )!
-                                        "
+                                    <FileImage
+                                        v-if="findProduct(item)?.picture"
+                                        :file="findProduct(item)!.picture"
                                         :alt="
                                             findProduct(item)?.displayName ||
                                             item.productIdentifier
@@ -669,15 +665,15 @@ const isExpiringSoon = computed(() => {
 
 const merchantIconUrl = computed(() => {
     // Use publisher picture if available, fall back to order app icon
-    if (publisher.value?.picture?.id) {
-        return getFileUrl(publisher.value.picture.id);
+    if (publisher.value?.picture) {
+        return publisher.value.picture;
     }
     return null;
 });
 
 const appIconUrl = computed(() => {
-    if (order.value?.app?.picture?.id) {
-        return getFileUrl(order.value.app.picture.id);
+    if (order.value?.app?.picture) {
+        return order.value.app.picture;
     }
     return null;
 });

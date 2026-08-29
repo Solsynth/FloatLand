@@ -17,9 +17,9 @@
       <div class="relative shrink-0 self-start">
         <div v-if="account" class="avatar">
           <div class="h-9 w-9 rounded-full">
-            <img
+            <FileImage
               v-if="accountAvatar"
-              :src="accountAvatar"
+              :file="accountAvatar"
               :alt="accountName"
               class="h-full w-full rounded-full object-cover"
             />
@@ -136,7 +136,6 @@
 <script setup lang="ts">
 import type { SnPresenceActivity, Account } from "~/types/post";
 import { API_BASE_URL } from "~/utils/api";
-import { getFileUrl } from "~/utils/files";
 import {
   IconGamepad,
   IconMusic,
@@ -214,8 +213,7 @@ const accountDisplayName = computed(() => {
 });
 
 const accountAvatar = computed(() => {
-  if (!account.value?.profile?.picture?.id) return null;
-  return getFileUrl(account.value.profile.picture.id);
+  return account.value?.profile?.picture ?? null;
 });
 
 const accountInitials = computed(() => {

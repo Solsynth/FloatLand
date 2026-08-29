@@ -100,7 +100,7 @@
                 </td>
                 <td>
                   <div class="w-10 h-10 rounded bg-base-200 overflow-hidden">
-                    <img v-if="getFileUrl(sticker.image?.id)" :src="getFileUrl(sticker.image?.id)"
+                    <FileImage v-if="sticker.image" :file="sticker.image"
                       class="w-full h-full object-contain" :alt="sticker.name || sticker.slug" />
                   </div>
                 </td>
@@ -177,7 +177,6 @@ import {
   deleteSticker,
   reorderStickers,
 } from '~/utils/creator'
-import { getFileUrl } from '~/utils/files'
 
 definePageMeta({ middleware: 'creator' })
 

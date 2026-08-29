@@ -103,7 +103,7 @@
         >
           <div v-if="avatarUrl" class="avatar">
             <div class="w-8 rounded-full">
-              <img :src="avatarUrl ?? ''" :alt="displayName || 'User'" />
+              <FileImage :file="avatarUrl" :alt="displayName || 'User'" />
             </div>
           </div>
           <div v-else class="avatar avatar-placeholder">
@@ -158,7 +158,6 @@
 </template>
 
 <script setup lang="ts">
-import { getFileUrl } from "~/utils/files";
 import {
   IconFolder,
   IconClock,
@@ -196,7 +195,7 @@ const isNodesActive = computed(() => route.path.startsWith("/drive/nodes"));
 
 const displayName = computed(() => authDisplayName.value || user.value?.nick || user.value?.name || "");
 const username = computed(() => user.value?.name || "");
-const avatarUrl = computed(() => getFileUrl(user.value?.profile?.picture?.id));
+const avatarUrl = computed(() => user.value?.profile?.picture ?? null);
 const fallbackInitials = computed(() => (username.value || "?").slice(0, 2).toUpperCase());
 
 function handleLogout() {
