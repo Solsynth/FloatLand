@@ -487,11 +487,6 @@ const navGroups = computed<TopbarNavGroup[]>(() => {
           label: t("nav.realms"),
           icon: IconCompass,
         }),
-        existing("/chat", {
-          to: "/chat",
-          label: t("nav.chat"),
-          icon: IconUser,
-        }),
       ],
     },
   ];

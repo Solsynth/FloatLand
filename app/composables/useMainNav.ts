@@ -3,7 +3,6 @@ import {
   IconBuilding,
   IconBriefcaseBusiness,
   IconHardDrive,
-  IconMessageSquare,
   IconPalette,
   IconCode,
   IconWallet,
@@ -28,7 +27,6 @@ export interface NavItem {
  * Uses i18n keys for labels.
  */
 export function useMainNav() {
-  const { unreadCount: chatUnreadCount } = useChat();
   const { isSuperuser } = useAuth();
 
   const navItems = computed<NavItem[]>(() => [
@@ -41,12 +39,6 @@ export function useMainNav() {
       requiresAuth: true,
     },
     { icon: IconHardDrive, labelKey: "nav.drive", href: "/drive" },
-    {
-      icon: IconMessageSquare,
-      labelKey: "nav.chat",
-      href: "/chat",
-      badge: chatUnreadCount.value > 0 ? chatUnreadCount.value : null,
-    },
     { icon: IconWallet, labelKey: "nav.wallet", href: "/wallets" },
     {
       icon: IconTicket,

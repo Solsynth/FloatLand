@@ -1,4 +1,5 @@
 import type { WebSocketPacket } from '~/types/chat'
+import type { SnNotification } from '~/types/notification'
 import { eventBus } from '~/utils/eventBus'
 import { snakeToCamel } from '~/utils/case'
 
@@ -223,30 +224,9 @@ export function useWebSocket() {
         eventBus.emit('ws:message', { ...packet, data: camelData })
 
         // Emit typed events
-        switch (packet.type) {
-          case 'notifications.new':
-            eventBus.emit('notification:new', camelData as any)
-            break
-          case 'messages.new':
-            eventBus.emit('chat:message:new', camelData as any)
-            break
-          case 'messages.update':
-            eventBus.emit('chat:message:update', camelData as any)
-            break
-          case 'messages.sync.file':
-            // camelData is the snake-to-camel converted packet payload;
-            // the event bus expects the SnChatMessage shape for this channel.
-            eventBus.emit('chat:message:update', camelData as SnChatMessage)
-            break
-          case 'messages.delete':
-            eventBus.emit('chat:message:delete', camelData as any)
-            break
-          case 'messages.read':
-            eventBus.emit('chat:room:read', camelData as any)
-            break
-          case 'messages.typing':
-            eventBus.emit('chat:typing', camelData as any)
-            break
+        if (packet.type === 'notifications.new') {
+          // Packet payload is unvalidated JSON; server contract is SnNotification.
+          eventBus.emit('notification:new', camelData as unknown as SnNotification)
         }
       } catch (e) {
         console.error('[WebSocket] Failed to parse message:', e)
@@ -294,39 +274,6 @@ export function useWebSocket() {
     connect()
   }
 
-  // Subscribe/unsubscribe helpers for chat rooms
-  function subscribeToRoom(roomId: string) {
-    send({
-      type: 'messages.subscribe',
-      data: { chat_room_id: roomId },
-      endpoint: 'messager',
-    })
-  }
-
-  function unsubscribeFromRoom(roomId: string) {
-    send({
-      type: 'messages.unsubscribe',
-      data: { chat_room_id: roomId },
-      endpoint: 'messager',
-    })
-  }
-
-  function sendReadReceipt(roomId: string) {
-    send({
-      type: 'messages.read',
-      data: { chat_room_id: roomId },
-      endpoint: 'messager',
-    })
-  }
-
-  function sendTypingStatus(roomId: string) {
-    send({
-      type: 'messages.typing',
-      data: { chat_room_id: roomId, type: 'typing' },
-      endpoint: 'messager',
-    })
-  }
-
   if (!authWatchInitialized) {
     authWatchInitialized = true
     watch(isAuthenticated, (authenticated) => {
@@ -341,9 +288,5 @@ export function useWebSocket() {
     disconnect,
     manualReconnect,
     send,
-    subscribeToRoom,
-    unsubscribeFromRoom,
-    sendReadReceipt,
-    sendTypingStatus,
   }
 }

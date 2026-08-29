@@ -73,12 +73,3 @@ export interface RealmInvite {
   realm?: Realm;
   invitedByAccount?: SnAccount;
 }
-
-export interface RealmChatRoom {
-  id: string;
-  realmId: string;
-  name: string;
-  description: string | null;
-  type: number;
-  createdAt: string;
-}
