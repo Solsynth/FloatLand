@@ -20,14 +20,18 @@ definePageMeta({ layout: false });
 
 const { t } = useI18n();
 
+// Room name becomes the page title once resolved.
+const seoTitle = ref("");
+const seoDescription = ref("");
+
 defineOgImage("UniOgImage", {
-  title: t("chat.inviteSeoTitle"),
-  description: t("chat.inviteSeoDescription"),
+  title: computed(() => seoTitle.value || t("chat.inviteSeoTitle")),
+  description: computed(() => seoDescription.value || t("chat.inviteSeoDescription")),
 });
 
 useSolarSeo({
-  title: t("chat.inviteSeoTitle"),
-  description: t("chat.inviteSeoDescription"),
+  title: computed(() => seoTitle.value || t("chat.inviteSeoTitle")),
+  description: computed(() => seoDescription.value || t("chat.inviteSeoDescription")),
 });
 
 const route = useRoute();
@@ -159,6 +163,10 @@ onMounted(async () => {
       return;
     }
     room.value = data;
+    seoTitle.value = data.realm?.name
+      ? `${displayName.value} · ${data.realm.name}`
+      : displayName.value;
+    seoDescription.value = data.description || data.realm?.name || "";
     await loadRealmIdentity();
   } catch (err) {
     if (err instanceof Error && err.message.includes("404")) {
