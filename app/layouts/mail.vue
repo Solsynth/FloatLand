@@ -13,8 +13,7 @@
         class="sticky top-14 z-40 h-[calc(100vh-3.5rem)] w-[18rem] shrink-0 overflow-y-auto border-r border-base-300 scrollbar-none"
       >
         <MailSidebar
-          :compose-open="composeOpen"
-          @compose="composeOpen = true"
+          @compose="goCompose"
           @open-blocklist="blocklistOpen = true"
         />
       </aside>
@@ -31,13 +30,14 @@
     <div class="lg:hidden flex flex-col min-h-screen">
       <!-- Mobile Header -->
       <header
+        v-if="!isReader"
         class="fixed top-0 left-0 right-0 z-50 border-b border-base-300 bg-base-100"
       >
         <div class="flex h-14 items-center justify-between px-4">
-          <NuxtLink to="/" class="btn btn-circle btn-ghost btn-sm">
+          <NuxtLink :to="mobileBackTarget" class="btn btn-circle btn-ghost btn-sm" :title="t('common.back')">
             <IconArrowLeft class="w-5 h-5" />
           </NuxtLink>
-          <span class="text-sm font-semibold">{{ pageTitle }}</span>
+          <span class="min-w-0 flex-1 truncate px-2 text-sm font-semibold">{{ pageTitle }}</span>
           <button
             class="btn btn-circle btn-ghost btn-sm"
             @click="mobileMenuOpen = !mobileMenuOpen"
@@ -64,25 +64,19 @@
           @click.stop
         >
           <MailSidebar
-            :compose-open="composeOpen"
-            @compose="composeOpen = true; mobileMenuOpen = false"
+            @compose="goCompose(); mobileMenuOpen = false"
             @open-blocklist="blocklistOpen = true; mobileMenuOpen = false"
           />
         </div>
       </Transition>
 
       <!-- Mobile Main Content -->
-      <main class="flex-1 pt-18">
+      <main :class="isReader ? 'flex-1' : 'flex-1 pt-18'">
         <slot />
       </main>
     </div>
 
     <!-- Shared dialogs -->
-    <MailComposeDialog
-      :open="composeOpen"
-      @close="composeOpen = false"
-      @sent="composeOpen = false"
-    />
     <BlocklistDialog
       :open="blocklistOpen"
       @close="blocklistOpen = false"
@@ -98,11 +92,15 @@ const route = useRoute();
 const { state, init } = useMail();
 
 const mobileMenuOpen = ref(false);
-const composeOpen = ref(false);
 const blocklistOpen = ref(false);
+
+function goCompose() {
+  navigateTo("/mail/compose");
+}
 
 const segmentLabels = computed<Record<string, string>>(() => ({
   mail: t("mail.title"),
+  compose: t("mail.compose"),
   inbox: t("mail.folders.inbox"),
   sent: t("mail.folders.sent"),
   drafts: t("mail.folders.drafts"),
@@ -140,9 +138,20 @@ const breadcrumbs = computed(() => {
   return parts;
 });
 
-const pageTitle = computed(() => {
-  const last = breadcrumbs.value[breadcrumbs.value.length - 1];
-  return last ? last.label : t("mail.title");
+// Reader route (standalone /mail/email/[id]); the MailReader component owns the mobile header here.
+const isReader = computed(() => route.path.split("/").filter(Boolean)[1] === "email");
+
+// Mobile back: return to the folder listing on the reader page (email/id);
+// other mail pages keep the original back-to-home behavior.
+const mobileBackTarget = computed(() => {
+  const segments = route.path.split("/").filter(Boolean);
+  if (segments[1] === "email") {
+    return `/mail/${state.readerFolder || "inbox"}`;
+  }
+  if (segments[1] === "compose") {
+    return "/mail/inbox";
+  }
+  return "/";
 });
 
 // Close mobile menu on navigation

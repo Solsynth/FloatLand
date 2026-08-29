@@ -37,6 +37,7 @@ export default defineNuxtConfig({
     }
   },
   modules: [
+    "vue-sonner/nuxt",
     "nuxt-lucide-icons",
     "@nuxt/eslint",
     "@pinia/nuxt",

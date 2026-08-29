@@ -1,6 +1,17 @@
 <template>
   <div class="flex h-full flex-col">
-    <div class="flex-1 overflow-y-auto">
+    <!-- Mobile header: back to the folder listing + subject (shown only on mobile) -->
+    <header class="lg:hidden sticky top-0 z-40 shrink-0 border-b border-base-300 bg-base-100">
+      <div class="flex h-14 items-center justify-between px-4">
+        <NuxtLink :to="backTarget" class="btn btn-circle btn-ghost btn-sm" :title="t('common.back')">
+          <IconArrowLeft class="h-5 w-5" />
+        </NuxtLink>
+        <span class="min-w-0 flex-1 truncate px-2 text-sm font-semibold">{{ subjectTitle }}</span>
+        <div class="w-9" />
+      </div>
+    </header>
+
+    <div class="flex-1 flex flex-col overflow-y-auto">
       <!-- Loading skeleton -->
       <div v-if="loading && !email" class="py-4">
         <div class="px-5 pb-4 border-b border-base-300">
@@ -31,13 +42,11 @@
         </button>
       </div>
 
-      <div v-else-if="email" class="flex flex-col min-h-full">
+      <div v-else-if="email" class="flex flex-col grow">
         <!-- Header -->
         <div class="border-b border-base-300 px-5 py-4">
           <div class="flex flex-wrap items-start justify-between gap-2">
-            <h1 class="text-xl font-bold break-words">
-              {{ email.subject || t("mail.noSubject") }}
-            </h1>
+            <h1 class="hidden text-xl font-bold wrap-break-word lg:block">{{ email.subject || t("mail.noSubject") }}</h1>
             <div class="flex shrink-0 items-center gap-1">
               <button class="btn btn-ghost btn-sm btn-circle" :title="email.isStarred ? t('mail.unstar') : t('mail.star')" @click="toggleStar">
                 <IconStar class="h-4 w-4" :class="email.isStarred ? 'fill-current text-warning' : 'text-base-content/30'" />
@@ -59,14 +68,12 @@
               </div>
             </div>
           </div>
-          <!-- Labels -->
           <div v-if="email.labels?.length" class="mt-2 flex flex-wrap gap-1.5">
             <span v-for="label in email.labels" :key="label.id" class="badge badge-ghost badge-sm gap-1">
               <span class="h-2 w-2 rounded-full" :style="{ backgroundColor: label.color || '#888' }" />
               {{ label.name }}
             </span>
           </div>
-          <!-- Sender -->
           <div class="mt-4 flex items-start gap-3">
             <div class="avatar avatar-placeholder">
               <div class="w-10 rounded-full bg-primary/10 text-primary">
@@ -97,15 +104,11 @@
               </button>
             </div>
           </div>
-          <!-- Delivery status -->
           <div v-if="email.deliveryStatus === 'failed'" class="mt-3 flex items-center gap-2 rounded-box bg-error/10 px-3 py-2 text-sm text-error">
             <IconAlertCircle class="h-4 w-4 shrink-0" />
-            <span class="min-w-0 flex-1 break-words">{{ email.deliveryError || t("mail.deliveryFailed") }}</span>
+            <span class="min-w-0 flex-1 wrap-break-word">{{ email.deliveryError || t("mail.deliveryFailed") }}</span>
             <button class="btn btn-ghost btn-xs shrink-0" @click="resend">{{ t("mail.resend") }}</button>
           </div>
-          <p v-else-if="email.deliveryStatus === 'pending'" class="mt-2 text-xs text-base-content/50">
-            {{ t("mail.deliveryPending") }}
-          </p>
         </div>
 
         <!-- Auth warnings -->
@@ -119,21 +122,22 @@
           </ul>
         </article>
 
-        <!-- Body -->
-        <div class="flex-1 min-h-0 px-5 py-4">
+        <!-- Email body -->
+        <div class="grow">
           <iframe
             v-if="isHtml"
             ref="emailFrameRef"
             :srcdoc="safeBody"
             referrerpolicy="no-referrer"
-            class="email-frame w-full flex-1 border-0 min-h-[500px]"
+            class="email-frame w-full h-full border-0 m-0 p-0"
             @load="onFrameLoad"
           />
-          <div v-else class="whitespace-pre-wrap break-words text-sm leading-relaxed">
+          <div v-else class="whitespace-pre-wrap wrap-break-word text-sm leading-relaxed">
             {{ email.body }}
           </div>
         </div>
 
+        <!-- Attachments -->
         <div v-if="mediaAttachments.length || nonMediaAttachments.length" class="px-5 py-3 border-t border-base-300">
           <AttachmentGrid
             v-if="mediaAttachments.length"
@@ -154,6 +158,7 @@
             </a>
           </div>
         </div>
+
         <!-- Conversation -->
         <article v-if="thread.length > 1" class="card bg-base-100 shadow-sm mx-5 my-4">
           <div class="card-body p-5">
@@ -176,11 +181,6 @@
             </div>
           </div>
         </article>
-
-        <!-- Keyboard shortcuts hint -->
-        <div class="flex items-center justify-center gap-4 pb-2 text-xs text-base-content/30">
-          <span>{{ t("mail.shortcutsHint") }}</span>
-        </div>
       </div>
     </div>
 
@@ -202,13 +202,11 @@
       </div>
     </div>
 
-    <!-- Compose -->
-    <MailComposeDialog :open="composeOpen" :prefill="composePrefill" @close="composeOpen = false" @sent="handleComposeSent" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { IconStar, IconMail, IconMailOpen, IconMoreVertical, IconReply, IconReplyAll, IconForward, IconPaperclip, IconDownload, IconAlertCircle, IconAlertTriangle, IconCheck } from "#components";
+import { IconStar, IconMail, IconMailOpen, IconMoreVertical, IconReply, IconReplyAll, IconForward, IconPaperclip, IconDownload, IconAlertCircle, IconAlertTriangle, IconCheck, IconArrowLeft } from "#components";
 import { formatRelativeTime } from "~/utils/datetime";
 import { getFileUrl } from "~/utils/files";
 import { sanitizeEmailHtml, stripHtmlTags } from "~/utils/sanitize";
@@ -229,11 +227,13 @@ const thread = ref<PostalEmail[]>([]);
 const loading = ref(true);
 const notFound = ref(false);
 const labelsMenuOpen = ref(false);
-const composeOpen = ref(false);
-const composePrefill = ref<{ mode: string; email: PostalEmail } | null>(null);
 const emailFrameRef = ref<HTMLIFrameElement | null>(null);
 
 const id = computed(() => props.emailId);
+
+const folder = computed(() => email.value?.folder || "inbox");
+const backTarget = computed(() => `/mail/${folder.value}`);
+const subjectTitle = computed(() => email.value?.subject || t("mail.noSubject"));
 
 const isHtml = computed(() => email.value?.contentType === "text/html");
 const safeBody = computed(() => sanitizeEmailHtml(email.value?.body || ""));
@@ -447,8 +447,10 @@ function onFrameLoad() {
 
 function openCompose(mode: "reply" | "replyAll" | "forward") {
   if (!email.value) return;
-  composePrefill.value = { mode, email: email.value };
-  composeOpen.value = true;
+  navigateTo({
+    path: "/mail/compose",
+    query: { mode, email: email.value.id },
+  });
 }
 
 function openThreadMessage(message: PostalEmail) {
@@ -456,16 +458,10 @@ function openThreadMessage(message: PostalEmail) {
   navigateTo(`/mail/email/${message.id}`);
 }
 
-function handleComposeSent() {
-  composeOpen.value = false;
-  composePrefill.value = null;
-  load();
-}
-
 function onKeyDown(e: KeyboardEvent) {
   const tag = (e.target as HTMLElement)?.tagName;
   if (tag === "INPUT" || tag === "TEXTAREA" || (e.target as HTMLElement)?.isContentEditable) return;
-  if (composeOpen.value || labelsMenuOpen.value) return;
+  if (labelsMenuOpen.value) return;
 
   switch (e.key) {
     case "j": {
