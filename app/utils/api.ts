@@ -53,6 +53,13 @@ import type {
 } from "~/types/realm";
 import type { FlywheelAuditEntry, FlywheelOwnerApp, FlywheelOwnerBlob, FlywheelStorageQuota, Workspace, WorkspaceCustomDomain, WorkspaceCustomDomainUsage, WorkspaceMailbox, WorkspaceMailboxAlias, WorkspaceMailboxForwardingRule, WorkspaceMailboxQuota, WorkspaceMailboxUsage, WorkspaceMailCredential, WorkspaceMailCredentialCreated, WorkspaceMember, WorkspacePlanOrder, WorkspacePlanStatus, WorkspaceSendUsage } from "~/types/workspace";
 import type {
+  BlockRule,
+  MailLabel,
+  MailStats,
+  PostalEmail,
+  SendEmailPayload,
+} from "~/types/mail";
+import type {
   NameChangeCardOrder,
   QuotaOrder,
   QuotaPurchaseConfig,
@@ -2292,6 +2299,164 @@ export async function createMailCredential(payload: { mailboxId: string; label: 
 
 export async function revokeMailCredential(credentialId: string): Promise<void> {
   await fetchJson<unknown>(`/postal/credentials/${encodeURIComponent(credentialId)}`, { method: "DELETE" });
+}
+
+// ── Mail (ElecPostal via /postal) ─────────────────────────────────────────
+
+export async function fetchMyMailboxes(): Promise<WorkspaceMailbox[]> {
+  return fetchJson<WorkspaceMailbox[]>("/postal/mailboxes");
+}
+
+export async function fetchMailStats(mailboxId?: string): Promise<MailStats> {
+  const endpoint = mailboxId
+    ? `/postal/mailboxes/${encodeURIComponent(mailboxId)}/stats`
+    : "/postal/emails/stats";
+  return fetchJson<MailStats>(endpoint);
+}
+
+export interface FetchEmailsOptions {
+  mailboxId?: string;
+  folder?: string;
+  offset?: number;
+  take?: number;
+  q?: string;
+  isRead?: boolean;
+  isStarred?: boolean;
+  labelId?: string;
+}
+
+export async function fetchEmails(
+  options: FetchEmailsOptions = {},
+): Promise<{ items: PostalEmail[]; total: number; hasMore: boolean }> {
+  const params = new URLSearchParams();
+  if (options.mailboxId) params.set("mailbox_id", options.mailboxId);
+  if (options.folder) params.set("folder", options.folder);
+  if (options.offset !== undefined) params.set("offset", String(options.offset));
+  if (options.take !== undefined) params.set("take", String(options.take));
+  if (options.q) params.set("q", options.q);
+  if (options.isRead !== undefined) params.set("is_read", String(options.isRead));
+  if (options.isStarred !== undefined) params.set("is_starred", String(options.isStarred));
+  if (options.labelId) params.set("label_id", options.labelId);
+  const query = params.toString();
+  const response = await apiFetch(`/postal/emails${query ? `?${query}` : ""}`);
+  const data = await safeJsonParse<PostalEmail[]>(response);
+  const total = parseInt(response.headers.get("x-total") || "0", 10);
+  const offset = options.offset ?? 0;
+  return { items: data, total, hasMore: offset + data.length < total };
+}
+
+export async function fetchEmail(id: string): Promise<PostalEmail> {
+  return fetchJson<PostalEmail>(`/postal/emails/${encodeURIComponent(id)}`);
+}
+
+export async function sendEmail(payload: SendEmailPayload): Promise<PostalEmail> {
+  const body: Record<string, unknown> = {
+    mailbox_id: payload.mailboxId,
+    to: payload.to,
+    cc: payload.cc,
+    bcc: payload.bcc,
+    subject: payload.subject,
+    body: payload.body,
+    content_type: payload.contentType || "text/plain",
+    attachment_ids: payload.attachmentIds,
+    is_draft: payload.isDraft ?? false,
+  };
+  if (payload.fromAliasId) body.from_alias_id = payload.fromAliasId;
+  if (payload.threadId) body.thread_id = payload.threadId;
+  if (payload.replyToId) body.reply_to_id = payload.replyToId;
+  return fetchJson<PostalEmail>("/postal/emails", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+export async function markEmailRead(id: string, read: boolean): Promise<void> {
+  await fetchJson<unknown>(`/postal/emails/${encodeURIComponent(id)}/${read ? "read" : "unread"}`, { method: "POST" });
+}
+
+export async function starEmail(id: string, starred: boolean): Promise<void> {
+  await fetchJson<unknown>(`/postal/emails/${encodeURIComponent(id)}/${starred ? "star" : "unstar"}`, { method: "POST" });
+}
+
+export async function moveEmail(id: string, folder: string): Promise<void> {
+  await fetchJson<unknown>(`/postal/emails/${encodeURIComponent(id)}/move`, {
+    method: "POST",
+    body: JSON.stringify({ folder }),
+  });
+}
+
+export async function deleteEmail(id: string): Promise<void> {
+  await fetchJson<unknown>(`/postal/emails/${encodeURIComponent(id)}`, { method: "DELETE" });
+}
+
+export async function reportSpam(id: string, spam: boolean): Promise<void> {
+  await fetchJson<unknown>(`/postal/emails/${encodeURIComponent(id)}/${spam ? "spam" : "not-spam"}`, { method: "POST" });
+}
+
+export async function resendEmail(id: string): Promise<PostalEmail> {
+  return fetchJson<PostalEmail>(`/postal/emails/${encodeURIComponent(id)}/resend`, { method: "POST" });
+}
+
+export async function fetchThread(id: string): Promise<PostalEmail[]> {
+  return fetchJson<PostalEmail[]>(`/postal/threads/${encodeURIComponent(id)}`);
+}
+
+export async function fetchLabels(): Promise<MailLabel[]> {
+  return fetchJson<MailLabel[]>("/postal/labels");
+}
+
+export async function createLabel(payload: { name: string; color: string }): Promise<MailLabel> {
+  return fetchJson<MailLabel>("/postal/labels", {
+    method: "POST",
+    body: JSON.stringify({ name: payload.name, color: payload.color }),
+  });
+}
+
+export async function deleteLabel(id: string): Promise<void> {
+  await fetchJson<unknown>(`/postal/labels/${encodeURIComponent(id)}`, { method: "DELETE" });
+}
+
+export async function setEmailLabel(emailId: string, labelId: string, assigned: boolean): Promise<void> {
+  await fetchJson<unknown>(`/postal/emails/${encodeURIComponent(emailId)}/labels/${encodeURIComponent(labelId)}`, {
+    method: assigned ? "POST" : "DELETE",
+  });
+}
+
+export async function fetchBlockRules(): Promise<BlockRule[]> {
+  return fetchJson<BlockRule[]>("/postal/blocklist");
+}
+
+export async function createBlockRule(payload: {
+  scope: "mailbox" | "workspace";
+  mailboxId?: string;
+  workspaceId?: string;
+  pattern: string;
+}): Promise<BlockRule> {
+  return fetchJson<BlockRule>("/postal/blocklist", {
+    method: "POST",
+    body: JSON.stringify({
+      scope: payload.scope,
+      mailbox_id: payload.mailboxId,
+      workspace_id: payload.workspaceId,
+      pattern: payload.pattern,
+    }),
+  });
+}
+
+export async function deleteBlockRule(id: string): Promise<void> {
+  await fetchJson<unknown>(`/postal/blocklist/${encodeURIComponent(id)}`, { method: "DELETE" });
+}
+
+/**
+ * Unread count for one mailbox's Inbox. The stats endpoint's `unread` is not
+ * folder-filtered (it includes unread sent mail), so the badge reads the
+ * X-Total of a filtered list instead.
+ */
+export async function fetchUnreadInboxCount(mailboxId: string): Promise<number> {
+  const response = await apiFetch(
+    `/postal/emails?mailbox_id=${encodeURIComponent(mailboxId)}&folder=inbox&is_read=false&take=1`,
+  );
+  return parseInt(response.headers.get("x-total") || "0", 10);
 }
 
 export async function fetchFlywheelApps(workspaceId: string): Promise<FlywheelOwnerApp[]> {

@@ -11,6 +11,9 @@ export type EventBusEvents = {
   // Notifications
   'notification:new': SnNotification
   'notification:count': number
+
+  // Mail realtime (mail.changed / mail.moved)
+  'mail:changed': { mailboxId?: string; emailId?: string; reason?: string }
 }
 
 // Create and export the event bus

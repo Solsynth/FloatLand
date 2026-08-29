@@ -72,6 +72,24 @@
             <component :is="driveNavItem.icon" class="h-4 w-4" />
             <span>{{ driveNavItem.label }}</span>
           </NuxtLink>
+          <NuxtLink
+            v-if="isAuthenticated"
+            to="/mail"
+            class="btn btn-ghost h-10 min-h-10 gap-2 px-3"
+            :class="isNavActive('/mail') ? 'bg-primary/10 text-primary' : ''"
+            :aria-current="isNavActive('/mail') ? 'page' : undefined"
+          >
+            <span class="relative">
+              <component :is="mailNavItem.icon" class="h-4 w-4" />
+              <span
+                v-if="accountUnread > 0"
+                class="absolute -top-2 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-error px-1 text-[9px] font-bold text-error-content"
+              >
+                {{ accountUnread > 99 ? "99+" : accountUnread }}
+              </span>
+            </span>
+            <span>{{ mailNavItem.label }}</span>
+          </NuxtLink>
           <details
             class="dropdown dropdown-end dropdown-bottom"
           >
@@ -270,6 +288,24 @@
             </span>
             <span class="flex h-5 items-center leading-5">{{ driveNavItem.label }}</span>
           </NuxtLink>
+          <NuxtLink
+            v-if="isAuthenticated"
+            to="/mail"
+            class="mb-3 flex h-12 min-h-12 items-center gap-3 rounded-box px-3 py-0 text-base leading-5"
+            :class="isNavActive('/mail') ? 'bg-primary/10 text-primary' : ''"
+            @click="closeMenu"
+          >
+            <span class="relative flex h-5 w-5 shrink-0 items-center justify-center">
+              <component :is="mailNavItem.icon" class="h-5 w-5" />
+              <span
+                v-if="accountUnread > 0"
+                class="absolute -top-2 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-error px-1 text-[9px] font-bold text-error-content"
+              >
+                {{ accountUnread > 99 ? "99+" : accountUnread }}
+              </span>
+            </span>
+            <span class="flex h-5 items-center leading-5">{{ mailNavItem.label }}</span>
+          </NuxtLink>
           <section>
             <div
               class="flex h-12 min-h-12 items-center gap-3 px-3 py-0 text-base font-semibold leading-6 text-base-content/70"
@@ -402,6 +438,7 @@
 <script setup lang="ts">
 import {
   IconHardDrive,
+  IconMail,
   IconBriefcaseBusiness,
   IconCreditCard,
   IconCompass,
@@ -508,6 +545,16 @@ const driveNavItem = computed<TopbarNavItem>(() => ({
   label: t("nav.storage"),
   icon: IconHardDrive,
 }));
+
+const mail = useMail();
+
+const mailNavItem = computed<TopbarNavItem>(() => ({
+  to: "/mail",
+  label: t("nav.mail"),
+  icon: IconMail,
+}));
+
+const accountUnread = computed(() => mail.state.accountUnread);
 
 const displayName = computed(() => user.value?.nick || user.value?.name || "");
 const avatarUrl = computed(() => user.value?.profile?.picture ?? null);

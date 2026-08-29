@@ -3,6 +3,7 @@ import {
   IconBuilding,
   IconBriefcaseBusiness,
   IconHardDrive,
+  IconMail,
   IconPalette,
   IconCode,
   IconWallet,
@@ -39,6 +40,12 @@ export function useMainNav() {
       requiresAuth: true,
     },
     { icon: IconHardDrive, labelKey: "nav.drive", href: "/drive" },
+    {
+      icon: IconMail,
+      labelKey: "nav.mail",
+      href: "/mail",
+      requiresAuth: true,
+    },
     { icon: IconWallet, labelKey: "nav.wallet", href: "/wallets" },
     {
       icon: IconTicket,
