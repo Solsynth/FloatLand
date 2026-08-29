@@ -36,6 +36,7 @@
     "pinia": "^3.0.4",
     "qrcode": "^1.5.4",
     "reka-ui": "^2.10.1",
+    "sanitize-html": "^2.17.7",
     "satori": "^0.26.0",
     "unstorage": "^1.17.5",
     "vaul-vue": "^0.4.1",

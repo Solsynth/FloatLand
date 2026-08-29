@@ -20,8 +20,8 @@
       </aside>
 
       <!-- Main Area -->
-      <main class="min-w-0 flex-1 overflow-y-auto scrollbar-none">
-        <div class="mx-auto h-full">
+      <main class="min-w-0 flex-1 overflow-hidden">
+        <div class="h-full">
           <slot />
         </div>
       </main>

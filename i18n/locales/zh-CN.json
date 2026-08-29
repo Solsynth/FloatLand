@@ -2218,7 +2218,20 @@
     "recipientsRequired": "请至少添加一个收件人。",
     "subjectPlaceholder": "主题",
     "bodyPlaceholder": "撰写你的邮件…",
-    "draftsShort": "草稿"
+    "draftsShort": "草稿",
+    "selectAll": "全选",
+    "deselectAll": "取消全选",
+    "select": "选择",
+    "deselect": "取消选择",
+    "selected": "已选",
+    "batchUpdated": "已更新",
+    "batchMoved": "已移动",
+    "batchDeleted": "已删除",
+    "batchDeleteConfirm": "删除 {count} 封邮件？",
+    "showQuoted": "显示引用内容",
+    "copyEmail": "复制邮箱地址",
+    "emailCopied": "已复制到剪贴板",
+    "shortcutsHint": "R 回复 · A 全部回复 · F 转发 · S 星标 · E 归档 · # 删除 · Esc 返回"
   },
   "creator": {
     "title": "创作者中心",

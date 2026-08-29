@@ -2220,7 +2220,20 @@
     "recipientsRequired": "Add at least one recipient.",
     "subjectPlaceholder": "Subject",
     "bodyPlaceholder": "Write your message…",
-    "draftsShort": "Draft"
+    "draftsShort": "Draft",
+    "selectAll": "Select all",
+    "deselectAll": "Deselect all",
+    "select": "Select",
+    "deselect": "Deselect",
+    "selected": "selected",
+    "batchUpdated": "Updated",
+    "batchMoved": "Moved",
+    "batchDeleted": "Deleted",
+    "batchDeleteConfirm": "Delete {count} emails?",
+    "showQuoted": "Show quoted text",
+    "copyEmail": "Copy email address",
+    "emailCopied": "Copied to clipboard",
+    "shortcutsHint": "R reply \u00B7 A reply all \u00B7 F forward \u00B7 S star \u00B7 E archive \u00B7 # trash \u00B7 Esc back"
   },
   "creator": {
     "title": "Creator Hub",

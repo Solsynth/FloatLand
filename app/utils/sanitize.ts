@@ -1,93 +1,76 @@
 /**
- * Minimal, dependency-free HTML sanitizer for email bodies.
+ * HTML sanitizer for email bodies.
  *
- * ElecPostal stores inbound HTML bodies and re-serves them through the API.
- * We render them with v-html, so strip active content and event handlers
- * before they reach the DOM. Server-generated mail is lower-risk than
- * arbitrary input, but defense-in-depth here is cheap.
+ * Uses sanitize-html for a well-tested, spec-compliant allowlist.
+ * Email bodies are rendered inside a sandboxed <iframe :srcdoc> so even
+ * if something slips through the allowlist, the sandbox blocks scripts,
+ * popups, and top-frame navigation.
  */
 
-const REMOVE_TAGS = new Set([
-  "script",
-  "style",
-  "iframe",
-  "object",
-  "embed",
-  "link",
-  "meta",
-  "title",
-  "base",
-  "form",
-  "input",
-  "button",
-  "select",
-  "textarea",
-]);
+import sanitize from "sanitize-html";
+
+/** Generous allowlist for email HTML — covers tables, inline styles, images. */
+const EMAIL_SANITIZE_OPTIONS: sanitize.IOptions = {
+  allowedTags: [
+    "a", "abbr", "b", "blockquote", "br",
+    "code", "div", "em", "font", "h1", "h2",
+    "h3", "h4", "hr", "i", "img", "li",
+    "ol", "p", "pre", "span", "strong",
+    "style", "title",
+    "table", "tbody", "td", "tfoot", "th",
+    "thead", "tr", "u", "ul",
+    "center", "dd", "dl", "dt", "sub", "sup",
+    "small", "big", "del", "ins", "mark",
+    "figure", "figcaption", "section", "article",
+    "header", "footer", "aside", "nav",
+    "details", "summary",
+  ],
+  allowedAttributes: {
+    "*": ["class", "style", "dir", "lang", "align", "valign", "width", "height"],
+    "a": ["href", "title", "target", "name", "id"],
+    "img": ["src", "alt", "width", "height", "border", "hspace", "vspace", "usemap", "ismap"],
+    "td": ["colspan", "rowspan", "nowrap", "bgcolor", "background"],
+    "th": ["colspan", "rowspan", "nowrap", "bgcolor", "background", "scope"],
+    "table": ["cellpadding", "cellspacing", "border", "bgcolor", "background", "width", "summary", "role"],
+    "font": ["color", "size", "face"],
+    "hr": ["width", "size", "noshade"],
+    "blockquote": ["cite"],
+    "ol": ["start", "type", "reversed"],
+    "li": ["value", "type"],
+  },
+  allowedSchemes: ["http", "https", "mailto", "cid", "data"],
+  allowedDataAttributes: [],
+  allowVulnerableTags: false,
+};
 
 /**
- * Sanitize an HTML string for safe insertion via v-html.
- * Falls back to tag-stripped plain text when DOMParser is unavailable.
+ * Sanitize an HTML string for safe rendering in a sandboxed iframe.
  */
-export function sanitizeHtml(html: string): string {
+export function sanitizeEmailHtml(html: string): string {
   if (!html) return "";
-  if (typeof DOMParser === "undefined") {
-    return stripHtmlTags(html);
-  }
-
-  const doc = new DOMParser().parseFromString(html, "text/html");
-  const root = doc.body;
-
-  const walker = doc.createTreeWalker(root, NodeFilter.SHOW_ELEMENT);
-  const nodes: Element[] = [];
-  while (walker.nextNode()) {
-    const el = walker.currentNode as Element;
-    nodes.push(el);
-  }
-
-  // Remove dangerous containers first (bottom-up so children are handled once).
-  for (const el of nodes) {
-    if (REMOVE_TAGS.has(el.tagName.toLowerCase())) {
-      el.remove();
-      continue;
-    }
-    // Strip event handlers and javascript: URLs.
-    for (const attr of Array.from(el.attributes)) {
-      const name = attr.name.toLowerCase();
-      if (name.startsWith("on")) {
-        el.removeAttribute(attr.name);
-        continue;
-      }
-      if (name === "href" || name === "src" || name === "xlink:href") {
-        const value = attr.value.trim().toLowerCase();
-        if (
-          value.startsWith("javascript:") ||
-          value.startsWith("vbscript:") ||
-          value.startsWith("data:text/html")
-        ) {
-          el.removeAttribute(attr.name);
-        }
-      }
-    }
-  }
-
-  return root.innerHTML;
+  return sanitize(html, EMAIL_SANITIZE_OPTIONS);
 }
 
 /**
- * Strip all tags from an HTML string. Used for plain-text list snippets
- * and as the sanitizer fallback when DOMParser is unavailable.
+ * Sanitize an HTML string for safe insertion via v-html (non-email contexts).
+ */
+export function sanitizeHtml(html: string): string {
+  if (!html) return "";
+  return sanitize(html, {
+    allowedTags: false,
+    allowedAttributes: false,
+    allowedSchemes: ["http", "https", "mailto", "cid"],
+    disallowedTagsMode: "discard",
+  });
+}
+
+/**
+ * Strip all tags from an HTML string. Used for plain-text list snippets.
  */
 export function stripHtmlTags(html: string): string {
-  return (html || "")
-    .replace(/<style[\s\S]*?<\/style>/gi, " ")
-    .replace(/<script[\s\S]*?<\/script>/gi, " ")
-    .replace(/<[^>]*>/g, " ")
-    .replace(/&nbsp;/gi, " ")
-    .replace(/&amp;/gi, "&")
-    .replace(/&lt;/gi, "<")
-    .replace(/&gt;/gi, ">")
-    .replace(/&quot;/gi, '"')
-    .replace(/&#39;/gi, "'")
-    .replace(/\s+/g, " ")
-    .trim();
+  if (!html) return "";
+  return sanitize(html, {
+    allowedTags: [],
+    allowedAttributes: {},
+  });
 }
