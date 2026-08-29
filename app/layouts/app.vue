@@ -55,6 +55,15 @@
             </ul>
           </details>
           <NuxtLink
+            :to="realmsNavItem.to"
+            class="btn btn-ghost h-10 min-h-10 gap-2 px-3"
+            :class="isNavActive(realmsNavItem.to) ? 'bg-primary/10 text-primary' : ''"
+            :aria-current="isNavActive(realmsNavItem.to) ? 'page' : undefined"
+          >
+            <component :is="realmsNavItem.icon" class="h-4 w-4" />
+            <span>{{ realmsNavItem.label }}</span>
+          </NuxtLink>
+          <NuxtLink
             :to="driveNavItem.to"
             class="btn btn-ghost h-10 min-h-10 gap-2 px-3"
             :class="isNavActive(driveNavItem.to) ? 'bg-primary/10 text-primary' : ''"
@@ -239,6 +248,17 @@
               </li>
             </ul>
           </section>
+          <NuxtLink
+            :to="realmsNavItem.to"
+            class="mb-3 flex h-12 min-h-12 items-center gap-3 rounded-box px-3 py-0 text-base leading-5"
+            :class="isNavActive(realmsNavItem.to) ? 'bg-primary/10 text-primary' : ''"
+            @click="closeMenu"
+          >
+            <span class="flex h-5 w-5 shrink-0 items-center justify-center">
+              <component :is="realmsNavItem.icon" class="h-5 w-5" />
+            </span>
+            <span class="flex h-5 items-center leading-5">{{ realmsNavItem.label }}</span>
+          </NuxtLink>
           <NuxtLink
             :to="driveNavItem.to"
             class="mb-3 flex h-12 min-h-12 items-center gap-3 rounded-box px-3 py-0 text-base leading-5"
@@ -450,11 +470,7 @@ const backstageNavItems = computed(() =>
     icon: item.icon,
   })),
 );
-const navGroups = computed<TopbarNavGroup[]>(() => {
-  const existing = (href: string, fallback: TopbarNavItem): TopbarNavItem =>
-    navItems.value.find((item) => item.to === href) || fallback;
-
-  return [
+const navGroups = computed<TopbarNavGroup[]>(() => [
     {
       key: "explore",
       label: t("nav.explore"),
@@ -477,20 +493,15 @@ const navGroups = computed<TopbarNavGroup[]>(() => {
         },
       ],
     },
-    {
-      key: "community",
-      label: t("nav.community"),
-      icon: IconUser,
-      items: [
-        existing("/realms", {
-          to: "/realms",
-          label: t("nav.realms"),
-          icon: IconCompass,
-        }),
-      ],
-    },
-  ];
-});
+]);
+
+const realmsNavItem = computed<TopbarNavItem>(() =>
+  navItems.value.find((item) => item.to === "/realms") || {
+    to: "/realms",
+    label: t("nav.realms"),
+    icon: IconCompass,
+  },
+);
 
 const driveNavItem = computed<TopbarNavItem>(() => ({
   to: "/drive",

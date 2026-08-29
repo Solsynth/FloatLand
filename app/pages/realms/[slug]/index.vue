@@ -364,6 +364,7 @@ import {
   joinRealm,
   fetchRealmMembers,
 } from "~/utils/api";
+import { getFileUrl } from "~/utils/files";
 import { useIntersectionObserver } from "@vueuse/core";
 import {
   IconSearch,
@@ -416,10 +417,16 @@ const contentTabs = computed(() => [
   { key: "articles" as const, label: t("realms.articles") },
 ]);
 
+const displayName = computed(() => realm.value?.name || "Unknown Realm");
+const avatarUrl = computed(() => realm.value?.picture ?? null);
+const backgroundUrl = computed(() => realm.value?.background ?? null);
+
 defineOgImage("UniOgImage", {
   title: computed(() => seoTitle.value || "Solar Network"),
   description: computed(() => seoDescription.value || ""),
-  iconImage: computed(() => avatarUrl.value || undefined),
+  iconImage: computed(() =>
+    avatarUrl.value ? getFileUrl(avatarUrl.value.id) ?? undefined : undefined,
+  ),
 });
 
 useHead({
@@ -451,10 +458,6 @@ useHead({
     },
   ],
 });
-
-const displayName = computed(() => realm.value?.name || "Unknown Realm");
-const avatarUrl = computed(() => realm.value?.picture ?? null);
-const backgroundUrl = computed(() => realm.value?.background ?? null);
 
 const repliesLabel = computed(() => {
   if (includeReplies.value === null) return t("realms.auto");
