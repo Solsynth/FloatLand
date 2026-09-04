@@ -11,7 +11,7 @@
 
 import type { H3Event } from "h3"
 import { defineEventHandler } from "h3"
-import { legacyBase, legacyLocale } from "../utils/legacy"
+import { legacyBase, legacyLocale, setNoImagesCookie } from "../utils/legacy"
 import { setLocaleCookie } from "../utils/legacy"
 import { getQuery } from "h3"
 import {
@@ -43,11 +43,20 @@ export default defineEventHandler((event: H3Event) => {
     return
   }
 
-  // Locale toggle handled uniformly (shared cookie + same-host redirect).
+  // Locale + bandwidth toggles handled uniformly (shared cookies).
   const q = getQuery(event)
   const lang = typeof q.lang === "string" ? q.lang : ""
+  const img = typeof q.img === "string" ? q.img : ""
   if (lang === "en" || lang === "zh") {
     const cookie = setLocaleCookie(event, lang)
+    const proto = String(event.node?.req?.headers?.["x-forwarded-proto"] ?? "http").split(",")[0].trim() || "http"
+    throw new Response(null, {
+      status: 302,
+      headers: { Location: `${proto}://${host}${rawPath}`, "Cache-Control": "no-store", "Set-Cookie": cookie },
+    })
+  }
+  if (img === "0" || img === "1") {
+    const cookie = setNoImagesCookie(event, img === "1")
     const proto = String(event.node?.req?.headers?.["x-forwarded-proto"] ?? "http").split(",")[0].trim() || "http"
     throw new Response(null, {
       status: 302,

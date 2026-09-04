@@ -21,6 +21,7 @@ import {
 } from "./legacyModels"
 import { postCard, renderAttachments } from "./legacyContent"
 import { legacyBase, legacyLocale, modernUrl } from "./legacyReq"
+import { legacyNoImages } from "./legacy"
 
 type L = (typeof L10N)["en"] | (typeof L10N)["zh"]
 
@@ -31,18 +32,38 @@ export interface PageCtx {
   locale: "en" | "zh"
   base: string
   t: L
+  /** Bandwidth mode: suppress images (cookie legacy_noimg). */
+  noImages: boolean
+  /** Current request path (for same-page toggle links). */
+  here: string
 }
 
 function ctx(event: H3Event): PageCtx {
   const locale = legacyLocale(event)
   const base = legacyBase(event)
-  return { locale, base, t: L10N[locale] }
+  const rawUrl = String((event.node?.req as { url?: string } | undefined)?.url ?? "/")
+  const here = rawUrl.split("?")[0] || "/"
+  return { locale, base, t: L10N[locale], noImages: legacyNoImages(event), here }
+}
+
+/** Card options shared by every listing on a page. */
+function cardOpts(c: PageCtx): { base: string; locale: "en" | "zh"; noImages: boolean } {
+  return { base: c.base, locale: c.locale, noImages: c.noImages }
 }
 
 function html(page: PageCtx, title: string, body: string, description: string | undefined, canonicalPath: string, cache: string): Response {
   return new Response(
     renderLegacyDoc(
-      { locale: page.locale, title, base: page.base, description, mainHome: modernUrl(canonicalPath), onLegacyHost: page.base === "" },
+      {
+        locale: page.locale,
+        title,
+        base: page.base,
+        description,
+        mainHome: modernUrl(canonicalPath),
+        onLegacyHost: page.base === "",
+        noImages: page.noImages,
+        here: page.here,
+      },
       body,
     ),
     { headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": cache } },
@@ -53,7 +74,16 @@ function notFoundPage(page: PageCtx, title: string, detail: string): Response {
   const t = page.t
   return new Response(
     renderLegacyDoc(
-      { locale: page.locale, title, base: page.base, description: undefined, mainHome: modernUrl("/"), onLegacyHost: page.base === "" },
+      {
+        locale: page.locale,
+        title,
+        base: page.base,
+        description: undefined,
+        mainHome: modernUrl("/"),
+        onLegacyHost: page.base === "",
+        noImages: page.noImages,
+        here: page.here,
+      },
       `<p>${escHtml(detail)}</p><p><a href="${page.base}/" style="color: #17324a">${escHtml(t.common.back)}</a></p>`,
     ),
     { status: 404, headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store", "X-Robots-Tag": "noindex" } },
@@ -73,7 +103,7 @@ export async function renderHome(event: H3Event): Promise<Response> {
   if (page === 1) {
     const res = await apiGet("/sphere/posts/featured")
     const posts = normalizePosts(parseJson<unknown>(res))
-    const cards = posts.slice(0, 5).map((p) => postCard(p, { base: c.base, locale: c.locale })).join("\n")
+    const cards = posts.slice(0, 5).map((p) => postCard(p, cardOpts(c))).join("\n")
     if (cards) featuredCards = `<h2 style="font-size: 16px; margin: 0 0 6px 0; color: #17222d">${escHtml(t.home.featured)}</h2>${cards}`
   }
 
@@ -93,7 +123,7 @@ export async function renderHome(event: H3Event): Promise<Response> {
     }
     const posts = normalizePosts(items)
     postsHtml = posts.length
-      ? posts.map((p) => postCard(p, { base: c.base, locale: c.locale })).join("\n") + pagesNav(c.base, page, payload.next_cursor ?? null, c.locale, "/", "?")
+      ? posts.map((p) => postCard(p, cardOpts(c))).join("\n") + pagesNav(c.base, page, payload.next_cursor ?? null, c.locale, "/", "?")
       : `<p>${escHtml(t.home.empty)}</p>`
   }
 
@@ -136,7 +166,7 @@ export async function renderPost(event: H3Event): Promise<Response> {
 
   const replies = normalizePosts(parseJson<unknown>(repliesRes))
   const replyCards = replies.length
-    ? replies.map((r) => postCard(r, { base: c.base, locale: c.locale })).join("\n")
+    ? replies.map((r) => postCard(r, cardOpts(c))).join("\n")
     : `<p style="color: #5a524a">${escHtml(t.post.noReplies)}</p>`
 
   const name = post.publisher?.nick || post.publisher?.name || "Unknown"
@@ -151,7 +181,7 @@ export async function renderPost(event: H3Event): Promise<Response> {
   return html(c, post.title || `${name}'s Post`, body, meta || undefined, `/posts/${encodeURIComponent(id)}`, "public, max-age=120")
 }
 
-function detail(post: LegacyPost, c: { base: string; locale: "en" | "zh"; t: L }): string {
+function detail(post: LegacyPost, c: PageCtx): string {
   const { t } = c
   const isArticle = post.type === 1
   const name = post.publisher?.nick || post.publisher?.name || "Unknown"
@@ -159,19 +189,19 @@ function detail(post: LegacyPost, c: { base: string; locale: "en" | "zh"; t: L }
   const time = post.publishedAt ? new Date(post.publishedAt).toUTCString() : ""
 
   const bits: string[] = []
-  if (avatar) bits.push(`<img src="${escHtml(avatar)}" alt="" width="40" height="40" style="vertical-align: middle; margin-right: 8px; border: 0">`)
+  if (avatar && !c.noImages) bits.push(`<img src="${escHtml(avatar)}" alt="" width="40" height="40" style="vertical-align: middle; margin-right: 8px; border: 0">`)
   bits.push(`<a href="${c.base}/publishers/${encodeURIComponent(post.publisher?.name ?? "")}" style="color: #17324a; font-weight: bold; text-decoration: none">${escHtml(name)}</a>`)
   if (post.realm) bits.push(`<span style="color: #8a8578">@</span><a href="${c.base}/realms/${encodeURIComponent(post.realm.slug)}" style="color: #8a8578; text-decoration: none">${escHtml(post.realm.name)}</a>`)
   const header = bits.join(" ")
 
   const content = post.isTruncated && !isArticle ? `${post.content}…` : post.content
-  const att = renderAttachments(post, { singleLabel: t.post.attachment, multiLabel: t.postCard.attachments })
+  const att = renderAttachments(post, { singleLabel: t.post.attachment, multiLabel: t.postCard.attachments, noImages: c.noImages })
   return [
     `<div style="background: #fffdf6; border: 1px solid #d8cfb4; padding: 14px 16px; margin-bottom: 10px">`,
     `<p style="margin: 0 0 8px 0; font-size: 14px">${header}</p>`,
     isArticle ? `<p style="margin:0 0 4px 0"><span style="font-size:12px;color:#8a6d1a;text-transform:uppercase">${escHtml(t.post.article)}</span></p>` : "",
     post.title ? `<h1 style="font-size: 20px; margin: 4px 0 6px 0; color: #17222d">${escHtml(post.title)}</h1>` : "",
-    `<div style="margin: 6px 0">${rewriteInternalLinks(renderMd(content), c.base)}</div>`,
+    `<div style="margin: 6px 0">${rewriteInternalLinks(renderMd(content, c.noImages), c.base)}</div>`,
     att,
     `<p style="margin: 8px 0 0 0; color: #8a8578; font-size: 11px">${escHtml(t.post.published)} ${escHtml(time)}</p>`,
     "</div>",
@@ -188,7 +218,7 @@ export async function renderRealmsIndex(event: H3Event): Promise<Response> {
   const res = await apiGet("/passport/realms/public")
   const realms = normalizeRealms(parseJson<unknown>(res))
   const cards = realms.length
-    ? realms.map((r) => realmRow(r, c.base)).join("\n")
+    ? realms.map((r) => realmRow(r, c.base, c.noImages)).join("\n")
     : `<p style="color: #5a524a">${escHtml(t.realms.empty)}</p>`
   const body = [
     `<h2 style="font-size: 16px; margin: 0 0 6px 0; color: #17222d">${escHtml(t.realms.title)}</h2>`,
@@ -198,9 +228,9 @@ export async function renderRealmsIndex(event: H3Event): Promise<Response> {
   return html(c, t.realms.title, body, t.realms.subtitle, "/realms", "public, max-age=300")
 }
 
-function realmRow(realm: LegacyRealm, base: string): string {
+function realmRow(realm: LegacyRealm, base: string, noImg: boolean): string {
   const avatar = realm.picture?.id ? `https://api.solian.app/drive/files/${encodeURIComponent(realm.picture.id)}` : null
-  const img = avatar ? `<img src="${escHtml(avatar)}" alt="" width="40" height="40" style="vertical-align: middle; margin-right: 8px; border: 0">` : ""
+  const img = avatar && !noImg ? `<img src="${escHtml(avatar)}" alt="" width="40" height="40" style="vertical-align: middle; margin-right: 8px; border: 0">` : ""
   const desc = realm.description ? realm.description.split("\n")[0].slice(0, 160) : ""
   return `<div style="background: #fffdf6; border: 1px solid #d8cfb4; padding: 10px 12px; margin: 0 0 8px 0">${img}<a href="${base}/realms/${encodeURIComponent(realm.slug)}" style="color: #17324a; text-decoration: none; font-weight: bold">${escHtml(realm.name)}</a> <span style="color: #8a8578; font-size: 11px">@${escHtml(realm.slug)}</span><br><span style="color: #5a524a; font-size: 12px">${escHtml(desc)}</span></div>`
 }
@@ -226,20 +256,20 @@ export async function renderRealm(event: H3Event): Promise<Response> {
   const posts = Array.isArray(raw) ? raw.map((p) => normalizePost(p)).filter((p): p is LegacyPost => !!p) : []
 
   const body = [
-    realmHeader(realm, c.base, c.locale),
+    realmHeader(realm, c.base, c.locale, c.noImages),
     `<h2 style="font-size: 16px; margin: 18px 0 6px 0; color: #17222d">${escHtml(t.realms.postsIn)}</h2>`,
     posts.length
-      ? posts.map((p) => postCard(p, { base: c.base, locale: c.locale })).join("\n")
+      ? posts.map((p) => postCard(p, cardOpts(c))).join("\n")
       : `<p style="color: #5a524a">${escHtml(t.realms.noPosts)}</p>`,
     `<p style="margin-top: 16px"><a href="${c.base}/realms" style="color: #17324a">&larr; ${escHtml(t.realms.backToRealms)}</a></p>`,
   ].join("\n")
   return html(c, realm.name, body, realm.description ?? undefined, `/realms/${encodeURIComponent(slug)}`, "public, max-age=120")
 }
 
-function realmHeader(realm: LegacyRealm, base: string, locale: "en" | "zh"): string {
+function realmHeader(realm: LegacyRealm, base: string, locale: "en" | "zh", noImg: boolean): string {
   const t = L10N[locale]
   const avatar = realm.picture?.id ? `https://api.solian.app/drive/files/${encodeURIComponent(realm.picture.id)}` : null
-  const img = avatar ? `<img src="${escHtml(avatar)}" alt="" width="64" height="64" style="vertical-align: middle; margin-right: 10px; border: 0">` : ""
+  const img = avatar && !noImg ? `<img src="${escHtml(avatar)}" alt="" width="64" height="64" style="vertical-align: middle; margin-right: 10px; border: 0">` : ""
   const kind = realm.isCommunity === true ? t.common.community : realm.isCommunity === false ? t.common.organization : ""
   const verified = realm.verification ? `<span style="color: #8a6d1a; font-size: 12px">[${escHtml(realm.verification)}]</span>` : ""
   const desc = realm.description ? `<p style="margin: 6px 0 0 0; color: #5a524a; font-size: 13px">${escHtml(realm.description)}</p>` : `<p style="margin: 6px 0 0 0; color: #8a8578">${escHtml(t.realms.noDescription)}</p>`
@@ -276,7 +306,7 @@ export async function renderCreators(event: H3Event): Promise<Response> {
   }
 
   const resultsHtml = rows.length
-    ? rows.map((p) => pubRow(p, c.base, c.locale)).join("\n")
+    ? rows.map((p) => pubRow(p, c.base, c.locale, c.noImages)).join("\n")
     : `<p style="color: #5a524a">${escHtml(q ? t.creators.noResults : t.creators.noPosts)}</p>`
   const form = `<form method="get" action="${c.base}/creators" style="margin: 0 0 12px 0"><input type="text" name="q" value="${escHtml(q)}" size="24" style="font-family: inherit; font-size: 13px; padding: 3px 5px"> <button type="submit" style="font-family: inherit; font-size: 13px; padding: 3px 10px">${escHtml(t.creators.search)}</button></form>`
   const body = [
@@ -298,10 +328,10 @@ function normalizePubs(raw: unknown): LegacyPublisher[] {
   return out
 }
 
-function pubRow(publisher: LegacyPublisher, base: string, locale: "en" | "zh"): string {
+function pubRow(publisher: LegacyPublisher, base: string, locale: "en" | "zh", noImg: boolean): string {
   const t = L10N[locale]
   const avatar = fileUrl(publisher.picture?.id)
-  const img = avatar ? `<img src="${escHtml(avatar)}" alt="" width="40" height="40" style="vertical-align: middle; margin-right: 8px; border: 0">` : ""
+  const img = avatar && !noImg ? `<img src="${escHtml(avatar)}" alt="" width="40" height="40" style="vertical-align: middle; margin-right: 8px; border: 0">` : ""
   const name = publisher.nick || publisher.name
   const verified = publisher.verification ? `<span style="color: #8a6d1a; font-size: 11px">[${escHtml(publisher.verification)}]</span>` : ""
   const subs = publisher.stat?.subscribers ? ` · ${publisher.stat.subscribers} ${t.creators.subscribers.toLowerCase()}` : ""
@@ -333,20 +363,20 @@ export async function renderPublisher(event: H3Event): Promise<Response> {
   const pages = Math.max(1, Math.ceil(total / P))
 
   const body = [
-    pubProfile(publisher, c.base, c.locale),
+    pubProfile(publisher, c.base, c.locale, c.noImages),
     `<h2 style="font-size: 16px; margin: 18px 0 6px 0; color: #17222d">${escHtml(t.creators.posts)}</h2>`,
     posts.length
-      ? posts.map((p) => postCard(p, { base: c.base, locale: c.locale })).join("\n")
+      ? posts.map((p) => postCard(p, cardOpts(c))).join("\n")
       : `<p style="color: #5a524a">${escHtml(t.creators.noPosts)}</p>`,
     pagedNav(c.base, name, page, pages, c.locale, "publishers"),
   ].join("\n")
   return html(c, publisher.nick || publisher.name, body, publisher.bio ?? undefined, `/publishers/${encodeURIComponent(name)}`, "public, max-age=120")
 }
 
-function pubProfile(publisher: LegacyPublisher, base: string, locale: "en" | "zh"): string {
+function pubProfile(publisher: LegacyPublisher, base: string, locale: "en" | "zh", noImg: boolean): string {
   const t = L10N[locale]
   const avatar = fileUrl(publisher.picture?.id)
-  const img = avatar ? `<img src="${escHtml(avatar)}" alt="" width="64" height="64" style="vertical-align: middle; margin-right: 10px; border: 0">` : ""
+  const img = avatar && !noImg ? `<img src="${escHtml(avatar)}" alt="" width="64" height="64" style="vertical-align: middle; margin-right: 10px; border: 0">` : ""
   const name = publisher.nick || publisher.name
   const verified = publisher.verification ? `<span style="color: #8a6d1a; font-size: 12px">[${escHtml(publisher.verification)}]</span>` : ""
   const stats: string[] = []
@@ -408,20 +438,20 @@ export async function renderAccount(event: H3Event): Promise<Response> {
   }
 
   const body = [
-    acctProfile(account, pubNames, c.base, c.locale),
+    acctProfile(account, pubNames, c.base, c.locale, c.noImages),
     `<h2 style="font-size: 16px; margin: 18px 0 6px 0; color: #17222d">${escHtml(t.creators.posts)}</h2>`,
     posts.length
-      ? posts.map((p) => postCard(p, { base: c.base, locale: c.locale })).join("\n")
+      ? posts.map((p) => postCard(p, cardOpts(c))).join("\n")
       : `<p style="color: #5a524a">${escHtml(t.account.noPosts)}</p>`,
     pagedNav(c.base, name, page, pages, c.locale, "accounts"),
   ].join("\n")
   return html(c, account.nick || account.name, body, account.bio ?? undefined, `/accounts/${encodeURIComponent(name)}`, "public, max-age=120")
 }
 
-function acctProfile(account: LegacyAccount, pubNames: string[], base: string, locale: "en" | "zh"): string {
+function acctProfile(account: LegacyAccount, pubNames: string[], base: string, locale: "en" | "zh", noImg: boolean): string {
   const t = L10N[locale]
   const avatar = fileUrl(account.picture?.id)
-  const img = avatar ? `<img src="${escHtml(avatar)}" alt="" width="64" height="64" style="vertical-align: middle; margin-right: 10px; border: 0">` : ""
+  const img = avatar && !noImg ? `<img src="${escHtml(avatar)}" alt="" width="64" height="64" style="vertical-align: middle; margin-right: 10px; border: 0">` : ""
   const name = account.nick || account.name
   const verified = account.verification ? `<span style="color: #8a6d1a; font-size: 12px">[${escHtml(account.verification)}]</span>` : ""
   const bio = account.bio ? `<p style="margin: 6px 0 0 0; color: #5a524a; font-size: 13px">${escHtml(account.bio)}</p>` : ""
@@ -469,25 +499,25 @@ export async function renderSearch(event: H3Event): Promise<Response> {
   return html(c, `${q} — ${t.search.title}`, body, t.search.subtitle, "/search", "public, max-age=60")
 }
 
-async function postSearch(c: { base: string; locale: "en" | "zh"; t: L }, q: string): Promise<string> {
+async function postSearch(c: PageCtx, q: string): Promise<string> {
   const { t } = c
   const res = await apiGet(`/sphere/posts?query=${encodeURIComponent(q)}&take=20&offset=0&replies=false`)
   const raw = parseJson<unknown>(res)
   const posts = Array.isArray(raw) ? raw.map((p) => normalizePost(p)).filter((p): p is LegacyPost => !!p) : []
   return `<h2 style="font-size: 16px; margin: 14px 0 6px 0; color: #17222d">${escHtml(t.search.postsTab)} (${posts.length})</h2>` +
-    (posts.length ? posts.map((p) => postCard(p, { base: c.base, locale: c.locale })).join("\n") : `<p style="color: #5a524a">${escHtml(t.search.noPosts)}</p>`)
+    (posts.length ? posts.map((p) => postCard(p, cardOpts(c))).join("\n") : `<p style="color: #5a524a">${escHtml(t.search.noPosts)}</p>`)
 }
 
-async function pubSearch(c: { base: string; locale: "en" | "zh"; t: L }, q: string): Promise<string> {
+async function pubSearch(c: PageCtx, q: string): Promise<string> {
   const { t } = c
   const res = await apiGet(`/sphere/publishers/search?query=${encodeURIComponent(q)}&take=10`)
   const raw = parseJson<unknown>(res)
   const pubs = normalizePubs(raw)
   return `<h2 style="font-size: 16px; margin: 14px 0 6px 0; color: #17222d">${escHtml(t.search.publishers)} (${pubs.length})</h2>` +
-    (pubs.length ? pubs.map((p) => pubRow(p, c.base, c.locale)).join("\n") : `<p style="color: #5a524a">${escHtml(t.search.noPublishers)}</p>`)
+    (pubs.length ? pubs.map((p) => pubRow(p, c.base, c.locale, c.noImages)).join("\n") : `<p style="color: #5a524a">${escHtml(t.search.noPublishers)}</p>`)
 }
 
-async function accountSearch(c: { base: string; locale: "en" | "zh"; t: L }, q: string): Promise<string> {
+async function accountSearch(c: PageCtx, q: string): Promise<string> {
   const { t } = c
   const res = await apiGet(`/stargate/accounts/search?query=${encodeURIComponent(q)}&take=10`)
   const raw = parseJson<unknown>(res)
@@ -501,7 +531,7 @@ async function accountSearch(c: { base: string; locale: "en" | "zh"; t: L }, q: 
         const profile = a.profile && typeof a.profile === "object" ? (a.profile as Record<string, unknown>) : null
         const pic = profile && typeof profile.picture === "object" ? (profile.picture as Record<string, unknown>).id : null
         const avatar = typeof pic === "string" ? fileUrl(pic) : null
-        const img = avatar ? `<img src="${escHtml(avatar)}" alt="" width="32" height="32" style="vertical-align: middle; margin-right: 6px; border: 0">` : ""
+        const img = avatar && !c.noImages ? `<img src="${escHtml(avatar)}" alt="" width="32" height="32" style="vertical-align: middle; margin-right: 6px; border: 0">` : ""
         rows.push(`<div style="background: #fffdf6; border: 1px solid #d8cfb4; padding: 8px 12px; margin: 0 0 6px 0">${img}<a href="${c.base}/accounts/${encodeURIComponent(n)}" style="color: #17324a; text-decoration: none; font-weight: bold">${escHtml(nick || n)}</a> <span style="color: #8a8578; font-size: 11px">@${escHtml(n)}</span></div>`)
       }
     }
@@ -510,7 +540,7 @@ async function accountSearch(c: { base: string; locale: "en" | "zh"; t: L }, q: 
     (rows.length ? rows.join("\n") : `<p style="color: #5a524a">${escHtml(t.search.noAccounts)}</p>`)
 }
 
-async function realmSearch(c: { base: string; locale: "en" | "zh"; t: L }, q: string): Promise<string> {
+async function realmSearch(c: PageCtx, q: string): Promise<string> {
   const { t } = c
   const res = await apiGet("/passport/realms/public")
   const raw = parseJson<unknown>(res)

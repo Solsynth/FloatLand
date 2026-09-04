@@ -36,6 +36,23 @@ export function setLocaleCookie(event: H3Event, locale: "en" | "zh"): string {
   return cookie
 }
 
+const NOIMG_COOKIE = "legacy_noimg"
+
+/** True when the legacy surface should suppress images for this visitor. */
+export function legacyNoImages(event: H3Event): boolean {
+  return getCookie(event, NOIMG_COOKIE) === "1"
+}
+
+/** Set (value "1") or clear (value "0") the no-images cookie. Returns the Set-Cookie value. */
+export function setNoImagesCookie(event: H3Event, enabled: boolean): string {
+  const cookie = `${NOIMG_COOKIE}=${enabled ? "1" : "0"}; Path=/; Max-Age=31536000; SameSite=Lax`
+  const res = event.node?.res as { setHeader?: (k: string, v: string | string[]) => void } | undefined
+  if (res?.setHeader) {
+    res.setHeader("Set-Cookie", cookie)
+  }
+  return cookie
+}
+
 /** Host from the Host header, lowercased, without port. */
 export function legacyHost(event: H3Event): string {
   return getRequestHost(event).split(":")[0].toLowerCase()
@@ -72,6 +89,10 @@ export const L10N = {
       signIn: "Sign In",
       modernSite: "Modern site",
       noJsNotice: "Legacy version",
+      imagesOff: "Images off",
+      imagesOn: "Images on",
+      showImages: "Show images",
+      hideImages: "Hide images",
     },
     common: {
       loading: "Loading...",
@@ -265,6 +286,10 @@ export const L10N = {
       signIn: "登录",
       modernSite: "新版网站",
       noJsNotice: "旧版",
+      imagesOff: "图片已关闭",
+      imagesOn: "图片已开启",
+      showImages: "显示图片",
+      hideImages: "隐藏图片",
     },
     common: {
       loading: "正在加载…",
@@ -691,9 +716,31 @@ markdown.renderer.rules.image = (tokens, idx, options, env, self) => {
   return defaultImage ? defaultImage(tokens, idx, options, env, self) : self.renderToken(tokens, idx, options)
 }
 
-/** Render post/publisher content to safe legacy HTML. */
-export function renderMd(content: string | null | undefined): string {
-  return markdown.render(content ?? "")
+/** Image renderer for bandwidth-saving mode: emits a plain text link instead
+ *  of <img> so the browser never fetches image bytes. */
+const noImageRule = (tokens: Array<{ attrGet: (k: string) => string | null }>, idx: number): string => {
+  const token = tokens[idx]
+  let src = token.attrGet("src") ?? ""
+  if (src.startsWith("solian://files/")) {
+    src = `${FILE_BASE}/${src.replace("solian://files/", "")}`
+  }
+  const alt = token.attrGet("alt") ?? ""
+  const label = alt || src
+  return `<a href="${markdown.utils.escapeHtml(src)}">${markdown.utils.escapeHtml(label)}</a>`
+}
+
+/** Render post/publisher content to safe legacy HTML. Pass noImages=true to
+ *  replace images with plain text links (bandwidth-saving mode). The rule
+ *  swap is safe: render() is synchronous. */
+export function renderMd(content: string | null | undefined, noImages = false): string {
+  if (!noImages) return markdown.render(content ?? "")
+  const prev = markdown.renderer.rules.image
+  markdown.renderer.rules.image = noImageRule
+  try {
+    return markdown.render(content ?? "")
+  } finally {
+    markdown.renderer.rules.image = prev
+  }
 }
 
 /** Prefix root-relative internal links (posts/accounts/realms/publishers)

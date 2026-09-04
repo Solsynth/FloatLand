@@ -3,7 +3,7 @@
 // font/CSS. All formatting is inline or legacy-safe HTML 4 attributes.
 // RFC 2119: no modern CSS classes are ever emitted by these helpers.
 
-import { escHtml, L10N, type LegacyLocale } from "./legacy"
+import { escAttr, escHtml, L10N, type LegacyLocale } from "./legacy"
 
 export interface LegacyPage {
   /** Current locale. */
@@ -18,6 +18,10 @@ export interface LegacyPage {
   description?: string
   /** True when the request came in on the legacy host. */
   onLegacyHost: boolean
+  /** Bandwidth mode active (suppresses images). */
+  noImages: boolean
+  /** Current request path (for same-page toggle links). */
+  here: string
 }
 
 export function pageTitle(page: LegacyPage, suffix: string): string {
@@ -78,6 +82,15 @@ function navLink(base: string, to: string, label: string): string {
   return `<a href="${base}${to}" style="color: #e9dcc0; text-decoration: none; font-size: 12px">${escHtml(label)}</a>`
 }
 
+/** Images on/off toggle that returns to the current page (no-JS friendly). */
+function imgToggle(page: LegacyPage, t: (typeof L10N)[LegacyLocale]["nav"]): string {
+  const target = page.noImages ? "0" : "1"
+  const label = page.noImages ? t.showImages : t.hideImages
+  const state = page.noImages ? t.imagesOff : t.imagesOn
+  const path = page.here && page.here !== "/" ? page.here : `${page.base}/`
+  return `<a href="${escAttr(path)}?img=${target}" style="color: #f5e9c8; font-size: 11px; text-decoration: none">[${escHtml(label)} · ${escHtml(state)}]</a>&nbsp;&nbsp;|&nbsp;&nbsp;`
+}
+
 export function legacyFooter(page: LegacyPage, year: number): string {
   const t = L10N[page.locale]
   const base = page.base
@@ -93,6 +106,7 @@ export function legacyFooter(page: LegacyPage, year: number): string {
     '<td style="padding: 10px 14px">',
     `${escHtml(t.footer.tagline)}<br>`,
     escHtml(t.footer.legacyNote).replace(/\s+/g, " ") + "<br>",
+    imgToggle(page, t.nav) + "<br>",
     escHtml(t.footer.copyright.replace("{year}", String(year))) + "&nbsp;&nbsp;",
     `<a href="${base}/" style="color: #e9dcc0">${escHtml(t.nav.home)}</a>&nbsp;|&nbsp;`,
     `<a href="${mainHref}" style="color: #e9dcc0">${escHtml(t.nav.modernSite)}</a>`,
@@ -130,9 +144,9 @@ export function renderLegacyDoc(page: LegacyPage, body: string): string {
   ].join("")
 }
 
-export function renderErrorPage(opts: { title: string; body: string; locale: "en" | "zh"; base: string; mainHome: string }, status: number): Response {
+export function renderErrorPage(opts: { title: string; body: string; locale: "en" | "zh"; base: string; mainHome: string; noImages?: boolean; here?: string }, status: number): Response {
   const { title, body, locale, base, mainHome } = opts
-  const page: LegacyPage = { locale, title, base, mainHome, onLegacyHost: base === "" }
+  const page: LegacyPage = { locale, title, base, mainHome, onLegacyHost: base === "", noImages: opts.noImages ?? false, here: opts.here ?? "/" }
   const inner = `<p style="color: #5a524a">${body}</p><p><a href="${base}/">${escHtml(L10N[locale].common.back)}</a></p>`
   const html = renderLegacyDoc(page, inner)
   return new Response(html, {

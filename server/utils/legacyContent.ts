@@ -22,6 +22,8 @@ export interface CardOpts {
   locale: LegacyLocale
   /** Compact article card (teaser, no full body). */
   compact?: boolean
+  /** Bandwidth mode: suppress <img>, replace with text links. */
+  noImages?: boolean
 }
 
 export function postCard(post: LegacyPost, opts: CardOpts): string {
@@ -36,7 +38,7 @@ export function postCard(post: LegacyPost, opts: CardOpts): string {
   const avatar = fileUrl(author?.picture?.id)
 
   const headerBits: string[] = []
-  if (avatar) {
+  if (avatar && !opts.noImages) {
     headerBits.push(`<img src="${escAttr(avatar)}" alt="" width="32" height="32" style="vertical-align: middle; margin-right: 6px; border: 0">`)
   }
   headerBits.push(`<a href="${authorHref}" style="color: #17324a; text-decoration: none; font-weight: bold">${escHtml(name)}</a>`)
@@ -63,12 +65,12 @@ export function postCard(post: LegacyPost, opts: CardOpts): string {
   if (isArticle && !opts.compact) {
     body = renderArticleBody(post, opts)
   } else if (isArticle && opts.compact) {
-    const excerpt = post.description ? stripTags(renderMd(post.description)) : ""
-    const teaser = excerpt ? excerpt : stripTags(rewriteInternalLinks(renderMd(post.content), opts.base)).slice(0, 300)
+    const excerpt = post.description ? stripTags(renderMd(post.description, opts.noImages)) : ""
+    const teaser = excerpt ? excerpt : stripTags(rewriteInternalLinks(renderMd(post.content, opts.noImages), opts.base)).slice(0, 300)
     body = `<a href="${postHref}" style="color: #20242a; text-decoration: none"><span style="font-size: 12px; color: #8a6d1a; text-transform: uppercase">${escHtml(L10N[opts.locale].post.article)}</span><br><b>${escHtml(post.title ?? "")}</b><br><span style="color: #5a524a; font-size: 12px">${escHtml(teaser)}…</span></a>`
   } else {
     const contentRaw = post.isTruncated ? `${post.content}…` : post.content
-    const contentHtml = rewriteInternalLinks(renderMd(contentRaw), opts.base)
+    const contentHtml = rewriteInternalLinks(renderMd(contentRaw, opts.noImages), opts.base)
     if (post.isTruncated) {
       readMore = `<p style="margin: 4px 0 0 0"><a href="${postHref}" style="color: #8a6d1a">${escHtml(L10N[opts.locale].post.openOnMain)} &rarr;</a></p>`
     }
@@ -83,6 +85,7 @@ export function postCard(post: LegacyPost, opts: CardOpts): string {
     singleLabel: L10N[opts.locale].post.attachment,
     multiLabel: L10N[opts.locale].postCard.attachments,
     limit: 1,
+    noImages: opts.noImages,
   })
 
   const tagHtml = post.tags.length
@@ -108,7 +111,7 @@ function renderReference(ref: LegacyPost, isReply: boolean, opts: CardOpts): str
   const label = isReply ? L10N[opts.locale].post.replyingTo : L10N[opts.locale].post.forwarded
   const name = displayName(ref.publisher)
   const href = `${opts.base}/posts/${ref.id}`
-  const snippet = ref.content ? stripTags(renderMd(ref.content)).slice(0, 180) : ""
+  const snippet = ref.content ? stripTags(renderMd(ref.content, opts.noImages)).slice(0, 180) : ""
   return `<div style="border-left: 3px solid #cbbd9c; padding: 2px 8px; margin: 0 0 6px 8px; font-size: 12px; color: #5a524a"><a href="${href}" style="color: #17324a; text-decoration: none"><b>${escHtml(label)} ${escHtml(name)}</b></a> &mdash; ${escHtml(snippet)}${ref.isTruncated ? "…" : ""}</div>`
 }
 
@@ -118,7 +121,7 @@ function renderReference(ref: LegacyPost, isReply: boolean, opts: CardOpts): str
  * `limit: 1` to show a single preview; the detail page passes no limit to
  * show every attachment.
  */
-export function renderAttachments(post: LegacyPost, opts: { singleLabel: string; multiLabel: string; limit?: number }): string {
+export function renderAttachments(post: LegacyPost, opts: { singleLabel: string; multiLabel: string; limit?: number; noImages?: boolean }): string {
   const list = post.attachments.filter((a) => a.id)
   const shown = opts.limit && list.length > opts.limit ? list.slice(0, opts.limit) : list
   if (shown.length === 0) return ""
@@ -128,7 +131,7 @@ export function renderAttachments(post: LegacyPost, opts: { singleLabel: string;
     if (!url) return ""
     const isImage = (a.mimeType ?? "").startsWith("image/")
     const label = a.name || a.id || url
-    if (isImage) {
+    if (isImage && !opts.noImages) {
       return `<p style="margin: 6px 0 0 0"><a href="${escAttr(url)}"><img src="${escAttr(url)}" alt="${escAttr(label)}" style="border: 1px solid #cbbd9c; max-width: 420px; height: auto; width: auto"></a></p>`
     }
     return `<p style="margin: 4px 0 0 0; font-size: 12px"><a href="${escAttr(url)}" style="color: #17324a">${escHtml(label)}</a></p>`
@@ -146,6 +149,6 @@ function renderArticleBody(post: LegacyPost, opts: CardOpts): string {
   const headerBits = `<span style="font-size: 12px; color: #8a6d1a; text-transform: uppercase">${escHtml(t.article)}</span>`
   const title = post.title ? `<h1 style="font-size: 20px; margin: 4px 0 0 0; color: #17222d">${escHtml(post.title)}</h1>` : ""
   const desc = post.description ? `<p style="color: #5a524a">${escHtml(post.description)}</p>` : ""
-  const contentHtml = renderMd(post.content)
+  const contentHtml = rewriteInternalLinks(renderMd(post.content, opts.noImages), opts.base)
   return `${headerBits}${title}${desc}<div style="margin-top: 6px">${contentHtml}</div>`
 }
