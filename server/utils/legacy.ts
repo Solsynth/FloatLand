@@ -651,7 +651,9 @@ markdown.core.ruler.push("legacy_sticker", (state) => {
           out.push(lead)
         }
         const sym = m[1]
-        const img = new state.Token("image", "img", 0)
+        // Custom token type (not "image") so markdown-it's default image rule
+        // (which requires children for alt text) never touches stickers.
+        const img = new state.Token("legacy_sticker", "img", 0)
         img.attrSet("src", `${API_BASE}/sphere/stickers/lookup/${encodeURIComponent(sym)}/open`)
         img.attrSet("alt", `:${sym}:`)
         img.attrSet("title", `:${sym}:`)
@@ -669,6 +671,21 @@ markdown.core.ruler.push("legacy_sticker", (state) => {
   }
   return true
 })
+
+/** Module-level render flag for the bandwidth-saving mode. Set around each
+ *  synchronous renderMd call; read by the sticker/image renderer rules. */
+let noImagesActive = false
+
+markdown.renderer.rules.legacy_sticker = (tokens, idx) => {
+  const token = tokens[idx]
+  const src = token.attrGet("src") ?? ""
+  const alt = token.attrGet("alt") ?? ""
+  if (noImagesActive) {
+    const label = alt || src
+    return `<a href="${markdown.utils.escapeHtml(src)}">${markdown.utils.escapeHtml(label)}</a>`
+  }
+  return `<img src="${markdown.utils.escapeHtml(src)}" alt="${markdown.utils.escapeHtml(alt)}" title="${markdown.utils.escapeHtml(token.attrGet("title") ?? alt)}" style="vertical-align: middle; border: 0">`
+}
 
 const spoilerOpen = /^=!([^=\n][\s\S]*?)!=/
 
@@ -709,37 +726,31 @@ markdown.renderer.rules.link_open = (tokens, idx, options, env, self) => {
 const defaultImage = markdown.renderer.rules.image
 markdown.renderer.rules.image = (tokens, idx, options, env, self) => {
   const token = tokens[idx]
-  const src = token.attrGet("src") ?? ""
-  if (src.startsWith("solian://files/")) {
-    token.attrSet("src", `${FILE_BASE}/${src.replace("solian://files/", "")}`)
-  }
-  return defaultImage ? defaultImage(tokens, idx, options, env, self) : self.renderToken(tokens, idx, options)
-}
-
-/** Image renderer for bandwidth-saving mode: emits a plain text link instead
- *  of <img> so the browser never fetches image bytes. */
-const noImageRule = (tokens: Array<{ attrGet: (k: string) => string | null }>, idx: number): string => {
-  const token = tokens[idx]
   let src = token.attrGet("src") ?? ""
   if (src.startsWith("solian://files/")) {
     src = `${FILE_BASE}/${src.replace("solian://files/", "")}`
   }
-  const alt = token.attrGet("alt") ?? ""
-  const label = alt || src
-  return `<a href="${markdown.utils.escapeHtml(src)}">${markdown.utils.escapeHtml(label)}</a>`
+  if (noImagesActive) {
+    // Bandwidth mode: plain text link instead of <img>.
+    const alt = token.attrGet("alt") ?? ""
+    const label = alt || src
+    return `<a href="${markdown.utils.escapeHtml(src)}">${markdown.utils.escapeHtml(label)}</a>`
+  }
+  token.attrSet("src", src)
+  return defaultImage ? defaultImage(tokens, idx, options, env, self) : self.renderToken(tokens, idx, options)
 }
 
 /** Render post/publisher content to safe legacy HTML. Pass noImages=true to
- *  replace images with plain text links (bandwidth-saving mode). The rule
- *  swap is safe: render() is synchronous. */
+ *  replace images with plain text links (bandwidth-saving mode). Renders are
+ *  synchronous, so the module flag toggling is race-free. */
 export function renderMd(content: string | null | undefined, noImages = false): string {
   if (!noImages) return markdown.render(content ?? "")
-  const prev = markdown.renderer.rules.image
-  markdown.renderer.rules.image = noImageRule
+  const prev = noImagesActive
+  noImagesActive = true
   try {
     return markdown.render(content ?? "")
   } finally {
-    markdown.renderer.rules.image = prev
+    noImagesActive = prev
   }
 }
 

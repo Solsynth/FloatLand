@@ -94,6 +94,27 @@ function notFoundPage(page: PageCtx, title: string, detail: string): Response {
 // Home
 // ---------------------------------------------------------------------------
 
+/** Fetch the timeline for `page`. The API is cursor-based (no offset), so
+ *  reaching page N requires following next_cursor N-1 times server-side.
+ *  Cap the walk to keep pathological pagination from hammering the API. */
+async function fetchTimelinePage(
+  page: number,
+): Promise<{ payload: { items?: unknown[] } | null; next: string | null }> {
+  let cursor: string | null = null
+  let final: { items?: unknown[]; next_cursor?: string | null } | null = null
+  const hops = Math.min(Math.max(page - 1, 0), 20)
+  for (let i = 0; i <= hops; i++) {
+    const qs = cursor ? `&cursor=${encodeURIComponent(cursor)}` : ""
+    const res = await apiGet(`/sphere/timeline?mode=latest&take=${P}${qs}`)
+    const payload = parseJson<{ items?: unknown[]; next_cursor?: string | null }>(res)
+    if (!payload) return { payload: null, next: null }
+    final = payload
+    cursor = payload.next_cursor ?? null
+    if (!cursor) break
+  }
+  return { payload: final, next: final?.next_cursor ?? null }
+}
+
 export async function renderHome(event: H3Event): Promise<Response> {
   const c = ctx(event)
   const { t } = c
@@ -107,8 +128,8 @@ export async function renderHome(event: H3Event): Promise<Response> {
     if (cards) featuredCards = `<h2 style="font-size: 16px; margin: 0 0 6px 0; color: #17222d">${escHtml(t.home.featured)}</h2>${cards}`
   }
 
-  const tl = await apiGet(`/sphere/timeline?mode=latest&take=${P}`)
-  const payload = parseJson<{ items?: unknown[]; next_cursor?: string | null }>(tl)
+  const tl = await fetchTimelinePage(page)
+  const payload = tl.payload
   let postsHtml = ""
   let errorHtml = ""
   if (!payload) {
@@ -123,7 +144,7 @@ export async function renderHome(event: H3Event): Promise<Response> {
     }
     const posts = normalizePosts(items)
     postsHtml = posts.length
-      ? posts.map((p) => postCard(p, cardOpts(c))).join("\n") + pagesNav(c.base, page, payload.next_cursor ?? null, c.locale, "/", "?")
+      ? posts.map((p) => postCard(p, cardOpts(c))).join("\n") + pagesNav(c.base, page, tl.next, c.locale, "/", "?")
       : `<p>${escHtml(t.home.empty)}</p>`
   }
 
