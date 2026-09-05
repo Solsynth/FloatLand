@@ -175,10 +175,17 @@ export default defineEventHandler(async (event) => {
   // decoupled from the browser; only our own `sid` cookie matters). With
   // `responseType: "stream"`, the body is `_data` (an un-consumed ReadableStream),
   // so we pass it through as-is to avoid re-reading a consumed buffer.
+  //
+  // Also drop `content-encoding` + `content-length`: undici auto-decompresses a
+  // gzip response stream, but keeps the original (encoded) `Content-Length`
+  // header. Forwarding that stale length with the decoded stream makes Node cut
+  // the body early (mid-JSON) — the truncation that produced invalid JSON.
   const status = response.status;
   const cleanHeaders = new Headers();
   response.headers.forEach((value, key) => {
-    if (key.toLowerCase() === "set-cookie") return;
+    const k = key.toLowerCase();
+    if (k === "set-cookie") return;
+    if (k === "content-encoding" || k === "content-length") return;
     cleanHeaders.set(key, value);
   });
   // With `responseType: "stream"` ofetch sets `_data` to the un-consumed body.
