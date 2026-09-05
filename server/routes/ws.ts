@@ -40,9 +40,10 @@ export default defineWebSocketHandler({
       return;
     }
 
-    const apiServerUrl = useRuntimeConfig().apiServerUrl as string;
+    const runtime = useRuntimeConfig();
+    const apiProxiedUrl = (runtime.apiProxiedUrl ?? runtime.apiServerUrl) as string;
     const backend = new WebSocket(
-      `${apiServerUrl.replace(/^http/, "ws")}/ws?tk=${encodeURIComponent(pair.token)}`,
+      `${apiProxiedUrl.replace(/^http/, "ws")}/ws?tk=${encodeURIComponent(pair.token)}`,
     );
 
     backend.addEventListener("message", (event) => {

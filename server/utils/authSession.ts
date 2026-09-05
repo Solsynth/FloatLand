@@ -1,6 +1,6 @@
 import { randomBytes } from "node:crypto";
 import type { H3Event } from "h3";
-import { getCookie, setCookie, deleteCookie } from "h3";
+import { getCookie, setCookie, deleteCookie, getRequestIP, getRequestHeader } from "h3";
 
 /**
  * Unified auth session store.
@@ -69,6 +69,33 @@ export function sidCookieName(event: H3Event): string {
 }
 
 /**
+ * Standard reverse-proxy client-IP headers for server-to-backend calls.
+ *
+ * FloatLand proxies request to the main API on the same host, so the backend
+ * would otherwise see FloatLand's IP. Forward the real client IP via the
+ * conventional `X-Forwarded-For` (leftmost, client-controlled value first) and
+ * `X-Real-IP` so login endpoints rate-limit and audit the actual user.
+ */
+export function clientIpHeaders(event: H3Event): Record<string, string> {
+  const headers: Record<string, string> = {};
+  const forwardedFor = getRequestHeader(event, "x-forwarded-for");
+  const clientIp =
+    (getRequestIP(event, { xForwardedFor: true }) ?? "").trim() ||
+    (getRequestHeader(event, "x-real-ip") ?? "").trim();
+  if (clientIp) {
+    // Preserve an existing forwarded chain (e.g. a CDN/load balancer in front);
+    // the client IP goes leftmost so the last hop (FloatLand) stays visible.
+    const forwarded = forwardedFor?.trim();
+    headers["x-forwarded-for"] =
+      forwarded && !forwarded.split(",")[0]?.trim().startsWith(clientIp)
+        ? `${clientIp}, ${forwarded}`
+        : clientIp;
+    headers["x-real-ip"] = clientIp;
+  }
+  return headers;
+}
+
+/**
  * Create (or overwrite) a server-side session for a token pair and set the
  * opaque `sid` cookie on the response. Returns the sid.
  */
@@ -94,7 +121,8 @@ export async function getAuthSession(sid: string): Promise<StoredPair | null> {
  */
 export async function refreshSession(event: H3Event, sid: string): Promise<boolean> {
   const cfg = authConfig(event);
-  const apiServerUrl = useRuntimeConfig(event).apiServerUrl as string;
+  const runtime = useRuntimeConfig(event);
+  const apiProxiedUrl = (runtime.apiProxiedUrl ?? runtime.apiServerUrl) as string;
   const pair = await getAuthSession(sid);
   if (!pair) return false;
 
@@ -116,8 +144,9 @@ export async function refreshSession(event: H3Event, sid: string): Promise<boole
       refresh_token?: string;
       expires_in?: number;
       refresh_expires_in?: number;
-    }>(`${apiServerUrl}/stargate/auth/token`, {
+    }>(`${apiProxiedUrl}/stargate/auth/token`, {
       method: "POST",
+      headers: { ...clientIpHeaders(event) },
       body: {
         grant_type: "refresh_token",
         refresh_token: pair.refreshToken,

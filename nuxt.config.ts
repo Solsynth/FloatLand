@@ -257,7 +257,12 @@ export default defineNuxtConfig({
       cookieSecure: process.env.NUXT_AUTH_COOKIE_SECURE !== "false",
       sessionTtl: 60 * 60 * 24 * 30,
     },
+    // Internal base URL for server-to-backend proxied calls. FloatLand and the
+    // main API share a host, so proxied calls should hit the internal endpoint
+    // rather than the public hostname. Distinct from the public `apiBaseUrl`,
+    // which is only used for display/OG/curl strings.
     apiServerUrl: process.env.NUXT_API_SERVER_URL ?? "https://api.solian.app",
+    apiProxiedUrl: process.env.NUXT_API_PROXIED_URL ?? process.env.NUXT_API_SERVER_URL ?? "https://api.solian.app",
   },
   site: {
     url: "https://solian.app",

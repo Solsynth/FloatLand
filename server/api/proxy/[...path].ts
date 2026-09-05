@@ -4,6 +4,7 @@ import {
   getCookie,
   getMethod,
   getRequestHeaders,
+  getRequestIP,
   readRawBody,
   readBody,
   setResponseStatus,
@@ -15,6 +16,7 @@ import {
   refreshSession,
   deleteSession,
   sidCookieName,
+  clientIpHeaders,
 } from "../../utils/authSession";
 
 // Backend request methods whose body must be forwarded.
@@ -41,11 +43,13 @@ function isoFromNow(seconds?: number): string | undefined {
 
 export default defineEventHandler(async (event) => {
   const cfg = useRuntimeConfig(event);
-  const apiServerUrl = cfg.apiServerUrl as string;
+  // Proxied backend calls go to the internal base URL (same host as FloatLand),
+  // distinct from the public `apiBaseUrl` used only for display/OG/curl strings.
+  const apiProxiedUrl = (cfg.apiProxiedUrl ?? cfg.apiServerUrl) as string;
   const cookieName = sidCookieName(event);
 
   const path = getRouterParam(event, "path") || "";
-  const target = `${apiServerUrl}/${path}`;
+  const target = `${apiProxiedUrl}/${path}`;
 
   const sid = getCookie(event, cookieName) ?? "";
   let pair = sid ? await getAuthSession(sid) : null;
@@ -65,6 +69,7 @@ export default defineEventHandler(async (event) => {
         refresh_expires_in?: number;
       }>(target, {
         method: "POST",
+        headers: { ...clientIpHeaders(event) },
         body,
       });
 
@@ -106,7 +111,7 @@ export default defineEventHandler(async (event) => {
     if (pair) {
       await $fetch(target, {
         method: "POST",
-        headers: { Authorization: `Bearer ${pair.token}` },
+        headers: { Authorization: `Bearer ${pair.token}`, ...clientIpHeaders(event) },
       }).catch(() => {});
     }
     await deleteSession(event, sid);
@@ -120,8 +125,11 @@ export default defineEventHandler(async (event) => {
   // The `sid` cookie arrives at the proxy via `getCookie(event)` above (sent
   // natively by the browser on the client, or forwarded as the `cookie` header
   // on SSR). We authenticate the backend with `Authorization: Bearer` and never
-  // forward the client cookie upstream.
-  const headers: Record<string, string> = {};
+  // forward the client cookie upstream. Forward the real client IP so login
+  // endpoints rate-limit and audit the actual user (not FloatLand's own IP).
+  const headers: Record<string, string> = {
+    ...clientIpHeaders(event),
+  };
   for (const [key, value] of Object.entries(incomingHeaders)) {
     if (DROP_ON_GENERIC.has(key.toLowerCase())) continue;
     headers[key] = value as string;
