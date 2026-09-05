@@ -168,6 +168,50 @@ export async function getAuthSession(sid: string): Promise<StoredPair | null> {
 }
 
 /**
+ * All `name=value` cookie values for `name` in a raw cookie header, in order.
+ * (A host-only `sid` and a `Domain`-scoped `sid` can coexist in the browser
+ * jar; browsers send BOTH, oldest-first, so a stale one may precede a valid
+ * one. h3's `getCookie` keeps the FIRST occurrence and would pick the stale.)
+ */
+export function getCookieValues(rawCookie: string, name: string): string[] {
+  const out: string[] = [];
+  if (!rawCookie) return out;
+  for (const part of rawCookie.split(";")) {
+    const eq = part.indexOf("=");
+    if (eq === -1) continue;
+    const key = part.slice(0, eq).trim();
+    if (key !== name) continue;
+    const value = part.slice(eq + 1).trim();
+    if (value) out.push(value);
+  }
+  return out;
+}
+
+export function getAllSids(event: H3Event): string[] {
+  return getCookieValues(event.node?.req?.headers?.cookie ?? "", sidCookieName(event));
+}
+
+/**
+ * Resolve the browser's session by scanning every `sid` cookie (not just the
+ * first, per h3's `getCookie`) and returning the first sid that actually holds
+ * a valid session. Falls back to the single `getCookie` value for a clean
+ * request. Returns `{ sid, pair }` or `{ sid: "", pair: null }`.
+ */
+export async function resolveAuthSession(
+  event: H3Event,
+): Promise<{ sid: string; pair: StoredPair | null }> {
+  const sids = getAllSids(event);
+  if (sids.length === 0) return { sid: "", pair: null };
+  for (const sid of sids) {
+    const pair = await getAuthSession(sid);
+    if (pair) return { sid, pair };
+  }
+  // No valid session. Surface the LAST `sid` value (the most recently set) so
+  // logout/refresh target the current cookie rather than a stale host-only one.
+  return { sid: sids[sids.length - 1], pair: null };
+}
+
+/**
  * Rotate the stored token pair via the backend refresh endpoint. Preserves the
  * existing sid. Returns true on success, false (and deletes the session) when
  * the refresh token is missing/expired or the backend rejects the refresh.
@@ -235,7 +279,27 @@ export async function deleteSession(event: H3Event, sid: string): Promise<void> 
   if (sid) {
     await useStorage("auth").removeItem(sid);
   }
-  deleteCookie(event, cfg.cookieName, cookieOptions(event));
+  clearSessionCookies(event, cfg.cookieName);
+}
+
+/**
+ * Clear the `sid` cookie in BOTH scopes a browser may have stored it.
+ *
+ * A stale host-only `sid` (no `Domain` attribute, from a login performed before
+ * the cookie-domain logic applied a `Domain`, or when it returned `undefined`
+ * for IP/localhost hosts) and the current `Domain`-scoped `sid` can coexist in
+ * the browser jar. A deletion cookie only matches a cookie with the SAME
+ * domain+path+name, so we must delete both the host-only and the Domain cookie
+ * or the stale one lingers and keeps breaking `getCookie` (which returns the
+ * first, oldest occurrence).
+ */
+export function clearSessionCookies(event: H3Event, cookieName: string): void {
+  const opts = cookieOptions(event);
+  // Domain-scoped cookie.
+  deleteCookie(event, cookieName, opts);
+  // Host-only cookie (no Domain attribute). `domain: undefined` must be set
+  // explicitly to override the domain resolved in `cookieOptions`.
+  deleteCookie(event, cookieName, { ...opts, domain: undefined });
 }
 
 /** Mint a single-use cross-host sync ticket mapping to `sid` (5 min TTL). */

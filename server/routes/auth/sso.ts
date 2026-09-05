@@ -1,9 +1,9 @@
-import { defineEventHandler, getCookie, getQuery, sendRedirect, setCookie } from "h3";
+import { defineEventHandler, getQuery, sendRedirect, setCookie } from "h3";
 import {
   cookieOptions,
   createSyncTicket,
   exchangeSyncTicket,
-  getAuthSession,
+  resolveAuthSession,
   sidCookieName,
 } from "../../utils/authSession";
 
@@ -30,8 +30,7 @@ export default defineEventHandler(async (event) => {
 
   // Canonical host: mint a ticket if we hold a session.
   if (canonicalHost && origin === canonicalHost) {
-    const sid = getCookie(event, cookieName) ?? "";
-    const pair = sid ? await getAuthSession(sid) : null;
+    const { sid, pair } = await resolveAuthSession(event);
     if (pair) {
       const tkt = await createSyncTicket(sid);
       const sep = next.includes("?") ? "&" : "?";

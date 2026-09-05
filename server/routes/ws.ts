@@ -1,6 +1,7 @@
 import { defineWebSocketHandler } from "h3";
 import type { Peer } from "crossws";
-import { getAuthSession } from "../utils/authSession";
+import type { StoredPair } from "../utils/authSession";
+import { getAuthSession, getCookieValues } from "../utils/authSession";
 
 // Same-origin websocket proxy.
 //
@@ -9,21 +10,17 @@ import { getAuthSession } from "../utils/authSession";
 // server-side session, then open a single backend socket authenticated with the
 // stored access token. Messages flow both ways until either side closes.
 
-function readSidFromRequest(peer: Peer): string {
+function readSidsFromRequest(peer: Peer): string[] {
   const request = peer.request;
   const headers = request?.headers;
   const cookie = headers?.get?.("cookie");
-  if (!cookie) return "";
+  if (!cookie) return [];
   const cfg = useRuntimeConfig().auth;
   const name =
     cfg && typeof cfg === "object" && "cookieName" in cfg
       ? (cfg.cookieName as string)
       : "sid";
-  for (const part of cookie.split(";")) {
-    const [key, ...rest] = part.trim().split("=");
-    if (key === name) return rest.join("=");
-  }
-  return "";
+  return getCookieValues(cookie, name);
 }
 
 function getBackend(peer: Peer): WebSocket | undefined {
@@ -33,8 +30,18 @@ function getBackend(peer: Peer): WebSocket | undefined {
 
 export default defineWebSocketHandler({
   async open(peer) {
-    const sid = readSidFromRequest(peer);
-    const pair = await getAuthSession(sid);
+    // Try every `sid` cookie (a stale host-only one can coexist with a fresh
+    // Domain-scoped one); use the first that holds a valid session.
+    let sid = "";
+    let pair: StoredPair | null = null;
+    for (const candidate of readSidsFromRequest(peer)) {
+      const maybePair = await getAuthSession(candidate);
+      if (maybePair) {
+        sid = candidate;
+        pair = maybePair;
+        break;
+      }
+    }
     if (!pair) {
       peer.close();
       return;

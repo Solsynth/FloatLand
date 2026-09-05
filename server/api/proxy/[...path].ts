@@ -1,7 +1,6 @@
 import {
   defineEventHandler,
   getRouterParam,
-  getCookie,
   getMethod,
   getRequestHeaders,
   getRequestIP,
@@ -15,6 +14,7 @@ import {
   getAuthSession,
   refreshSession,
   deleteSession,
+  resolveAuthSession,
   sidCookieName,
   clientIpHeaders,
 } from "../../utils/authSession";
@@ -51,8 +51,11 @@ export default defineEventHandler(async (event) => {
   const path = getRouterParam(event, "path") || "";
   const target = `${apiProxiedUrl}/${path}`;
 
-  const sid = getCookie(event, cookieName) ?? "";
-  let pair = sid ? await getAuthSession(sid) : null;
+  // Resolve the session from ALL `sid` cookie values (a stale host-only sid can
+  // coexist with a fresh Domain-scoped one; h3's getCookie keeps the first and
+  // would pick the stale one). Use the first sid that holds a valid session.
+  const { sid, pair: initialPair } = await resolveAuthSession(event);
+  let pair = initialPair;
 
   // ── Bootstrap token exchange (authorization_code OR refresh_token) ──────
   if (path === "stargate/auth/token") {

@@ -1,5 +1,5 @@
-import { defineEventHandler, getCookie, getQuery, sendRedirect } from "h3";
-import { getAuthSession, sidCookieName } from "../../utils/authSession";
+import { defineEventHandler, getQuery, sendRedirect } from "h3";
+import { resolveAuthSession } from "../../utils/authSession";
 
 // Cross-host session sync entry point.
 //
@@ -14,13 +14,11 @@ import { getAuthSession, sidCookieName } from "../../utils/authSession";
 export default defineEventHandler(async (event) => {
   const cfg = useRuntimeConfig(event);
   const canonicalHost = cfg.auth?.canonicalHost as string;
-  const cookieName = sidCookieName(event);
 
   const query = getQuery(event);
   const next = typeof query.next === "string" ? query.next : "/";
 
-  const sid = getCookie(event, cookieName) ?? "";
-  const pair = sid ? await getAuthSession(sid) : null;
+  const { pair } = await resolveAuthSession(event);
   if (pair) {
     return sendRedirect(event, next);
   }
