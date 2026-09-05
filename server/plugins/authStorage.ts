@@ -17,7 +17,7 @@ function selectRedisUrl(): string | undefined {
   return url;
 }
 
-export default defineNitroPlugin((nitroApp) => {
+export default defineNitroPlugin(async (nitroApp) => {
   const url = selectRedisUrl();
   if (!url) {
     // No Redis configured — keep the build-time `fs` mount for local dev.
@@ -29,15 +29,19 @@ export default defineNitroPlugin((nitroApp) => {
     url,
     base: "floatland:auth",
     // Preconnect eagerly so a missing/invalid Redis surfaces at startup rather
-    // than on the first login.
+    // than on the first login. Bound retries so a down Redis doesn't retry
+    // forever; ioredis reconnects with exponential backoff up to this many
+    // attempts before giving up.
+    retryStrategy: (times) => Math.min(times * 200, 2000),
+    maxRetriesPerRequest: 3,
+    enableOfflineQueue: false,
     preConnect: true,
   });
 
-  // Replace the baked-in `auth` mount. `unmount` disposes the fs driver first
-  // (it holds no state we care about), then re-mounts Redis under the same key
-  // so `useStorage("auth")` in the proxy/store resolves to Redis.
-  if (storage.unmount) {
-    storage.unmount("auth");
-  }
+  // Replace the baked-in `auth` mount. `unmount` is async (it disposes the fs
+  // driver and deletes the mount), so await it before re-mounting Redis under
+  // the same key; otherwise `mount` sees the old mount still present and
+  // throws "already mounted at auth:".
+  await storage.unmount("auth");
   storage.mount("auth", driver);
 });

@@ -181,7 +181,6 @@ export async function apiFetch(
   // cookie), and the client never adds auth headers itself. Keep the flag
   // accepted by callers but it no longer changes transport behavior.
   void skipAuth;
-  const url = `/api/proxy${endpoint}`;
   const headers: Record<string, string> = {
     ...((fetchOptions.headers as Record<string, string>) || {}),
   };
@@ -202,6 +201,22 @@ export async function apiFetch(
     : undefined;
   if (incomingCookie) {
     headers["cookie"] = incomingCookie;
+  }
+
+  // Build the same-origin proxy URL. On the client a relative URL resolves
+  // against the browser origin; on SSR Node's `fetch` rejects relative URLs,
+  // so reconstruct an absolute URL from the incoming request's host/protocol.
+  const relativeUrl = `/api/proxy${endpoint}`;
+  let url = relativeUrl;
+  if (import.meta.server) {
+    const event = useRequestEvent();
+    const host = event?.node?.req?.headers?.host ?? "";
+    const proto = String(
+      event?.node?.req?.headers?.["x-forwarded-proto"] ?? "http",
+    )
+      .split(",")[0]
+      .trim() || "http";
+    url = `${proto}://${host}${relativeUrl}`;
   }
 
   // Same-origin proxy with no credentials: the browser sends the `sid` cookie
