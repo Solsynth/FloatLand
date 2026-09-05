@@ -415,8 +415,7 @@ import type {
   Publisher,
   SnTimelineEvent,
 } from "~/types/post";
-import { API_BASE_URL, fetchJson, fetchTimeline } from "~/utils/api";
-import { getValidToken } from "~/utils/token";
+import { fetchJson, fetchTimeline } from "~/utils/api";
 import {
   IconAlertCircle,
   IconAtSign,
@@ -678,14 +677,10 @@ async function uploadInlineAttachments(): Promise<ComposeAttachment[]> {
     const formData = new FormData();
     formData.append("file", attachment.file, attachment.file.name);
 
-    const token = await getValidToken(API_BASE_URL);
-    const headers: Record<string, string> = {};
-    if (token) headers.Authorization = `Bearer ${token}`;
-
     compose.updateAttachmentProgress(attachment.id, 0);
-    const response = await fetch(`${API_BASE_URL}/drive/files/upload/direct`, {
+    // Same-origin proxy upload; the browser sends the `sid` cookie.
+    const response = await fetch(`/api/proxy/drive/files/upload/direct`, {
       method: "POST",
-      headers,
       body: formData,
     });
 

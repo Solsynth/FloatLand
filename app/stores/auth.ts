@@ -8,13 +8,7 @@ import {
     getToken,
     getUserInfo,
     logoutApi,
-    getAuthMode,
 } from "~/utils/api";
-import {
-    readTokenPair,
-    clearTokenPair,
-    setTokenFromResponse,
-} from "~/utils/token";
 import FingerprintJS, { type Agent } from "@fingerprintjs/fingerprintjs";
 
 let fpPromise: Promise<Agent> | null = null;
@@ -112,23 +106,11 @@ export const useAuthStore = defineStore("auth", () => {
     async function initAuth() {
         isLoading.value = true;
         try {
-            const mode = import.meta.client ? getAuthMode() : "cookie";
-            const saved = mode === "bearer" ? readTokenPair() : null;
-
-            // Avoid an unauthenticated /me request when bearer mode has no token.
-            if (mode === "bearer" && !saved) {
-                user.value = null;
-                isAuthenticated.value = false;
-                token.value = null;
-                return;
-            }
-
+            // Unified server-held session: always resolve the user via the
+            // same-origin proxy (the `sid` cookie authenticates on the client
+            // and is forwarded on SSR).
             const userData = await getUserInfo();
             setAuthenticatedUser(userData);
-
-            if (saved) {
-                token.value = { token: saved.token, expiresAt: saved.expiresAt };
-            }
         } catch {
             user.value = null;
             isAuthenticated.value = false;
@@ -160,22 +142,23 @@ export const useAuthStore = defineStore("auth", () => {
         expiresIn?: number,
         refreshExpiresIn?: number,
     ) {
-        // Only store in localStorage for dev mode (bearer auth)
-        // Production uses HttpOnly cookies set by backend
-        if (import.meta.client && getAuthMode() === "bearer") {
-            setTokenFromResponse(tokenString, refreshToken, expiresIn, refreshExpiresIn);
-            const saved = readTokenPair();
-            token.value = { token: tokenString, expiresAt: saved?.expiresAt };
+        // The server holds the full token pair; the client only reflects the
+        // access token as display metadata.
+        if (import.meta.client) {
+            token.value = {
+                token: tokenString,
+                expiresIn,
+                refreshToken,
+                refreshExpiresIn,
+            };
         }
         isAuthenticated.value = true;
     }
 
     async function logout(): Promise<void> {
         try {
-            // Clear server-side session (cookie mode)
-            if (import.meta.client && getAuthMode() === "cookie") {
-                await logoutApi();
-            }
+            // Unified server-held session: always clear the proxy session.
+            await logoutApi();
         } catch {
             // Ignore logout API errors
         }
@@ -187,7 +170,6 @@ export const useAuthStore = defineStore("auth", () => {
         challenge.value = null;
         factors.value = [];
         selectedFactor.value = null;
-        clearTokenPair();
     }
 
     // Login flow

@@ -39,11 +39,11 @@ const options = { ...DEFAULT_OPTIONS }
 // ── Composable ───────────────────────────────────────────────────────────
 
 export function useWebSocket() {
-  const config = useRuntimeConfig()
   const { isAuthenticated } = useAuth()
   function getUrl(): string {
-    const baseUrl = config.public.apiBaseUrl as string
-    return baseUrl.replace(/^http/, 'ws') + '/ws'
+    // Same-origin websocket proxy at /ws; the Nitro handler opens the backend
+    // socket authenticated with the server-held session token.
+    return '/ws'
   }
 
   function addStatus(s: WSStatus) {
@@ -62,20 +62,6 @@ export function useWebSocket() {
     }
     heartbeatAt = null
     globalLatency.value = null
-  }
-
-  function getAuthToken(): string | null {
-    if (import.meta.server) return null
-    const raw =
-      localStorage.getItem('auth_token_pair') ||
-      localStorage.getItem('auth_token')
-    if (!raw) return null
-    try {
-      const parsed = JSON.parse(raw)
-      return parsed.token || raw
-    } catch {
-      return raw
-    }
   }
 
   function send(packet: WebSocketPacket): boolean {
@@ -154,11 +140,8 @@ export function useWebSocket() {
     cancelTimers()
     addStatus('connecting')
 
-    const token = getAuthToken()
     const url = getUrl()
-    const wsUrl = token
-      ? `${url}?tk=${encodeURIComponent(token)}`
-      : url
+    const wsUrl = url
 
     try {
       ws = new WebSocket(wsUrl)

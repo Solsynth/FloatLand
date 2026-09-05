@@ -250,6 +250,14 @@ export default defineNuxtConfig({
       apiBaseUrl: "https://api.solian.app",
       fileBaseUrl: "https://api.solian.app/drive/files",
     },
+    // Private (server-only) auth configuration.
+    auth: {
+      canonicalHost: process.env.NUXT_AUTH_CANONICAL_HOST ?? "https://solian.app",
+      cookieName: "sid",
+      cookieSecure: process.env.NUXT_AUTH_COOKIE_SECURE !== "false",
+      sessionTtl: 60 * 60 * 24 * 30,
+    },
+    apiServerUrl: process.env.NUXT_API_SERVER_URL ?? "https://api.solian.app",
   },
   site: {
     url: "https://solian.app",
@@ -301,6 +309,22 @@ export default defineNuxtConfig({
         driver: "fs",
         base: "./.nuxt/cache",
       },
+      auth: {
+        driver:
+          process.env.NITRO_AUTH_DRIVER ??
+          (process.env.REDIS_URL ? "redis" : "fs"),
+        base:
+          process.env.NITRO_AUTH_DRIVER === "redis" ||
+          process.env.REDIS_URL
+            ? "floatland:auth"
+            : "./.data/auth",
+        ...(process.env.NITRO_AUTH_DRIVER === "redis" || process.env.REDIS_URL
+          ? { url: process.env.REDIS_URL }
+          : {}),
+      },
+    },
+    experimental: {
+      websocket: true,
     },
   },
 });

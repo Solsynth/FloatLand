@@ -67,13 +67,6 @@ import type {
 } from "~/types/shop";
 
 import { snakeToCamel, camelToSnake } from "~/utils/case";
-import {
-  getValidToken,
-  readTokenPair,
-  refreshAccessToken,
-  type StoredTokenPair,
-} from "~/utils/token";
-import { mergeCookieHeader } from "~/utils/cookies";
 
 // Re-export types for convenience
 export type { SpellInfo };
@@ -85,15 +78,6 @@ export const API_BASE_URL = `https://${API_BASE}`;
 // Helper to build API URL
 export function getApiUrl(endpoint: string): string {
   return `${API_BASE_URL}${endpoint}`;
-}
-
-// Auth mode detection
-// - 'cookie': Production mode - uses HttpOnly cookies set by backend
-// - 'bearer': Development mode - uses localStorage + Authorization header
-export function getAuthMode(): "cookie" | "bearer" {
-  if (import.meta.server) return "cookie";
-  const host = window.location.hostname;
-  return host === "localhost" || host === "127.0.0.1" ? "bearer" : "cookie";
 }
 
 // Parse response helper
@@ -113,12 +97,6 @@ async function parseResponse(response: Response): Promise<unknown> {
 export async function safeJsonParse<T>(response: Response): Promise<T> {
   const data = await parseResponse(response);
   return snakeToCamel(data) as T;
-}
-
-async function getAuthToken(): Promise<string | null> {
-  if (import.meta.server) return null;
-  if (getAuthMode() === "cookie") return null;
-  return getValidToken(API_BASE_URL);
 }
 
 interface ApiFetchOptions extends RequestInit {
@@ -197,8 +175,13 @@ export async function apiFetch(
   endpoint: string,
   options: ApiFetchOptions = {},
 ): Promise<Response> {
-  const url = `${API_BASE_URL}${endpoint}`;
-  const { skipAuth = false, retryCount = 0, ...fetchOptions } = options;
+  const { skipAuth, ...fetchOptions } = options;
+  // `skipAuth` (pre-auth / anonymous calls) is a no-op now: the proxy
+  // authenticates purely by the presence of a server-held session (`sid`
+  // cookie), and the client never adds auth headers itself. Keep the flag
+  // accepted by callers but it no longer changes transport behavior.
+  void skipAuth;
+  const url = `/api/proxy${endpoint}`;
   const headers: Record<string, string> = {
     ...((fetchOptions.headers as Record<string, string>) || {}),
   };
@@ -213,7 +196,7 @@ export async function apiFetch(
   }
 
   // SSR has no browser cookie jar. Forward the incoming request's cookie
-  // header explicitly on every server-side API call, including refresh.
+  // header explicitly so the browser's `sid` reaches the same-origin proxy.
   const incomingCookie = import.meta.server
     ? headers["cookie"] || useRequestHeaders(["cookie"]).cookie
     : undefined;
@@ -221,98 +204,18 @@ export async function apiFetch(
     headers["cookie"] = incomingCookie;
   }
 
-  // Client bearer mode: Add Authorization header
-  if (!skipAuth && import.meta.client && getAuthMode() === "bearer") {
-    const token = await getAuthToken();
-    if (token) {
-      headers["Authorization"] = `Bearer ${token}`;
-    }
-  }
+  // Same-origin proxy with no credentials: the browser sends the `sid` cookie
+  // natively on the client; on SSR the `cookie` header is forwarded above.
+  const response = await fetch(url, { ...fetchOptions, headers });
 
-  // Client cookie mode: Include credentials for cookies
-  const credentials =
-    import.meta.client && getAuthMode() === "cookie" ? "include" : undefined;
-
-  const response = await fetch(url, { ...fetchOptions, headers, credentials });
-
-  // Handle 401 Unauthorized
-  if (response.status === 401 && !skipAuth && retryCount < 1) {
-    // Skip session expiration handling on localhost (dev mode)
-    if (import.meta.client && window.location.hostname === "localhost") {
-      return response;
-    }
-
-    const mode = getAuthMode();
-
-    if (mode === "cookie") {
-      // Cookie mode: Call refresh endpoint (uses HttpOnly refresh cookie).
-      // On SSR, credentials do not provide a cookie jar, so forward the
-      // incoming request cookie header explicitly.
-      try {
-        const refreshResponse = await fetch(
-          `${API_BASE_URL}/stargate/auth/refresh`,
-          {
-            method: "POST",
-            credentials: "include",
-            headers: {
-              "Content-Type": "application/json",
-              ...(incomingCookie ? { cookie: incomingCookie } : {}),
-            },
-          },
-        );
-        if (refreshResponse.ok) {
-          if (import.meta.server) {
-            const refreshedCookies =
-              "getSetCookie" in refreshResponse.headers
-                ? (
-                    refreshResponse.headers as Headers & {
-                      getSetCookie: () => string[];
-                    }
-                  ).getSetCookie()
-                : [];
-            const responseEvent = useRequestEvent();
-            for (const cookie of refreshedCookies) {
-              responseEvent?.res.headers.append("set-cookie", cookie);
-            }
-
-            const retryCookie = mergeCookieHeader(
-              incomingCookie,
-              refreshedCookies,
-            );
-            return apiFetch(endpoint, {
-              ...options,
-              headers: {
-                ...((options.headers as Record<string, string>) || {}),
-                ...(retryCookie ? { cookie: retryCookie } : {}),
-              },
-              retryCount: retryCount + 1,
-            });
-          }
-          return apiFetch(endpoint, {
-            ...options,
-            retryCount: retryCount + 1,
-          });
-        }
-      } catch {
-        // Refresh failed, proceed to logout
-      }
-    } else {
-      // Bearer mode: Use localStorage refresh token
-      const tokenPair = readTokenPair();
-      if (tokenPair?.refreshToken) {
-        const refreshed = await refreshAccessToken(API_BASE_URL, tokenPair);
-        if (refreshed) {
-          return apiFetch(endpoint, { ...options, retryCount: retryCount + 1 });
-        }
-      }
-    }
-
-    // Refresh failed - clear auth state
+  // The proxy refreshes + retries once; a persistent 401 means the session is
+  // truly expired. Clear local auth state and surface a friendly error.
+  if (response.status === 401) {
     if (import.meta.client) {
       const auth = useAuth();
       auth.logout();
+      throw new Error("Session expired. Please login again.");
     }
-    throw new Error("Session expired. Please login again.");
   }
 
   if (!response.ok) {
@@ -647,62 +550,17 @@ export async function getToken(code: string): Promise<SnAuthToken> {
 
   const data = await safeJsonParse<{
     token: string;
-    refresh_token?: string;
     expires_in?: number;
     refresh_expires_in?: number;
   }>(response);
 
-  // Only store in localStorage for dev mode (bearer auth)
-  // Production uses HttpOnly cookies set by backend
-  if (getAuthMode() === "bearer") {
-    setTokenFromResponse(
-      data.token,
-      data.refresh_token,
-      data.expires_in,
-      data.refresh_expires_in,
-    );
-  }
-
+  // The proxy stored the token pair server-side and set our `sid` cookie. The
+  // client only keeps display metadata; the pair lives in the session store.
   return {
     token: data.token,
-    refreshToken: data.refresh_token,
     expiresIn: data.expires_in,
     refreshExpiresIn: data.refresh_expires_in,
   };
-}
-
-export async function refreshApiAccessToken(
-  refreshToken: string,
-): Promise<StoredTokenPair | null> {
-  try {
-    const response = await apiFetch("/stargate/auth/token", {
-      method: "POST",
-      body: JSON.stringify({
-        grant_type: "refresh_token",
-        refresh_token: refreshToken,
-      }),
-      skipAuth: true,
-    });
-
-    const data = await safeJsonParse<{
-      token: string;
-      refresh_token?: string;
-      expires_in?: number;
-      refresh_expires_in?: number;
-    }>(response);
-
-    setTokenFromResponse(
-      data.token,
-      data.refresh_token,
-      data.expires_in,
-      data.refresh_expires_in,
-    );
-
-    return readTokenPair();
-  } catch (err) {
-    console.error("Token refresh failed:", err);
-    return null;
-  }
 }
 
 export async function getUserInfo(): Promise<SnAccount> {
@@ -710,17 +568,15 @@ export async function getUserInfo(): Promise<SnAccount> {
   return safeJsonParse<SnAccount>(response);
 }
 
-// Cookie-mode auth helpers
+// Unified logout: the proxy clears the server session + cookie.
 export async function logoutApi(): Promise<void> {
   await apiFetch("/stargate/auth/logout", { method: "POST", skipAuth: true });
 }
 
 export async function refreshSession(): Promise<boolean> {
   try {
-    const response = await fetch(`${API_BASE_URL}/stargate/auth/refresh`, {
+    const response = await fetch("/api/proxy/stargate/auth/refresh", {
       method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
     });
     return response.ok;
   } catch {
@@ -3565,21 +3421,12 @@ export async function uploadDriveFile(
   if (options.applicationType)
     formData.append("application_type", options.applicationType);
 
-  const url = `${API_BASE_URL}/drive/files/upload/direct`;
-  const headers: Record<string, string> = {};
-
-  if (import.meta.client && getAuthMode() === "bearer") {
-    const token = await getAuthToken();
-    if (token) headers["Authorization"] = `Bearer ${token}`;
-  }
-
-  const credentials =
-    import.meta.client && getAuthMode() === "cookie" ? "include" : undefined;
+  // Same-origin proxy upload: the proxy injects the session Bearer and strips
+  // any backend cookie. The browser sends the `sid` cookie natively.
+  const url = `/api/proxy/drive/files/upload/direct`;
   const response = await fetch(url, {
     method: "POST",
     body: formData,
-    headers,
-    credentials,
   });
 
   if (!response.ok) {

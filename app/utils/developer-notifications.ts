@@ -28,7 +28,7 @@ export async function sendCustomAppNotification(
   data: NotificationSendRequest,
 ): Promise<NotificationSendResponse> {
   const response = await fetch(
-    `https://api.solian.app/develop/private/apps/${appId}/notifications`,
+    `/api/proxy/develop/private/apps/${appId}/notifications`,
     {
       method: 'POST',
       headers: {

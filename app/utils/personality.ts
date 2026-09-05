@@ -1,6 +1,5 @@
-import { API_BASE_URL, getAuthMode, apiFetch, fetchJson, safeJsonParse } from "~/utils/api";
+import { API_BASE_URL, apiFetch, fetchJson, safeJsonParse } from "~/utils/api";
 import { camelToSnake } from "~/utils/case";
-import { getValidToken } from "~/utils/token";
 
 /**
  * PersonalityCore client.
@@ -194,23 +193,27 @@ export async function personalityChatCompletion(payload: {
   const init: RequestInit = { method: "POST", headers, body };
 
   if (payload.bearerToken) {
+    // Playground API key path (unsessioned): forward the caller's key as-is.
     headers["Authorization"] = `Bearer ${payload.bearerToken}`;
     init.credentials = "omit";
-  } else if (import.meta.server) {
-    const requestHeaders = useRequestHeaders(["cookie"]);
-    if (requestHeaders.cookie) {
-      headers["cookie"] = requestHeaders.cookie;
-    }
-  } else if (getAuthMode() === "bearer") {
-    const token = await getValidToken(API_BASE_URL);
-    if (token) {
-      headers["Authorization"] = `Bearer ${token}`;
-    }
   } else {
-    init.credentials = "include";
+    // Sessioned path: route through the same-origin proxy so the server-held
+    // token authenticates for us and no backend cookie leaks to the browser.
+    // SSR forwards the incoming `cookie` so the `sid` reaches the proxy.
+    if (import.meta.server) {
+      const requestHeaders = useRequestHeaders(["cookie"]);
+      if (requestHeaders.cookie) {
+        headers["cookie"] = requestHeaders.cookie;
+      }
+    }
   }
 
-  const response = await fetch(`${API_BASE_URL}${PERSONALITY_CHAT_COMPLETIONS}`, init);
+  const response = await fetch(
+    payload.bearerToken
+      ? `${API_BASE_URL}${PERSONALITY_CHAT_COMPLETIONS}`
+      : `/api/proxy${PERSONALITY_CHAT_COMPLETIONS}`,
+    init,
+  );
   const data: unknown = await response.json().catch(() => null);
   if (!response.ok) {
     const body = (data ?? {}) as Record<string, unknown>;
