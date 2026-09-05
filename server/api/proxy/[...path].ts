@@ -163,7 +163,18 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  let response = await forward(pair);
+  let response: Response;
+  try {
+    response = await forward(pair);
+  } catch (err) {
+    // Upstream unreachable (bad port, ECONNREFUSED, DNS failure). Surface a
+    // controlled 502 rather than leaking an unhandled fetch error as a 500.
+    throw createError({
+      status: 502,
+      statusMessage: "Bad Gateway",
+      cause: err,
+    });
+  }
 
   if (pair && response.status === 401) {
     const ok = await refreshSession(event, sid);
@@ -171,7 +182,15 @@ export default defineEventHandler(async (event) => {
       pair = await getAuthSession(sid);
     }
     if (ok && pair) {
-      response = await forward(pair);
+      try {
+        response = await forward(pair);
+      } catch (err) {
+        throw createError({
+          status: 502,
+          statusMessage: "Bad Gateway",
+          cause: err,
+        });
+      }
     } else {
       await deleteSession(event, sid);
       setResponseStatus(event, 401);

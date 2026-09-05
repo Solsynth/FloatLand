@@ -53,14 +53,67 @@ function isoFromNow(seconds?: number): string | undefined {
   return new Date(Date.now() + seconds * 1000).toISOString();
 }
 
+// Known multi-part public suffixes the app hosts on. A registrable domain is
+// the public suffix plus the label before it (e.g. `solarpass.one`). We only
+// ever host on `solian.app`, `solsynth.dev`, and `solarpass.one`, so this small
+// case list is sufficient; anything else falls back to a registrable-domain
+// heuristic (last two labels).
+const MULTI_PART_PUBLIC_SUFFIXES = [
+  "co.uk",
+  "com.au",
+  "co.jp",
+  "com.br",
+  "co.nz",
+  "org.uk",
+  "co.za",
+  "net.au",
+  "com.sg",
+];
+
+function isIpOrLocalhost(host: string): boolean {
+  if (!host) return true;
+  return (
+    host === "localhost" ||
+    host === "127.0.0.1" ||
+    host === "::1" ||
+    /^\d{1,3}(\.\d{1,3}){3}$/.test(host)
+  );
+}
+
+/**
+ * Resolve the registrable domain (e.g. `solarpass.one`) for a cookie `Domain`
+ * attribute from the request Host header, INCLUDING the apex so the cookie is
+ * sent to `example.com` and every `*.example.com`. Returns undefined for
+ * localhost/IP hosts (where a Domain attribute would break the cookie) so the
+ * cookie stays host-only in dev.
+ */
+export function cookieDomainFor(event: H3Event): string | undefined {
+  const host = String(event.node?.req?.headers?.host ?? "")
+    .split(":")[0]
+    .trim()
+    .toLowerCase();
+  if (!host || isIpOrLocalhost(host)) return undefined;
+  const labels = host.split(".");
+  if (labels.length < 2) return host;
+  const lastTwo = labels.slice(-2).join(".");
+  const publicSuffixIsMultiPart = MULTI_PART_PUBLIC_SUFFIXES.some((suffix) =>
+    host.endsWith(`.${suffix}`),
+  );
+  // Registrable domain = public suffix + the single label preceding it.
+  const takeLabels = publicSuffixIsMultiPart ? 3 : 2;
+  return labels.slice(-takeLabels).join(".");
+}
+
 export function cookieOptions(event: H3Event) {
   const cfg = authConfig(event);
+  const domain = cookieDomainFor(event);
   return {
     httpOnly: true,
     secure: cfg.cookieSecure,
     sameSite: "lax" as const,
     path: "/",
     maxAge: cfg.sessionTtl,
+    ...(domain ? { domain } : {}),
   };
 }
 
