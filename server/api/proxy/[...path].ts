@@ -49,7 +49,14 @@ export default defineEventHandler(async (event) => {
   const cookieName = sidCookieName(event);
 
   const path = getRouterParam(event, "path") || "";
-  const target = `${apiProxiedUrl}/${path}`;
+  // Preserve the incoming query string (e.g. `?channel=stable&limit=100&offset=0`).
+  // `getRouterParam("path")` and `event.path` strip the query, so the target URL
+  // would otherwise lose pagination/filter params and the backend rejects the
+  // call. Rebuild it from the raw request URL.
+  const rawUrl = event.node?.req?.url ?? "";
+  const qIdx = rawUrl.indexOf("?");
+  const query = qIdx === -1 ? "" : rawUrl.slice(qIdx);
+  const target = `${apiProxiedUrl}/${path}${query}`;
 
   // Resolve the session from ALL `sid` cookie values (a stale host-only sid can
   // coexist with a fresh Domain-scoped one; h3's getCookie keeps the first and
