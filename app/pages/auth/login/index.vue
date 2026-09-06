@@ -240,6 +240,52 @@
                             </div>
                         </div>
 
+                        <!-- Prompt Login: waiting for app approval -->
+                        <div v-if="step === 'prompt'" class="flex flex-1 flex-col">
+                            <div class="mb-4">
+                                <h2 class="text-lg font-semibold">{{ t("auth.promptTitle") }}</h2>
+                                <p class="mt-0.5 text-sm text-base-content/60">
+                                    {{ t("auth.promptHint") }}
+                                </p>
+                            </div>
+
+                            <div class="flex flex-1 flex-col items-center justify-center gap-4 py-6">
+                                <div class="relative">
+                                    <div class="flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">
+                                        <IconLoader class="h-8 w-8 animate-spin text-primary" />
+                                    </div>
+                                    <span class="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs text-primary-content">
+                                        <IconBell class="h-3 w-3" />
+                                    </span>
+                                </div>
+
+                                <p class="text-sm text-base-content/60">
+                                    {{ t("auth.promptWaiting") }}
+                                </p>
+                            </div>
+
+                            <div class="mt-auto grid grid-cols-2 gap-2 pt-6">
+                                <button
+                                    type="button"
+                                    class="btn btn-ghost"
+                                    :disabled="submitting"
+                                    @click="goBackToLookup"
+                                >
+                                    <IconArrowLeft class="h-4 w-4" />
+                                    {{ t("auth.back") }}
+                                </button>
+                                <button
+                                    type="button"
+                                    class="btn btn-outline"
+                                    :disabled="submitting"
+                                    @click="goBackToFactors"
+                                >
+                                    <IconRefreshCw class="h-4 w-4" />
+                                    {{ t("auth.promptTryOther") }}
+                                </button>
+                            </div>
+                        </div>
+
                         <!-- Step 2: Factor Selection -->
                         <div v-if="step === 'picker'" class="flex flex-1 flex-col">
                             <div class="mb-4">
@@ -329,6 +375,7 @@ import {
     IconFingerprint,
     IconQrCode,
     IconRefreshCw,
+    IconBell,
 } from "#components";
 import {
     startPasskeyAuthentication,
@@ -376,7 +423,7 @@ const {
     clearFactor,
 } = auth;
 
-const step = ref<"lookup" | "picker" | "check" | "success" | "qr">("lookup");
+const step = ref<"lookup" | "picker" | "check" | "success" | "qr" | "prompt">("lookup");
 const account = ref("");
 const password = ref("");
 const submitting = ref(false);
@@ -396,6 +443,10 @@ const qrNow = ref(Date.now());
 let qrPollTimer: ReturnType<typeof setInterval> | null = null;
 let qrCountdownTimer: ReturnType<typeof setInterval> | null = null;
 let qrFinishing = false;
+
+// Prompt login state (InAppCode factor)
+let promptEventSource: EventSource | null = null;
+let promptFinishing = false;
 
 const qrImageUrl = computed(() => {
     if (!qrData.value) return "";
@@ -448,6 +499,7 @@ function goBackToLookup() {
     clearLoginFlow();
     stopQrPolling();
     resetQrState();
+    stopPromptPolling();
     step.value = "lookup";
     updateQuery({});
     focusAccountInput();
@@ -582,6 +634,64 @@ async function startQrLogin() {
     }
 }
 
+// ── Prompt login (InAppCode factor) ───────────────────────────────────
+
+function stopPromptPolling() {
+    if (promptEventSource) {
+        promptEventSource.close();
+        promptEventSource = null;
+    }
+}
+
+function startPromptPolling(challengeId: string) {
+    stopPromptPolling();
+    promptFinishing = false;
+    step.value = "prompt";
+
+    const url = `/api/auth/challenge-poll/${challengeId}`;
+    const es = new EventSource(url);
+    promptEventSource = es;
+
+    es.onmessage = async (event) => {
+        if (promptFinishing) return;
+        try {
+            const data = JSON.parse(event.data) as { status: string };
+            if (data.status === "approved") {
+                promptFinishing = true;
+                stopPromptPolling();
+                step.value = "success";
+                const redirectUrl = (route.query.redirect as string) || getRedirect();
+                await exchangeToken(challengeId);
+                clearLoginFlow();
+                clearRedirect();
+                router.replace({ query: {} });
+                navigateTo(redirectUrl || "/");
+            } else if (data.status === "expired" || data.status === "declined") {
+                stopPromptPolling();
+                error.value = data.status === "declined"
+                    ? t("auth.promptDeclined")
+                    : t("auth.promptExpired");
+                step.value = "picker";
+                clearFactor();
+            }
+        } catch {
+            // Parse error — ignore, keep polling
+        }
+    };
+
+    es.onerror = () => {
+        if (!promptFinishing) {
+            stopPromptPolling();
+            // Only show error if we're still on the prompt step
+            if (step.value === "prompt") {
+                error.value = t("auth.promptConnectionLost");
+                step.value = "picker";
+                clearFactor();
+            }
+        }
+    };
+}
+
 async function handleLookup() {
     const accountValue = account.value.trim();
     if (!accountValue) return;
@@ -622,6 +732,10 @@ async function handleFactorSelect() {
     submitting.value = true;
     error.value = null;
 
+    // InAppCode (type 2) → request code (triggers push to native app), then
+    // switch to prompt polling instead of the password/code entry screen.
+    const isInAppCode = factor.type === 2;
+
     try {
         await auth.requestCode(challengeId, factor.id);
     } catch (e) {
@@ -634,8 +748,13 @@ async function handleFactorSelect() {
     }
 
     submitting.value = false;
-    step.value = "check";
-    updateQuery({ challenge: challengeId, step: "check" });
+
+    if (isInAppCode) {
+        startPromptPolling(challengeId);
+    } else {
+        step.value = "check";
+        updateQuery({ challenge: challengeId, step: "check" });
+    }
 }
 
 async function handleVerify() {
@@ -898,5 +1017,6 @@ onMounted(async () => {
 
 onUnmounted(() => {
     stopQrPolling();
+    stopPromptPolling();
 });
 </script>
