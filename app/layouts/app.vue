@@ -1,125 +1,23 @@
 <template>
   <div class="min-h-screen bg-base-200">
     <header
-      class="sticky top-0 z-40 w-full border-b border-base-300 bg-base-100 shadow-sm"
+      class="sticky top-0 z-40 w-full border-b border-base-300 bg-base-100"
     >
-      <div class="navbar mx-auto min-h-16 max-w-7xl px-4 lg:px-6">
+      <div class="navbar w-full min-h-16 px-4 lg:px-6">
+        <!-- Left: Icon + Title -->
         <div class="navbar-start gap-1">
-          <NuxtLink to="/" class="flex items-center gap-2" aria-label="Home">
-            <img src="/favicon.png" alt="Solar Network" class="h-9 w-9" />
+          <NuxtLink to="/" class="flex min-w-0 items-center gap-2.5" aria-label="Home">
+            <img src="/favicon.png" alt="Solar Network" class="h-8 w-8 shrink-0" />
+            <span class="truncate text-lg font-semibold text-base-content">Solar Network</span>
           </NuxtLink>
         </div>
 
-        <nav
-          ref="navRef"
-          class="navbar-center hidden items-center gap-1 lg:flex"
-          aria-label="Primary"
-          @keydown.esc="closeNavDropdown"
-        >
-          <details
-            v-for="group in navGroups"
-            :key="group.key"
-            class="dropdown dropdown-bottom"
-          >
-            <summary
-              class="btn btn-ghost h-10 min-h-10 list-none gap-2 px-3 [&::-webkit-details-marker]:hidden"
-              :class="isNavGroupActive(group) ? 'bg-primary/10 text-primary' : ''"
-              aria-haspopup="menu"
-              @click="handleNavDropdownClick"
-            >
-              <component :is="group.icon" class="h-4 w-4" />
-              <span>{{ group.label }}</span>
-            </summary>
-            <ul
-              class="dropdown-content menu z-50 mt-2 w-60 rounded-box border border-base-300 bg-base-100 p-2 text-base-content shadow-lg"
-            >
-              <li v-for="item in group.items" :key="item.to">
-                <NuxtLink
-                  :to="item.to"
-                  :class="isNavActive(item.to) ? 'bg-primary/10 text-primary' : ''"
-                  :aria-current="isNavActive(item.to) ? 'page' : undefined"
-                  @click="closeNavDropdown"
-                >
-                  <span class="relative">
-                    <component :is="item.icon" class="h-4 w-4" />
-                    <span
-                      v-if="item.badge"
-                      class="absolute -top-2 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-error px-1 text-[9px] font-bold text-error-content"
-                    >
-                      {{ item.badge > 99 ? "99+" : item.badge }}
-                    </span>
-                  </span>
-                  {{ item.label }}
-                </NuxtLink>
-              </li>
-            </ul>
-          </details>
-          <NuxtLink
-            :to="realmsNavItem.to"
-            class="btn btn-ghost h-10 min-h-10 gap-2 px-3"
-            :class="isNavActive(realmsNavItem.to) ? 'bg-primary/10 text-primary' : ''"
-            :aria-current="isNavActive(realmsNavItem.to) ? 'page' : undefined"
-          >
-            <component :is="realmsNavItem.icon" class="h-4 w-4" />
-            <span>{{ realmsNavItem.label }}</span>
-          </NuxtLink>
-          <NuxtLink
-            :to="driveNavItem.to"
-            class="btn btn-ghost h-10 min-h-10 gap-2 px-3"
-            :class="isNavActive(driveNavItem.to) ? 'bg-primary/10 text-primary' : ''"
-            :aria-current="isNavActive(driveNavItem.to) ? 'page' : undefined"
-          >
-            <component :is="driveNavItem.icon" class="h-4 w-4" />
-            <span>{{ driveNavItem.label }}</span>
-          </NuxtLink>
-          <NuxtLink
-            v-if="isAuthenticated"
-            to="/mail"
-            class="btn btn-ghost h-10 min-h-10 gap-2 px-3"
-            :class="isNavActive('/mail') ? 'bg-primary/10 text-primary' : ''"
-            :aria-current="isNavActive('/mail') ? 'page' : undefined"
-          >
-            <span class="relative">
-              <component :is="mailNavItem.icon" class="h-4 w-4" />
-              <span
-                v-if="accountUnread > 0"
-                class="absolute -top-2 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-error px-1 text-[9px] font-bold text-error-content"
-              >
-                {{ accountUnread > 99 ? "99+" : accountUnread }}
-              </span>
-            </span>
-            <span>{{ mailNavItem.label }}</span>
-          </NuxtLink>
-          <details
-            class="dropdown dropdown-end dropdown-bottom"
-          >
-            <summary
-              class="btn btn-ghost h-10 min-h-10 list-none gap-2 px-3 [&::-webkit-details-marker]:hidden"
-              :class="isBackstageActive ? 'bg-primary/10 text-primary' : ''"
-              aria-haspopup="menu"
-              @click="handleNavDropdownClick"
-            >
-              <component :is="backstageEntry.icon" class="h-4 w-4" />
-              <span>{{ t(backstageEntry.labelKey) }}</span>
-            </summary>
-            <ul
-              class="dropdown-content menu z-50 mt-2 w-56 rounded-box border border-base-300 bg-base-100 p-2 text-base-content shadow-lg"
-            >
-              <li v-for="item in backstageNavItems" :key="item.to">
-                <NuxtLink
-                  :to="item.to"
-                  :class="isNavActive(item.to) ? 'bg-primary/10 text-primary' : ''"
-                  :aria-current="isNavActive(item.to) ? 'page' : undefined"
-                  @click="closeNavDropdown"
-                >
-                  <component :is="item.icon" class="h-4 w-4" />
-                  {{ item.label }}
-                </NuxtLink>
-              </li>
-            </ul>
-          </details>
-        </nav>
+        <!-- Center: empty for Google-style minimal navbar -->
+        <div class="navbar-center hidden lg:flex" />
+
+        <!-- Right: AppSwitcher + Notifications + Profile -->
         <div class="navbar-end gap-1">
+          <AppSwitcher v-if="isAuthenticated" />
           <NotificationBell v-if="isAuthenticated && user" />
           <div v-if="isAuthenticated && user" class="hidden sm:block">
             <DropdownMenuRoot v-model:open="profileMenuOpen">
@@ -188,7 +86,7 @@
                     </NuxtLink>
                   </DropdownMenuItem>
                   <DropdownMenuItem as-child>
-                    <button type="button" @click="handleLogout" class="mt-1 flex items-center gap-2 rounded-box px-2.5 py-2 text-sm outline-none cursor-pointer hover:bg-error/10 data-[highlighted]:bg-error/10 text-error">
+                    <button type="button" class="mt-1 flex items-center gap-2 rounded-box px-2.5 py-2 text-sm outline-none cursor-pointer hover:bg-error/10 data-[highlighted]:bg-error/10 text-error" @click="handleLogout">
                       <IconLogOut class="h-4 w-4" />
                       {{ t("nav.logout") }}
                     </button>
@@ -235,102 +133,146 @@
         @click.stop
       >
         <nav aria-label="Mobile" class="menu w-full p-0">
-          <section v-for="group in navGroups" :key="group.key" class="mb-3">
-            <div
-              class="flex h-12 min-h-12 items-center gap-3 px-3 py-0 text-base font-semibold leading-6 text-base-content/70"
-            >
-              <span class="flex h-5 w-5 shrink-0 items-center justify-center">
-                <component :is="group.icon" class="h-5 w-5" />
-              </span>
-              <span class="flex h-6 items-center leading-6">{{ group.label }}</span>
-            </div>
-            <ul class="menu ms-2 w-auto p-0">
-              <li v-for="item in group.items" :key="item.to">
-                <NuxtLink
-                  :to="item.to"
-                  class="flex h-12 min-h-12 items-center gap-3 ps-12 pe-3 py-0 text-base leading-5"
-                  :class="isNavActive(item.to) ? 'bg-primary/10 text-primary' : ''"
-                  @click="closeMenu"
-                >
-                  <span class="relative flex h-5 w-5 shrink-0 items-center justify-center">
-                    <component :is="item.icon" class="h-4 w-4" />
-                    <span
-                      v-if="item.badge"
-                      class="absolute -top-2 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-error px-1 text-[9px] font-bold text-error-content"
-                    >
-                      {{ item.badge > 99 ? "99+" : item.badge }}
-                    </span>
-                  </span>
-                  <span class="flex h-5 items-center leading-5">{{ item.label }}</span>
-                </NuxtLink>
-              </li>
-            </ul>
-          </section>
           <NuxtLink
-            :to="realmsNavItem.to"
-            class="mb-3 flex h-12 min-h-12 items-center gap-3 rounded-box px-3 py-0 text-base leading-5"
-            :class="isNavActive(realmsNavItem.to) ? 'bg-primary/10 text-primary' : ''"
+            to="/"
+            class="flex h-12 min-h-12 items-center gap-3 rounded-box px-3 py-0 text-base leading-5"
+            :class="isNavActive('/') ? 'bg-primary/10 text-primary' : ''"
             @click="closeMenu"
           >
             <span class="flex h-5 w-5 shrink-0 items-center justify-center">
-              <component :is="realmsNavItem.icon" class="h-5 w-5" />
+              <IconCompass class="h-5 w-5" />
             </span>
-            <span class="flex h-5 items-center leading-5">{{ realmsNavItem.label }}</span>
+            <span class="flex h-5 items-center leading-5">{{ t("nav.explore") }}</span>
           </NuxtLink>
           <NuxtLink
-            :to="driveNavItem.to"
-            class="mb-3 flex h-12 min-h-12 items-center gap-3 rounded-box px-3 py-0 text-base leading-5"
-            :class="isNavActive(driveNavItem.to) ? 'bg-primary/10 text-primary' : ''"
+            to="/realms"
+            class="flex h-12 min-h-12 items-center gap-3 rounded-box px-3 py-0 text-base leading-5"
+            :class="isNavActive('/realms') ? 'bg-primary/10 text-primary' : ''"
             @click="closeMenu"
           >
             <span class="flex h-5 w-5 shrink-0 items-center justify-center">
-              <component :is="driveNavItem.icon" class="h-5 w-5" />
+              <IconBuilding class="h-5 w-5" />
             </span>
-            <span class="flex h-5 items-center leading-5">{{ driveNavItem.label }}</span>
+            <span class="flex h-5 items-center leading-5">{{ t("nav.realms") }}</span>
+          </NuxtLink>
+          <NuxtLink
+            to="/workspaces"
+            class="flex h-12 min-h-12 items-center gap-3 rounded-box px-3 py-0 text-base leading-5"
+            :class="isNavActive('/workspaces') ? 'bg-primary/10 text-primary' : ''"
+            @click="closeMenu"
+          >
+            <span class="flex h-5 w-5 shrink-0 items-center justify-center">
+              <IconBriefcaseBusiness class="h-5 w-5" />
+            </span>
+            <span class="flex h-5 items-center leading-5">{{ t("nav.workspaces") }}</span>
+          </NuxtLink>
+          <NuxtLink
+            to="/drive"
+            class="flex h-12 min-h-12 items-center gap-3 rounded-box px-3 py-0 text-base leading-5"
+            :class="isNavActive('/drive') ? 'bg-primary/10 text-primary' : ''"
+            @click="closeMenu"
+          >
+            <span class="flex h-5 w-5 shrink-0 items-center justify-center">
+              <IconHardDrive class="h-5 w-5" />
+            </span>
+            <span class="flex h-5 items-center leading-5">{{ t("nav.drive") }}</span>
           </NuxtLink>
           <NuxtLink
             v-if="isAuthenticated"
             to="/mail"
-            class="mb-3 flex h-12 min-h-12 items-center gap-3 rounded-box px-3 py-0 text-base leading-5"
+            class="flex h-12 min-h-12 items-center gap-3 rounded-box px-3 py-0 text-base leading-5"
             :class="isNavActive('/mail') ? 'bg-primary/10 text-primary' : ''"
             @click="closeMenu"
           >
-            <span class="relative flex h-5 w-5 shrink-0 items-center justify-center">
-              <component :is="mailNavItem.icon" class="h-5 w-5" />
-              <span
-                v-if="accountUnread > 0"
-                class="absolute -top-2 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-error px-1 text-[9px] font-bold text-error-content"
-              >
-                {{ accountUnread > 99 ? "99+" : accountUnread }}
-              </span>
+            <span class="flex h-5 w-5 shrink-0 items-center justify-center">
+              <IconMail class="h-5 w-5" />
             </span>
-            <span class="flex h-5 items-center leading-5">{{ mailNavItem.label }}</span>
+            <span class="flex h-5 items-center leading-5">{{ t("nav.mail") }}</span>
           </NuxtLink>
-          <section>
-            <div
-              class="flex h-12 min-h-12 items-center gap-3 px-3 py-0 text-base font-semibold leading-6 text-base-content/70"
-            >
-              <span class="flex h-5 w-5 shrink-0 items-center justify-center">
-                <component :is="backstageEntry.icon" class="h-5 w-5" />
-              </span>
-              <span class="flex h-6 items-center leading-6">{{ t(backstageEntry.labelKey) }}</span>
-            </div>
-            <ul class="menu ms-2 w-auto p-0">
-              <li v-for="item in backstageNavItems" :key="item.to">
-                <NuxtLink
-                  :to="item.to"
-                  class="flex h-12 min-h-12 items-center gap-3 ps-12 pe-3 py-0 text-base leading-5"
-                  :class="isNavActive(item.to) ? 'bg-primary/10 text-primary' : ''"
-                  @click="closeMenu"
-                >
-                  <span class="flex h-5 w-5 shrink-0 items-center justify-center">
-                    <component :is="item.icon" class="h-4 w-4" />
-                  </span>
-                  <span class="flex h-5 items-center leading-5">{{ item.label }}</span>
-                </NuxtLink>
-              </li>
-            </ul>
-          </section>
+          <NuxtLink
+            to="/wallets"
+            class="flex h-12 min-h-12 items-center gap-3 rounded-box px-3 py-0 text-base leading-5"
+            :class="isNavActive('/wallets') ? 'bg-primary/10 text-primary' : ''"
+            @click="closeMenu"
+          >
+            <span class="flex h-5 w-5 shrink-0 items-center justify-center">
+              <IconWallet class="h-5 w-5" />
+            </span>
+            <span class="flex h-5 items-center leading-5">{{ t("nav.wallet") }}</span>
+          </NuxtLink>
+          <NuxtLink
+            v-if="isAuthenticated"
+            to="/tickets"
+            class="flex h-12 min-h-12 items-center gap-3 rounded-box px-3 py-0 text-base leading-5"
+            :class="isNavActive('/tickets') ? 'bg-primary/10 text-primary' : ''"
+            @click="closeMenu"
+          >
+            <span class="flex h-5 w-5 shrink-0 items-center justify-center">
+              <IconTicket class="h-5 w-5" />
+            </span>
+            <span class="flex h-5 items-center leading-5">{{ t("nav.tickets") }}</span>
+          </NuxtLink>
+          <div class="divider my-2" />
+          <div class="px-3 py-1 text-xs font-semibold uppercase tracking-wider text-base-content/40">
+            {{ t("nav.backstage") }}
+          </div>
+          <NuxtLink
+            to="/creators"
+            class="flex h-12 min-h-12 items-center gap-3 rounded-box px-3 py-0 text-base leading-5"
+            :class="isNavActive('/creators') ? 'bg-primary/10 text-primary' : ''"
+            @click="closeMenu"
+          >
+            <span class="flex h-5 w-5 shrink-0 items-center justify-center">
+              <IconPalette class="h-5 w-5" />
+            </span>
+            <span class="flex h-5 items-center leading-5">{{ t("nav.creatorHub") }}</span>
+          </NuxtLink>
+          <NuxtLink
+            to="/developers"
+            class="flex h-12 min-h-12 items-center gap-3 rounded-box px-3 py-0 text-base leading-5"
+            :class="isNavActive('/developers') ? 'bg-primary/10 text-primary' : ''"
+            @click="closeMenu"
+          >
+            <span class="flex h-5 w-5 shrink-0 items-center justify-center">
+              <IconCode class="h-5 w-5" />
+            </span>
+            <span class="flex h-5 items-center leading-5">{{ t("nav.developerHub") }}</span>
+          </NuxtLink>
+          <NuxtLink
+            to="/merchants"
+            class="flex h-12 min-h-12 items-center gap-3 rounded-box px-3 py-0 text-base leading-5"
+            :class="isNavActive('/merchants') ? 'bg-primary/10 text-primary' : ''"
+            @click="closeMenu"
+          >
+            <span class="flex h-5 w-5 shrink-0 items-center justify-center">
+              <IconTrendingUp class="h-5 w-5" />
+            </span>
+            <span class="flex h-5 items-center leading-5">{{ t("nav.merchantHub") }}</span>
+          </NuxtLink>
+          <NuxtLink
+            v-if="isAuthenticated"
+            to="/personality"
+            class="flex h-12 min-h-12 items-center gap-3 rounded-box px-3 py-0 text-base leading-5"
+            :class="isNavActive('/personality') ? 'bg-primary/10 text-primary' : ''"
+            @click="closeMenu"
+          >
+            <span class="flex h-5 w-5 shrink-0 items-center justify-center">
+              <IconBrain class="h-5 w-5" />
+            </span>
+            <span class="flex h-5 items-center leading-5">{{ t("nav.aiConsole") }}</span>
+          </NuxtLink>
+          <NuxtLink
+            v-if="isSuperuser"
+            to="/admin"
+            class="flex h-12 min-h-12 items-center gap-3 rounded-box px-3 py-0 text-base leading-5"
+            :class="isNavActive('/admin') ? 'bg-primary/10 text-primary' : ''"
+            @click="closeMenu"
+          >
+            <span class="flex h-5 w-5 shrink-0 items-center justify-center">
+              <IconShield class="h-5 w-5" />
+            </span>
+            <span class="flex h-5 items-center leading-5">{{ t("nav.adminPanel") }}</span>
+          </NuxtLink>
         </nav>
 
         <div v-if="isAuthenticated && user" class="divider my-2" />
@@ -437,19 +379,24 @@
 
 <script setup lang="ts">
 import {
+  IconCompass,
+  IconBuilding,
+  IconBriefcaseBusiness,
   IconHardDrive,
   IconMail,
-  IconBriefcaseBusiness,
-  IconCreditCard,
-  IconCompass,
-  IconMenu,
+  IconWallet,
   IconTicket,
+  IconPalette,
+  IconCode,
+  IconTrendingUp,
+  IconBrain,
+  IconShield,
+  IconCreditCard,
+  IconMenu,
   IconUser,
   IconSettings,
   IconLogOut,
   IconLogIn,
-  IconSearch,
-  IconTags,
 } from "#components";
 import {
   DropdownMenuContent,
@@ -458,113 +405,23 @@ import {
   DropdownMenuRoot,
   DropdownMenuTrigger,
 } from "reka-ui";
-type TopbarNavItem = {
-  to: string;
-  label: string;
-  icon: any;
-  badge?: number | null;
-};
-type TopbarNavGroup = {
-  key: string;
-  label: string;
-  icon: any;
-  items: TopbarNavItem[];
-};
+import AppSwitcher from "~/components/layout/AppSwitcher.vue";
 
 const { t } = useI18n();
 const route = useRoute();
 
 const auth = useAuth();
-const { isAuthenticated, user } = auth;
+const { isAuthenticated, user, isSuperuser } = auth;
 
 const menuOpen = ref(false);
 const composeOpen = ref(false);
 const profileMenuOpen = ref(false);
-const navRef = ref<HTMLElement | null>(null);
-
-const {
-  navItems: mainNavItems,
-  backstageItems,
-  backstageEntry,
-} = useMainNav();
 
 const { state: lightboxState } = useLightbox();
 const { drawerOpen: notificationDrawerOpen } = useNotifications();
 
-const navItems = computed(() =>
-  mainNavItems.value.map((item) => ({
-    to: item.href,
-    label: t(item.labelKey),
-    icon: item.icon,
-    badge: item.badge,
-  })),
-);
-
-const backstageNavItems = computed(() =>
-  backstageItems.value.map((item) => ({
-    to: item.href,
-    label: t(item.labelKey),
-    icon: item.icon,
-  })),
-);
-const navGroups = computed<TopbarNavGroup[]>(() => [
-    {
-      key: "explore",
-      label: t("nav.explore"),
-      icon: IconCompass,
-      items: [
-        {
-          to: "/",
-          label: t("nav.timeline"),
-          icon: IconCompass,
-        },
-        {
-          to: "/categories",
-          label: t("categories.title"),
-          icon: IconTags,
-        },
-        {
-          to: "/search",
-          label: t("search.seoTitle"),
-          icon: IconSearch,
-        },
-      ],
-    },
-]);
-
-const realmsNavItem = computed<TopbarNavItem>(() =>
-  navItems.value.find((item) => item.to === "/realms") || {
-    to: "/realms",
-    label: t("nav.realms"),
-    icon: IconCompass,
-  },
-);
-
-const driveNavItem = computed<TopbarNavItem>(() => ({
-  to: "/drive",
-  label: t("nav.storage"),
-  icon: IconHardDrive,
-}));
-
-const mail = useMail();
-
-const mailNavItem = computed<TopbarNavItem>(() => ({
-  to: "/mail",
-  label: t("nav.mail"),
-  icon: IconMail,
-}));
-
-const accountUnread = computed(() => mail.state.accountUnread);
-
 const displayName = computed(() => user.value?.nick || user.value?.name || "");
 const avatarUrl = computed(() => user.value?.profile?.picture ?? null);
-const isBackstageActive = computed(() =>
-  backstageNavItems.value.some((item) => isNavActive(item.to)),
-);
-function isNavGroupActive(group: TopbarNavGroup) {
-  return group.items.some((item) => isNavActive(item.to));
-}
-
 
 function isNavActive(path: string) {
   return route.path === path || (path !== "/" && route.path.startsWith(`${path}/`));
@@ -578,37 +435,6 @@ function toggleMenu() {
 function closeMenu() {
   menuOpen.value = false;
   profileMenuOpen.value = false;
-}
-
-function closeNavDropdown() {
-  if (!import.meta.client) {
-    return;
-  }
-
-  document
-    .querySelectorAll("header nav details[open]")
-    .forEach((details) => details.removeAttribute("open"));
-}
-
-function handleNavDropdownClick(event: MouseEvent) {
-  const current = event.currentTarget as HTMLDetailsElement | null;
-  if (!current || !navRef.value) {
-    return;
-  }
-
-  navRef.value.querySelectorAll<HTMLDetailsElement>("details[open]").forEach((details) => {
-    if (details !== current) {
-      details.removeAttribute("open");
-    }
-  });
-}
-
-function handleNavOutsideClick(event: MouseEvent) {
-  if (!(event.target instanceof Node) || navRef.value?.contains(event.target)) {
-    return;
-  }
-
-  closeNavDropdown();
 }
 
 function handleLogout() {
@@ -627,17 +453,14 @@ function handleOpenComposeEvent() {
 
 watch(() => route.path, () => {
   closeMenu();
-  closeNavDropdown();
 });
 
 onMounted(() => {
   window.addEventListener("open-compose", handleOpenComposeEvent);
-  document.addEventListener("click", handleNavOutsideClick);
 });
 
 onUnmounted(() => {
   window.removeEventListener("open-compose", handleOpenComposeEvent);
-  document.removeEventListener("click", handleNavOutsideClick);
 });
 
 </script>

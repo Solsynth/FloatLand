@@ -266,8 +266,9 @@
       </button>
     </div>
 
-    <!-- User Profile -->
+    <!-- User Profile (desktop navbar owns this; shown only in mobile drawers) -->
     <div
+      v-if="showAccount"
       class="mt-auto shrink-0 px-2 pb-3 pt-2"
       :class="collapsed ? 'px-1' : ''"
     >
@@ -405,6 +406,8 @@ const props = withDefaults(defineProps<{
   showEnrollPrompt?: boolean
   /** Whether enrollment is in progress */
   enrolling?: boolean
+  /** Whether to render the account/profile section (mobile drawers only; the desktop navbar owns it) */
+  showAccount?: boolean
 }>(), {
   clearLabel: '',
   portalMode: 'creator' as 'creator' | 'developer' | 'merchant',
@@ -414,6 +417,7 @@ const props = withDefaults(defineProps<{
   collapsed: false,
   showEnrollPrompt: false,
   enrolling: false,
+  showAccount: false,
 })
 const collapsed = computed(() => props.collapsed)
 const collapsible = computed(() => props.collapsible)

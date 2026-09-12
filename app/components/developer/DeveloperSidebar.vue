@@ -12,6 +12,7 @@
     :show-portal-toggle="!!currentDeveloper"
     :collapsed="props.collapsed"
     :collapsible="props.collapsible"
+    :show-account="props.showAccount"
     @navigate="$emit('navigate')"
     @clear-selection="
       clearSelection();
@@ -37,10 +38,12 @@ const props = withDefaults(
   defineProps<{
     collapsed?: boolean;
     collapsible?: boolean;
+    showAccount?: boolean;
   }>(),
   {
     collapsed: false,
     collapsible: false,
+    showAccount: false,
   },
 );
 

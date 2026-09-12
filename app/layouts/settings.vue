@@ -1,8 +1,9 @@
 <template>
-    <header class="hidden sticky top-0 z-50 border-b border-base-300 bg-base-100 shadow-sm lg:block">
+    <header class="hidden sticky top-0 z-50 border-b border-base-300 bg-base-100 lg:block">
         <div class="navbar min-h-16 px-4 lg:px-6">
-            <NuxtLink to="/" class="flex items-center" aria-label="Solar Network">
-                <img src="/favicon.png" alt="Solar Network" class="h-9 w-9" />
+            <NuxtLink to="/" class="flex min-w-0 items-center gap-2.5" aria-label="Solar Network">
+                <img src="/favicon.png" alt="Solar Network" class="w-8 h-8 shrink-0" />
+                <span class="truncate text-lg font-semibold text-base-content">{{ t("settings.title") }}</span>
             </NuxtLink>
         </div>
     </header>
@@ -44,7 +45,7 @@
             <!-- Mobile Layout -->
             <div class="lg:hidden flex flex-col min-h-screen">
                 <!-- Mobile Header -->
-                <header class="sticky top-0 z-50 bg-base-100 shadow-sm">
+                <header class="sticky top-0 z-50 bg-base-100">
                     <div class="flex items-center justify-between px-4 h-14">
                         <NuxtLink to="/" class="flex items-center gap-2">
                             <img src="/favicon.png" alt="Solar Network" class="w-8 h-8" >

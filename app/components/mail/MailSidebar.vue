@@ -127,8 +127,8 @@
       @close="labelsOpen = false"
     />
 
-    <!-- User Profile -->
-    <div class="px-3 pb-4 pt-2">
+    <!-- User Profile (desktop navbar owns this; shown only in mobile drawers) -->
+    <div v-if="showAccount" class="px-3 pb-4 pt-2">
       <div v-if="isAuthenticated && user" class="dropdown dropdown-end dropdown-top w-full">
         <button
           class="flex w-full items-center gap-3 rounded-box px-3 py-2.5 transition-colors hover:bg-base-200/80"
@@ -213,6 +213,11 @@ const { state, selectMailbox } = useMail();
 const { isAuthenticated, user, displayName: authDisplayName, logout } = useAuth();
 
 const labelsOpen = ref(false);
+
+defineProps<{
+  /** Whether to render the account/profile section (mobile drawers only; the desktop navbar owns it) */
+  showAccount?: boolean;
+}>();
 
 defineEmits<{
   compose: [];
