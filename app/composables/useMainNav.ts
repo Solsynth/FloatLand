@@ -11,7 +11,7 @@ import {
   IconShield,
   IconTicket,
   IconLayoutDashboard,
-  IconBrain,
+  IconPawPrint,
 } from "#components";
 
 export interface NavItem {
@@ -61,9 +61,9 @@ export function useMainNav() {
       { icon: IconCode, labelKey: "nav.developerHub", href: "/developers" },
       { icon: IconTrendingUp, labelKey: "nav.merchantHub", href: "/merchants" },
       {
-        icon: IconBrain,
-        labelKey: "nav.aiConsole",
-        href: "/personality",
+        icon: IconPawPrint,
+        labelKey: "nav.pet",
+        href: "/pet",
         requiresAuth: true,
       },
     ];

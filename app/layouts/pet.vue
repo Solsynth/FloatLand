@@ -354,26 +354,11 @@
         </NuxtLink>
       </aside>
     </Transition>
-    <div class="app-shell mx-auto max-w-7xl">
-
-      <main class="min-h-[calc(100dvh-65px)] px-4 py-4 lg:px-6">
-        <slot />
-      </main>
-
-      <LazyComposeDialog
-        v-if="composeOpen"
-        :open="composeOpen"
-        @close="composeOpen = false"
-        @submit="handleComposeSubmit"
-      />
-
-      <LazyLightboxViewer v-if="lightboxState.isOpen" />
-      <LazyNotificationDrawer v-if="notificationDrawerOpen" />
-      <WebSocketStatus />
-      <ClientOnly>
-        <LazyOnboardingModal />
-      </ClientOnly>
-    </div>
+    <!-- Full-bleed shell below the 65px appbar: no max-width limit, pages
+         control their own width/height. -->
+    <main class="h-[calc(100dvh-65px)] overflow-hidden">
+      <slot />
+    </main>
   </div>
 </template>
 
@@ -414,11 +399,7 @@ const auth = useAuth();
 const { isAuthenticated, user, isSuperuser } = auth;
 
 const menuOpen = ref(false);
-const composeOpen = ref(false);
 const profileMenuOpen = ref(false);
-
-const { state: lightboxState } = useLightbox();
-const { drawerOpen: notificationDrawerOpen } = useNotifications();
 
 const displayName = computed(() => user.value?.nick || user.value?.name || "");
 const avatarUrl = computed(() => user.value?.profile?.picture ?? null);
@@ -442,26 +423,7 @@ function handleLogout() {
   closeMenu();
 }
 
-function handleComposeSubmit() {
-  composeOpen.value = false;
-}
-
-function handleOpenComposeEvent() {
-  composeOpen.value = true;
-}
-
-
 watch(() => route.path, () => {
   closeMenu();
 });
-
-onMounted(() => {
-  window.addEventListener("open-compose", handleOpenComposeEvent);
-});
-
-onUnmounted(() => {
-  window.removeEventListener("open-compose", handleOpenComposeEvent);
-});
-
 </script>
-

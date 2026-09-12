@@ -41,10 +41,10 @@ import {
   IconPalette,
   IconCode,
   IconTrendingUp,
-  IconBrain,
   IconShield,
   IconBriefcaseBusiness,
   IconWallet,
+  IconPawPrint,
 } from "#components";
 import {
   DropdownMenuContent,
@@ -76,7 +76,7 @@ const allApps = computed<AppItem[]>(() => {
     { href: "/creators", label: t("nav.creatorHub"), icon: IconPalette },
     { href: "/developers", label: t("nav.developerHub"), icon: IconCode },
     { href: "/merchants", label: t("nav.merchantHub"), icon: IconTrendingUp },
-    { href: "/personality", label: t("nav.aiConsole"), icon: IconBrain, requiresAuth: true },
+    { href: "/pet", label: t("nav.pet"), icon: IconPawPrint, requiresAuth: true },
     { href: "/workspaces", label: t("nav.workspaces"), icon: IconBriefcaseBusiness, requiresAuth: true },
     { href: "/wallets", label: t("nav.wallet"), icon: IconWallet },
   ];
