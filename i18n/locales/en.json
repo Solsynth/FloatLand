@@ -201,7 +201,53 @@
     "overview": "Overview",
     "content": "Content",
     "community": "Community",
+    "dashboard": "Dashboard",
     "adminPanel": "Admin Panel"
+  },
+  "dashboard": {
+    "seoTitle": "Dashboard",
+    "seoDescription": "Your personalized start page for Solar Network.",
+    "searchPlaceholder": "Search anything…",
+    "greetingMorning": "Good morning",
+    "greetingAfternoon": "Good afternoon",
+    "greetingEvening": "Good evening",
+    "greetingNight": "Good night",
+    "shortcuts": "Shortcuts",
+    "viewAll": "View all",
+    "weather": {
+      "title": "Weather",
+      "clear": "Clear",
+      "mainlyClear": "Mostly clear",
+      "partlyCloudy": "Partly cloudy",
+      "overcast": "Overcast",
+      "fog": "Fog",
+      "drizzle": "Drizzle",
+      "rain": "Rain",
+      "snow": "Snow",
+      "showers": "Showers",
+      "snowShowers": "Snow showers",
+      "thunderstorm": "Thunderstorm",
+      "thunderstormHail": "Thunderstorm with hail",
+      "unknown": "Unknown",
+      "feelsLike": "Feels like {temp}°",
+      "humidity": "{value}%",
+      "wind": "{value} km/h",
+      "dataBy": "Weather data by",
+      "failed": "Weather unavailable"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "empty": "No notifications yet"
+    },
+    "oracle": {
+      "title": "Today's Fortune",
+      "notCheckedIn": "Draw today's fortune at the temple",
+      "drawFortune": "Draw today's fortune"
+    },
+    "featured": {
+      "title": "Featured Posts",
+      "failed": "Could not load featured posts"
+    }
   },
   "ai": {
     "title": "AI Console",

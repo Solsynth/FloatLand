@@ -208,7 +208,53 @@
     "overview": "概览",
     "content": "内容",
     "community": "社区",
+    "dashboard": "仪表盘",
     "adminPanel": "管理面板"
+  },
+  "dashboard": {
+    "seoTitle": "仪表盘",
+    "seoDescription": "你的 Solar Network 个性化起始页。",
+    "searchPlaceholder": "搜索任何内容…",
+    "greetingMorning": "早上好",
+    "greetingAfternoon": "下午好",
+    "greetingEvening": "晚上好",
+    "greetingNight": "夜深了",
+    "shortcuts": "快捷入口",
+    "viewAll": "查看全部",
+    "weather": {
+      "title": "天气",
+      "clear": "晴",
+      "mainlyClear": "大部晴朗",
+      "partlyCloudy": "多云",
+      "overcast": "阴",
+      "fog": "雾",
+      "drizzle": "毛毛雨",
+      "rain": "雨",
+      "snow": "雪",
+      "showers": "阵雨",
+      "snowShowers": "阵雪",
+      "thunderstorm": "雷暴",
+      "thunderstormHail": "雷暴伴冰雹",
+      "unknown": "未知",
+      "feelsLike": "体感 {temp}°",
+      "humidity": "{value}%",
+      "wind": "{value} 公里/小时",
+      "dataBy": "天气数据来自",
+      "failed": "天气暂不可用"
+    },
+    "notifications": {
+      "title": "通知",
+      "empty": "暂无通知"
+    },
+    "oracle": {
+      "title": "今日运势",
+      "notCheckedIn": "去神庙抽取今日运势",
+      "drawFortune": "抽取今日运势"
+    },
+    "featured": {
+      "title": "精选帖子",
+      "failed": "无法加载精选帖子"
+    }
   },
   "ai": {
     "title": "AI 控制台",

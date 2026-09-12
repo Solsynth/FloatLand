@@ -31,7 +31,12 @@ export function useMainNav() {
   const { isSuperuser } = useAuth();
 
   const navItems = computed<NavItem[]>(() => [
-    { icon: IconCompass, labelKey: "nav.explore", href: "/" },
+    {
+      icon: IconLayoutDashboard,
+      labelKey: "nav.dashboard",
+      href: "/",
+    },
+    { icon: IconCompass, labelKey: "nav.explore", href: "/timeline" },
     { icon: IconBuilding, labelKey: "nav.realms", href: "/realms" },
     {
       icon: IconBriefcaseBusiness,
