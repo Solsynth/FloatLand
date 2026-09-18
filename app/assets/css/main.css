@@ -429,7 +429,7 @@
   }
 
   @media (min-width: 1024px) {
-    .feed-layout { grid-template-columns: minmax(0, 1fr) 20rem; column-gap: 1.5rem; }
+    .feed-layout { grid-template-columns: minmax(0, 1fr) 26rem; column-gap: 1.5rem; }
     .feed-sidebar { display: block; }
   }
 

@@ -1,7 +1,7 @@
 <template>
   <div class="flex w-full flex-col gap-5">
     <!-- Search -->
-    <div class="relative">
+    <div v-if="showSearch" class="relative">
       <input
         v-model="searchQuery"
         type="search"
@@ -19,9 +19,6 @@
         <IconSearch class="h-4 w-4" />
       </button>
     </div>
-
-    <!-- Check-In Widget (authenticated only) -->
-    <CheckInWidget v-if="isAuthenticated" />
 
     <!-- Categories -->
     <section v-if="categories.length > 0" class="right-rail-section">
@@ -125,8 +122,10 @@ import {
 
 const { t, locale } = useI18n();
 
-const auth = useAuth();
-const { isAuthenticated } = auth;
+withDefaults(defineProps<{ showSearch?: boolean }>(), {
+  showSearch: true,
+});
+
 const currentYear = new Date().getFullYear();
 const searchQuery = ref("");
 

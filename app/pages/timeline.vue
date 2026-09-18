@@ -5,10 +5,137 @@
       <div class="min-w-0">
         <!-- Feed shell: continuous list like Flutter explore -->
         <div class="feed-stream">
+          <!-- Featured -->
+          <ClientOnly>
+            <FeaturedPostsCarousel
+              class="border-b border-base-300/80"
+              @boost="handleBoost"
+              @share="handleShare"
+              @reply="handleReply"
+            />
+          </ClientOnly>
+
+          <!-- Loading -->
+          <div
+            v-if="
+              (status === 'pending' || status === 'idle') &&
+              timelineEvents.length === 0
+            "
+            class="flex justify-center py-16"
+          >
+            <ConfuseSpinner :message="t('home.loadingPosts')" />
+          </div>
+
+          <!-- Error -->
+          <div
+            v-else-if="error"
+            class="flex flex-col items-center gap-3 px-4 py-12 text-center"
+          >
+            <div
+              class="flex h-10 w-10 items-center justify-center rounded-full bg-error/10 text-error"
+            >
+              <IconAlertCircle class="h-5 w-5" />
+            </div>
+            <p class="max-w-sm text-sm text-base-content/70">
+              {{ t("home.loadFailed", { error: String(error) }) }}
+            </p>
+            <button class="btn btn-sm btn-ghost" @click="refreshTimeline">
+              {{ t("common.retry") }}
+            </button>
+          </div>
+
+          <!-- Empty -->
+          <div
+            v-else-if="status !== 'pending' && timelineEvents.length === 0"
+            class="flex flex-col items-center gap-2 px-4 py-14 text-center"
+          >
+            <p class="text-sm font-medium text-base-content/75">
+              {{ t("home.emptyTitle") }}
+            </p>
+            <p class="max-w-xs text-xs leading-relaxed text-base-content/45">
+              {{ t("home.emptyDesc") }}
+            </p>
+            <button
+              class="btn btn-sm btn-ghost mt-1"
+              @click="refreshTimeline"
+            >
+              {{ t("common.refresh") }}
+            </button>
+          </div>
+
+          <!-- Events (divided list) -->
+          <div
+            v-if="timelineEvents.length > 0"
+            class="divide-y divide-base-300/80"
+          >
+            <TimelineEventRenderer
+              v-for="event in timelineEvents"
+              :key="event.id"
+              :event="event"
+              @boost="handleBoost"
+              @share="handleShare"
+              @reply="handleReply"
+            />
+          </div>
+
+          <!-- Footer / infinite scroll -->
+          <div
+            ref="loadMoreSentinel"
+            class="feed-footer"
+          >
+            <div
+              v-if="fetchingMore"
+              class="flex items-center gap-2 text-xs text-base-content/45"
+            >
+              <span class="loading loading-spinner loading-xs" />
+              <span>{{ t("common.loading") }}</span>
+            </div>
+            <button
+              v-else-if="hasMore && timelineEvents.length > 0"
+              type="button"
+              class="btn btn-ghost btn-sm text-base-content/55"
+              :disabled="fetchingMore"
+              @click="loadMore"
+            >
+              {{ t("common.loadMore") }}
+            </button>
+            <p
+              v-else-if="!hasMore && timelineEvents.length > 0"
+              class="text-xs text-base-content/35"
+            >
+              {{ t("common.noMore") }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Compose + Explore Sidebar (26rem rail) -->
+      <aside class="feed-sidebar">
+        <div class="flex w-full flex-col gap-5">
+          <!-- Search -->
+          <div class="relative">
+            <input
+              v-model="searchQuery"
+              type="search"
+              :placeholder="t('common.search')"
+              :aria-label="t('common.search')"
+              class="rail-search input w-full pr-10"
+              @keyup.enter="handleSidebarSearch"
+            />
+            <button
+              type="button"
+              :aria-label="t('common.search')"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/40 transition-colors hover:text-base-content/70"
+              @click="handleSidebarSearch"
+            >
+              <IconSearch class="h-4 w-4" />
+            </button>
+          </div>
+
           <!-- Inline Compose -->
           <section
             v-if="isAuthenticated"
-            class="border-b border-base-300/80 px-4 py-2 sm:px-5"
+            class="right-rail-section p-4"
           >
             <form
               class="flex items-start gap-3"
@@ -66,7 +193,7 @@
                         v-else
                         class="flex h-full w-full items-center justify-center bg-base-200 text-[10px] font-semibold"
                       >
-                        {{ getPublisherInitials(publisher) }}
+                        {{ getInitials(publisher.nick || publisher.name) }}
                       </div>
                     </div>
                     <span class="min-w-0 flex-1 truncate">
@@ -286,122 +413,16 @@
               @change="onLocalFilesPicked"
             />
           </section>
-          <CloudFileDrawer
-            v-model:open="filePickerOpen"
-            :allow-multiple="true"
-            :crop-aspect-ratio="null"
-            usage="post.attachment"
-            @select="handleCloudFilesSelected"
-          />
-
-          <!-- Featured -->
-          <ClientOnly>
-            <FeaturedPostsCarousel
-              class="border-b border-base-300/80"
-              @boost="handleBoost"
-              @share="handleShare"
-              @reply="handleReply"
-            />
-          </ClientOnly>
-
-          <!-- Loading -->
-          <div
-            v-if="
-              (status === 'pending' || status === 'idle') &&
-              timelineEvents.length === 0
-            "
-            class="flex justify-center py-16"
-          >
-            <ConfuseSpinner :message="t('home.loadingPosts')" />
-          </div>
-
-          <!-- Error -->
-          <div
-            v-else-if="error"
-            class="flex flex-col items-center gap-3 px-4 py-12 text-center"
-          >
-            <div
-              class="flex h-10 w-10 items-center justify-center rounded-full bg-error/10 text-error"
-            >
-              <IconAlertCircle class="h-5 w-5" />
-            </div>
-            <p class="max-w-sm text-sm text-base-content/70">
-              {{ t("home.loadFailed", { error: String(error) }) }}
-            </p>
-            <button class="btn btn-sm btn-ghost" @click="refreshTimeline">
-              {{ t("common.retry") }}
-            </button>
-          </div>
-
-          <!-- Empty -->
-          <div
-            v-else-if="status !== 'pending' && timelineEvents.length === 0"
-            class="flex flex-col items-center gap-2 px-4 py-14 text-center"
-          >
-            <p class="text-sm font-medium text-base-content/75">
-              {{ t("home.emptyTitle") }}
-            </p>
-            <p class="max-w-xs text-xs leading-relaxed text-base-content/45">
-              {{ t("home.emptyDesc") }}
-            </p>
-            <button
-              class="btn btn-sm btn-ghost mt-1"
-              @click="refreshTimeline"
-            >
-              {{ t("common.refresh") }}
-            </button>
-          </div>
-
-          <!-- Events (divided list) -->
-          <div
-            v-if="timelineEvents.length > 0"
-            class="divide-y divide-base-300/80"
-          >
-            <TimelineEventRenderer
-              v-for="event in timelineEvents"
-              :key="event.id"
-              :event="event"
-              @boost="handleBoost"
-              @share="handleShare"
-              @reply="handleReply"
-            />
-          </div>
-
-          <!-- Footer / infinite scroll -->
-          <div
-            ref="loadMoreSentinel"
-            class="feed-footer"
-          >
-            <div
-              v-if="fetchingMore"
-              class="flex items-center gap-2 text-xs text-base-content/45"
-            >
-              <span class="loading loading-spinner loading-xs" />
-              <span>{{ t("common.loading") }}</span>
-            </div>
-            <button
-              v-else-if="hasMore && timelineEvents.length > 0"
-              type="button"
-              class="btn btn-ghost btn-sm text-base-content/55"
-              :disabled="fetchingMore"
-              @click="loadMore"
-            >
-              {{ t("common.loadMore") }}
-            </button>
-            <p
-              v-else-if="!hasMore && timelineEvents.length > 0"
-              class="text-xs text-base-content/35"
-            >
-              {{ t("common.noMore") }}
-            </p>
-          </div>
+          <ExploreSidebar :show-search="false" />
         </div>
-      </div>
-
-      <!-- Explore Sidebar (20rem rail) -->
-      <aside class="feed-sidebar">
-        <ExploreSidebar />
       </aside>
+      <CloudFileDrawer
+        v-model:open="filePickerOpen"
+        :allow-multiple="true"
+        :crop-aspect-ratio="null"
+        usage="post.attachment"
+        @select="handleCloudFilesSelected"
+      />
     </div>
   </NuxtLayout>
 </template>
@@ -416,6 +437,7 @@ import type {
   SnTimelineEvent,
 } from "~/types/post";
 import { fetchJson, fetchTimeline } from "~/utils/api";
+import { getInitials } from "~/utils/identity";
 import {
   IconAlertCircle,
   IconAtSign,
@@ -427,6 +449,7 @@ import {
   IconLink,
   IconLoader,
   IconPaperclip,
+  IconSearch,
   IconSend,
   IconVideo,
   IconX,
@@ -465,6 +488,7 @@ const fetchingMore = ref(false);
 const loadMoreSentinel = ref<HTMLElement | null>(null);
 
 const userAvatar = computed(() => user.value?.profile?.picture ?? null);
+const userName = computed(() => user.value?.nick || user.value?.name || "");
 
 const compose = useCompose();
 const {
@@ -493,7 +517,7 @@ const publisherAvatar = computed(
   () => currentPublisher.value?.picture ?? userAvatar.value,
 );
 const publisherInitials = computed(() =>
-  getPublisherInitials(currentPublisher.value?.nick || userName.value || "?"),
+  getInitials(currentPublisher.value?.nick || userName.value || "?"),
 );
 onMounted(() => {
   if (isAuthenticated.value && publishers.value.length === 0) {
@@ -511,6 +535,14 @@ async function loadComposePublishers() {
     }
   } catch (error) {
     console.error("Failed to load compose publishers:", error);
+  }
+}
+
+const searchQuery = ref("");
+
+function handleSidebarSearch() {
+  if (searchQuery.value.trim()) {
+    navigateTo(`/search?q=${encodeURIComponent(searchQuery.value.trim())}`);
   }
 }
 function selectInlinePublisher(publisher: Publisher) {
