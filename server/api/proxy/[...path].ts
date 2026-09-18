@@ -150,9 +150,12 @@ export default defineEventHandler(async (event) => {
   delete headers["cookie"];
 
   // Capture the request body once so the 401-retry can resend it without
-  // re-consuming the request stream.
+  // re-consuming the request stream. MUST read as raw Buffer (`encoding: false`):
+  // h3's default utf8 decode turns binary bytes (images, zips, videos) into
+  // U+FFFD replacement chars, and re-encoding that mangled string corrupts the
+  // forwarded body — breaking every non-text upload.
   const requestBody = PAYLOAD_METHODS.has(method)
-    ? await readRawBody(event).catch(() => undefined)
+    ? await readRawBody(event, false).catch(() => undefined)
     : undefined;
 
   async function forward(authPair: typeof pair): Promise<Response> {
