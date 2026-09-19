@@ -10,7 +10,21 @@ import {
   CaptchaConfigSchema,
   PasskeyAuthenticationOptionsSchema,
   PasskeyRegistrationOptionsSchema,
+  SnAccountPunishmentSchema,
+  SnAccountTimelineItemSchema,
+  PublicAccountConnectionSchema,
 } from "~/types/auth";
+import {
+  PostSchema,
+  PublisherSchema,
+  TimelineResultSchema,
+  ThreadedReplyNodeSchema,
+  ReactionSchema,
+  PostReactionSchema,
+  BoostSchema,
+  PublisherSubscriptionStatusSchema,
+  HeatmapDataSchema,
+} from "~/types/post";
 import type {
   SnAuthChallenge,
   SnAuthFactor,
@@ -55,8 +69,13 @@ export type {
 import type {
   Publisher,
   Post,
-  SnTimelineEvent,
   TimelineResult,
+  HeatmapData,
+  Boost,
+  PostReaction,
+  Reaction,
+  PublisherSubscriptionStatus,
+  ThreadedReplyNode,
 } from "~/types/post";
 import type {
   Realm,
@@ -85,6 +104,13 @@ import { snakeToCamel, camelToSnake } from "~/utils/case";
 
 // Re-export types for convenience
 export type { SpellInfo };
+export type {
+  HeatmapData,
+  Boost,
+  PostReaction,
+  Reaction,
+  PublisherSubscriptionStatus,
+} from "~/types/post";
 
 // Global API configuration
 export const API_BASE = "api.solian.app";
@@ -265,19 +291,17 @@ export async function fetchJson<T>(
 }
 
 /**
- * Fetch JSON and validate the response against a Zod schema.
+ * Validate already-parsed data against a schema, failing loudly with a
+ * CONTRACT_MISMATCH ApiError when the backend drifts from the contract.
  *
  * The response is case-converted (snake_case → camelCase) first, so schemas
- * describe the camelCase shape callers consume. A schema mismatch (backend
- * contract drift) fails loudly with a CONTRACT_MISMATCH ApiError instead of
- * surfacing as `undefined` deep in a component.
+ * describe the camelCase shape callers consume.
  */
-export async function fetchJsonZ<T>(
+function parseWithSchema<T>(
   endpoint: string,
   schema: z.ZodType<T>,
-  options: ApiFetchOptions = {},
-): Promise<T> {
-  const data = await safeJsonParse<unknown>(await apiFetch(endpoint, options));
+  data: unknown,
+): T {
   const parsed = schema.safeParse(data);
   if (!parsed.success) {
     const issues = parsed.error.issues
@@ -293,6 +317,37 @@ export async function fetchJsonZ<T>(
     );
   }
   return parsed.data;
+}
+
+export async function fetchJsonZ<T>(
+  endpoint: string,
+  schema: z.ZodType<T>,
+  options: ApiFetchOptions = {},
+): Promise<T> {
+  const response = await apiFetch(endpoint, options);
+  return parseWithSchema(
+    endpoint,
+    schema,
+    await safeJsonParse<unknown>(response),
+  );
+}
+
+/**
+ * Fetch + validate, also returning the raw response headers (needed for
+ * `x-total` pagination metadata the backend sends alongside the body).
+ */
+export async function fetchJsonZHeaders<T>(
+  endpoint: string,
+  schema: z.ZodType<T>,
+  options: ApiFetchOptions = {},
+): Promise<{ data: T; headers: Headers }> {
+  const response = await apiFetch(endpoint, options);
+  const data = parseWithSchema(
+    endpoint,
+    schema,
+    await safeJsonParse<unknown>(response),
+  );
+  return { data, headers: response.headers };
 }
 
 // Auth API
@@ -753,13 +808,13 @@ export async function fetchPosts(
 
   // Send auth when logged in so API can return reactionsMade
   const { isAuthenticated } = useAuth();
-  const response = await apiFetch(`/sphere/posts?${params.toString()}`, {
-    skipAuth: !isAuthenticated.value,
-  });
+  const { data, headers } = await fetchJsonZHeaders(
+    `/sphere/posts?${params.toString()}`,
+    PostSchema.array(),
+    { skipAuth: !isAuthenticated.value },
+  );
 
-  const total = parseInt(response.headers.get("x-total") || "0", 10);
-  const data = await safeJsonParse<Post[]>(response);
-
+  const total = parseInt(headers.get("x-total") || "0", 10);
   return { posts: data, total };
 }
 
@@ -784,60 +839,30 @@ export async function fetchTimeline(
     params.set("aggressive", String(options.aggressive));
 
   const { isAuthenticated } = useAuth();
-  const response = await apiFetch(`/sphere/timeline?${params.toString()}`, {
+  return fetchJsonZ(`/sphere/timeline?${params.toString()}`, TimelineResultSchema, {
     skipAuth: !isAuthenticated.value,
   });
-
-  const payload = (await parseResponse(response)) as Record<string, unknown>;
-  const rawItems = (payload.items as unknown[]) ?? [];
-  // Support both snake_case and camelCase response shapes
-  const nextCursor =
-    (payload.next_cursor as string | null | undefined) ??
-    (payload.nextCursor as string | null | undefined) ??
-    null;
-  const mode = (payload.mode as string) ?? "personalized";
-
-  const items = rawItems
-    .filter(
-      (e): e is Record<string, unknown> => typeof e === "object" && e !== null,
-    )
-    .map((e) => snakeToCamel(e) as SnTimelineEvent);
-
-  return {
-    items,
-    nextCursor: nextCursor && nextCursor.length > 0 ? nextCursor : null,
-    mode,
-  };
 }
 
 export async function fetchFeaturedPosts(): Promise<Post[]> {
   const { isAuthenticated } = useAuth();
-  const response = await apiFetch("/sphere/posts/featured", {
+  return fetchJsonZ("/sphere/posts/featured", PostSchema.array(), {
     skipAuth: !isAuthenticated.value,
   });
-  return safeJsonParse<Post[]>(response);
 }
 
 export async function fetchPost(id: string): Promise<Post> {
   const { isAuthenticated } = useAuth();
-  const response = await apiFetch(`/sphere/posts/${id}`, {
+  return fetchJsonZ(`/sphere/posts/${id}`, PostSchema, {
     skipAuth: !isAuthenticated.value,
   });
-  return safeJsonParse<Post>(response);
 }
 
 export async function fetchPostReplies(id: string): Promise<Post[]> {
   const { isAuthenticated } = useAuth();
-  const response = await apiFetch(`/sphere/posts/${id}/replies`, {
+  return fetchJsonZ(`/sphere/posts/${id}/replies`, PostSchema.array(), {
     skipAuth: !isAuthenticated.value,
   });
-  return safeJsonParse<Post[]>(response);
-}
-
-export interface ThreadedReplyNode {
-  post: Post;
-  depth: number;
-  parentId: string | null;
 }
 
 export async function fetchPostRepliesThreaded(
@@ -845,73 +870,28 @@ export async function fetchPostRepliesThreaded(
   take = 3,
   offset = 0,
 ): Promise<{ nodes: ThreadedReplyNode[]; total: number }> {
-  const response = await apiFetch(
+  const { data, headers } = await fetchJsonZHeaders(
     `/sphere/posts/${id}/replies/threaded?offset=${offset}&take=${take}`,
+    ThreadedReplyNodeSchema.array(),
     { skipAuth: true },
   );
 
-  const total = parseInt(response.headers.get("x-total") || "0", 10);
-  const data =
-    await safeJsonParse<
-      Array<{ post: Post; depth?: number; parent_id?: string | null }>
-    >(response);
-
+  const total = parseInt(headers.get("x-total") || "0", 10);
   return {
     total,
     nodes: data.map((node) => ({
       post: node.post,
       depth: node.depth ?? 0,
-      parentId: node.parent_id ?? null,
+      parentId: node.parentId ?? null,
     })),
   };
 }
 
 // Reactions API
-export interface Reaction {
-  symbol: string;
-  attitude: number;
-  count: number;
-}
-
-export interface PostReaction {
-  id: string;
-  postId: string;
-  symbol: string;
-  attitude: number;
-  accountId?: string;
-  actorId?: string;
-  account?: {
-    id: string;
-    name: string;
-    nick: string;
-    profile: {
-      picture?: { id: string };
-    };
-  };
-  createdAt: string;
-}
-
-export interface Boost {
-  id: string;
-  postId: string;
-  accountId?: string;
-  actorId?: string;
-  account?: {
-    id: string;
-    name: string;
-    nick: string;
-    profile: {
-      picture?: { id: string };
-    };
-  };
-  boostedAt: string;
-}
-
 export async function fetchPostReactions(postId: string): Promise<Reaction[]> {
-  const response = await apiFetch(`/sphere/posts/${postId}/reactions`, {
+  return fetchJsonZ(`/sphere/posts/${postId}/reactions`, ReactionSchema.array(), {
     skipAuth: true,
   });
-  return safeJsonParse<Reaction[]>(response);
 }
 
 export async function fetchPostReactionList(
@@ -923,14 +903,12 @@ export async function fetchPostReactionList(
     take: String(take),
     offset: String(offset),
   });
-  const response = await apiFetch(
+  const { data, headers } = await fetchJsonZHeaders(
     `/sphere/posts/${postId}/reactions?${params.toString()}`,
-    {
-      skipAuth: true,
-    },
+    PostReactionSchema.array(),
+    { skipAuth: true },
   );
-  const total = parseInt(response.headers.get("x-total") || "0", 10);
-  const data = await safeJsonParse<PostReaction[]>(response);
+  const total = parseInt(headers.get("x-total") || "0", 10);
   return { items: data, total };
 }
 
@@ -963,14 +941,12 @@ export async function fetchPostBoosts(
     take: String(take),
     offset: String(offset),
   });
-  const response = await apiFetch(
+  const { data, headers } = await fetchJsonZHeaders(
     `/sphere/posts/${postId}/boosts?${params.toString()}`,
-    {
-      skipAuth: true,
-    },
+    BoostSchema.array(),
+    { skipAuth: true },
   );
-  const total = parseInt(response.headers.get("x-total") || "0", 10);
-  const data = await safeJsonParse<Boost[]>(response);
+  const total = parseInt(headers.get("x-total") || "0", 10);
   return { items: data, total };
 }
 
@@ -983,23 +959,21 @@ export async function fetchPostForwards(
     take: String(take),
     offset: String(offset),
   });
-  const response = await apiFetch(
+  const { data, headers } = await fetchJsonZHeaders(
     `/sphere/posts/${postId}/forwards?${params.toString()}`,
-    {
-      skipAuth: true,
-    },
+    PostSchema.array(),
+    { skipAuth: true },
   );
-  const total = parseInt(response.headers.get("x-total") || "0", 10);
-  const data = await safeJsonParse<Post[]>(response);
+  const total = parseInt(headers.get("x-total") || "0", 10);
   return { posts: data, total };
 }
 
 // Data API - Publishers
 export async function fetchPublisher(name: string): Promise<Publisher> {
-  const response = await apiFetch(
+  return fetchJsonZ(
     `/sphere/publishers/${encodeURIComponent(name)}`,
+    PublisherSchema,
   );
-  return safeJsonParse<Publisher>(response);
 }
 
 export async function fetchPublisherPosts(
@@ -1026,19 +1000,20 @@ export async function fetchPublisherPosts(
   if (options.media) params.set("media", "true");
   if (options.queryTerm) params.set("query", options.queryTerm);
 
-  const response = await apiFetch(`/sphere/posts?${params.toString()}`, {
-    skipAuth: true,
-  });
+  const { data, headers } = await fetchJsonZHeaders(
+    `/sphere/posts?${params.toString()}`,
+    PostSchema.array(),
+    { skipAuth: true },
+  );
 
-  const total = parseInt(response.headers.get("x-total") || "0", 10);
-  const data = await safeJsonParse<Post[]>(response);
-
+  const total = parseInt(headers.get("x-total") || "0", 10);
   return { posts: data, total };
 }
 
 export async function fetchPublishers(): Promise<Publisher[]> {
-  const response = await apiFetch("/sphere/publishers", { skipAuth: true });
-  return safeJsonParse<Publisher[]>(response);
+  return fetchJsonZ("/sphere/publishers", PublisherSchema.array(), {
+    skipAuth: true,
+  });
 }
 
 // Search API
@@ -1047,11 +1022,11 @@ export async function searchAccounts(
   take = 20,
 ): Promise<SnAccount[]> {
   const params = new URLSearchParams({ query, take: String(take) });
-  const response = await apiFetch(
+  return fetchJsonZ(
     `/stargate/accounts/search?${params.toString()}`,
+    SnAccountSchema.array(),
     { skipAuth: true },
   );
-  return safeJsonParse<SnAccount[]>(response);
 }
 
 export async function searchPublishers(
@@ -1059,11 +1034,11 @@ export async function searchPublishers(
   take = 20,
 ): Promise<Publisher[]> {
   const params = new URLSearchParams({ query, take: String(take) });
-  const response = await apiFetch(
+  return fetchJsonZ(
     `/sphere/publishers/search?${params.toString()}`,
+    PublisherSchema.array(),
     { skipAuth: true },
   );
-  return safeJsonParse<Publisher[]>(response);
 }
 
 export async function searchRealms(query: string, take = 20): Promise<Realm[]> {
@@ -1077,23 +1052,22 @@ export async function searchRealms(query: string, take = 20): Promise<Realm[]> {
 
 // Data API - Accounts
 export async function fetchAccount(name: string): Promise<SnAccount> {
-  const response = await apiFetch(
+  return fetchJsonZ(
     `/stargate/accounts/${encodeURIComponent(name)}`,
+    SnAccountSchema,
     { skipAuth: true },
   );
-  return safeJsonParse<SnAccount>(response);
 }
 
 export async function fetchAccountPunishment(
   name: string,
 ): Promise<SnAccountPunishment | null> {
   try {
-    const response = await apiFetch(
+    return await fetchJsonZ(
       `/stargate/accounts/${encodeURIComponent(name)}/punishments/overview`,
+      SnAccountPunishmentSchema,
       { skipAuth: true },
     );
-    if (!response.ok) return null;
-    return safeJsonParse<SnAccountPunishment>(response);
   } catch {
     return null;
   }
@@ -1189,11 +1163,11 @@ export async function fetchPublicAccountConnections(
   name: string,
 ): Promise<PublicAccountConnection[]> {
   try {
-    const response = await apiFetch(
+    return await fetchJsonZ(
       `/stargate/accounts/${encodeURIComponent(name)}/connections`,
+      PublicAccountConnectionSchema.array(),
       { skipAuth: true },
     );
-    return safeJsonParse<PublicAccountConnection[]>(response);
   } catch {
     return [];
   }
@@ -1203,11 +1177,11 @@ export async function fetchAccountPublishers(
   accountId: string,
 ): Promise<Publisher[]> {
   try {
-    const response = await apiFetch(
+    return await fetchJsonZ(
       `/sphere/publishers/of/${encodeURIComponent(accountId)}`,
+      PublisherSchema.array(),
       { skipAuth: true },
     );
-    return safeJsonParse<Publisher[]>(response);
   } catch {
     return [];
   }
@@ -1257,40 +1231,25 @@ export async function fetchRealmPosts(
 }
 
 // Heatmap data for publisher activity
-export interface HeatmapData {
-  startDate: string;
-  endDate: string;
-  data: Record<string, number>;
-}
-
 export async function fetchPublisherHeatmap(
   publisherName: string,
 ): Promise<HeatmapData> {
-  const response = await apiFetch(
+  return fetchJsonZ(
     `/sphere/publishers/${encodeURIComponent(publisherName)}/heatmap`,
+    HeatmapDataSchema,
     { skipAuth: true },
   );
-  return safeJsonParse<HeatmapData>(response);
 }
 
 // Publisher subscription status
-export interface PublisherSubscriptionStatus {
-  status: "none" | "pending" | "following" | "subscribed";
-  isPending: boolean;
-  subscription?: {
-    isActive: boolean;
-    notify: boolean;
-  };
-}
-
 export async function fetchPublisherSubscriptionStatus(
   publisherName: string,
 ): Promise<PublisherSubscriptionStatus | null> {
   try {
-    const response = await apiFetch(
+    return await fetchJsonZ(
       `/sphere/publishers/${encodeURIComponent(publisherName)}/subscription`,
+      PublisherSubscriptionStatusSchema,
     );
-    return safeJsonParse<PublisherSubscriptionStatus>(response);
   } catch (err) {
     // 404 means not subscribed
     if (err instanceof Error && err.message.includes("404")) {
@@ -1335,11 +1294,11 @@ export async function setPublisherNotify(
 export async function fetchPublisherPinnedPosts(
   publisherName: string,
 ): Promise<Post[]> {
-  const response = await apiFetch(
+  return fetchJsonZ(
     `/sphere/posts?pub=${encodeURIComponent(publisherName)}&pinned=true&take=10`,
+    PostSchema.array(),
     { skipAuth: true },
   );
-  return safeJsonParse<Post[]>(response);
 }
 
 // Account timeline (user's posts)
@@ -1354,13 +1313,13 @@ export async function fetchAccountTimeline(
     account: accountName,
   });
 
-  const response = await apiFetch(`/sphere/posts?${params.toString()}`, {
-    skipAuth: true,
-  });
+  const { data, headers } = await fetchJsonZHeaders(
+    `/sphere/posts?${params.toString()}`,
+    PostSchema.array(),
+    { skipAuth: true },
+  );
 
-  const total = parseInt(response.headers.get("x-total") || "0", 10);
-  const data = await safeJsonParse<Post[]>(response);
-
+  const total = parseInt(headers.get("x-total") || "0", 10);
   return { posts: data, total };
 }
 
@@ -1375,14 +1334,13 @@ export async function fetchAccountActivityTimeline(
     offset: String(offset),
   });
 
-  const response = await apiFetch(
+  const { data, headers } = await fetchJsonZHeaders(
     `/passport/accounts/${encodeURIComponent(accountName)}/timeline?${params.toString()}`,
+    SnAccountTimelineItemSchema.array(),
     { skipAuth: true },
   );
 
-  const total = parseInt(response.headers.get("x-total") || "0", 10);
-  const data = await safeJsonParse<SnAccountTimelineItem[]>(response);
-
+  const total = parseInt(headers.get("x-total") || "0", 10);
   return { items: data, total };
 }
 

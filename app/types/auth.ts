@@ -192,11 +192,12 @@ export interface SnAccountConnection {
 }
 
 /** Public connection shape from GET /stargate/accounts/{name}/connections */
-export interface PublicAccountConnection {
-  provider: string;
-  providedIdentifier: string;
-  url?: string;
-}
+export const PublicAccountConnectionSchema = z.object({
+  provider: z.string(),
+  providedIdentifier: z.string(),
+  url: z.string().optional(),
+});
+export type PublicAccountConnection = z.infer<typeof PublicAccountConnectionSchema>;
 
 /** Board widget kind: 0/prebuilt or 1/custom_app */
 export type AccountBoardItemKind = "prebuilt" | "custom_app" | 0 | 1;
@@ -465,20 +466,21 @@ export interface WalletOrder {
   developer?: WalletOrderDeveloper;
 }
 
-export interface SnAccountPunishment {
-  id: string;
-  type: number;
-  reason?: string;
-  createdAt: string;
-  updatedAt?: string;
-  expiredAt?: string | null;
-  /** @deprecated prefer expiredAt */
-  expiresAt?: string | null;
-  accountId?: string;
-  creatorId?: string | null;
-  blockedPermissions?: string[] | null;
-  issuedBy?: string;
-}
+export const SnAccountPunishmentSchema = z.object({
+  id: z.string(),
+  type: z.number(),
+  reason: z.string().optional(),
+  createdAt: z.string(),
+  updatedAt: z.string().optional(),
+  expiredAt: z.string().nullable().optional(),
+  /** Legacy backend field for older payloads; current API returns `expiredAt`. */
+  expiresAt: z.string().nullable().optional(),
+  accountId: z.string().optional(),
+  creatorId: z.string().nullable().optional(),
+  blockedPermissions: z.array(z.string()).nullable().optional(),
+  issuedBy: z.string().optional(),
+});
+export type SnAccountPunishment = z.infer<typeof SnAccountPunishmentSchema>;
 
 export interface SpellInfo {
   type: number;
@@ -490,32 +492,35 @@ export interface SpellInfo {
   expiredAt?: string;
 }
 
-export interface SnAccountStatus {
-  type: number;
-  label: string;
-  symbol?: string;
-  isOnline: boolean;
-  isAutomated: boolean;
-  appIdentifier?: string;
-}
+export const SnAccountStatusSchema = z.object({
+  type: z.number(),
+  label: z.string(),
+  symbol: z.string().optional(),
+  isOnline: z.boolean(),
+  isAutomated: z.boolean(),
+  appIdentifier: z.string().optional(),
+});
+export type SnAccountStatus = z.infer<typeof SnAccountStatusSchema>;
 
-export interface SnAccountActivity {
-  type: number;
-  manualId?: string;
-  title?: string;
-  titleUrl?: string;
-  subtitle?: string;
-  subtitleUrl?: string;
-  caption?: string;
-  largeImage?: string;
-  smallImage?: string;
-  meta?: Record<string, unknown>;
-}
+export const SnAccountActivitySchema = z.object({
+  type: z.number(),
+  manualId: z.string().optional(),
+  title: z.string().optional(),
+  titleUrl: z.string().optional(),
+  subtitle: z.string().optional(),
+  subtitleUrl: z.string().optional(),
+  caption: z.string().optional(),
+  largeImage: z.string().optional(),
+  smallImage: z.string().optional(),
+  meta: z.record(z.string(), z.unknown()).optional(),
+});
+export type SnAccountActivity = z.infer<typeof SnAccountActivitySchema>;
 
-export interface SnAccountTimelineItem {
-  id: string;
-  eventType: number;
-  createdAt: string;
-  status?: SnAccountStatus;
-  activity?: SnAccountActivity;
-}
+export const SnAccountTimelineItemSchema = z.object({
+  id: z.string(),
+  eventType: z.number(),
+  createdAt: z.string(),
+  status: SnAccountStatusSchema.optional(),
+  activity: SnAccountActivitySchema.optional(),
+});
+export type SnAccountTimelineItem = z.infer<typeof SnAccountTimelineItemSchema>;
