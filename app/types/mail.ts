@@ -1,123 +1,133 @@
-import type { WorkspaceMailbox } from "~/types/workspace";
+import { z } from "zod";
+import { WorkspaceMailboxSchema } from "./workspace";
 
 /** Denormalized DysonFS file snapshot carried by an email attachment. */
-export interface PostalCloudFile {
-  id: string;
-  name: string;
-  mimeType: string;
-  size: number;
-  url?: string;
-  fileMeta?: Record<string, unknown>;
-  userMeta?: Record<string, unknown>;
-  sensitiveMarks?: number[];
-  hasCompression?: boolean;
-  width?: number;
-  height?: number;
-  blurhash?: string;
-  usage?: string;
-  applicationType?: string;
-}
+export const PostalCloudFileSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  mimeType: z.string(),
+  size: z.number(),
+  url: z.string().optional(),
+  fileMeta: z.record(z.string(), z.unknown()).optional(),
+  userMeta: z.record(z.string(), z.unknown()).optional(),
+  sensitiveMarks: z.array(z.number()).optional(),
+  hasCompression: z.boolean().optional(),
+  width: z.number().optional(),
+  height: z.number().optional(),
+  blurhash: z.string().optional(),
+  usage: z.string().optional(),
+  applicationType: z.string().optional(),
+});
+export type PostalCloudFile = z.infer<typeof PostalCloudFileSchema>;
 
-export interface PostalAttachment {
-  id: string;
-  emailId: string;
-  position: number;
-  filename: string;
-  mimeType: string;
-  size: number;
-  storageKey?: string;
-  file?: PostalCloudFile;
-  contentId?: string;
-  disposition?: string;
-}
+export const PostalAttachmentSchema = z.object({
+  id: z.string(),
+  emailId: z.string(),
+  position: z.number(),
+  filename: z.string(),
+  mimeType: z.string(),
+  size: z.number(),
+  storageKey: z.string().optional(),
+  file: PostalCloudFileSchema.optional(),
+  contentId: z.string().optional(),
+  disposition: z.string().optional(),
+});
+export type PostalAttachment = z.infer<typeof PostalAttachmentSchema>;
 
 /** kind is `to`, `cc`, or `bcc`. */
-export interface PostalRecipient {
-  id: string;
-  emailId: string;
-  address: string;
-  name: string;
-  kind: "to" | "cc" | "bcc" | string;
-}
+export const PostalRecipientSchema = z.object({
+  id: z.string(),
+  emailId: z.string(),
+  address: z.string(),
+  name: z.string(),
+  kind: z.string(),
+});
+export type PostalRecipient = z.infer<typeof PostalRecipientSchema>;
 
-export interface MailLabel {
-  id: string;
-  accountId: string;
-  name: string;
-  color: string;
-}
+export const MailLabelSchema = z.object({
+  id: z.string(),
+  accountId: z.string(),
+  name: z.string(),
+  color: z.string(),
+});
+export type MailLabel = z.infer<typeof MailLabelSchema>;
 
 /** Server-generated sender-authentication metadata. */
-export interface PostalAuth {
-  spf?: string;
-  dkim?: string;
-  score?: number;
-  warnings?: string[];
-}
+export const PostalAuthSchema = z.object({
+  spf: z.string().optional(),
+  dkim: z.string().optional(),
+  score: z.number().optional(),
+  warnings: z.array(z.string()).optional(),
+});
+export type PostalAuth = z.infer<typeof PostalAuthSchema>;
 
 export type MailFolder = "inbox" | "sent" | "drafts" | "spam" | "trash" | "archive";
 
-export interface PostalEmail {
-  id: string;
-  accountId: string;
-  mailboxId: string;
-  threadId?: string | null;
-  subject: string;
-  body: string;
-  fromAddress: string;
-  fromName: string;
-  isRead: boolean;
-  isStarred: boolean;
-  isDraft: boolean;
-  folder: string;
-  contentType: string;
-  scheduledAt?: string | null;
-  trashedAt?: string | null;
-  spamAt?: string | null;
-  sentAt?: string | null;
-  deliveryStatus: string;
-  deliveryAttempts?: number;
-  lastDeliveryAttemptAt?: string | null;
-  deliveryError?: string | null;
-  providerMessageId?: string | null;
-  authentication?: PostalAuth | null;
-  rawSizeBytes?: number;
-  archivedAt?: string | null;
-  createdAt: string;
-  updatedAt: string;
-  mailbox?: WorkspaceMailbox | null;
-  recipients?: PostalRecipient[];
-  attachments?: PostalAttachment[];
-  labels?: MailLabel[];
-}
+export const PostalEmailSchema = z.object({
+  id: z.string(),
+  accountId: z.string(),
+  mailboxId: z.string(),
+  threadId: z.string().nullable().optional(),
+  subject: z.string(),
+  body: z.string(),
+  fromAddress: z.string(),
+  fromName: z.string(),
+  isRead: z.boolean(),
+  isStarred: z.boolean(),
+  isDraft: z.boolean(),
+  folder: z.string(),
+  contentType: z.string(),
+  scheduledAt: z.string().nullable().optional(),
+  trashedAt: z.string().nullable().optional(),
+  spamAt: z.string().nullable().optional(),
+  sentAt: z.string().nullable().optional(),
+  deliveryStatus: z.string(),
+  deliveryAttempts: z.number().optional(),
+  lastDeliveryAttemptAt: z.string().nullable().optional(),
+  deliveryError: z.string().nullable().optional(),
+  providerMessageId: z.string().nullable().optional(),
+  authentication: PostalAuthSchema.nullable().optional(),
+  rawSizeBytes: z.number().optional(),
+  archivedAt: z.string().nullable().optional(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+  mailbox: WorkspaceMailboxSchema.nullable().optional(),
+  recipients: z.array(PostalRecipientSchema).optional(),
+  attachments: z.array(PostalAttachmentSchema).optional(),
+  labels: z.array(MailLabelSchema).optional(),
+});
+export type PostalEmail = z.infer<typeof PostalEmailSchema>;
 
-export interface MailStats {
-  total: number;
-  unread: number;
-  starred: number;
-  drafts: number;
-  deliveryStatus: Record<string, number>;
-}
+export const MailStatsSchema = z.object({
+  total: z.number(),
+  unread: z.number(),
+  starred: z.number(),
+  drafts: z.number(),
+  deliveryStatus: z.record(z.string(), z.number()),
+});
+export type MailStats = z.infer<typeof MailStatsSchema>;
 
-export interface ThreadSummary {
-  id: string;
-  mailboxId: string;
-  subject: string;
-  latestAt: string;
-  messageCount: number;
-  unreadCount: number;
-  participants: string[];
-  latestMessage: PostalEmail;
-}
+export const ThreadSummarySchema = z.object({
+  id: z.string(),
+  mailboxId: z.string(),
+  subject: z.string(),
+  latestAt: z.string(),
+  messageCount: z.number(),
+  unreadCount: z.number(),
+  participants: z.array(z.string()),
+  latestMessage: PostalEmailSchema,
+});
+export type ThreadSummary = z.infer<typeof ThreadSummarySchema>;
 
-export interface BlockRule {
-  id: string;
-  workspaceId?: string | null;
-  mailboxId?: string | null;
-  pattern: string;
-  matchType: "address" | "domain" | string;
-  createdAt: string;
-}
+export const BlockRuleSchema = z.object({
+  id: z.string(),
+  workspaceId: z.string().nullable().optional(),
+  mailboxId: z.string().nullable().optional(),
+  pattern: z.string(),
+  matchType: z.string(),
+  createdAt: z.string(),
+});
+export type BlockRule = z.infer<typeof BlockRuleSchema>;
 
 export interface EmailRecipientInput {
   address: string;

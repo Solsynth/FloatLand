@@ -1,4 +1,5 @@
-import type { FileAttachment } from "./post";
+import { z } from "zod";
+import { FileAttachmentSchema } from "./post";
 
 export const WorkspaceType = {
   individual: 0,
@@ -11,160 +12,208 @@ export const WorkspacePlan = {
   enterprise: 2,
 } as const;
 
-export interface Workspace {
-  id: string;
-  slug: string;
-  name: string;
-  description: string | null;
-  type: number;
-  ownerAccountId: string | null;
-  picture: FileAttachment | null;
-  background: FileAttachment | null;
-  plan: number;
-  planExpiresAt: string | null;
-  isBundled: boolean;
-}
+export const WorkspaceSchema = z.object({
+  id: z.string(),
+  slug: z.string(),
+  name: z.string(),
+  description: z.string().nullable(),
+  type: z.number(),
+  ownerAccountId: z.string().nullable(),
+  picture: FileAttachmentSchema.nullable(),
+  background: FileAttachmentSchema.nullable(),
+  plan: z.number(),
+  planExpiresAt: z.string().nullable(),
+  isBundled: z.boolean(),
+});
+export type Workspace = z.infer<typeof WorkspaceSchema>;
 
-export interface WorkspaceMember {
-  id: string;
-  accountId: string;
-  role: number;
-  account?: { name?: string; nick?: string; contacts?: { content: string; isPrimary?: boolean; type?: number }[]; profile?: { picture?: FileAttachment | null } | null } | null;
-}
+export const WorkspaceMemberSchema = z.object({
+  id: z.string(),
+  accountId: z.string(),
+  role: z.number(),
+  account: z
+    .object({
+      name: z.string().optional(),
+      nick: z.string().optional(),
+      contacts: z
+        .array(
+          z.object({
+            content: z.string(),
+            isPrimary: z.boolean().optional(),
+            type: z.number().optional(),
+          }),
+        )
+        .optional(),
+      profile: z
+        .object({
+          picture: FileAttachmentSchema.nullable().optional(),
+        })
+        .nullable()
+        .optional(),
+    })
+    .nullable()
+    .optional(),
+});
+export type WorkspaceMember = z.infer<typeof WorkspaceMemberSchema>;
 
-export interface WorkspacePlanStatus {
-  plan: number;
-  isBundled: boolean;
-  prices?: { pro?: number; enterprise?: number; currency?: string } | null;
-}
+export const WorkspacePlanStatusSchema = z.object({
+  plan: z.number(),
+  isBundled: z.boolean(),
+  prices: z
+    .object({
+      pro: z.number().optional(),
+      enterprise: z.number().optional(),
+      currency: z.string().optional(),
+    })
+    .nullable()
+    .optional(),
+});
+export type WorkspacePlanStatus = z.infer<typeof WorkspacePlanStatusSchema>;
 
-export interface WorkspacePlanOrder {
-  orderId: string;
-  amount: number;
-  currency: string;
-  plan: number;
-}
+export const WorkspacePlanOrderSchema = z.object({
+  orderId: z.string(),
+  amount: z.number(),
+  currency: z.string(),
+  plan: z.number(),
+});
+export type WorkspacePlanOrder = z.infer<typeof WorkspacePlanOrderSchema>;
 
-export interface WorkspaceMailbox {
-  id: string;
-  accountId: string;
-  workspaceId: string | null;
-  address: string;
-  name: string | null;
-  isDefault: boolean;
-  isVerified: boolean;
-}
+export const WorkspaceMailboxSchema = z.object({
+  id: z.string(),
+  accountId: z.string(),
+  workspaceId: z.string().nullable(),
+  address: z.string(),
+  name: z.string().nullable(),
+  isDefault: z.boolean(),
+  isVerified: z.boolean(),
+});
+export type WorkspaceMailbox = z.infer<typeof WorkspaceMailboxSchema>;
 
-export interface WorkspaceMailboxAlias {
-  id: string;
-  mailboxId: string;
-  customDomainId: string;
-  localPart: string;
-  address: string;
-  name: string | null;
-}
+export const WorkspaceMailboxAliasSchema = z.object({
+  id: z.string(),
+  mailboxId: z.string(),
+  customDomainId: z.string(),
+  localPart: z.string(),
+  address: z.string(),
+  name: z.string().nullable(),
+});
+export type WorkspaceMailboxAlias = z.infer<typeof WorkspaceMailboxAliasSchema>;
 
-export interface WorkspaceMailboxForwardingRule {
-  id: string;
-  mailboxId: string;
-  aliasId: string;
-  destination: string;
-}
+export const WorkspaceMailboxForwardingRuleSchema = z.object({
+  id: z.string(),
+  mailboxId: z.string(),
+  aliasId: z.string(),
+  destination: z.string(),
+});
+export type WorkspaceMailboxForwardingRule = z.infer<typeof WorkspaceMailboxForwardingRuleSchema>;
 
-export interface WorkspaceMailboxQuota {
-  workspaceId: string;
-  usedBytes: number;
-  limitBytes: number;
-  remainingBytes: number;
-}
+export const WorkspaceMailboxQuotaSchema = z.object({
+  workspaceId: z.string(),
+  usedBytes: z.number(),
+  limitBytes: z.number(),
+  remainingBytes: z.number(),
+});
+export type WorkspaceMailboxQuota = z.infer<typeof WorkspaceMailboxQuotaSchema>;
 
-export interface WorkspaceMailboxUsage {
-  workspaceId: string;
-  used: number;
-  limit: number;
-  remaining: number;
-}
+export const WorkspaceMailboxUsageSchema = z.object({
+  workspaceId: z.string(),
+  used: z.number(),
+  limit: z.number(),
+  remaining: z.number(),
+});
+export type WorkspaceMailboxUsage = z.infer<typeof WorkspaceMailboxUsageSchema>;
 
-export interface WorkspaceSendUsagePeriod {
-  limit: number;
-  used: number;
-  remaining: number;
-}
+export const WorkspaceSendUsagePeriodSchema = z.object({
+  limit: z.number(),
+  used: z.number(),
+  remaining: z.number(),
+});
+export type WorkspaceSendUsagePeriod = z.infer<typeof WorkspaceSendUsagePeriodSchema>;
 
-export interface WorkspaceSendUsage {
-  workspaceId: string;
-  daily: WorkspaceSendUsagePeriod;
-  monthly: WorkspaceSendUsagePeriod;
-}
+export const WorkspaceSendUsageSchema = z.object({
+  workspaceId: z.string(),
+  daily: WorkspaceSendUsagePeriodSchema,
+  monthly: WorkspaceSendUsagePeriodSchema,
+});
+export type WorkspaceSendUsage = z.infer<typeof WorkspaceSendUsageSchema>;
 
-export interface WorkspaceCustomDomainDnsRecord {
-  name: string;
-  type: string;
-  value: string;
-}
+export const WorkspaceCustomDomainDnsRecordSchema = z.object({
+  name: z.string(),
+  type: z.string(),
+  value: z.string(),
+});
+export type WorkspaceCustomDomainDnsRecord = z.infer<typeof WorkspaceCustomDomainDnsRecordSchema>;
 
-export interface WorkspaceCustomDomain {
-  id: string;
-  workspaceId: string;
-  provider: string;
-  domain: string;
-  verificationStatus: string;
-  verifiedForSendingStatus: boolean;
-  dkimStatus: string;
-  mailFromDomain: string;
-  mailFromStatus: string;
-  stage: "basic" | "full" | "completed";
-  dnsRecords: WorkspaceCustomDomainDnsRecord[];
-}
+export const WorkspaceCustomDomainSchema = z.object({
+  id: z.string(),
+  workspaceId: z.string(),
+  provider: z.string(),
+  domain: z.string(),
+  verificationStatus: z.string(),
+  verifiedForSendingStatus: z.boolean(),
+  dkimStatus: z.string(),
+  mailFromDomain: z.string(),
+  mailFromStatus: z.string(),
+  stage: z.enum(["basic", "full", "completed"]),
+  dnsRecords: z.array(WorkspaceCustomDomainDnsRecordSchema),
+});
+export type WorkspaceCustomDomain = z.infer<typeof WorkspaceCustomDomainSchema>;
 
-export interface WorkspaceCustomDomainUsage {
-  workspaceId: string;
-  used: number;
-  limit: number;
-  remaining: number;
-}
+export const WorkspaceCustomDomainUsageSchema = z.object({
+  workspaceId: z.string(),
+  used: z.number(),
+  limit: z.number(),
+  remaining: z.number(),
+});
+export type WorkspaceCustomDomainUsage = z.infer<typeof WorkspaceCustomDomainUsageSchema>;
 
-export interface WorkspaceMailCredential {
-  id: string;
-  accountId: string;
-  mailboxId: string;
-  label: string;
-  protocols: string[];
-  createdAt: string | null;
-}
+export const WorkspaceMailCredentialSchema = z.object({
+  id: z.string(),
+  accountId: z.string(),
+  mailboxId: z.string(),
+  label: z.string(),
+  protocols: z.array(z.string()),
+  createdAt: z.string().nullable(),
+});
+export type WorkspaceMailCredential = z.infer<typeof WorkspaceMailCredentialSchema>;
 
-export interface WorkspaceMailCredentialCreated {
-  credential: WorkspaceMailCredential;
-  secret: string;
-}
+export const WorkspaceMailCredentialCreatedSchema = z.object({
+  credential: WorkspaceMailCredentialSchema,
+  secret: z.string(),
+});
+export type WorkspaceMailCredentialCreated = z.infer<typeof WorkspaceMailCredentialCreatedSchema>;
 
-export interface FlywheelOwnerApp {
-  appId: string;
-  retainedRevisionCount: number;
-  blobCount: number;
-  retainedRevisionCountTotal: number;
-  retainedBytes: number;
-  lastUpdatedAt: string;
-}
+export const FlywheelOwnerAppSchema = z.object({
+  appId: z.string(),
+  retainedRevisionCount: z.number(),
+  blobCount: z.number(),
+  retainedRevisionCountTotal: z.number(),
+  retainedBytes: z.number(),
+  lastUpdatedAt: z.string(),
+});
+export type FlywheelOwnerApp = z.infer<typeof FlywheelOwnerAppSchema>;
 
-export interface FlywheelOwnerBlob {
-  blobId: string;
-  currentRevision: number;
-  retainedRevisionCount: number;
-  retainedBytes: number;
-  updatedAt: string;
-}
+export const FlywheelOwnerBlobSchema = z.object({
+  blobId: z.string(),
+  currentRevision: z.number(),
+  retainedRevisionCount: z.number(),
+  retainedBytes: z.number(),
+  updatedAt: z.string(),
+});
+export type FlywheelOwnerBlob = z.infer<typeof FlywheelOwnerBlobSchema>;
 
-export interface FlywheelStorageQuota {
-  usedBytes: number;
-  budgetBytes: number;
-}
+export const FlywheelStorageQuotaSchema = z.object({
+  usedBytes: z.number(),
+  budgetBytes: z.number(),
+});
+export type FlywheelStorageQuota = z.infer<typeof FlywheelStorageQuotaSchema>;
 
-export interface FlywheelAuditEntry {
-  appId: string;
-  blobId: string | null;
-  revision: number | null;
-  action: string;
-  actorAccountId: string;
-  createdAt: string;
-}
+export const FlywheelAuditEntrySchema = z.object({
+  appId: z.string(),
+  blobId: z.string().nullable(),
+  revision: z.number().nullable(),
+  action: z.string(),
+  actorAccountId: z.string(),
+  createdAt: z.string(),
+});
+export type FlywheelAuditEntry = z.infer<typeof FlywheelAuditEntrySchema>;

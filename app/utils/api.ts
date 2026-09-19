@@ -1,4 +1,4 @@
-import type { z } from "zod";
+import { z } from "zod";
 import {
   SnAuthChallengeSchema,
   SnAuthFactorSchema,
@@ -36,6 +36,32 @@ import {
   SubscriptionGroupSchema,
   StellarSubscriptionSchema,
 } from "~/types/subscription";
+import {
+  WorkspaceSchema,
+  WorkspaceMemberSchema,
+  WorkspacePlanStatusSchema,
+  WorkspacePlanOrderSchema,
+  WorkspaceMailboxSchema,
+  WorkspaceMailboxAliasSchema,
+  WorkspaceMailboxForwardingRuleSchema,
+  WorkspaceMailboxQuotaSchema,
+  WorkspaceMailboxUsageSchema,
+  WorkspaceSendUsageSchema,
+  WorkspaceCustomDomainSchema,
+  WorkspaceCustomDomainUsageSchema,
+  WorkspaceMailCredentialSchema,
+  WorkspaceMailCredentialCreatedSchema,
+  FlywheelOwnerAppSchema,
+  FlywheelOwnerBlobSchema,
+  FlywheelStorageQuotaSchema,
+  FlywheelAuditEntrySchema,
+} from "~/types/workspace";
+import {
+  BlockRuleSchema,
+  MailLabelSchema,
+  MailStatsSchema,
+  PostalEmailSchema,
+} from "~/types/mail";
 import {
   PostSchema,
   PublisherSchema,
@@ -1899,7 +1925,7 @@ export async function markAllNotificationsRead(): Promise<void> {
 // Realm API
 // Workspace API — served by WattEngine Valve, separate from Realm APIs.
 export async function fetchWorkspaces(): Promise<Workspace[]> {
-  return fetchJson<Workspace[]>("/valve/workspaces");
+  return fetchJsonZ("/valve/workspaces", WorkspaceSchema.array());
 }
 
 export async function createWorkspace(payload: {
@@ -1908,126 +1934,130 @@ export async function createWorkspace(payload: {
   description?: string;
   type: number;
 }): Promise<Workspace> {
-  return fetchJson<Workspace>("/valve/workspaces", {
+  return fetchJsonZ("/valve/workspaces", WorkspaceSchema, {
     method: "POST",
     body: JSON.stringify(camelToSnake(payload)),
   });
 }
 
 export async function fetchWorkspaceMembers(slug: string): Promise<WorkspaceMember[]> {
-  return fetchJson<WorkspaceMember[]>(`/valve/workspaces/${encodeURIComponent(slug)}/members`);
+  return fetchJsonZ(`/valve/workspaces/${encodeURIComponent(slug)}/members`, WorkspaceMemberSchema.array());
 }
 
 export async function inviteWorkspaceMember(slug: string, accountId: string, role: number): Promise<WorkspaceMember> {
-  return fetchJson<WorkspaceMember>(`/valve/workspaces/${encodeURIComponent(slug)}/members/invite`, {
+  return fetchJsonZ(`/valve/workspaces/${encodeURIComponent(slug)}/members/invite`, WorkspaceMemberSchema, {
     method: "POST",
     body: JSON.stringify({ account_id: accountId, role }),
   });
 }
 
 export async function updateWorkspaceMemberRole(slug: string, accountId: string, role: number): Promise<WorkspaceMember> {
-  return fetchJson<WorkspaceMember>(`/valve/workspaces/${encodeURIComponent(slug)}/members/${encodeURIComponent(accountId)}`, {
+  return fetchJsonZ(`/valve/workspaces/${encodeURIComponent(slug)}/members/${encodeURIComponent(accountId)}`, WorkspaceMemberSchema, {
     method: "PATCH",
     body: JSON.stringify({ role }),
   });
 }
 
 export async function removeWorkspaceMember(slug: string, accountId: string): Promise<void> {
-  await fetchJson<unknown>(`/valve/workspaces/${encodeURIComponent(slug)}/members/${encodeURIComponent(accountId)}`, { method: "DELETE" });
+  await apiFetch(`/valve/workspaces/${encodeURIComponent(slug)}/members/${encodeURIComponent(accountId)}`, { method: "DELETE" });
 }
 
 export async function fetchWorkspaceMailboxes(workspaceId: string): Promise<WorkspaceMailbox[]> {
-  return fetchJson<WorkspaceMailbox[]>(`/postal/mailboxes?workspace_id=${encodeURIComponent(workspaceId)}`);
+  return fetchJsonZ(`/postal/mailboxes?workspace_id=${encodeURIComponent(workspaceId)}`, WorkspaceMailboxSchema.array());
 }
 
 export async function fetchWorkspaceMailboxUsage(workspaceId: string): Promise<WorkspaceMailboxUsage> {
-  return fetchJson<WorkspaceMailboxUsage>(`/postal/workspaces/${encodeURIComponent(workspaceId)}/mailbox-usage`);
+  return fetchJsonZ(`/postal/workspaces/${encodeURIComponent(workspaceId)}/mailbox-usage`, WorkspaceMailboxUsageSchema);
 }
 
 export async function fetchWorkspaceSendUsage(workspaceId: string): Promise<WorkspaceSendUsage> {
-  return fetchJson<WorkspaceSendUsage>(`/postal/workspaces/${encodeURIComponent(workspaceId)}/send-usage`);
+  return fetchJsonZ(`/postal/workspaces/${encodeURIComponent(workspaceId)}/send-usage`, WorkspaceSendUsageSchema);
 }
 
 export async function fetchWorkspaceCustomDomainUsage(workspaceId: string): Promise<WorkspaceCustomDomainUsage> {
-  return fetchJson<WorkspaceCustomDomainUsage>(`/postal/workspaces/${encodeURIComponent(workspaceId)}/custom-domain-usage`);
+  return fetchJsonZ(`/postal/workspaces/${encodeURIComponent(workspaceId)}/custom-domain-usage`, WorkspaceCustomDomainUsageSchema);
 }
 
 export async function fetchMailHost(): Promise<string> {
-  const result = await fetchJson<{ host?: string }>("/postal/mail/host", { skipAuth: true });
+  const result = await fetchJsonZ(
+    "/postal/mail/host",
+    z.object({ host: z.string().optional() }),
+    { skipAuth: true },
+  );
   return result.host?.trim().toLowerCase() || "";
 }
 
 export async function createWorkspaceMailbox(payload: { address: string; workspaceId: string; name?: string; isDefault?: boolean }): Promise<WorkspaceMailbox> {
-  return fetchJson<WorkspaceMailbox>("/postal/mailboxes", { method: "POST", body: JSON.stringify({ address: payload.address, workspace_id: payload.workspaceId, name: payload.name, is_default: payload.isDefault ?? false }) });
+  return fetchJsonZ("/postal/mailboxes", WorkspaceMailboxSchema, { method: "POST", body: JSON.stringify({ address: payload.address, workspace_id: payload.workspaceId, name: payload.name, is_default: payload.isDefault ?? false }) });
 }
 
 export async function fetchMailboxAliases(mailboxId: string): Promise<WorkspaceMailboxAlias[]> {
-  return fetchJson<WorkspaceMailboxAlias[]>(`/postal/mailboxes/${encodeURIComponent(mailboxId)}/aliases`);
+  return fetchJsonZ(`/postal/mailboxes/${encodeURIComponent(mailboxId)}/aliases`, WorkspaceMailboxAliasSchema.array());
 }
 
 export async function createMailboxAlias(payload: { mailboxId: string; customDomainId: string; localPart: string; name?: string }): Promise<WorkspaceMailboxAlias> {
-  return fetchJson<WorkspaceMailboxAlias>(`/postal/mailboxes/${encodeURIComponent(payload.mailboxId)}/aliases`, { method: "POST", body: JSON.stringify({ custom_domain_id: payload.customDomainId, local_part: payload.localPart, name: payload.name }) });
+  return fetchJsonZ(`/postal/mailboxes/${encodeURIComponent(payload.mailboxId)}/aliases`, WorkspaceMailboxAliasSchema, { method: "POST", body: JSON.stringify({ custom_domain_id: payload.customDomainId, local_part: payload.localPart, name: payload.name }) });
 }
 
 export async function deleteMailboxAlias(mailboxId: string, aliasId: string): Promise<void> {
-  await fetchJson<unknown>(`/postal/mailboxes/${encodeURIComponent(mailboxId)}/aliases/${encodeURIComponent(aliasId)}`, { method: "DELETE" });
+  await apiFetch(`/postal/mailboxes/${encodeURIComponent(mailboxId)}/aliases/${encodeURIComponent(aliasId)}`, { method: "DELETE" });
 }
 
 export async function fetchMailboxForwarding(mailboxId: string): Promise<WorkspaceMailboxForwardingRule[]> {
-  return fetchJson<WorkspaceMailboxForwardingRule[]>(`/postal/mailboxes/${encodeURIComponent(mailboxId)}/forwarding`);
+  return fetchJsonZ(`/postal/mailboxes/${encodeURIComponent(mailboxId)}/forwarding`, WorkspaceMailboxForwardingRuleSchema.array());
 }
 
 export async function fetchMailboxQuota(mailboxId: string): Promise<WorkspaceMailboxQuota> {
-  return fetchJson<WorkspaceMailboxQuota>(`/postal/mailboxes/${encodeURIComponent(mailboxId)}/quota`);
+  return fetchJsonZ(`/postal/mailboxes/${encodeURIComponent(mailboxId)}/quota`, WorkspaceMailboxQuotaSchema);
 }
 
 export async function createMailboxForwarding(payload: { mailboxId: string; aliasId: string; destination: string }): Promise<WorkspaceMailboxForwardingRule> {
-  return fetchJson<WorkspaceMailboxForwardingRule>(`/postal/mailboxes/${encodeURIComponent(payload.mailboxId)}/forwarding`, { method: "POST", body: JSON.stringify({ alias_id: payload.aliasId, destination: payload.destination }) });
+  return fetchJsonZ(`/postal/mailboxes/${encodeURIComponent(payload.mailboxId)}/forwarding`, WorkspaceMailboxForwardingRuleSchema, { method: "POST", body: JSON.stringify({ alias_id: payload.aliasId, destination: payload.destination }) });
 }
 
 export async function deleteMailboxForwarding(mailboxId: string, ruleId: string): Promise<void> {
-  await fetchJson<unknown>(`/postal/mailboxes/${encodeURIComponent(mailboxId)}/forwarding/${encodeURIComponent(ruleId)}`, { method: "DELETE" });
+  await apiFetch(`/postal/mailboxes/${encodeURIComponent(mailboxId)}/forwarding/${encodeURIComponent(ruleId)}`, { method: "DELETE" });
 }
 
 export async function fetchWorkspaceCustomDomains(workspaceId: string): Promise<WorkspaceCustomDomain[]> {
-  return fetchJson<WorkspaceCustomDomain[]>(`/postal/custom-domains?workspace_id=${encodeURIComponent(workspaceId)}`);
+  return fetchJsonZ(`/postal/custom-domains?workspace_id=${encodeURIComponent(workspaceId)}`, WorkspaceCustomDomainSchema.array());
 }
 
 export async function createWorkspaceCustomDomain(payload: { workspaceId: string; domain: string }): Promise<WorkspaceCustomDomain> {
-  return fetchJson<WorkspaceCustomDomain>("/postal/custom-domains", { method: "POST", body: JSON.stringify({ workspace_id: payload.workspaceId, domain: payload.domain }) });
+  return fetchJsonZ("/postal/custom-domains", WorkspaceCustomDomainSchema, { method: "POST", body: JSON.stringify({ workspace_id: payload.workspaceId, domain: payload.domain }) });
 }
 
 export async function refreshWorkspaceCustomDomain(domainId: string): Promise<WorkspaceCustomDomain> {
-  return fetchJson<WorkspaceCustomDomain>(`/postal/custom-domains/${encodeURIComponent(domainId)}/refresh`, { method: "POST" });
+  return fetchJsonZ(`/postal/custom-domains/${encodeURIComponent(domainId)}/refresh`, WorkspaceCustomDomainSchema, { method: "POST" });
 }
 
 export async function deleteWorkspaceCustomDomain(domainId: string): Promise<void> {
-  await fetchJson<unknown>(`/postal/custom-domains/${encodeURIComponent(domainId)}`, { method: "DELETE" });
+  await apiFetch(`/postal/custom-domains/${encodeURIComponent(domainId)}`, { method: "DELETE" });
 }
 
 export async function fetchMailCredentials(): Promise<WorkspaceMailCredential[]> {
-  return fetchJson<WorkspaceMailCredential[]>("/postal/credentials");
+  return fetchJsonZ("/postal/credentials", WorkspaceMailCredentialSchema.array());
 }
 
 export async function createMailCredential(payload: { mailboxId: string; label: string; protocols: string[] }): Promise<WorkspaceMailCredentialCreated> {
-  return fetchJson<WorkspaceMailCredentialCreated>("/postal/credentials", { method: "POST", body: JSON.stringify({ mailbox_id: payload.mailboxId, label: payload.label, protocols: payload.protocols }) });
+  return fetchJsonZ("/postal/credentials", WorkspaceMailCredentialCreatedSchema, { method: "POST", body: JSON.stringify({ mailbox_id: payload.mailboxId, label: payload.label, protocols: payload.protocols }) });
 }
 
 export async function revokeMailCredential(credentialId: string): Promise<void> {
-  await fetchJson<unknown>(`/postal/credentials/${encodeURIComponent(credentialId)}`, { method: "DELETE" });
+  await apiFetch(`/postal/credentials/${encodeURIComponent(credentialId)}`, { method: "DELETE" });
 }
 
 // ── Mail (ElecPostal via /postal) ─────────────────────────────────────────
 
 export async function fetchMyMailboxes(): Promise<WorkspaceMailbox[]> {
-  return fetchJson<WorkspaceMailbox[]>("/postal/mailboxes");
+  return fetchJsonZ("/postal/mailboxes", WorkspaceMailboxSchema.array());
 }
 
 export async function fetchMailStats(mailboxId?: string): Promise<MailStats> {
   const endpoint = mailboxId
     ? `/postal/mailboxes/${encodeURIComponent(mailboxId)}/stats`
     : "/postal/emails/stats";
-  return fetchJson<MailStats>(endpoint);
+  return fetchJsonZ(endpoint, MailStatsSchema);
 }
 
 export interface FetchEmailsOptions {
@@ -2054,15 +2084,17 @@ export async function fetchEmails(
   if (options.isStarred !== undefined) params.set("is_starred", String(options.isStarred));
   if (options.labelId) params.set("label_id", options.labelId);
   const query = params.toString();
-  const response = await apiFetch(`/postal/emails${query ? `?${query}` : ""}`);
-  const data = await safeJsonParse<PostalEmail[]>(response);
-  const total = parseInt(response.headers.get("x-total") || "0", 10);
+  const { data, headers } = await fetchJsonZHeaders(
+    `/postal/emails${query ? `?${query}` : ""}`,
+    PostalEmailSchema.array(),
+  );
+  const total = parseInt(headers.get("x-total") || "0", 10);
   const offset = options.offset ?? 0;
   return { items: data, total, hasMore: offset + data.length < total };
 }
 
 export async function fetchEmail(id: string): Promise<PostalEmail> {
-  return fetchJson<PostalEmail>(`/postal/emails/${encodeURIComponent(id)}`);
+  return fetchJsonZ(`/postal/emails/${encodeURIComponent(id)}`, PostalEmailSchema);
 }
 
 export async function sendEmail(payload: SendEmailPayload): Promise<PostalEmail> {
@@ -2080,66 +2112,66 @@ export async function sendEmail(payload: SendEmailPayload): Promise<PostalEmail>
   if (payload.fromAliasId) body.from_alias_id = payload.fromAliasId;
   if (payload.threadId) body.thread_id = payload.threadId;
   if (payload.replyToId) body.reply_to_id = payload.replyToId;
-  return fetchJson<PostalEmail>("/postal/emails", {
+  return fetchJsonZ("/postal/emails", PostalEmailSchema, {
     method: "POST",
     body: JSON.stringify(body),
   });
 }
 
 export async function markEmailRead(id: string, read: boolean): Promise<void> {
-  await fetchJson<unknown>(`/postal/emails/${encodeURIComponent(id)}/${read ? "read" : "unread"}`, { method: "POST" });
+  await apiFetch(`/postal/emails/${encodeURIComponent(id)}/${read ? "read" : "unread"}`, { method: "POST" });
 }
 
 export async function starEmail(id: string, starred: boolean): Promise<void> {
-  await fetchJson<unknown>(`/postal/emails/${encodeURIComponent(id)}/${starred ? "star" : "unstar"}`, { method: "POST" });
+  await apiFetch(`/postal/emails/${encodeURIComponent(id)}/${starred ? "star" : "unstar"}`, { method: "POST" });
 }
 
 export async function moveEmail(id: string, folder: string): Promise<void> {
-  await fetchJson<unknown>(`/postal/emails/${encodeURIComponent(id)}/move`, {
+  await apiFetch(`/postal/emails/${encodeURIComponent(id)}/move`, {
     method: "POST",
     body: JSON.stringify({ folder }),
   });
 }
 
 export async function deleteEmail(id: string): Promise<void> {
-  await fetchJson<unknown>(`/postal/emails/${encodeURIComponent(id)}`, { method: "DELETE" });
+  await apiFetch(`/postal/emails/${encodeURIComponent(id)}`, { method: "DELETE" });
 }
 
 export async function reportSpam(id: string, spam: boolean): Promise<void> {
-  await fetchJson<unknown>(`/postal/emails/${encodeURIComponent(id)}/${spam ? "spam" : "not-spam"}`, { method: "POST" });
+  await apiFetch(`/postal/emails/${encodeURIComponent(id)}/${spam ? "spam" : "not-spam"}`, { method: "POST" });
 }
 
 export async function resendEmail(id: string): Promise<PostalEmail> {
-  return fetchJson<PostalEmail>(`/postal/emails/${encodeURIComponent(id)}/resend`, { method: "POST" });
+  return fetchJsonZ(`/postal/emails/${encodeURIComponent(id)}/resend`, PostalEmailSchema, { method: "POST" });
 }
 
 export async function fetchThread(id: string): Promise<PostalEmail[]> {
-  return fetchJson<PostalEmail[]>(`/postal/threads/${encodeURIComponent(id)}`);
+  return fetchJsonZ(`/postal/threads/${encodeURIComponent(id)}`, PostalEmailSchema.array());
 }
 
 export async function fetchLabels(): Promise<MailLabel[]> {
-  return fetchJson<MailLabel[]>("/postal/labels");
+  return fetchJsonZ("/postal/labels", MailLabelSchema.array());
 }
 
 export async function createLabel(payload: { name: string; color: string }): Promise<MailLabel> {
-  return fetchJson<MailLabel>("/postal/labels", {
+  return fetchJsonZ("/postal/labels", MailLabelSchema, {
     method: "POST",
     body: JSON.stringify({ name: payload.name, color: payload.color }),
   });
 }
 
 export async function deleteLabel(id: string): Promise<void> {
-  await fetchJson<unknown>(`/postal/labels/${encodeURIComponent(id)}`, { method: "DELETE" });
+  await apiFetch(`/postal/labels/${encodeURIComponent(id)}`, { method: "DELETE" });
 }
 
 export async function setEmailLabel(emailId: string, labelId: string, assigned: boolean): Promise<void> {
-  await fetchJson<unknown>(`/postal/emails/${encodeURIComponent(emailId)}/labels/${encodeURIComponent(labelId)}`, {
+  await apiFetch(`/postal/emails/${encodeURIComponent(emailId)}/labels/${encodeURIComponent(labelId)}`, {
     method: assigned ? "POST" : "DELETE",
   });
 }
 
 export async function fetchBlockRules(): Promise<BlockRule[]> {
-  return fetchJson<BlockRule[]>("/postal/blocklist");
+  return fetchJsonZ("/postal/blocklist", BlockRuleSchema.array());
 }
 
 export async function createBlockRule(payload: {
@@ -2148,7 +2180,7 @@ export async function createBlockRule(payload: {
   workspaceId?: string;
   pattern: string;
 }): Promise<BlockRule> {
-  return fetchJson<BlockRule>("/postal/blocklist", {
+  return fetchJsonZ("/postal/blocklist", BlockRuleSchema, {
     method: "POST",
     body: JSON.stringify({
       scope: payload.scope,
@@ -2160,7 +2192,7 @@ export async function createBlockRule(payload: {
 }
 
 export async function deleteBlockRule(id: string): Promise<void> {
-  await fetchJson<unknown>(`/postal/blocklist/${encodeURIComponent(id)}`, { method: "DELETE" });
+  await apiFetch(`/postal/blocklist/${encodeURIComponent(id)}`, { method: "DELETE" });
 }
 
 /**
@@ -2176,31 +2208,31 @@ export async function fetchUnreadInboxCount(mailboxId: string): Promise<number> 
 }
 
 export async function fetchFlywheelApps(workspaceId: string): Promise<FlywheelOwnerApp[]> {
-  return fetchJson<FlywheelOwnerApp[]>(`/flywheel/workspaces/${encodeURIComponent(workspaceId)}/apps`);
+  return fetchJsonZ(`/flywheel/workspaces/${encodeURIComponent(workspaceId)}/apps`, FlywheelOwnerAppSchema.array());
 }
 
 export async function fetchFlywheelStorageQuota(workspaceId: string): Promise<FlywheelStorageQuota> {
-  return fetchJson<FlywheelStorageQuota>(`/flywheel/workspaces/${encodeURIComponent(workspaceId)}/quota`);
+  return fetchJsonZ(`/flywheel/workspaces/${encodeURIComponent(workspaceId)}/quota`, FlywheelStorageQuotaSchema);
 }
 
 export async function fetchFlywheelBlobs(workspaceId: string, appId: string): Promise<FlywheelOwnerBlob[]> {
-  return fetchJson<FlywheelOwnerBlob[]>(`/flywheel/workspaces/${encodeURIComponent(workspaceId)}/apps/${encodeURIComponent(appId)}/management/blobs`);
+  return fetchJsonZ(`/flywheel/workspaces/${encodeURIComponent(workspaceId)}/apps/${encodeURIComponent(appId)}/management/blobs`, FlywheelOwnerBlobSchema.array());
 }
 
 export async function fetchFlywheelAudit(workspaceId: string, appId: string): Promise<FlywheelAuditEntry[]> {
-  return fetchJson<FlywheelAuditEntry[]>(`/flywheel/workspaces/${encodeURIComponent(workspaceId)}/apps/${encodeURIComponent(appId)}/management/audit`);
+  return fetchJsonZ(`/flywheel/workspaces/${encodeURIComponent(workspaceId)}/apps/${encodeURIComponent(appId)}/management/audit`, FlywheelAuditEntrySchema.array());
 }
 
 export async function deleteFlywheelBlob(workspaceId: string, appId: string, blobId: string): Promise<void> {
-  await fetchJson<unknown>(`/flywheel/workspaces/${encodeURIComponent(workspaceId)}/apps/${encodeURIComponent(appId)}/management/blobs/${encodeURIComponent(blobId)}`, { method: "DELETE" });
+  await apiFetch(`/flywheel/workspaces/${encodeURIComponent(workspaceId)}/apps/${encodeURIComponent(appId)}/management/blobs/${encodeURIComponent(blobId)}`, { method: "DELETE" });
 }
 
 export async function fetchWorkspacePlanStatus(slug: string): Promise<WorkspacePlanStatus> {
-  return fetchJson<WorkspacePlanStatus>(`/valve/workspaces/${encodeURIComponent(slug)}/plan/status`);
+  return fetchJsonZ(`/valve/workspaces/${encodeURIComponent(slug)}/plan/status`, WorkspacePlanStatusSchema);
 }
 
 export async function subscribeWorkspacePlan(slug: string, plan: number): Promise<WorkspacePlanOrder> {
-  return fetchJson<WorkspacePlanOrder>(`/valve/workspaces/${encodeURIComponent(slug)}/plan/subscribe`, {
+  return fetchJsonZ(`/valve/workspaces/${encodeURIComponent(slug)}/plan/subscribe`, WorkspacePlanOrderSchema, {
     method: "POST",
     body: JSON.stringify({ plan }),
   });
