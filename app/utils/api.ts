@@ -1,3 +1,5 @@
+import type { z } from "zod";
+import { SnAuthChallengeSchema } from "~/types/auth";
 import type {
   SnAuthChallenge,
   SnAuthFactor,
@@ -249,17 +251,47 @@ export async function fetchJson<T>(
   return safeJsonParse<T>(response);
 }
 
+/**
+ * Fetch JSON and validate the response against a Zod schema.
+ *
+ * The response is case-converted (snake_case → camelCase) first, so schemas
+ * describe the camelCase shape callers consume. A schema mismatch (backend
+ * contract drift) fails loudly with a CONTRACT_MISMATCH ApiError instead of
+ * surfacing as `undefined` deep in a component.
+ */
+export async function fetchJsonZ<T>(
+  endpoint: string,
+  schema: z.ZodType<T>,
+  options: ApiFetchOptions = {},
+): Promise<T> {
+  const data = await safeJsonParse<unknown>(await apiFetch(endpoint, options));
+  const parsed = schema.safeParse(data);
+  if (!parsed.success) {
+    const issues = parsed.error.issues
+      .map((issue) => {
+        const at = issue.path.length ? issue.path.join(".") : "(root)";
+        return `${at}: ${issue.message}`;
+      })
+      .join("; ");
+    throw new ApiError(
+      `API contract mismatch for ${endpoint} — ${issues}`,
+      502,
+      { code: "CONTRACT_MISMATCH" },
+    );
+  }
+  return parsed.data;
+}
+
 // Auth API
 export async function createChallenge(
   account: string,
   deviceInfo: Record<string, unknown>,
 ): Promise<SnAuthChallenge> {
-  const response = await apiFetch("/stargate/auth/challenge", {
+  return fetchJsonZ("/stargate/auth/challenge", SnAuthChallengeSchema, {
     method: "POST",
     body: JSON.stringify({ account, ...deviceInfo }),
     skipAuth: true,
   });
-  return safeJsonParse<SnAuthChallenge>(response);
 }
 
 export async function getFactors(challengeId: string): Promise<SnAuthFactor[]> {

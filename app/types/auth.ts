@@ -1,11 +1,14 @@
-export interface SnAuthFactor {
-  id: string;
-  type: number;
-  name?: string;
-  enabledAt?: string | null;
-  createdAt?: string;
-  createdResponse?: Record<string, unknown>;
-}
+import { z } from "zod";
+
+export const SnAuthFactorSchema = z.object({
+  id: z.string(),
+  type: z.number(),
+  name: z.string().optional(),
+  enabledAt: z.string().nullable().optional(),
+  createdAt: z.string().optional(),
+  createdResponse: z.record(z.string(), z.unknown()).optional(),
+});
+export type SnAuthFactor = z.infer<typeof SnAuthFactorSchema>;
 
 /** Padlock-local passkey credential (not the Passkey auth factor). */
 export interface SnPasskey {
@@ -16,18 +19,19 @@ export interface SnPasskey {
   updatedAt?: string;
 }
 
-export interface SnAuthChallenge {
-  id: string;
-  stepRemain?: number;
-  stepTotal?: number;
-  riskLevel?: number;
-  factors?: SnAuthFactor[];
-  blacklistFactors?: string[];
-  doneAt?: string | null;
-  grantAid?: string | null;
-  grantToken?: string | null;
-  accountId?: string;
-}
+export const SnAuthChallengeSchema = z.object({
+  id: z.string(),
+  stepRemain: z.number().optional(),
+  stepTotal: z.number().optional(),
+  riskLevel: z.number().optional(),
+  factors: z.array(SnAuthFactorSchema).optional(),
+  blacklistFactors: z.array(z.string()).optional(),
+  doneAt: z.string().nullable().optional(),
+  grantAid: z.string().nullable().optional(),
+  grantToken: z.string().nullable().optional(),
+  accountId: z.string().optional(),
+});
+export type SnAuthChallenge = z.infer<typeof SnAuthChallengeSchema>;
 
 export interface SnAuthToken {
   token: string;
