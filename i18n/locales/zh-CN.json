@@ -221,6 +221,13 @@
     "greetingNight": "夜深了",
     "shortcuts": "快捷入口",
     "viewAll": "查看全部",
+    "customize": {
+      "title": "自定义仪表盘",
+      "reset": "重置",
+      "moveUp": "上移",
+      "moveDown": "下移",
+      "toggle": "显示或隐藏 {module}"
+    },
     "weather": {
       "title": "天气",
       "clear": "晴",
@@ -250,6 +257,25 @@
       "title": "今日运势",
       "notCheckedIn": "去神庙抽取今日运势",
       "drawFortune": "抽取今日运势"
+    },
+    "friends": {
+      "title": "好友",
+      "empty": "还没有好友",
+      "failed": "无法加载好友",
+      "online": "在线",
+      "offline": "离线",
+      "idle": "离开",
+      "busy": "忙碌",
+      "doNotDisturb": "勿扰",
+      "invisible": "隐身"
+    },
+    "chats": {
+      "title": "最近聊天",
+      "empty": "暂无聊天",
+      "failed": "无法加载聊天"
+    },
+    "fortuneTrend": {
+      "title": "运势趋势"
     },
     "featured": {
       "title": "精选帖子",

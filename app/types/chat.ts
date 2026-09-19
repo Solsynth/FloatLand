@@ -5,6 +5,7 @@ export interface SnChatRoom {
   id: string
   name: string
   description?: string
+  slug?: string
   type: number
   realmId?: string
   realm?: Realm | null

@@ -10,10 +10,15 @@
       </section>
 
       <!-- Widgets: fluid, but capped so cards stay readable on ultra-wide -->
+      <div class="mx-auto mt-4 flex w-full max-w-[100rem] items-center justify-end">
+        <DashboardCustomize />
+      </div>
       <div class="mx-auto grid w-full max-w-[100rem] gap-4 md:grid-cols-2 xl:grid-cols-3">
-        <DashboardWeather />
-        <DashboardOracle v-if="isAuthenticated" />
-        <DashboardNotifications v-if="isAuthenticated" />
+        <component
+          :is="moduleComponents[id]"
+          v-for="id in visibleModules"
+          :key="id"
+        />
       </div>
 
       <div class="mx-auto mt-4 w-full max-w-[100rem]">
@@ -24,9 +29,41 @@
 </template>
 
 <script setup lang="ts">
+import {
+  DashboardWeather,
+  DashboardFriends,
+  DashboardOracle,
+  FortuneTrendCard,
+  DashboardChats,
+  DashboardNotifications,
+} from "#components";
+import { DASHBOARD_MODULES, useDashboardConfig } from "~/composables/useDashboardConfig";
+
 const { t } = useI18n();
 const auth = useAuth();
 const { isAuthenticated } = auth;
+
+const moduleComponents = {
+  weather: DashboardWeather,
+  friends: DashboardFriends,
+  oracle: DashboardOracle,
+  fortuneTrend: FortuneTrendCard,
+  chats: DashboardChats,
+  notifications: DashboardNotifications,
+} as const;
+
+const moduleById = Object.fromEntries(
+  DASHBOARD_MODULES.map((module) => [module.id, module]),
+) as Record<(typeof DASHBOARD_MODULES)[number]["id"], (typeof DASHBOARD_MODULES)[number]>;
+
+const { order } = useDashboardConfig();
+
+const visibleModules = computed(() =>
+  order.value.filter((id) => {
+    const module = moduleById[id];
+    return module && (!module.requiresAuth || isAuthenticated.value);
+  }),
+);
 
 const seoTitle = computed(() => t("dashboard.seoTitle"));
 const seoDescription = computed(() => t("dashboard.seoDescription"));

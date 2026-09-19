@@ -20,7 +20,6 @@
 </template>
 
 <script setup lang="ts">
-import { IconCreditCard } from "#components";
 import { useMainNav } from "~/composables/useMainNav";
 
 const { t } = useI18n();
@@ -48,7 +47,6 @@ const links = computed(() => {
         icon: item.icon,
         requiresAuth: item.requiresAuth,
       })),
-    { href: "/pricing", label: t("nav.pricing"), icon: IconCreditCard },
   ];
 
   return items.filter((item) => !item.requiresAuth || isAuthenticated.value);

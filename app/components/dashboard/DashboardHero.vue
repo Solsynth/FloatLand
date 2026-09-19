@@ -1,25 +1,32 @@
 <template>
   <div class="flex flex-col items-center gap-5 text-center">
-    <!-- Sun / moon glyph — the one true-color moment, reflects real time -->
-    <component
-      :is="isDay ? IconSun : IconMoonStar"
-      class="h-8 w-8"
-      :class="isDay ? 'text-amber-400' : 'text-indigo-400'"
-      :aria-hidden="true"
-    />
+    <!-- Time-dependent content renders client-only: the server's local time
+         (UTC) often disagrees with the visitor's, and hydrating a different
+         day/night icon into the SSR DOM left a corrupted hybrid (sun rays
+         plus a moon crescent). The clock ticks client-side anyway. -->
+    <ClientOnly>
+      <!-- Sun / moon glyph — the one true-color moment, reflects real time -->
+      <component
+        :is="isDay ? IconSun : IconMoonStar"
+        :key="isDay ? 'sun' : 'moon'"
+        class="h-8 w-8"
+        :class="isDay ? 'text-amber-400' : 'text-indigo-400'"
+        :aria-hidden="true"
+      />
 
-    <!-- Greeting -->
-    <p class="text-sm font-medium text-base-content/70">
-      {{ greeting }}<template v-if="displayName">, {{ displayName }}</template>
-    </p>
+      <!-- Greeting -->
+      <p class="text-sm font-medium text-base-content/70">
+        {{ greeting }}<template v-if="displayName">, {{ displayName }}</template>
+      </p>
 
-    <!-- Clock — instrumental mono, seconds recede -->
-    <p class="dash-clock text-base-content">
-      <span class="text-[clamp(3.5rem,10vw,6.5rem)]">{{ hm }}</span>
-      <span class="text-[clamp(1.5rem,4vw,2.5rem)] text-base-content/45">:{{ ss }}</span>
-    </p>
+      <!-- Clock — instrumental mono, seconds recede -->
+      <p class="dash-clock text-base-content">
+        <span class="text-[clamp(3.5rem,10vw,6.5rem)]">{{ hm }}</span>
+        <span class="text-[clamp(1.5rem,4vw,2.5rem)] text-base-content/45">:{{ ss }}</span>
+      </p>
 
-    <p class="text-sm font-medium text-base-content/50">{{ dateLabel }}</p>
+      <p class="text-sm font-medium text-base-content/50">{{ dateLabel }}</p>
+    </ClientOnly>
 
     <!-- Search — flat pill, hairline border, primary focus -->
     <form class="w-full max-w-md" role="search" @submit.prevent="submit">

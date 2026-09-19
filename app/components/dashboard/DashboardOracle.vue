@@ -23,7 +23,7 @@
     </div>
 
     <div v-else class="mt-4 space-y-2">
-      <span class="text-sm font-bold" :style="{ color: getLevelColor(result.level) }">
+      <span class="text-sm font-bold" :style="{ color: fortuneLevelColor(result.level) }">
         {{ getLevelLabel(result.level) }}
       </span>
       <p
@@ -41,6 +41,7 @@
 import { IconChurch, IconFlame } from "#components";
 import type { CheckInResult } from "~/utils/api";
 import { getCheckInResultToday } from "~/utils/api";
+import { fortuneLevelColor } from "~/utils/fortune";
 
 const { t } = useI18n();
 const auth = useAuth();
@@ -50,15 +51,6 @@ const loading = ref(false);
 const error = ref(false);
 const result = ref<CheckInResult | null>(null);
 
-const levelColors: Record<number, string> = {
-  0: "#7A587D",
-  1: "#79709C",
-  2: "#8DB7EF",
-  3: "#FEDE81",
-  4: "#E04A46",
-  5: "#FFB7C0",
-};
-
 const levelLabels: Record<number, string> = {
   0: "Terrible Fortune",
   1: "Bad Fortune",
@@ -67,10 +59,6 @@ const levelLabels: Record<number, string> = {
   4: "Great Fortune",
   5: "Best of Luck",
 };
-
-function getLevelColor(level: number): string {
-  return levelColors[level] ?? "#8DB7EF";
-}
 
 function getLevelLabel(level: number): string {
   return levelLabels[level] ?? "Fortune";

@@ -214,6 +214,13 @@
     "greetingNight": "Good night",
     "shortcuts": "Shortcuts",
     "viewAll": "View all",
+    "customize": {
+      "title": "Customize dashboard",
+      "reset": "Reset",
+      "moveUp": "Move up",
+      "moveDown": "Move down",
+      "toggle": "Show or hide {module}"
+    },
     "weather": {
       "title": "Weather",
       "clear": "Clear",
@@ -243,6 +250,25 @@
       "title": "Today's Fortune",
       "notCheckedIn": "Draw today's fortune at the temple",
       "drawFortune": "Draw today's fortune"
+    },
+    "friends": {
+      "title": "Friends",
+      "empty": "No friends yet",
+      "failed": "Could not load friends",
+      "online": "Online",
+      "offline": "Offline",
+      "idle": "Idle",
+      "busy": "Busy",
+      "doNotDisturb": "Do not disturb",
+      "invisible": "Invisible"
+    },
+    "chats": {
+      "title": "Recent chats",
+      "empty": "No chats yet",
+      "failed": "Could not load chats"
+    },
+    "fortuneTrend": {
+      "title": "Fortune trend"
     },
     "featured": {
       "title": "Featured Posts",

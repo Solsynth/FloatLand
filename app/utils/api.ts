@@ -1515,6 +1515,37 @@ export async function deleteRelationship(relatedId: string): Promise<void> {
   });
 }
 
+// Friends overview (dashboard module, mirrors the Solian clients).
+export interface FriendOverviewItem {
+  account: SnAccount;
+  status: {
+    id: string;
+    attitude: number;
+    isOnline: boolean;
+    isIdle: boolean;
+    type: number;
+    label: string;
+    updatedAt: string;
+  } | null;
+  activities: Array<{
+    id: string;
+    type: string;
+    title?: string | null;
+    subtitle?: string | null;
+    caption?: string | null;
+    smallImage?: string | null;
+    largeImage?: string | null;
+  }>;
+}
+
+export async function fetchFriendsOverview(): Promise<FriendOverviewItem[]> {
+  const response = await apiFetch("/passport/friends/overview");
+  const data = await safeJsonParse<unknown>(response);
+  return snakeToCamel<FriendOverviewItem[]>(data) ?? [];
+}
+
+
+
 // Wallet Types
 export interface WalletPocket {
   id: string;
@@ -3527,6 +3558,14 @@ export async function fetchChatRoomBySlug(
   const data = await safeJsonParse<SnChatRoom>(response);
   return snakeToCamel(data) as SnChatRoom;
  }
+
+export async function fetchChatRooms(take = 20): Promise<SnChatRoom[]> {
+  const response = await apiFetch(
+    `/messager/chat/rooms?offset=0&take=${take}`,
+  );
+  const data = await safeJsonParse<SnChatRoom[]>(response);
+  return (data ?? []).map((room) => snakeToCamel(room)) as SnChatRoom[];
+}
 
 // Device Authorization Flow (RFC 8628)
 export interface DeviceCodeStatus {
