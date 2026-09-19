@@ -1,5 +1,16 @@
 import type { z } from "zod";
-import { SnAuthChallengeSchema } from "~/types/auth";
+import {
+  SnAuthChallengeSchema,
+  SnAuthFactorSchema,
+  SnAuthTokenSchema,
+  SnAccountSchema,
+  SnPasskeySchema,
+  QrLoginGenerateResponseSchema,
+  QrLoginStatusResponseSchema,
+  CaptchaConfigSchema,
+  PasskeyAuthenticationOptionsSchema,
+  PasskeyRegistrationOptionsSchema,
+} from "~/types/auth";
 import type {
   SnAuthChallenge,
   SnAuthFactor,
@@ -27,6 +38,8 @@ import type {
   SnAccountTimelineItem,
   AccountBoardItem,
   PublicAccountConnection,
+  PasskeyAuthenticationOptions,
+  PasskeyRegistrationOptions,
 } from "~/types/auth";
 
 export type {
@@ -295,20 +308,21 @@ export async function createChallenge(
 }
 
 export async function getFactors(challengeId: string): Promise<SnAuthFactor[]> {
-  const response = await apiFetch(
+  return fetchJsonZ(
     `/stargate/auth/challenge/${challengeId}/factors`,
+    SnAuthFactorSchema.array(),
     { skipAuth: true },
   );
-  return safeJsonParse<SnAuthFactor[]>(response);
 }
 
 export async function getChallenge(
   challengeId: string,
 ): Promise<SnAuthChallenge> {
-  const response = await apiFetch(`/stargate/auth/challenge/${challengeId}`, {
-    skipAuth: true,
-  });
-  return safeJsonParse<SnAuthChallenge>(response);
+  return fetchJsonZ(
+    `/stargate/auth/challenge/${challengeId}`,
+    SnAuthChallengeSchema,
+    { skipAuth: true },
+  );
 }
 
 export async function requestFactorCode(
@@ -325,52 +339,15 @@ export async function requestFactorCode(
   return safeJsonParse<unknown>(response);
 }
 
-export interface PasskeyAuthenticationOptions {
-  challenge: string;
-  rpId: string;
-  allowCredentials: { type: string; id: string; transports?: string[] }[];
-  userVerification: string;
-  timeout?: number;
-  /** Present for discoverable (username-less) passkey login. */
-  authChallengeId?: string;
-}
-
-export interface PasskeyRegistrationOptions {
-  challenge: string;
-  rpId: string;
-  rpName: string;
-  userId: string;
-  userName: string;
-  displayName: string;
-  pubKeyCredParams: { type: string; alg: number }[];
-  timeout?: number;
-  authenticatorSelection?: {
-    authenticatorAttachment?: string;
-    residentKey?: string;
-    userVerification?: string;
-  };
-}
-
 /** Account-known challenge: start WebAuthn assertion for a username login. */
 export async function startPasskeyAuthentication(
   challengeId: string,
 ): Promise<PasskeyAuthenticationOptions> {
-  const response = await apiFetch(
+  return fetchJsonZ(
     `/stargate/auth/challenge/${challengeId}/passkey/start`,
-    {
-      method: "POST",
-      skipAuth: true,
-    },
+    PasskeyAuthenticationOptionsSchema,
+    { method: "POST", skipAuth: true },
   );
-  // safeJsonParse already converts snake_case → camelCase
-  const data = await safeJsonParse<PasskeyAuthenticationOptions>(response);
-  return {
-    challenge: data.challenge,
-    rpId: data.rpId,
-    allowCredentials: data.allowCredentials ?? [],
-    userVerification: data.userVerification ?? "preferred",
-    timeout: data.timeout,
-  };
 }
 
 /**
@@ -385,8 +362,9 @@ export async function completePasskeyAuthentication(
   signature: string,
   userHandle?: string | null,
 ): Promise<SnAuthChallenge> {
-  const response = await apiFetch(
+  return fetchJsonZ(
     `/stargate/auth/challenge/${challengeId}/passkey/complete`,
+    SnAuthChallengeSchema,
     {
       method: "POST",
       body: JSON.stringify(
@@ -401,7 +379,6 @@ export async function completePasskeyAuthentication(
       skipAuth: true,
     },
   );
-  return safeJsonParse<SnAuthChallenge>(response);
 }
 
 /** Discoverable (resident) passkey login without a username. */
@@ -412,7 +389,7 @@ export async function startDiscoverablePasskeyAuthentication(payload: {
   audiences?: string[];
   scopes?: string[];
 }): Promise<PasskeyAuthenticationOptions> {
-  const response = await apiFetch("/stargate/auth/passkey/start", {
+  return fetchJsonZ("/stargate/auth/passkey/start", PasskeyAuthenticationOptionsSchema, {
     method: "POST",
     body: JSON.stringify(
       camelToSnake({
@@ -425,15 +402,6 @@ export async function startDiscoverablePasskeyAuthentication(payload: {
     ),
     skipAuth: true,
   });
-  const data = await safeJsonParse<PasskeyAuthenticationOptions>(response);
-  return {
-    challenge: data.challenge,
-    rpId: data.rpId,
-    allowCredentials: data.allowCredentials ?? [],
-    userVerification: data.userVerification ?? "preferred",
-    timeout: data.timeout,
-    authChallengeId: data.authChallengeId,
-  };
 }
 
 export async function completeDiscoverablePasskeyAuthentication(
@@ -444,8 +412,9 @@ export async function completeDiscoverablePasskeyAuthentication(
   signature: string,
   userHandle?: string | null,
 ): Promise<SnAuthChallenge> {
-  const response = await apiFetch(
+  return fetchJsonZ(
     `/stargate/auth/passkey/${challengeId}/complete`,
+    SnAuthChallengeSchema,
     {
       method: "POST",
       body: JSON.stringify(
@@ -460,7 +429,6 @@ export async function completeDiscoverablePasskeyAuthentication(
       skipAuth: true,
     },
   );
-  return safeJsonParse<SnAuthChallenge>(response);
 }
 
 // ── QR Login (web polls; mobile scans/approves) ─────────────────────────────
@@ -500,30 +468,34 @@ export async function generateQrLogin(payload: {
   audiences?: string[];
   scopes?: string[];
 }): Promise<QrLoginGenerateResponse> {
-  const response = await apiFetch("/stargate/auth/qr/generate", {
-    method: "POST",
-    body: JSON.stringify(
-      camelToSnake({
-        deviceId: payload.deviceId,
-        deviceName: payload.deviceName,
-        platform: payload.platform ?? 1, // ClientPlatform.Web
-        audiences: payload.audiences ?? [],
-        scopes: payload.scopes ?? [],
-      }),
-    ),
-    skipAuth: true,
-  });
-  return safeJsonParse<QrLoginGenerateResponse>(response);
+  return fetchJsonZ(
+    "/stargate/auth/qr/generate",
+    QrLoginGenerateResponseSchema,
+    {
+      method: "POST",
+      body: JSON.stringify(
+        camelToSnake({
+          deviceId: payload.deviceId,
+          deviceName: payload.deviceName,
+          platform: payload.platform ?? 1, // ClientPlatform.Web
+          audiences: payload.audiences ?? [],
+          scopes: payload.scopes ?? [],
+        }),
+      ),
+      skipAuth: true,
+    },
+  );
 }
 
 /** Poll QR challenge status (web cannot use WebSocket while unauthenticated). */
 export async function getQrLoginStatus(
   qrChallengeId: string,
 ): Promise<QrLoginStatusResponse> {
-  const response = await apiFetch(`/stargate/auth/qr/${qrChallengeId}`, {
-    skipAuth: true,
-  });
-  return safeJsonParse<QrLoginStatusResponse>(response);
+  return fetchJsonZ(
+    `/stargate/auth/qr/${qrChallengeId}`,
+    QrLoginStatusResponseSchema,
+    { skipAuth: true },
+  );
 }
 
 /** Start WebAuthn registration (requires enabled Passkey factor). */
@@ -533,11 +505,11 @@ export async function startPasskeyRegistration(payload: {
   rpId: string;
   rpName: string;
 }): Promise<PasskeyRegistrationOptions> {
-  const response = await apiFetch("/stargate/factors/passkey/start", {
-    method: "POST",
-    body: JSON.stringify(camelToSnake(payload)),
-  });
-  return safeJsonParse<PasskeyRegistrationOptions>(response);
+  return fetchJsonZ(
+    "/stargate/factors/passkey/start",
+    PasskeyRegistrationOptionsSchema,
+    { method: "POST", body: JSON.stringify(camelToSnake(payload)) },
+  );
 }
 
 export async function completePasskeyRegistration(payload: {
@@ -546,27 +518,26 @@ export async function completePasskeyRegistration(payload: {
   clientDataJson: string;
   attestationObject: string;
 }): Promise<SnPasskey> {
-  const response = await apiFetch("/stargate/factors/passkey/complete", {
-    method: "POST",
-    body: JSON.stringify(camelToSnake(payload)),
-  });
-  return safeJsonParse<SnPasskey>(response);
+  return fetchJsonZ(
+    "/stargate/factors/passkey/complete",
+    SnPasskeySchema,
+    { method: "POST", body: JSON.stringify(camelToSnake(payload)) },
+  );
 }
 
 export async function fetchPasskeys(): Promise<SnPasskey[]> {
-  const response = await apiFetch("/stargate/factors/passkey");
-  return safeJsonParse<SnPasskey[]>(response);
+  return fetchJsonZ("/stargate/factors/passkey", SnPasskeySchema.array());
 }
 
 export async function updatePasskey(
   passkeyId: string,
   label: string,
 ): Promise<SnPasskey> {
-  const response = await apiFetch(`/stargate/factors/passkey/${passkeyId}`, {
-    method: "PATCH",
-    body: JSON.stringify({ label }),
-  });
-  return safeJsonParse<SnPasskey>(response);
+  return fetchJsonZ(
+    `/stargate/factors/passkey/${passkeyId}`,
+    SnPasskeySchema,
+    { method: "PATCH", body: JSON.stringify({ label }) },
+  );
 }
 
 export async function deletePasskey(passkeyId: string): Promise<void> {
@@ -580,39 +551,33 @@ export async function verifyChallenge(
   factorId: string,
   password: string,
 ): Promise<SnAuthChallenge> {
-  const response = await apiFetch(`/stargate/auth/challenge/${challengeId}`, {
-    method: "PATCH",
-    body: JSON.stringify(camelToSnake({ factorId, password })),
-    skipAuth: true,
-  });
-  return safeJsonParse<SnAuthChallenge>(response);
+  return fetchJsonZ(
+    `/stargate/auth/challenge/${challengeId}`,
+    SnAuthChallengeSchema,
+    {
+      method: "PATCH",
+      body: JSON.stringify(camelToSnake({ factorId, password })),
+      skipAuth: true,
+    },
+  );
 }
 
 export async function getToken(code: string): Promise<SnAuthToken> {
-  const response = await apiFetch("/stargate/auth/token", {
-    method: "POST",
-    body: JSON.stringify({ grant_type: "authorization_code", code }),
-    skipAuth: true,
-  });
-
-  const data = await safeJsonParse<{
-    token: string;
-    expires_in?: number;
-    refresh_expires_in?: number;
-  }>(response);
-
-  // The proxy stored the token pair server-side and set our `sid` cookie. The
-  // client only keeps display metadata; the pair lives in the session store.
-  return {
-    token: data.token,
-    expiresIn: data.expires_in,
-    refreshExpiresIn: data.refresh_expires_in,
-  };
+  // The proxy stored the token pair server-side and set our `sid` cookie. It
+  // returns display metadata in camelCase; the pair lives in the session store.
+  return fetchJsonZ(
+    "/stargate/auth/token",
+    SnAuthTokenSchema,
+    {
+      method: "POST",
+      body: JSON.stringify({ grant_type: "authorization_code", code }),
+      skipAuth: true,
+    },
+  );
 }
 
 export async function getUserInfo(): Promise<SnAccount> {
-  const response = await apiFetch("/stargate/accounts/me");
-  return safeJsonParse<SnAccount>(response);
+  return fetchJsonZ("/stargate/accounts/me", SnAccountSchema);
 }
 
 // Unified logout: the proxy clears the server session + cookie.
@@ -660,8 +625,9 @@ export async function requestPasswordReset(
 }
 
 export async function getCaptchaConfig(): Promise<CaptchaConfig> {
-  const response = await apiFetch("/stargate/auth/captcha", { skipAuth: true });
-  return safeJsonParse<CaptchaConfig>(response);
+  return fetchJsonZ("/stargate/auth/captcha", CaptchaConfigSchema, {
+    skipAuth: true,
+  });
 }
 
 export interface AuthorizeClientInfo {

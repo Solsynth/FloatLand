@@ -11,13 +11,14 @@ export const SnAuthFactorSchema = z.object({
 export type SnAuthFactor = z.infer<typeof SnAuthFactorSchema>;
 
 /** Padlock-local passkey credential (not the Passkey auth factor). */
-export interface SnPasskey {
-  id: string;
-  label: string;
-  accountId?: string;
-  createdAt?: string;
-  updatedAt?: string;
-}
+export const SnPasskeySchema = z.object({
+  id: z.string(),
+  label: z.string(),
+  accountId: z.string().optional(),
+  createdAt: z.string().optional(),
+  updatedAt: z.string().optional(),
+});
+export type SnPasskey = z.infer<typeof SnPasskeySchema>;
 
 export const SnAuthChallengeSchema = z.object({
   id: z.string(),
@@ -33,94 +34,153 @@ export const SnAuthChallengeSchema = z.object({
 });
 export type SnAuthChallenge = z.infer<typeof SnAuthChallengeSchema>;
 
-export interface SnAuthToken {
-  token: string;
-  expiresIn?: number;
-  refreshToken?: string;
-  refreshExpiresIn?: number;
-  expiresAt?: string;
-  refreshExpiresAt?: string;
-}
+export const PasskeyAuthenticationOptionsSchema = z.object({
+  challenge: z.string(),
+  rpId: z.string(),
+  allowCredentials: z
+    .array(
+      z.object({
+        type: z.string(),
+        id: z.string(),
+        transports: z.array(z.string()).optional(),
+      }),
+    )
+    .default([]),
+  userVerification: z.string().default("preferred"),
+  timeout: z.number().optional(),
+  /** Present for discoverable (username-less) passkey login. */
+  authChallengeId: z.string().optional(),
+});
+export type PasskeyAuthenticationOptions = z.infer<typeof PasskeyAuthenticationOptionsSchema>;
 
-export interface SnAccountProfile {
-  id?: string;
-  bio?: string;
-  firstName?: string;
-  middleName?: string;
-  lastName?: string;
-  gender?: string;
-  pronouns?: string;
-  location?: string;
-  timeZone?: string;
-  birthday?: string | null;
-  lastSeenAt?: string | null;
-  picture?: { id: string } | null;
-  background?: { id: string } | null;
-  links?: { url: string; name?: string; label?: string }[];
-  verification?: {
-    type: number;
-    title?: string;
-    description?: string;
-    verifiedBy?: string;
-  } | null;
-  /** @deprecated API returns `verification`; kept for older payloads */
-  verified?: {
-    type: number;
-    title?: string;
-    description?: string;
-    verifiedBy?: string;
-  } | null;
-  activeBadge?: SnAccountBadge | null;
-  level?: number;
-  experience?: number;
-  levelingProgress?: number;
-  socialCredits?: number;
-  socialCreditsLevel?: number;
-  createdAt?: string;
-  updatedAt?: string;
-}
+export const PasskeyRegistrationOptionsSchema = z.object({
+  challenge: z.string(),
+  rpId: z.string(),
+  rpName: z.string(),
+  userId: z.string(),
+  userName: z.string(),
+  displayName: z.string(),
+  pubKeyCredParams: z.array(
+    z.object({ type: z.string(), alg: z.number() }),
+  ),
+  timeout: z.number().optional(),
+  authenticatorSelection: z
+    .object({
+      authenticatorAttachment: z.string().optional(),
+      residentKey: z.string().optional(),
+      userVerification: z.string().optional(),
+    })
+    .optional(),
+});
+export type PasskeyRegistrationOptions = z.infer<typeof PasskeyRegistrationOptionsSchema>;
 
-export interface SnAccountBadge {
-  id: string;
-  type: string;
-  label?: string | null;
-  caption?: string | null;
-  activatedAt?: string | null;
-  expiredAt?: string | null;
-  accountId?: string;
-  createdAt?: string;
-  updatedAt?: string;
-  meta?: Record<string, unknown>;
-}
+export const SnAuthTokenSchema = z.object({
+  token: z.string(),
+  expiresIn: z.number().optional(),
+  refreshToken: z.string().optional(),
+  refreshExpiresIn: z.number().optional(),
+  expiresAt: z.string().optional(),
+  refreshExpiresAt: z.string().optional(),
+});
+export type SnAuthToken = z.infer<typeof SnAuthTokenSchema>;
 
-export interface SnAccount {
-  id: string
-  name: string
-  nick?: string
-  language?: string
-  region?: string
-  activatedAt?: string | null
-  automatedId?: string | null
-  isSuperuser?: boolean
-  perkLevel?: number
-  perkSubscription?: Record<string, unknown> | null
-  profile?: SnAccountProfile
-  badges?: SnAccountBadge[]
-  contacts?: SnContactMethod[]
-  createdAt?: string
-  updatedAt?: string
-  deletedAt?: string | null
-}
+export const SnAccountBadgeSchema = z.object({
+  id: z.string(),
+  type: z.string(),
+  label: z.string().nullable().optional(),
+  caption: z.string().nullable().optional(),
+  activatedAt: z.string().nullable().optional(),
+  expiredAt: z.string().nullable().optional(),
+  accountId: z.string().optional(),
+  createdAt: z.string().optional(),
+  updatedAt: z.string().optional(),
+  meta: z.record(z.string(), z.unknown()).optional(),
+});
+export type SnAccountBadge = z.infer<typeof SnAccountBadgeSchema>;
 
-export interface SnContactMethod {
-  id: string;
-  type: number;
-  content: string;
-  isPrimary: boolean;
-  isPublic: boolean;
-  verifiedAt?: string | null;
-  createdAt: string;
-}
+export const SnAccountProfileSchema = z.object({
+  id: z.string().optional(),
+  bio: z.string().optional(),
+  firstName: z.string().optional(),
+  middleName: z.string().optional(),
+  lastName: z.string().optional(),
+  gender: z.string().optional(),
+  pronouns: z.string().optional(),
+  location: z.string().optional(),
+  timeZone: z.string().optional(),
+  birthday: z.string().nullable().optional(),
+  lastSeenAt: z.string().nullable().optional(),
+  picture: z.object({ id: z.string() }).nullable().optional(),
+  background: z.object({ id: z.string() }).nullable().optional(),
+  links: z
+    .array(
+      z.object({
+        url: z.string(),
+        name: z.string().optional(),
+        label: z.string().optional(),
+      }),
+    )
+    .optional(),
+  verification: z
+    .object({
+      type: z.number(),
+      title: z.string().optional(),
+      description: z.string().optional(),
+      verifiedBy: z.string().optional(),
+    })
+    .nullable()
+    .optional(),
+  /** Legacy backend field for older payloads; current API returns `verification`. */
+  verified: z
+    .object({
+      type: z.number(),
+      title: z.string().optional(),
+      description: z.string().optional(),
+      verifiedBy: z.string().optional(),
+    })
+    .nullable()
+    .optional(),
+  activeBadge: SnAccountBadgeSchema.nullable().optional(),
+  level: z.number().optional(),
+  experience: z.number().optional(),
+  levelingProgress: z.number().optional(),
+  socialCredits: z.number().optional(),
+  socialCreditsLevel: z.number().optional(),
+  createdAt: z.string().optional(),
+  updatedAt: z.string().optional(),
+});
+export type SnAccountProfile = z.infer<typeof SnAccountProfileSchema>;
+
+export const SnContactMethodSchema = z.object({
+  id: z.string(),
+  type: z.number(),
+  content: z.string(),
+  isPrimary: z.boolean(),
+  isPublic: z.boolean(),
+  verifiedAt: z.string().nullable().optional(),
+  createdAt: z.string(),
+});
+export type SnContactMethod = z.infer<typeof SnContactMethodSchema>;
+
+export const SnAccountSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  nick: z.string().optional(),
+  language: z.string().optional(),
+  region: z.string().optional(),
+  activatedAt: z.string().nullable().optional(),
+  automatedId: z.string().nullable().optional(),
+  isSuperuser: z.boolean().optional(),
+  perkLevel: z.number().optional(),
+  perkSubscription: z.record(z.string(), z.unknown()).nullable().optional(),
+  profile: SnAccountProfileSchema.optional(),
+  badges: z.array(SnAccountBadgeSchema).optional(),
+  contacts: z.array(SnContactMethodSchema).optional(),
+  createdAt: z.string().optional(),
+  updatedAt: z.string().optional(),
+  deletedAt: z.string().nullable().optional(),
+});
+export type SnAccount = z.infer<typeof SnAccountSchema>;
 
 export interface SnAccountConnection {
   id: string;
@@ -286,28 +346,30 @@ export const FACTOR_TYPES: Record<
 };
 
 /** Web client QR login challenge (POST /stargate/auth/qr/generate). */
-export interface QrLoginGenerateResponse {
-  qrChallengeId: string;
-  authChallengeId: string;
-  qrData: string;
-  expiresAt: string;
-  expiresInSeconds: number;
-}
+export const QrLoginGenerateResponseSchema = z.object({
+  qrChallengeId: z.string(),
+  authChallengeId: z.string(),
+  qrData: z.string(),
+  expiresAt: z.string(),
+  expiresInSeconds: z.number(),
+});
+export type QrLoginGenerateResponse = z.infer<typeof QrLoginGenerateResponseSchema>;
 
 /**
  * Poll response from GET /stargate/auth/qr/{id}.
  * Backend serializes QrLoginStatus as a number by default (0–4).
  */
-export interface QrLoginStatusResponse {
-  qrChallengeId: string;
-  authChallengeId: string;
-  status: number | string;
-  expiresAt: string;
-  approvedAt?: string | null;
-  approvedDeviceId?: string | null;
-  deviceName?: string | null;
-  platform?: number;
-}
+export const QrLoginStatusResponseSchema = z.object({
+  qrChallengeId: z.string(),
+  authChallengeId: z.string(),
+  status: z.union([z.number(), z.string()]),
+  expiresAt: z.string(),
+  approvedAt: z.string().nullable().optional(),
+  approvedDeviceId: z.string().nullable().optional(),
+  deviceName: z.string().nullable().optional(),
+  platform: z.number().optional(),
+});
+export type QrLoginStatusResponse = z.infer<typeof QrLoginStatusResponseSchema>;
 
 export type QrLoginStatus =
   | "pending"
@@ -318,10 +380,11 @@ export type QrLoginStatus =
 
 export type LoginStep = "lookup" | "picker" | "check" | "qr";
 
-export interface CaptchaConfig {
-  provider: string;
-  apiKey: string;
-}
+export const CaptchaConfigSchema = z.object({
+  provider: z.string(),
+  apiKey: z.string(),
+});
+export type CaptchaConfig = z.infer<typeof CaptchaConfigSchema>;
 
 export interface WalletOrderItem {
   productIdentifier: string;
