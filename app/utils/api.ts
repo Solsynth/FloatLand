@@ -4,7 +4,11 @@ import {
   SnAuthFactorSchema,
   SnAuthTokenSchema,
   SnAccountSchema,
+  SnAccountBadgeSchema,
   SnPasskeySchema,
+  SnContactMethodSchema,
+  SnAccountConnectionSchema,
+  SnAuthSessionSchema,
   QrLoginGenerateResponseSchema,
   QrLoginStatusResponseSchema,
   CaptchaConfigSchema,
@@ -1859,8 +1863,10 @@ export async function fetchFunds(
 export type Badge = SnAccountBadge;
 
 export async function fetchMyBadges(): Promise<SnAccountBadge[]> {
-  const response = await apiFetch("/passport/accounts/me/badges");
-  return safeJsonParse<Badge[]>(response);
+  return fetchJsonZ(
+    "/passport/accounts/me/badges",
+    SnAccountBadgeSchema.array(),
+  );
 }
 
 export async function activateBadge(badgeId: string): Promise<void> {
@@ -1870,27 +1876,28 @@ export async function activateBadge(badgeId: string): Promise<void> {
 }
 
 // Notifications
-export interface Notification {
-  id: string;
-  topic: string;
-  title: string;
-  subtitle: string;
-  content: string;
-  link?: string;
-  meta: Record<string, unknown>;
-  viewedAt?: string;
-  createdAt: string;
-}
+const NotificationSchema = z.object({
+  id: z.string(),
+  topic: z.string(),
+  title: z.string(),
+  subtitle: z.string(),
+  content: z.string(),
+  link: z.string().optional(),
+  meta: z.record(z.string(), z.unknown()),
+  viewedAt: z.string().optional(),
+  createdAt: z.string(),
+});
+export type Notification = z.infer<typeof NotificationSchema>;
 
 export async function fetchNotifications(
   offset = 0,
   take = 20,
 ): Promise<{ items: Notification[]; total: number; hasMore: boolean }> {
-  const response = await apiFetch(
+  const { data, headers } = await fetchJsonZHeaders(
     `/ring/notifications?offset=${offset}&take=${take}`,
+    NotificationSchema.array(),
   );
-  const data = await safeJsonParse<Notification[]>(response);
-  const total = parseInt(response.headers.get("x-total") || "0", 10);
+  const total = parseInt(headers.get("x-total") || "0", 10);
   return {
     items: data,
     total,
@@ -2451,11 +2458,10 @@ export async function updateAccount(payload: {
   language?: string;
   region?: string;
 }): Promise<SnAccount> {
-  const response = await apiFetch("/stargate/accounts/me", {
+  return fetchJsonZ("/stargate/accounts/me", SnAccountSchema, {
     method: "PATCH",
     body: JSON.stringify(camelToSnake(payload)),
   });
-  return safeJsonParse<SnAccount>(response);
 }
 
 export async function updateProfile(payload: {
@@ -2472,11 +2478,10 @@ export async function updateProfile(payload: {
   backgroundId?: string;
   links?: { name: string; url: string }[];
 }): Promise<SnAccount> {
-  const response = await apiFetch("/stargate/accounts/me/profile", {
+  return fetchJsonZ("/stargate/accounts/me/profile", SnAccountSchema, {
     method: "PATCH",
     body: JSON.stringify(camelToSnake(payload)),
   });
-  return safeJsonParse<SnAccount>(response);
 }
 
 export async function deleteAccount(): Promise<void> {
@@ -2487,25 +2492,17 @@ export async function deleteAccount(): Promise<void> {
 
 // Settings API - Auth Factors
 export async function fetchAuthFactors(): Promise<SnAuthFactor[]> {
-  const response = await apiFetch("/stargate/factors");
-  return safeJsonParse<SnAuthFactor[]>(response);
+  return fetchJsonZ("/stargate/factors", SnAuthFactorSchema.array());
 }
 
 export async function createAuthFactor(payload: {
   type: number;
   secret?: string | null;
-  /** @deprecated Prefer top-level `secret`. Kept for older callers. */
-  data?: Record<string, string>;
 }): Promise<SnAuthFactor> {
-  const secret =
-    payload.secret !== undefined
-      ? payload.secret
-      : (payload.data?.secret ?? null);
-  const response = await apiFetch("/stargate/factors", {
+  return fetchJsonZ("/stargate/factors", SnAuthFactorSchema, {
     method: "POST",
-    body: JSON.stringify({ type: payload.type, secret }),
+    body: JSON.stringify({ type: payload.type, secret: payload.secret ?? null }),
   });
-  return safeJsonParse<SnAuthFactor>(response);
 }
 
 export async function deleteAuthFactor(factorId: string): Promise<void> {
@@ -2518,11 +2515,10 @@ export async function enableAuthFactor(
   factorId: string,
   verificationCode?: string,
 ): Promise<SnAuthFactor> {
-  const response = await apiFetch(`/stargate/factors/${factorId}/enable`, {
+  return fetchJsonZ(`/stargate/factors/${factorId}/enable`, SnAuthFactorSchema, {
     method: "POST",
     body: verificationCode ? JSON.stringify(verificationCode) : undefined,
   });
-  return safeJsonParse<SnAuthFactor>(response);
 }
 
 export async function disableAuthFactor(factorId: string): Promise<void> {
@@ -2533,19 +2529,17 @@ export async function disableAuthFactor(factorId: string): Promise<void> {
 
 // Settings API - Contact Methods
 export async function fetchContactMethods(): Promise<SnContactMethod[]> {
-  const response = await apiFetch("/stargate/contacts");
-  return safeJsonParse<SnContactMethod[]>(response);
+  return fetchJsonZ("/stargate/contacts", SnContactMethodSchema.array());
 }
 
 export async function createContactMethod(payload: {
   type: number;
   content: string;
 }): Promise<SnContactMethod> {
-  const response = await apiFetch("/stargate/contacts", {
+  return fetchJsonZ("/stargate/contacts", SnContactMethodSchema, {
     method: "POST",
     body: JSON.stringify(camelToSnake(payload)),
   });
-  return safeJsonParse<SnContactMethod>(response);
 }
 
 export async function deleteContactMethod(contactId: string): Promise<void> {
@@ -2584,8 +2578,7 @@ export async function makeContactPrivate(contactId: string): Promise<void> {
 export async function fetchAccountConnections(): Promise<
   SnAccountConnection[]
 > {
-  const response = await apiFetch("/stargate/connections");
-  return safeJsonParse<SnAccountConnection[]>(response);
+  return fetchJsonZ("/stargate/connections", SnAccountConnectionSchema.array());
 }
 
 export async function deleteAccountConnection(
@@ -2602,8 +2595,10 @@ export function getConnectionAuthUrl(provider: string): string {
 
 // Settings API - Auth Devices & Sessions
 export async function fetchAuthDevices(): Promise<SnAuthDevice[]> {
-  const response = await apiFetch("/stargate/devices");
-  const raw = await safeJsonParse<{ sessions: SnAuthSession[] }[]>(response);
+  const raw = await fetchJsonZ(
+    "/stargate/devices",
+    z.array(z.object({ sessions: z.array(SnAuthSessionSchema) })),
+  );
 
   return raw.map((item) => {
     const sessions = item.sessions ?? [];
@@ -2627,16 +2622,19 @@ export async function fetchAuthSessions(
   const params = new URLSearchParams();
   if (type !== undefined) params.set("type", String(type));
   params.set("include_children", "false");
-  const response = await apiFetch(`/stargate/sessions?${params.toString()}`);
-  const data = await safeJsonParse<SnAuthSession[]>(response);
-  return Array.isArray(data) ? data : [];
+  return fetchJsonZ(
+    `/stargate/sessions?${params.toString()}`,
+    SnAuthSessionSchema.array(),
+  );
 }
 
 export async function fetchSessionChildren(
   parentId: string,
 ): Promise<SnAuthSession[]> {
-  const response = await apiFetch(`/stargate/sessions/${parentId}/children`);
-  const data = await safeJsonParse<{ items: SnAuthSession[] }>(response);
+  const data = await fetchJsonZ(
+    `/stargate/sessions/${parentId}/children`,
+    z.object({ items: z.array(SnAuthSessionSchema) }),
+  );
   return data.items;
 }
 
@@ -2669,19 +2667,19 @@ export async function updateDeviceLabel(
 }
 
 // Settings API - Publishing (matches Island sphere.getPublishingSettings)
-export interface SnPublishingSettings {
-  id: string;
-  accountId: string;
-  defaultPostingPublisherId?: string | null;
-  defaultReplyPublisherId?: string | null;
-  defaultFediversePublisherId?: string | null;
-  createdAt?: string;
-  updatedAt?: string | null;
-}
+const SnPublishingSettingsSchema = z.object({
+  id: z.string(),
+  accountId: z.string(),
+  defaultPostingPublisherId: z.string().nullable().optional(),
+  defaultReplyPublisherId: z.string().nullable().optional(),
+  defaultFediversePublisherId: z.string().nullable().optional(),
+  createdAt: z.string().optional(),
+  updatedAt: z.string().nullable().optional(),
+});
+export type SnPublishingSettings = z.infer<typeof SnPublishingSettingsSchema>;
 
 export async function fetchPublishingSettings(): Promise<SnPublishingSettings> {
-  const response = await apiFetch("/sphere/account/publishing");
-  return safeJsonParse<SnPublishingSettings>(response);
+  return fetchJsonZ("/sphere/account/publishing", SnPublishingSettingsSchema);
 }
 
 export async function updatePublishingSettings(payload: {
@@ -2689,11 +2687,10 @@ export async function updatePublishingSettings(payload: {
   defaultReplyPublisherId?: string | null;
   defaultFediversePublisherId?: string | null;
 }): Promise<SnPublishingSettings> {
-  const response = await apiFetch("/sphere/account/publishing", {
+  return fetchJsonZ("/sphere/account/publishing", SnPublishingSettingsSchema, {
     method: "PATCH",
     body: JSON.stringify(camelToSnake(payload)),
   });
-  return safeJsonParse<SnPublishingSettings>(response);
 }
 
 // Settings API - Notification preferences (matches Island notifications API)
@@ -2705,14 +2702,15 @@ export interface SnNotificationTopic {
   description: string;
 }
 
-export interface SnNotificationPreference {
-  id: string;
-  accountId: string;
-  topic: string;
-  preference: SnNotificationPreferenceLevel;
-  createdAt?: string;
-  updatedAt?: string;
-}
+const SnNotificationPreferenceSchema = z.object({
+  id: z.string(),
+  accountId: z.string(),
+  topic: z.string(),
+  preference: z.union([z.literal(0), z.literal(1), z.literal(2)]),
+  createdAt: z.string().optional(),
+  updatedAt: z.string().optional(),
+});
+export type SnNotificationPreference = z.infer<typeof SnNotificationPreferenceSchema>;
 
 /** Default topics from Island NotificationsApi._defaultTopics */
 export const DEFAULT_NOTIFICATION_TOPICS: SnNotificationTopic[] = [
@@ -2734,8 +2732,10 @@ export const DEFAULT_NOTIFICATION_TOPICS: SnNotificationTopic[] = [
 export async function fetchNotificationPreferences(): Promise<
   SnNotificationPreference[]
 > {
-  const response = await apiFetch("/ring/notifications/preferences");
-  return safeJsonParse<SnNotificationPreference[]>(response);
+  return fetchJsonZ(
+    "/ring/notifications/preferences",
+    SnNotificationPreferenceSchema.array(),
+  );
 }
 
 export async function setNotificationPreference(
@@ -2771,33 +2771,36 @@ export async function addCustomNotificationTopic(
 }
 
 // Categories API
-export interface PostCategory {
-  id: string;
-  slug: string;
-  name: string;
-  description: string | null;
-  color: string | null;
-  icon: string | null;
-  usage: number;
-  createdAt: string;
-  updatedAt: string;
-}
+const PostCategorySchema = z.object({
+  id: z.string(),
+  slug: z.string(),
+  name: z.string(),
+  description: z.string().nullable(),
+  color: z.string().nullable(),
+  icon: z.string().nullable(),
+  usage: z.number(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+export type PostCategory = z.infer<typeof PostCategorySchema>;
 
-export interface PostTag {
-  id: string;
-  slug: string;
-  name: string | null;
-  usage: number;
-  createdAt: string;
-  updatedAt: string;
-}
+const PostTagSchema = z.object({
+  id: z.string(),
+  slug: z.string(),
+  name: z.string().nullable(),
+  usage: z.number(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+export type PostTag = z.infer<typeof PostTagSchema>;
 
-export interface CategorySubscription {
-  id: string;
-  categoryId: string;
-  accountId: string;
-  createdAt: string;
-}
+const CategorySubscriptionSchema = z.object({
+  id: z.string(),
+  categoryId: z.string(),
+  accountId: z.string(),
+  createdAt: z.string(),
+});
+export type CategorySubscription = z.infer<typeof CategorySubscriptionSchema>;
 
 export async function fetchCategories(
   take = 20,
@@ -2808,34 +2811,30 @@ export async function fetchCategories(
     offset: String(offset),
   });
 
-  const response = await apiFetch(
+  const { data, headers } = await fetchJsonZHeaders(
     `/sphere/posts/categories?${params.toString()}`,
-    {
-      skipAuth: true,
-    },
+    PostCategorySchema.array(),
+    { skipAuth: true },
   );
 
-  const total = parseInt(response.headers.get("x-total") || "0", 10);
-  const data = await safeJsonParse<PostCategory[]>(response);
-
+  const total = parseInt(headers.get("x-total") || "0", 10);
   return { categories: data, total };
 }
 
 export async function fetchCategory(slug: string): Promise<PostCategory> {
-  const response = await apiFetch(`/sphere/posts/categories/${slug}`, {
+  return fetchJsonZ(`/sphere/posts/categories/${slug}`, PostCategorySchema, {
     skipAuth: true,
   });
-  return safeJsonParse<PostCategory>(response);
 }
 
 export async function fetchCategorySubscription(
   slug: string,
 ): Promise<CategorySubscription | null> {
   try {
-    const response = await apiFetch(
+    return await fetchJsonZ(
       `/sphere/posts/categories/${slug}/subscription`,
+      CategorySubscriptionSchema,
     );
-    return safeJsonParse<CategorySubscription>(response);
   } catch {
     return null;
   }
@@ -2862,29 +2861,30 @@ export async function fetchTags(
     offset: String(offset),
   });
 
-  const response = await apiFetch(`/sphere/posts/tags?${params.toString()}`, {
-    skipAuth: true,
-  });
+  const { data, headers } = await fetchJsonZHeaders(
+    `/sphere/posts/tags?${params.toString()}`,
+    PostTagSchema.array(),
+    { skipAuth: true },
+  );
 
-  const total = parseInt(response.headers.get("x-total") || "0", 10);
-  const data = await safeJsonParse<PostTag[]>(response);
-
+  const total = parseInt(headers.get("x-total") || "0", 10);
   return { tags: data, total };
 }
 
 export async function fetchTag(slug: string): Promise<PostTag> {
-  const response = await apiFetch(`/sphere/posts/tags/${slug}`, {
+  return fetchJsonZ(`/sphere/posts/tags/${slug}`, PostTagSchema, {
     skipAuth: true,
   });
-  return safeJsonParse<PostTag>(response);
 }
 
 export async function fetchTagSubscription(
   slug: string,
 ): Promise<CategorySubscription | null> {
   try {
-    const response = await apiFetch(`/sphere/posts/tags/${slug}/subscription`);
-    return safeJsonParse<CategorySubscription>(response);
+    return await fetchJsonZ(
+      `/sphere/posts/tags/${slug}/subscription`,
+      CategorySubscriptionSchema,
+    );
   } catch {
     return null;
   }
@@ -2913,13 +2913,13 @@ export async function fetchPostsByCategory(
     categories: slug,
   });
 
-  const response = await apiFetch(`/sphere/posts?${params.toString()}`, {
-    skipAuth: true,
-  });
+  const { data, headers } = await fetchJsonZHeaders(
+    `/sphere/posts?${params.toString()}`,
+    PostSchema.array(),
+    { skipAuth: true },
+  );
 
-  const total = parseInt(response.headers.get("x-total") || "0", 10);
-  const data = await safeJsonParse<Post[]>(response);
-
+  const total = parseInt(headers.get("x-total") || "0", 10);
   return { posts: data, total };
 }
 
@@ -2934,13 +2934,13 @@ export async function fetchPostsByTag(
     tags: slug,
   });
 
-  const response = await apiFetch(`/sphere/posts?${params.toString()}`, {
-    skipAuth: true,
-  });
+  const { data, headers } = await fetchJsonZHeaders(
+    `/sphere/posts?${params.toString()}`,
+    PostSchema.array(),
+    { skipAuth: true },
+  );
 
-  const total = parseInt(response.headers.get("x-total") || "0", 10);
-  const data = await safeJsonParse<Post[]>(response);
-
+  const total = parseInt(headers.get("x-total") || "0", 10);
   return { posts: data, total };
 }
 

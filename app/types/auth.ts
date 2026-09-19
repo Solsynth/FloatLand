@@ -182,14 +182,15 @@ export const SnAccountSchema = z.object({
 });
 export type SnAccount = z.infer<typeof SnAccountSchema>;
 
-export interface SnAccountConnection {
-  id: string;
-  provider: string;
-  providedIdentifier: string;
-  meta: Record<string, string>;
-  lastUsedAt: string;
-  createdAt: string;
-}
+export const SnAccountConnectionSchema = z.object({
+  id: z.string(),
+  provider: z.string(),
+  providedIdentifier: z.string(),
+  meta: z.record(z.string(), z.string()),
+  lastUsedAt: z.string(),
+  createdAt: z.string(),
+});
+export type SnAccountConnection = z.infer<typeof SnAccountConnectionSchema>;
 
 /** Public connection shape from GET /stargate/accounts/{name}/connections */
 export const PublicAccountConnectionSchema = z.object({
@@ -284,54 +285,59 @@ export interface AccountBoardItem {
   updatedAt?: string;
 }
 
-export interface SnAuthSession {
-  id: string;
-  type: number;
-  label?: string;
-  userAgent?: string;
-  ipAddress?: string;
-  location?: {
-    city?: string;
-    country?: string;
-    countryCode?: string;
-    latitude?: number;
-    longitude?: number;
-  };
-  isCurrent?: boolean;
-  childrenCount?: number;
-  createdAt: string;
-  updatedAt?: string;
-  lastGrantedAt: string;
-  expiredAt?: string;
-  audiences?: string[];
-  scopes?: string[];
-  clientId?: string;
-  client?: SnAuthClient | null;
-  parentSessionId?: string | null;
-  accountId?: string;
-  challengeId?: string;
-}
+export const SnAuthClientSchema = z.object({
+  id: z.string(),
+  platform: z.number(),
+  deviceName: z.string(),
+  deviceLabel: z.string().nullable().optional(),
+  deviceId: z.string(),
+  accountId: z.string(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+  deletedAt: z.string().nullable().optional(),
+});
+export type SnAuthClient = z.infer<typeof SnAuthClientSchema>;
 
-export interface SnAuthClient {
-  id: string;
-  platform: number;
-  deviceName: string;
-  deviceLabel?: string | null;
-  deviceId: string;
-  accountId: string;
-  createdAt: string;
-  updatedAt: string;
-  deletedAt?: string | null;
-}
+export const SnAuthSessionSchema = z.object({
+  id: z.string(),
+  type: z.number(),
+  label: z.string().optional(),
+  userAgent: z.string().optional(),
+  ipAddress: z.string().optional(),
+  location: z
+    .object({
+      city: z.string().optional(),
+      country: z.string().optional(),
+      countryCode: z.string().optional(),
+      latitude: z.number().optional(),
+      longitude: z.number().optional(),
+    })
+    .optional(),
+  isCurrent: z.boolean().optional(),
+  childrenCount: z.number().optional(),
+  createdAt: z.string(),
+  updatedAt: z.string().optional(),
+  lastGrantedAt: z.string(),
+  expiredAt: z.string().optional(),
+  audiences: z.array(z.string()).optional(),
+  scopes: z.array(z.string()).optional(),
+  clientId: z.string().optional(),
+  client: SnAuthClientSchema.nullable().optional(),
+  parentSessionId: z.string().nullable().optional(),
+  accountId: z.string().optional(),
+  challengeId: z.string().optional(),
+});
+export type SnAuthSession = z.infer<typeof SnAuthSessionSchema>;
 
-export interface SnAuthDevice {
-  deviceId: string;
-  deviceName: string;
-  deviceLabel?: string;
-  platform: number;
-  isCurrent: boolean;
-  sessions: SnAuthSession[];
-}
+export const SnAuthDeviceSchema = z.object({
+  deviceId: z.string(),
+  deviceName: z.string(),
+  deviceLabel: z.string().optional(),
+  platform: z.number(),
+  isCurrent: z.boolean(),
+  sessions: z.array(SnAuthSessionSchema),
+});
+export type SnAuthDevice = z.infer<typeof SnAuthDeviceSchema>;
 
 export const SESSION_TYPES: Record<number, { label: string; icon: string }> = {
   0: { label: "Login", icon: "key" },
