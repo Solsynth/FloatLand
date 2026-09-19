@@ -439,35 +439,39 @@ export const CaptchaConfigSchema = z.object({
 });
 export type CaptchaConfig = z.infer<typeof CaptchaConfigSchema>;
 
-export interface WalletOrderItem {
-  productIdentifier: string;
-  quantity: number;
-  unitPrice: number;
-  currency: string;
-}
+export const WalletOrderItemSchema = z.object({
+  productIdentifier: z.string(),
+  quantity: z.number(),
+  unitPrice: z.number(),
+  currency: z.string(),
+});
+export type WalletOrderItem = z.infer<typeof WalletOrderItemSchema>;
 
-export interface WalletOrderAppImage {
-  id: string;
-  name: string;
-  mime_type?: string;
-  blurhash?: string;
-  url?: string;
-}
+export const WalletOrderAppImageSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  mimeType: z.string().optional(),
+  blurhash: z.string().optional(),
+  url: z.string().optional(),
+});
+export type WalletOrderAppImage = z.infer<typeof WalletOrderAppImageSchema>;
 
-export interface WalletOrderApp {
-  id: string;
-  slug: string;
-  name: string;
-  description: string | null;
-  picture: WalletOrderAppImage | null;
-  background: WalletOrderAppImage | null;
-}
+export const WalletOrderAppSchema = z.object({
+  id: z.string(),
+  slug: z.string(),
+  name: z.string(),
+  description: z.string().nullable(),
+  picture: WalletOrderAppImageSchema.nullable(),
+  background: WalletOrderAppImageSchema.nullable(),
+});
+export type WalletOrderApp = z.infer<typeof WalletOrderAppSchema>;
 
-export interface WalletOrderDeveloper {
-  id: string;
-  publisherId: string;
-  publisherName: string;
-}
+export const WalletOrderDeveloperSchema = z.object({
+  id: z.string(),
+  publisherId: z.string(),
+  publisherName: z.string(),
+});
+export type WalletOrderDeveloper = z.infer<typeof WalletOrderDeveloperSchema>;
 
 export enum WalletOrderStatus {
   Unpaid = 0,
@@ -477,46 +481,154 @@ export enum WalletOrderStatus {
   Expired = 4,
 }
 
-export interface WalletOrderTimestamp {
-  seconds: number;
-  nanos: number;
-}
+export const WalletOrderTimestampSchema = z.object({
+  seconds: z.number(),
+  nanos: z.number(),
+});
+export type WalletOrderTimestamp = z.infer<typeof WalletOrderTimestampSchema>;
 
-export interface AppProduct {
-  id: string;
-  identifier: string;
-  displayName: string | null;
-  description: string | null;
-  currency: string;
-  price: number;
-  picture: WalletOrderAppImage | null;
-  background?: WalletOrderAppImage | null;
-  app_id: string;
-  app?: WalletOrderApp;
-  recurrence?: number;
-  groupIdentifier?: string | null;
-  createdAt?: string | WalletOrderTimestamp;
-  updatedAt?: string | WalletOrderTimestamp;
-  deletedAt?: string | WalletOrderTimestamp | null;
-}
+export const AppProductSchema = z.object({
+  id: z.string(),
+  identifier: z.string(),
+  displayName: z.string().nullable(),
+  description: z.string().nullable(),
+  currency: z.string(),
+  price: z.number(),
+  picture: WalletOrderAppImageSchema.nullable(),
+  background: WalletOrderAppImageSchema.nullable().optional(),
+  appId: z.string(),
+  app: WalletOrderAppSchema.optional(),
+  recurrence: z.number().optional(),
+  groupIdentifier: z.string().nullable().optional(),
+  createdAt: z.union([z.string(), WalletOrderTimestampSchema]).optional(),
+  updatedAt: z.union([z.string(), WalletOrderTimestampSchema]).optional(),
+  deletedAt: z
+    .union([z.string(), WalletOrderTimestampSchema])
+    .nullable()
+    .optional(),
+});
+export type AppProduct = z.infer<typeof AppProductSchema>;
 
-export interface WalletOrder {
-  id: string;
-  status: WalletOrderStatus;
-  productIdentifier: string | null;
-  remarks: string | null;
-  amount: number;
-  currency: string;
-  items?: WalletOrderItem[];
-  appIdentifier?: string;
-  transactionId?: string | null;
-  payeeWalletId?: string;
-  expiredAt?: string | null;
-  createdAt?: string | WalletOrderTimestamp;
-  updatedAt?: string | WalletOrderTimestamp;
-  app?: WalletOrderApp;
-  developer?: WalletOrderDeveloper;
-}
+export const WalletOrderSchema = z.object({
+  id: z.string(),
+  status: z.nativeEnum(WalletOrderStatus),
+  productIdentifier: z.string().nullable(),
+  remarks: z.string().nullable(),
+  amount: z.number(),
+  currency: z.string(),
+  items: z.array(WalletOrderItemSchema).optional(),
+  appIdentifier: z.string().optional(),
+  transactionId: z.string().nullable().optional(),
+  payeeWalletId: z.string().optional(),
+  expiredAt: z.string().nullable().optional(),
+  createdAt: z.union([z.string(), WalletOrderTimestampSchema]).optional(),
+  updatedAt: z.union([z.string(), WalletOrderTimestampSchema]).optional(),
+  app: WalletOrderAppSchema.optional(),
+  developer: WalletOrderDeveloperSchema.optional(),
+});
+export type WalletOrder = z.infer<typeof WalletOrderSchema>;
+
+export const WalletPocketSchema = z.object({
+  id: z.string(),
+  currency: z.string(),
+  amount: z.number(),
+  heldAmount: z.number(),
+  availableAmount: z.number(),
+  walletId: z.string(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+export type WalletPocket = z.infer<typeof WalletPocketSchema>;
+
+export const WalletSchema = z.object({
+  id: z.string(),
+  accountId: z.string(),
+  name: z.string(),
+  realmId: z.string().optional(),
+  isPrimary: z.boolean(),
+  publicId: z.string().optional(),
+  pockets: z.array(WalletPocketSchema),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+export type Wallet = z.infer<typeof WalletSchema>;
+
+export const WalletStatsSchema = z.object({
+  totalIncome: z.number(),
+  totalOutgoing: z.number(),
+});
+export type WalletStats = z.infer<typeof WalletStatsSchema>;
+
+const WalletAccountSchema = z.object({
+  account: RelationshipAccountSchema.optional(),
+});
+
+export const TransactionSchema = z.object({
+  id: z.string(),
+  payerWalletId: z.string().optional(),
+  payeeWalletId: z.string().optional(),
+  amount: z.number(),
+  currency: z.string(),
+  type: z.number(),
+  status: z.number(),
+  isFrozen: z.boolean(),
+  requireConfirmation: z.boolean(),
+  remarks: z.string().optional(),
+  frozenAt: z.string().optional(),
+  expiresAt: z.string().optional(),
+  confirmedAt: z.string().optional(),
+  createdAt: z.string(),
+  payerWallet: WalletAccountSchema.optional(),
+  payeeWallet: WalletAccountSchema.optional(),
+});
+export type Transaction = z.infer<typeof TransactionSchema>;
+
+export const FundRecipientSchema = z.object({
+  id: z.string(),
+  recipientAccountId: z.string(),
+  amount: z.number(),
+  isReceived: z.boolean(),
+  receivedAt: z.string().optional(),
+  recipientAccount: RelationshipAccountSchema.optional(),
+});
+export type FundRecipient = z.infer<typeof FundRecipientSchema>;
+
+export const FundSchema = z.object({
+  id: z.string(),
+  senderId: z.string(),
+  currency: z.string(),
+  totalAmount: z.number(),
+  splitType: z.number(),
+  amountOfSplits: z.number(),
+  message: z.string().optional(),
+  remainingAmount: z.number(),
+  raisedAmount: z.number(),
+  status: z.number(),
+  isRaising: z.boolean(),
+  isOpen: z.boolean(),
+  targetAmount: z.number(),
+  contributionType: z.number(),
+  contributionAmount: z.number(),
+  deadlineAt: z.string().optional(),
+  createdAt: z.string(),
+  expiresAt: z.string().optional(),
+  recipients: z.array(FundRecipientSchema),
+  creatorAccount: RelationshipAccountSchema.optional(),
+});
+export type Fund = z.infer<typeof FundSchema>;
+
+export const WalletPinStatusSchema = z.object({
+  hasPin: z.boolean(),
+  validationRequired: z.boolean(),
+});
+export type WalletPinStatus = z.infer<typeof WalletPinStatusSchema>;
+
+export const AfdianCheckoutSchema = z.object({
+  checkoutUrl: z.string(),
+  providerReferenceId: z.string().nullable().optional(),
+  planId: z.string().nullable().optional(),
+});
+export type AfdianCheckout = z.infer<typeof AfdianCheckoutSchema>;
 
 export const SnAccountPunishmentSchema = z.object({
   id: z.string(),
@@ -534,15 +646,16 @@ export const SnAccountPunishmentSchema = z.object({
 });
 export type SnAccountPunishment = z.infer<typeof SnAccountPunishmentSchema>;
 
-export interface SpellInfo {
-  type: number;
-  account: {
-    name: string;
-  };
-  createdAt: string;
-  affectedAt: string;
-  expiredAt?: string;
-}
+export const SpellInfoSchema = z.object({
+  type: z.number(),
+  account: z.object({
+    name: z.string(),
+  }),
+  createdAt: z.string(),
+  affectedAt: z.string(),
+  expiredAt: z.string().optional(),
+});
+export type SpellInfo = z.infer<typeof SpellInfoSchema>;
 
 export const SnAccountStatusSchema = z.object({
   type: z.number(),

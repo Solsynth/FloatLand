@@ -16,7 +16,26 @@ import {
   RelationshipSchema,
   RelationshipStatusSchema,
   FriendOverviewItemSchema,
+  WalletOrderSchema,
+  AppProductSchema,
+  SpellInfoSchema,
+  WalletSchema,
+  WalletStatsSchema,
+  TransactionSchema,
+  FundSchema,
+  WalletPinStatusSchema,
+  AfdianCheckoutSchema,
 } from "~/types/auth";
+import {
+  WalletProductCatalogItemSchema,
+  QuotaPurchaseConfigSchema,
+  QuotaOrderSchema,
+  NameChangeCardOrderSchema,
+} from "~/types/shop";
+import {
+  SubscriptionGroupSchema,
+  StellarSubscriptionSchema,
+} from "~/types/subscription";
 import {
   PostSchema,
   PublisherSchema,
@@ -68,7 +87,17 @@ import type {
   Relationship,
   RelationshipStatus,
   FriendOverviewItem,
+  Wallet,
+  WalletStats,
+  Transaction,
+  Fund,
+  WalletPinStatus,
+  AfdianCheckout,
 } from "~/types/auth";
+import type {
+  SubscriptionGroup,
+  StellarSubscription,
+} from "~/types/subscription";
 
 export type {
   WalletOrder,
@@ -126,6 +155,7 @@ export type {
   PublisherSubscriptionStatus,
 } from "~/types/post";
 export type { Relationship, RelationshipStatus, FriendOverviewItem } from "~/types/auth";
+export type { Wallet, WalletStats, Transaction, Fund, WalletPinStatus, AfdianCheckout } from "~/types/auth";
 
 // Global API configuration
 export const API_BASE = "api.solian.app";
@@ -732,10 +762,10 @@ export async function submitAuthorizeDecision(
 }
 
 export async function getOrder(orderId: string): Promise<WalletOrder> {
-  const response = await apiFetch(
+  return fetchJsonZ(
     `/wallet/orders/${encodeURIComponent(orderId)}`,
+    WalletOrderSchema,
   );
-  return safeJsonParse<WalletOrder>(response);
 }
 
 export async function payOrder(
@@ -745,30 +775,27 @@ export async function payOrder(
 ): Promise<WalletOrder> {
   const body: Record<string, string> = { pin_code: pinCode };
   if (payerWalletId) body.payer_wallet_id = payerWalletId;
-  const response = await apiFetch(
+  return fetchJsonZ(
     `/wallet/orders/${encodeURIComponent(orderId)}/pay`,
-    {
-      method: "POST",
-      body: JSON.stringify(body),
-    },
+    WalletOrderSchema,
+    { method: "POST", body: JSON.stringify(body) },
   );
-  return safeJsonParse<WalletOrder>(response);
 }
 
 export async function fetchStoreProducts(
   appSlug: string,
 ): Promise<AppProduct[]> {
-  const response = await apiFetch(
+  return fetchJsonZ(
     `/develop/apps/${encodeURIComponent(appSlug)}/products`,
+    AppProductSchema.array(),
   );
-  return safeJsonParse<AppProduct[]>(response);
 }
 
 export async function getSpell(spellWord: string): Promise<SpellInfo> {
-  const response = await apiFetch(
+  return fetchJsonZ(
     `/stargate/spells/${encodeURIComponent(spellWord)}`,
+    SpellInfoSchema,
   );
-  return safeJsonParse<SpellInfo>(response);
 }
 
 export async function applySpell(
@@ -1468,123 +1495,10 @@ export async function fetchFriendsOverview(): Promise<FriendOverviewItem[]> {
 
 
 
-// Wallet Types
-export interface WalletPocket {
-  id: string;
-  currency: string;
-  amount: number;
-  heldAmount: number;
-  availableAmount: number;
-  walletId: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface Wallet {
-  id: string;
-  accountId: string;
-  name: string;
-  realmId?: string;
-  isPrimary: boolean;
-  publicId?: string;
-  pockets: WalletPocket[];
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface WalletStats {
-  totalIncome: number;
-  totalOutgoing: number;
-}
-
-export interface Transaction {
-  id: string;
-  payerWalletId?: string;
-  payeeWalletId?: string;
-  amount: number;
-  currency: string;
-  type: number; // 0: transfer, 1: payment
-  status: number; // 0: pending, 1: frozen, 2: confirmed, 3: refunded, 4: cancelled
-  isFrozen: boolean;
-  requireConfirmation: boolean;
-  remarks?: string;
-  frozenAt?: string;
-  expiresAt?: string;
-  confirmedAt?: string;
-  createdAt: string;
-  payerWallet?: {
-    account?: {
-      id: string;
-      name: string;
-      nick: string;
-      profile: {
-        picture?: { id: string };
-      };
-    };
-  };
-  payeeWallet?: {
-    account?: {
-      id: string;
-      name: string;
-      nick: string;
-      profile: {
-        picture?: { id: string };
-      };
-    };
-  };
-}
-
-export interface FundRecipient {
-  id: string;
-  recipientAccountId: string;
-  amount: number;
-  isReceived: boolean;
-  receivedAt?: string;
-  recipientAccount?: {
-    id: string;
-    name: string;
-    nick: string;
-    profile: {
-      picture?: { id: string };
-    };
-  };
-}
-
-export interface Fund {
-  id: string;
-  senderId: string;
-  currency: string;
-  totalAmount: number;
-  splitType: number; // 0: even, 1: random
-  amountOfSplits: number;
-  message?: string;
-  remainingAmount: number;
-  raisedAmount: number;
-  status: number; // 0: created, 1: partial, 2: completed, 3: expired
-  isRaising: boolean;
-  isOpen: boolean;
-  targetAmount: number;
-  contributionType: number; // 0: free, 1: fixed
-  contributionAmount: number;
-  deadlineAt?: string;
-  createdAt: string;
-  expiresAt?: string;
-  recipients: FundRecipient[];
-  creatorAccount?: {
-    id: string;
-    name: string;
-    nick: string;
-    profile: {
-      picture?: { id: string };
-    };
-  };
-}
-
 // Wallet API
 export async function fetchWallet(): Promise<Wallet | null> {
   try {
-    const response = await apiFetch("/wallet/wallets");
-    return safeJsonParse<Wallet>(response);
+    return await fetchJsonZ("/wallet/wallets", WalletSchema);
   } catch (err) {
     if (err instanceof Error && err.message.includes("404")) {
       return null;
@@ -1594,27 +1508,24 @@ export async function fetchWallet(): Promise<Wallet | null> {
 }
 
 export async function fetchWallets(): Promise<Wallet[]> {
-  const response = await apiFetch("/wallet/wallets/all");
-  return safeJsonParse<Wallet[]>(response);
+  return fetchJsonZ("/wallet/wallets/all", WalletSchema.array());
 }
 
 export async function fetchWalletById(id: string): Promise<Wallet> {
-  const response = await apiFetch(`/wallet/wallets/${id}`);
-  return safeJsonParse<Wallet>(response);
+  return fetchJsonZ(`/wallet/wallets/${id}`, WalletSchema);
 }
 
 export async function createWallet(params?: {
   name?: string;
   realmId?: string;
 }): Promise<Wallet> {
-  const response = await apiFetch("/wallet/wallets", {
+  return fetchJsonZ("/wallet/wallets", WalletSchema, {
     method: "POST",
     body: JSON.stringify({
       name: params?.name,
       realm_id: params?.realmId,
     }),
   });
-  return safeJsonParse<Wallet>(response);
 }
 
 export async function setDefaultWallet(walletId: string): Promise<void> {
@@ -1645,20 +1556,14 @@ export async function fetchWalletStats(params?: {
   if (params?.walletId) searchParams.set("wallets", params.walletId);
   if (params?.currency) searchParams.set("currencies", params.currency);
   const query = searchParams.toString();
-  const response = await apiFetch(
+  return fetchJsonZ(
     `/wallet/wallets/stats${query ? "?" + query : ""}`,
+    WalletStatsSchema,
   );
-  return safeJsonParse<WalletStats>(response);
-}
-
-export interface WalletPinStatus {
-  hasPin: boolean;
-  validationRequired: boolean;
 }
 
 export async function fetchWalletPinStatus(): Promise<WalletPinStatus> {
-  const response = await apiFetch("/stargate/accounts/me/pin-status");
-  return safeJsonParse<WalletPinStatus>(response);
+  return fetchJsonZ("/stargate/accounts/me/pin-status", WalletPinStatusSchema);
 }
 
 // ── Stellar Program subscriptions ────────────────────────────────────────
@@ -1673,10 +1578,10 @@ export async function fetchSubscriptionGroup(
   groupId: string = STELLAR_SUBSCRIPTION_GROUP,
 ): Promise<SubscriptionGroup | null> {
   try {
-    const response = await apiFetch(
+    return await fetchJsonZ(
       `/wallet/subscriptions/groups/${encodeURIComponent(groupId)}`,
+      SubscriptionGroupSchema,
     );
-    return safeJsonParse<SubscriptionGroup>(response);
   } catch {
     return null;
   }
@@ -1685,10 +1590,10 @@ export async function fetchSubscriptionGroup(
 /** Fetch the currently active Stellar subscription, if any. */
 export async function fetchActiveStellarSubscription(): Promise<StellarSubscription | null> {
   try {
-    const response = await apiFetch(
+    return await fetchJsonZ(
       `/wallet/subscriptions/groups/${STELLAR_SUBSCRIPTION_GROUP}/active`,
+      StellarSubscriptionSchema,
     );
-    return safeJsonParse<StellarSubscription>(response);
   } catch {
     return null;
   }
@@ -1702,7 +1607,7 @@ export async function createStellarSubscription(
   identifier: string,
   cycleDurationDays = 30,
 ): Promise<StellarSubscription> {
-  const response = await apiFetch("/wallet/subscriptions", {
+  return fetchJsonZ("/wallet/subscriptions", StellarSubscriptionSchema, {
     method: "POST",
     body: JSON.stringify({
       identifier,
@@ -1710,18 +1615,17 @@ export async function createStellarSubscription(
       payment_details: { currency: "points" },
     }),
   });
-  return safeJsonParse<StellarSubscription>(response);
 }
 
 /** Create an unpaid order for a subscription; pay it with `payOrder`. */
 export async function createSubscriptionOrder(
   subscriptionId: string,
 ): Promise<WalletOrder> {
-  const response = await apiFetch(
+  return fetchJsonZ(
     `/wallet/subscriptions/${encodeURIComponent(subscriptionId)}/order`,
+    WalletOrderSchema,
     { method: "POST" },
   );
-  return safeJsonParse<WalletOrder>(response);
 }
 
 /** Cancel an active wallet subscription. */
@@ -1734,28 +1638,15 @@ export async function cancelStellarSubscription(
   );
 }
 
-export interface AfdianCheckout {
-  checkoutUrl: string;
-  providerReferenceId: string | null;
-  planId: string | null;
-}
-
 /** Create an Afdian checkout URL for a catalog identifier. */
 export async function createAfdianCheckout(
   identifier: string,
 ): Promise<AfdianCheckout> {
-  const response = await apiFetch(
+  const data = await fetchJsonZ(
     `/wallet/subscriptions/${encodeURIComponent(identifier)}/checkout/afdian`,
+    AfdianCheckoutSchema,
     { method: "POST" },
   );
-  const data = await safeJsonParse<{
-    checkoutUrl?: string;
-    providerReferenceId?: string | null;
-    planId?: string | null;
-  }>(response);
-  if (!data.checkoutUrl) {
-    throw new ApiError("Missing checkout URL", 502);
-  }
   return {
     checkoutUrl: data.checkoutUrl,
     providerReferenceId: data.providerReferenceId ?? null,
@@ -1768,8 +1659,10 @@ export async function createAfdianCheckout(
 /** Wallet product catalog (Golden Solar Points pack and friends). */
 export async function fetchWalletProductCatalog(): Promise<WalletProductCatalogItem[]> {
   try {
-    const response = await apiFetch("/wallet/wallet-products/catalog");
-    return safeJsonParse<WalletProductCatalogItem[]>(response);
+    return await fetchJsonZ(
+      "/wallet/wallet-products/catalog",
+      WalletProductCatalogItemSchema.array(),
+    );
   } catch {
     return [];
   }
@@ -1777,22 +1670,25 @@ export async function fetchWalletProductCatalog(): Promise<WalletProductCatalogI
 
 /** Create an Afdian checkout URL for the Golden Solar Points pack. */
 export async function createGoldsAfdianCheckout(): Promise<AfdianCheckout> {
-  const response = await apiFetch(
+  const data = await fetchJsonZ(
     "/wallet/wallet-products/golds-resupply-pack/checkout/afdian",
+    AfdianCheckoutSchema,
     { method: "POST" },
   );
-  const data = await safeJsonParse<{ checkoutUrl?: string }>(response);
-  if (!data.checkoutUrl) {
-    throw new ApiError("Missing checkout URL", 502);
-  }
-  return { checkoutUrl: data.checkoutUrl, providerReferenceId: null, planId: null };
+  return {
+    checkoutUrl: data.checkoutUrl,
+    providerReferenceId: data.providerReferenceId ?? null,
+    planId: data.planId ?? null,
+  };
 }
 
 /** Quota purchase pricing. Returns null when unavailable or unauthenticated. */
 export async function fetchQuotaPurchaseConfig(): Promise<QuotaPurchaseConfig | null> {
   try {
-    const response = await apiFetch("/drive/billing/quota/purchase");
-    return safeJsonParse<QuotaPurchaseConfig>(response);
+    return await fetchJsonZ(
+      "/drive/billing/quota/purchase",
+      QuotaPurchaseConfigSchema,
+    );
   } catch {
     return null;
   }
@@ -1802,30 +1698,28 @@ export async function fetchQuotaPurchaseConfig(): Promise<QuotaPurchaseConfig | 
 export async function createQuotaPurchaseOrder(
   quantityGb: number,
 ): Promise<QuotaOrder> {
-  const response = await apiFetch("/drive/billing/quota/purchase", {
+  return fetchJsonZ("/drive/billing/quota/purchase", QuotaOrderSchema, {
     method: "POST",
     body: JSON.stringify({ quantity_gb: quantityGb }),
   });
-  return safeJsonParse<QuotaOrder>(response);
 }
 
 /** Order a name change card; pay the returned order with `payOrder`. */
 export async function orderNameChangeCard(): Promise<NameChangeCardOrder> {
-  const response = await apiFetch("/accounts/me/name-change-card/order", {
+  return fetchJsonZ("/accounts/me/name-change-card/order", NameChangeCardOrderSchema, {
     method: "POST",
   });
-  return safeJsonParse<NameChangeCardOrder>(response);
 }
 
 export async function fetchTransactions(
   offset = 0,
   take = 20,
 ): Promise<{ items: Transaction[]; total: number; hasMore: boolean }> {
-  const response = await apiFetch(
+  const { data, headers } = await fetchJsonZHeaders(
     `/wallet/wallets/transactions?offset=${offset}&take=${take}`,
+    TransactionSchema.array(),
   );
-  const data = await safeJsonParse<Transaction[]>(response);
-  const total = parseInt(response.headers.get("x-total") || "0", 10);
+  const total = parseInt(headers.get("x-total") || "0", 10);
   return {
     items: data,
     total,
@@ -1888,7 +1782,7 @@ export async function createFund(payload: {
   deadlineAt?: string;
   payerWalletId?: string;
 }): Promise<Fund> {
-  const response = await apiFetch("/wallet/wallets/funds", {
+  return fetchJsonZ("/wallet/wallets/funds", FundSchema, {
     method: "POST",
     body: JSON.stringify({
       currency: payload.currency,
@@ -1907,12 +1801,10 @@ export async function createFund(payload: {
       payer_wallet_id: payload.payerWalletId,
     }),
   });
-  return safeJsonParse<Fund>(response);
 }
 
 export async function fetchFund(fundId: string): Promise<Fund> {
-  const response = await apiFetch(`/wallet/wallets/funds/${fundId}`);
-  return safeJsonParse<Fund>(response);
+  return fetchJsonZ(`/wallet/wallets/funds/${fundId}`, FundSchema);
 }
 
 export async function claimFund(fundId: string): Promise<void> {
@@ -1925,11 +1817,11 @@ export async function fetchFunds(
   offset = 0,
   take = 20,
 ): Promise<{ items: Fund[]; total: number; hasMore: boolean }> {
-  const response = await apiFetch(
+  const { data, headers } = await fetchJsonZHeaders(
     `/wallet/wallets/funds?offset=${offset}&take=${take}`,
+    FundSchema.array(),
   );
-  const data = await safeJsonParse<Fund[]>(response);
-  const total = parseInt(response.headers.get("x-total") || "0", 10);
+  const total = parseInt(headers.get("x-total") || "0", 10);
   return {
     items: data,
     total,
