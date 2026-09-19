@@ -67,6 +67,16 @@ import {
   PostalEmailSchema,
 } from "~/types/mail";
 import {
+  SnCloudFileSchema,
+  SnFilePoolSchema,
+  DriveUsageSchema,
+  SnStorageNodeSchema,
+  CreateDriveNodeResponseSchema,
+  DriveQuotaSchema,
+  DriveFilePermissionSchema,
+} from "~/types/drive";
+import { SnChatRoomSchema } from "~/types/chat";
+import {
   PostSchema,
   PublisherSchema,
   TimelineResultSchema,
@@ -128,6 +138,19 @@ import type {
   SubscriptionGroup,
   StellarSubscription,
 } from "~/types/subscription";
+import type {
+  SnCloudFile,
+  SnFilePool,
+  SnStorageNode,
+  CreateDriveNodePayload,
+  CreateDriveNodeResponse,
+  UpdateDriveNodePayload,
+  DriveUsage,
+  DriveQuota,
+  DriveFilePermission,
+  PaginatedResult,
+} from "~/types/drive";
+import type { SnChatRoom } from "~/types/chat";
 
 export type {
   WalletOrder,
@@ -2945,46 +2968,51 @@ export async function fetchPostsByTag(
 }
 
 // Check-In / Fortune API
-export interface FortuneReport {
-  version: number;
-  poem: string;
-  summary: string;
-  summaryDetail: string | null;
-  wish: string;
-  love: string;
-  study: string;
-  career: string;
-  health: string;
-  lostItem: string;
-  luckyColor: string;
-  luckyDirection: string;
-  luckyTime: string;
-  luckyItem: string;
-  luckyAction: string;
-  avoidAction: string;
-  ritual: string;
-}
+const FortuneReportSchema = z.object({
+  version: z.number(),
+  poem: z.string(),
+  summary: z.string(),
+  summaryDetail: z.string().nullable(),
+  wish: z.string(),
+  love: z.string(),
+  study: z.string(),
+  career: z.string(),
+  health: z.string(),
+  lostItem: z.string(),
+  luckyColor: z.string(),
+  luckyDirection: z.string(),
+  luckyTime: z.string(),
+  luckyItem: z.string(),
+  luckyAction: z.string(),
+  avoidAction: z.string(),
+  ritual: z.string(),
+});
+export type FortuneReport = z.infer<typeof FortuneReportSchema>;
 
-export interface FortuneTip {
-  isPositive: boolean;
-  title: string;
-  content: string;
-}
+const FortuneTipSchema = z.object({
+  isPositive: z.boolean(),
+  title: z.string(),
+  content: z.string(),
+});
+export type FortuneTip = z.infer<typeof FortuneTipSchema>;
 
-export interface CheckInResult {
-  id: string;
-  level: number;
-  tips: FortuneTip[];
-  fortuneReport: FortuneReport | null;
-  accountId: string;
-  createdAt: string;
-  updatedAt: string;
-}
+const CheckInResultSchema = z.object({
+  id: z.string(),
+  level: z.number(),
+  tips: z.array(FortuneTipSchema),
+  fortuneReport: FortuneReportSchema.nullable(),
+  accountId: z.string(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+export type CheckInResult = z.infer<typeof CheckInResultSchema>;
 
 export async function getCheckInResultToday(): Promise<CheckInResult | null> {
   try {
-    const response = await apiFetch("/passport/accounts/me/check-in?version=2");
-    return safeJsonParse<CheckInResult>(response);
+    return await fetchJsonZ(
+      "/passport/accounts/me/check-in?version=2",
+      CheckInResultSchema,
+    );
   } catch (err) {
     if (err instanceof ApiError && err.status === 404) {
       return null;
@@ -2999,18 +3027,19 @@ export async function performCheckIn(
   const body = captchaToken
     ? JSON.stringify({ captcha_token: captchaToken })
     : undefined;
-  const response = await apiFetch("/passport/accounts/me/check-in?version=2", {
-    method: "POST",
-    body,
-  });
-  return safeJsonParse<CheckInResult>(response);
+  return fetchJsonZ(
+    "/passport/accounts/me/check-in?version=2",
+    CheckInResultSchema,
+    { method: "POST", body },
+  );
 }
 
 // Event Calendar API
-export interface EventCalendarEntry {
-  date: string;
-  checkInResult: CheckInResult | null;
-}
+const EventCalendarEntrySchema = z.object({
+  date: z.string(),
+  checkInResult: CheckInResultSchema.nullable(),
+});
+export type EventCalendarEntry = z.infer<typeof EventCalendarEntrySchema>;
 
 export async function fetchEventCalendar(
   year: number,
@@ -3025,24 +3054,13 @@ export async function fetchEventCalendar(
     month: String(month),
     includeNotableDays: "false",
   });
-  const response = await apiFetch(`${path}?${params.toString()}`);
-  return safeJsonParse<EventCalendarEntry[]>(response);
+  return fetchJsonZ(
+    `${path}?${params.toString()}`,
+    EventCalendarEntrySchema.array(),
+  );
 }
 
 // Drive API
-import type {
-  SnCloudFile,
-  SnFilePool,
-  SnStorageNode,
-  CreateDriveNodePayload,
-  CreateDriveNodeResponse,
-  UpdateDriveNodePayload,
-  DriveUsage,
-  DriveQuota,
-  DriveFilePermission,
-  PaginatedResult,
-} from "~/types/drive";
-
 export async function fetchDriveRootChildren(
   options: {
     query?: string;
@@ -3069,9 +3087,11 @@ export async function fetchDriveRootChildren(
 
   const qs = params.toString();
   const endpoint = `/drive/files/root/children${qs ? `?${qs}` : ""}`;
-  const response = await apiFetch(endpoint);
-  const total = parseInt(response.headers.get("x-total") || "0", 10);
-  const data = await safeJsonParse<SnCloudFile[]>(response);
+  const { data, headers } = await fetchJsonZHeaders(
+    endpoint,
+    SnCloudFileSchema.array(),
+  );
+  const total = parseInt(headers.get("x-total") || "0", 10);
   return { items: data, totalCount: total };
 }
 
@@ -3102,22 +3122,25 @@ export async function fetchDriveFolderChildren(
 
   const qs = params.toString();
   const endpoint = `/drive/files/${folderId}/children${qs ? `?${qs}` : ""}`;
-  const response = await apiFetch(endpoint);
-  const total = parseInt(response.headers.get("x-total") || "0", 10);
-  const data = await safeJsonParse<SnCloudFile[]>(response);
+  const { data, headers } = await fetchJsonZHeaders(
+    endpoint,
+    SnCloudFileSchema.array(),
+  );
+  const total = parseInt(headers.get("x-total") || "0", 10);
   return { items: data, totalCount: total };
 }
 
 export async function fetchDriveFileInfo(fileId: string): Promise<SnCloudFile> {
-  const response = await apiFetch(`/drive/files/${fileId}/info`);
-  return safeJsonParse<SnCloudFile>(response);
+  return fetchJsonZ(`/drive/files/${fileId}/info`, SnCloudFileSchema);
 }
 
 export async function fetchDriveFilePermissions(
   fileId: string,
 ): Promise<DriveFilePermission[]> {
-  const response = await apiFetch(`/drive/files/${fileId}/permissions`);
-  return safeJsonParse<DriveFilePermission[]>(response);
+  return fetchJsonZ(
+    `/drive/files/${fileId}/permissions`,
+    DriveFilePermissionSchema.array(),
+  );
 }
 
 export async function createDriveFolder(options: {
@@ -3128,22 +3151,20 @@ export async function createDriveFolder(options: {
   const body: Record<string, unknown> = { name: options.name };
   if (options.parentId) body.parent_id = options.parentId;
   if (options.poolId) body.pool_id = options.poolId;
-  const response = await apiFetch("/drive/files/folders", {
+  return fetchJsonZ("/drive/files/folders", SnCloudFileSchema, {
     method: "POST",
     body: JSON.stringify(body),
   });
-  return safeJsonParse<SnCloudFile>(response);
 }
 
 export async function renameDriveFile(
   fileId: string,
   newName: string,
 ): Promise<SnCloudFile> {
-  const response = await apiFetch(`/drive/files/${fileId}`, {
+  return fetchJsonZ(`/drive/files/${fileId}`, SnCloudFileSchema, {
     method: "PATCH",
     body: JSON.stringify({ name: newName }),
   });
-  return safeJsonParse<SnCloudFile>(response);
 }
 
 export async function moveDriveFile(
@@ -3153,11 +3174,10 @@ export async function moveDriveFile(
 ): Promise<SnCloudFile> {
   const body: Record<string, unknown> = { parent_id: parentId };
   if (indexed !== undefined) body.indexed = indexed;
-  const response = await apiFetch(`/drive/files/${fileId}/move`, {
+  return fetchJsonZ(`/drive/files/${fileId}/move`, SnCloudFileSchema, {
     method: "POST",
     body: JSON.stringify(body),
   });
-  return safeJsonParse<SnCloudFile>(response);
 }
 
 export async function deleteDriveFile(fileId: string): Promise<void> {
@@ -3167,75 +3187,67 @@ export async function deleteDriveFile(fileId: string): Promise<void> {
 export async function batchDeleteDriveFiles(
   fileIds: string[],
 ): Promise<number> {
-  const response = await apiFetch("/drive/files/batch", {
-    method: "DELETE",
-    body: JSON.stringify({ ids: fileIds }),
-  });
-  const data = await safeJsonParse<{ count: number }>(response);
-  return data.count;
+  const { count } = await fetchJsonZ(
+    "/drive/files/batch",
+    z.object({ count: z.number() }),
+    { method: "DELETE", body: JSON.stringify({ ids: fileIds }) },
+  );
+  return count;
 }
 
 export async function updateDriveFileSensitiveMarks(
   fileId: string,
   marks: string[],
 ): Promise<SnCloudFile> {
-  const response = await apiFetch(`/drive/files/${fileId}/sensitive`, {
+  return fetchJsonZ(`/drive/files/${fileId}/sensitive`, SnCloudFileSchema, {
     method: "PATCH",
     body: JSON.stringify({ marks }),
   });
-  return safeJsonParse<SnCloudFile>(response);
 }
 
 export async function updateDriveFileUserMeta(
   fileId: string,
   meta: Record<string, unknown>,
 ): Promise<SnCloudFile> {
-  const response = await apiFetch(`/drive/files/${fileId}/meta`, {
+  return fetchJsonZ(`/drive/files/${fileId}/meta`, SnCloudFileSchema, {
     method: "PATCH",
     body: JSON.stringify({ meta }),
   });
-  return safeJsonParse<SnCloudFile>(response);
 }
 
 export async function fetchDriveUsage(): Promise<DriveUsage> {
-  const response = await apiFetch("/drive/billing/usage");
-  return safeJsonParse<DriveUsage>(response);
+  return fetchJsonZ("/drive/billing/usage", DriveUsageSchema);
 }
 
 export async function fetchDriveQuota(): Promise<DriveQuota> {
-  const response = await apiFetch("/drive/billing/quota");
-  return safeJsonParse<DriveQuota>(response);
+  return fetchJsonZ("/drive/billing/quota", DriveQuotaSchema);
 }
 
 export async function fetchDrivePools(): Promise<SnFilePool[]> {
-  const response = await apiFetch("/drive/pools");
-  return safeJsonParse<SnFilePool[]>(response);
+  return fetchJsonZ("/drive/pools", SnFilePoolSchema.array());
 }
 
 export async function fetchDriveNodes(): Promise<SnStorageNode[]> {
-  const response = await apiFetch("/drive/nodes");
-  return safeJsonParse<SnStorageNode[]>(response);
+  return fetchJsonZ("/drive/nodes", SnStorageNodeSchema.array());
 }
 
 export async function createDriveNode(
   payload: CreateDriveNodePayload,
 ): Promise<CreateDriveNodeResponse> {
-  const response = await apiFetch("/drive/nodes", {
+  return fetchJsonZ("/drive/nodes", CreateDriveNodeResponseSchema, {
     method: "POST",
     body: JSON.stringify(camelToSnake(payload)),
   });
-  return safeJsonParse<CreateDriveNodeResponse>(response);
 }
 
 export async function updateDriveNode(
   nodeId: string,
   payload: UpdateDriveNodePayload,
 ): Promise<SnStorageNode> {
-  const response = await apiFetch(`/drive/nodes/${encodeURIComponent(nodeId)}`, {
+  return fetchJsonZ(`/drive/nodes/${encodeURIComponent(nodeId)}`, SnStorageNodeSchema, {
     method: "PATCH",
     body: JSON.stringify(camelToSnake(payload)),
   });
-  return safeJsonParse<SnStorageNode>(response);
 }
 
 export async function deleteDriveNode(nodeId: string): Promise<void> {
@@ -3273,9 +3285,11 @@ export async function fetchDriveUnindexedFiles(
 
   const qs = params.toString();
   const endpoint = `/drive/files/unindexed${qs ? `?${qs}` : ""}`;
-  const response = await apiFetch(endpoint);
-  const total = parseInt(response.headers.get("x-total") || "0", 10);
-  const data = await safeJsonParse<SnCloudFile[]>(response);
+  const { data, headers } = await fetchJsonZHeaders(
+    endpoint,
+    SnCloudFileSchema.array(),
+  );
+  const total = parseInt(headers.get("x-total") || "0", 10);
   return { items: data, totalCount: total };
 }
 
@@ -3309,47 +3323,52 @@ export async function uploadDriveFile(
     throw ApiError.fromBody(response.status, errorData);
   }
 
-  return safeJsonParse<SnCloudFile>(response);
+  return parseWithSchema(
+    url,
+    SnCloudFileSchema,
+    await safeJsonParse<unknown>(response),
+  );
 }
 
 export async function deleteDriveRecycledFiles(): Promise<number> {
-  const response = await apiFetch("/drive/files/recycled", {
-    method: "DELETE",
-  });
-  const data = await safeJsonParse<{ count: number }>(response);
-  return data.count;
+  const { count } = await fetchJsonZ(
+    "/drive/files/recycled",
+    z.object({ count: z.number() }),
+    { method: "DELETE" },
+  );
+  return count;
 }
 
-export interface DriveBreadcrumb {
-  id: string;
-  name: string;
-  parentId: string | null;
-  isFolder: boolean;
-}
+const DriveBreadcrumbSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  parentId: z.string().nullable(),
+  isFolder: z.boolean(),
+});
+export type DriveBreadcrumb = z.infer<typeof DriveBreadcrumbSchema>;
 
 export async function fetchDriveBreadcrumb(
   fileId: string,
 ): Promise<DriveBreadcrumb[]> {
-  const response = await apiFetch(`/drive/files/${fileId}/breadcrumb`);
-  return safeJsonParse<DriveBreadcrumb[]>(response);
+  return fetchJsonZ(`/drive/files/${fileId}/breadcrumb`, DriveBreadcrumbSchema.array());
 }
 
-export interface WopiEditSession {
-  actionUrl: string;
-  action: string;
-  method: string;
-  formFields: Record<string, string>;
-  wopiSrc: string;
-  expiresAt: string;
-}
+const WopiEditSessionSchema = z.object({
+  actionUrl: z.string(),
+  action: z.string(),
+  method: z.string(),
+  formFields: z.record(z.string(), z.string()),
+  wopiSrc: z.string(),
+  expiresAt: z.string(),
+});
+export type WopiEditSession = z.infer<typeof WopiEditSessionSchema>;
 
 export async function createWopiEditSession(
   fileId: string,
 ): Promise<WopiEditSession> {
-  const response = await apiFetch(`/drive/files/${fileId}/edit`, {
+  return fetchJsonZ(`/drive/files/${fileId}/edit`, WopiEditSessionSchema, {
     method: "POST",
   });
-  return safeJsonParse<WopiEditSession>(response);
 }
 
 const OFFICE_MIME_TYPES = [
@@ -3374,47 +3393,48 @@ export function isOfficeFile(mimeType: string | null | undefined): boolean {
 }
 
 // Chat API
-import type { SnChatRoom } from "~/types/chat";
-
 export async function fetchChatRoomBySlug(
   scope: string,
   slug: string,
 ): Promise<SnChatRoom | null> {
-  const response = await apiFetch(
-    `/messager/chat/public/${encodeURIComponent(scope)}/${encodeURIComponent(slug)}`,
-  );
-  if (response.status === 404) return null;
-  const data = await safeJsonParse<SnChatRoom>(response);
-  return snakeToCamel(data) as SnChatRoom;
- }
+  try {
+    return await fetchJsonZ(
+      `/messager/chat/public/${encodeURIComponent(scope)}/${encodeURIComponent(slug)}`,
+      SnChatRoomSchema,
+    );
+  } catch (err) {
+    if (err instanceof ApiError && err.status === 404) return null;
+    throw err;
+  }
+}
 
 export async function fetchChatRooms(take = 20): Promise<SnChatRoom[]> {
-  const response = await apiFetch(
+  return fetchJsonZ(
     `/messager/chat/rooms?offset=0&take=${take}`,
+    SnChatRoomSchema.array().nullable().transform((v) => v ?? []),
   );
-  const data = await safeJsonParse<SnChatRoom[]>(response);
-  return (data ?? []).map((room) => snakeToCamel(room)) as SnChatRoom[];
 }
 
 // Device Authorization Flow (RFC 8628)
-export interface DeviceCodeStatus {
-  userCode: string;
-  clientId: string;
-  clientName?: string;
-  picture?: { id?: string };
-  scopes: string[];
-  status: "pending" | "approved" | "declined" | "expired";
-  expiresAt: string;
-}
+const DeviceCodeStatusSchema = z.object({
+  userCode: z.string(),
+  clientId: z.string(),
+  clientName: z.string().optional(),
+  picture: z.object({ id: z.string().optional() }).optional(),
+  scopes: z.array(z.string()),
+  status: z.enum(["pending", "approved", "declined", "expired"]),
+  expiresAt: z.string(),
+});
+export type DeviceCodeStatus = z.infer<typeof DeviceCodeStatusSchema>;
 
 export async function getDeviceCodeStatus(
   userCode: string,
 ): Promise<DeviceCodeStatus> {
-  const response = await apiFetch(
+  return fetchJsonZ(
     `/stargate/auth/open/device/code/${encodeURIComponent(userCode)}`,
+    DeviceCodeStatusSchema,
     { skipAuth: true },
   );
-  return safeJsonParse<DeviceCodeStatus>(response);
 }
 
 export async function approveDeviceCode(userCode: string): Promise<void> {
