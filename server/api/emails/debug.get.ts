@@ -1,16 +1,21 @@
-export default defineEventHandler(async (event) => {
-  const query = getQuery(event);
-  const name = query.name as string;
+import { z } from "zod";
 
-  if (!name) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: "Missing template name. Usage: /api/emails/debug?name=TemplateName&prop1=value1&...",
-    });
-  }
+const querySchema = z
+  .object({
+    name: z
+      .string()
+      .min(1, {
+        message:
+          "Missing template name. Usage: /api/emails/debug?name=TemplateName&prop1=value1&...",
+      }),
+  })
+  .passthrough();
+
+export default defineEventHandler(async (event) => {
+  const query = await getValidatedQuery(event, querySchema.parse);
 
   // Remove 'name' from query, rest are props
-  const { name: _name, ...props } = query;
+  const { name, ...props } = query;
 
   try {
     const html = await renderEmailComponent(name, props as Record<string, unknown>, {
@@ -23,10 +28,10 @@ export default defineEventHandler(async (event) => {
     // Return raw HTML for direct browser viewing
     setHeader(event, "Content-Type", "text/html; charset=utf-8");
     return htmlString;
-  } catch (error: any) {
+  } catch (error) {
     throw createError({
       statusCode: 500,
-      statusMessage: `Failed to render: ${error.message || "Unknown error"}`,
+      statusMessage: `Failed to render: ${error instanceof Error ? error.message : "Unknown error"}`,
     });
   }
 });

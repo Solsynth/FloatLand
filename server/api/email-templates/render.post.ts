@@ -1,8 +1,8 @@
 import { z } from "zod";
 
 const bodySchema = z.object({
-  name: z.string().nonempty(),
-  props: z.record(z.any()).optional().default({}),
+  name: z.string().min(1),
+  props: z.record(z.string(), z.unknown()).optional().default({}),
   pretty: z.boolean().optional().default(false),
 });
 
