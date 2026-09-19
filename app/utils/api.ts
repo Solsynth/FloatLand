@@ -13,6 +13,9 @@ import {
   SnAccountPunishmentSchema,
   SnAccountTimelineItemSchema,
   PublicAccountConnectionSchema,
+  RelationshipSchema,
+  RelationshipStatusSchema,
+  FriendOverviewItemSchema,
 } from "~/types/auth";
 import {
   PostSchema,
@@ -25,6 +28,14 @@ import {
   PublisherSubscriptionStatusSchema,
   HeatmapDataSchema,
 } from "~/types/post";
+import {
+  RealmSchema,
+  RealmMemberSchema,
+  RealmLabelSchema,
+  RealmBoostStatusSchema,
+  RealmBoostLeaderboardEntrySchema,
+  RealmInviteSchema,
+} from "~/types/realm";
 import type {
   SnAuthChallenge,
   SnAuthFactor,
@@ -54,6 +65,9 @@ import type {
   PublicAccountConnection,
   PasskeyAuthenticationOptions,
   PasskeyRegistrationOptions,
+  Relationship,
+  RelationshipStatus,
+  FriendOverviewItem,
 } from "~/types/auth";
 
 export type {
@@ -111,6 +125,7 @@ export type {
   Reaction,
   PublisherSubscriptionStatus,
 } from "~/types/post";
+export type { Relationship, RelationshipStatus, FriendOverviewItem } from "~/types/auth";
 
 // Global API configuration
 export const API_BASE = "api.solian.app";
@@ -1043,11 +1058,11 @@ export async function searchPublishers(
 
 export async function searchRealms(query: string, take = 20): Promise<Realm[]> {
   const params = new URLSearchParams({ query, take: String(take) });
-  const response = await apiFetch(
+  return fetchJsonZ(
     `/passport/realms/search?${params.toString()}`,
+    RealmSchema.array(),
     { skipAuth: true },
   );
-  return safeJsonParse<Realm[]>(response);
 }
 
 // Data API - Accounts
@@ -1189,11 +1204,11 @@ export async function fetchAccountPublishers(
 
 // Data API - Realms
 export async function fetchRealm(slug: string): Promise<Realm> {
-  const response = await apiFetch(
+  return fetchJsonZ(
     `/passport/realms/${encodeURIComponent(slug)}`,
+    RealmSchema,
     { skipAuth: true },
   );
-  return safeJsonParse<Realm>(response);
 }
 
 export async function fetchRealmPosts(
@@ -1220,13 +1235,13 @@ export async function fetchRealmPosts(
   if (options.media) params.set("media", "true");
   if (options.queryTerm) params.set("query", options.queryTerm);
 
-  const response = await apiFetch(`/sphere/posts?${params.toString()}`, {
-    skipAuth: true,
-  });
+  const { data, headers } = await fetchJsonZHeaders(
+    `/sphere/posts?${params.toString()}`,
+    PostSchema.array(),
+    { skipAuth: true },
+  );
 
-  const total = parseInt(response.headers.get("x-total") || "0", 10);
-  const data = await safeJsonParse<Post[]>(response);
-
+  const total = parseInt(headers.get("x-total") || "0", 10);
   return { posts: data, total };
 }
 
@@ -1345,20 +1360,14 @@ export async function fetchAccountActivityTimeline(
 }
 
 // Account relationships
-export interface RelationshipStatus {
-  status: number; // -100 = blocked, 0 = none, >0 = friend
-  isFriend: boolean;
-  isBlocked: boolean;
-}
-
 export async function fetchAccountRelationship(
   accountId: string,
 ): Promise<RelationshipStatus | null> {
   try {
-    const response = await apiFetch(
+    return await fetchJsonZ(
       `/passport/accounts/${accountId}/relationship`,
+      RelationshipStatusSchema,
     );
-    return safeJsonParse<RelationshipStatus>(response);
   } catch (err) {
     if (err instanceof Error && err.message.includes("404")) {
       return null;
@@ -1386,39 +1395,15 @@ export async function unblockAccount(accountId: string): Promise<void> {
 }
 
 // Relationships
-export interface Relationship {
-  id: string;
-  accountId: string;
-  relatedId: string;
-  status: number;
-  expiredAt?: string;
-  account?: {
-    id: string;
-    name: string;
-    nick: string;
-    profile: {
-      picture?: { id: string };
-    };
-  };
-  related?: {
-    id: string;
-    name: string;
-    nick: string;
-    profile: {
-      picture?: { id: string };
-    };
-  };
-}
-
 export async function fetchRelationships(
   offset = 0,
   take = 20,
 ): Promise<{ items: Relationship[]; total: number; hasMore: boolean }> {
-  const response = await apiFetch(
+  const { data, headers } = await fetchJsonZHeaders(
     `/stargate/relationships?offset=${offset}&take=${take}`,
+    RelationshipSchema.array(),
   );
-  const data = await safeJsonParse<Relationship[]>(response);
-  const total = parseInt(response.headers.get("x-total") || "0", 10);
+  const total = parseInt(headers.get("x-total") || "0", 10);
   return {
     items: data,
     total,
@@ -1427,8 +1412,10 @@ export async function fetchRelationships(
 }
 
 export async function fetchFriendRequests(): Promise<Relationship[]> {
-  const response = await apiFetch("/stargate/relationships/requests");
-  return safeJsonParse<Relationship[]>(response);
+  return fetchJsonZ(
+    "/stargate/relationships/requests",
+    RelationshipSchema.array(),
+  );
 }
 
 export async function sendFriendRequest(accountId: string): Promise<void> {
@@ -1472,32 +1459,11 @@ export async function deleteRelationship(relatedId: string): Promise<void> {
 }
 
 // Friends overview (dashboard module, mirrors the Solian clients).
-export interface FriendOverviewItem {
-  account: SnAccount;
-  status: {
-    id: string;
-    attitude: number;
-    isOnline: boolean;
-    isIdle: boolean;
-    type: number;
-    label: string;
-    updatedAt: string;
-  } | null;
-  activities: Array<{
-    id: string;
-    type: string;
-    title?: string | null;
-    subtitle?: string | null;
-    caption?: string | null;
-    smallImage?: string | null;
-    largeImage?: string | null;
-  }>;
-}
-
 export async function fetchFriendsOverview(): Promise<FriendOverviewItem[]> {
-  const response = await apiFetch("/passport/friends/overview");
-  const data = await safeJsonParse<unknown>(response);
-  return snakeToCamel<FriendOverviewItem[]>(data) ?? [];
+  return fetchJsonZ(
+    "/passport/friends/overview",
+    FriendOverviewItemSchema.array().nullable().transform((v) => v ?? []),
+  );
 }
 
 
@@ -2349,9 +2315,7 @@ export async function subscribeWorkspacePlan(slug: string, plan: number): Promis
 }
 
 export async function fetchRealms(): Promise<Realm[]> {
-  const response = await apiFetch("/passport/realms");
-  const data = await safeJsonParse<Realm[]>(response);
-  return data;
+  return fetchJsonZ("/passport/realms", RealmSchema.array());
 }
 
 export async function createRealm(payload: {
@@ -2361,11 +2325,10 @@ export async function createRealm(payload: {
   isPublic?: boolean;
   isCommunity?: boolean;
 }): Promise<Realm> {
-  const response = await apiFetch("/passport/realms", {
+  return fetchJsonZ("/passport/realms", RealmSchema, {
     method: "POST",
     body: JSON.stringify(camelToSnake(payload)),
   });
-  return safeJsonParse<Realm>(response);
 }
 
 export async function updateRealm(
@@ -2376,14 +2339,10 @@ export async function updateRealm(
     isPublic?: boolean;
   },
 ): Promise<Realm> {
-  const response = await apiFetch(
-    `/passport/realms/${encodeURIComponent(slug)}`,
-    {
-      method: "PATCH",
-      body: JSON.stringify(camelToSnake(payload)),
-    },
-  );
-  return safeJsonParse<Realm>(response);
+  return fetchJsonZ(`/passport/realms/${encodeURIComponent(slug)}`, RealmSchema, {
+    method: "PATCH",
+    body: JSON.stringify(camelToSnake(payload)),
+  });
 }
 
 export async function deleteRealm(slug: string): Promise<void> {
@@ -2409,10 +2368,10 @@ export async function getMyRealmMembership(
   slug: string,
 ): Promise<RealmMember | null> {
   try {
-    const response = await apiFetch(
+    return await fetchJsonZ(
       `/passport/realms/${encodeURIComponent(slug)}/members/me`,
+      RealmMemberSchema,
     );
-    return safeJsonParse<RealmMember>(response);
   } catch (err) {
     if (err instanceof Error && err.message.includes("404")) {
       return null;
@@ -2430,18 +2389,17 @@ export async function fetchRealmMembers(
     take: String(take),
     offset: String(offset),
   });
-  const response = await apiFetch(
+  const { data, headers } = await fetchJsonZHeaders(
     `/passport/realms/${encodeURIComponent(slug)}/members?${params.toString()}`,
+    RealmMemberSchema.array(),
   );
-  const total = parseInt(response.headers.get("x-total") || "0", 10);
-  const data = await safeJsonParse<RealmMember[]>(response);
+  const total = parseInt(headers.get("x-total") || "0", 10);
   return { members: data, total };
 }
 
 // Realm invites
 export async function fetchRealmInvites(): Promise<RealmInvite[]> {
-  const response = await apiFetch("/passport/realms/invites");
-  return safeJsonParse<RealmInvite[]>(response);
+  return fetchJsonZ("/passport/realms/invites", RealmInviteSchema.array());
 }
 
 export async function acceptRealmInvite(slug: string): Promise<void> {
@@ -2466,20 +2424,20 @@ export async function declineRealmInvite(slug: string): Promise<void> {
 export async function fetchRealmBoostStatus(
   slug: string,
 ): Promise<RealmBoostStatus> {
-  const response = await apiFetch(
+  return fetchJsonZ(
     `/passport/realms/${encodeURIComponent(slug)}/boost`,
+    RealmBoostStatusSchema,
   );
-  return safeJsonParse<RealmBoostStatus>(response);
 }
 
 export async function fetchRealmBoostLeaderboard(
   slug: string,
   take = 20,
 ): Promise<RealmBoostLeaderboardEntry[]> {
-  const response = await apiFetch(
+  return fetchJsonZ(
     `/passport/realms/${encodeURIComponent(slug)}/boost/leaderboard?take=${take}`,
+    RealmBoostLeaderboardEntrySchema.array(),
   );
-  return safeJsonParse<RealmBoostLeaderboardEntry[]>(response);
 }
 
 export async function boostRealm(
@@ -2495,10 +2453,10 @@ export async function boostRealm(
 
 // Realm labels
 export async function fetchRealmLabels(slug: string): Promise<RealmLabel[]> {
-  const response = await apiFetch(
+  return fetchJsonZ(
     `/passport/realms/${encodeURIComponent(slug)}/labels`,
+    RealmLabelSchema.array(),
   );
-  return safeJsonParse<RealmLabel[]>(response);
 }
 
 export async function createRealmLabel(
@@ -2510,14 +2468,11 @@ export async function createRealmLabel(
     color?: string;
   },
 ): Promise<RealmLabel> {
-  const response = await apiFetch(
+  return fetchJsonZ(
     `/passport/realms/${encodeURIComponent(slug)}/labels`,
-    {
-      method: "POST",
-      body: JSON.stringify(camelToSnake(payload)),
-    },
+    RealmLabelSchema,
+    { method: "POST", body: JSON.stringify(camelToSnake(payload)) },
   );
-  return safeJsonParse<RealmLabel>(response);
 }
 
 export async function updateRealmLabel(
@@ -2530,14 +2485,11 @@ export async function updateRealmLabel(
     color?: string;
   },
 ): Promise<RealmLabel> {
-  const response = await apiFetch(
+  return fetchJsonZ(
     `/passport/realms/${encodeURIComponent(slug)}/labels/${labelId}`,
-    {
-      method: "PATCH",
-      body: JSON.stringify(camelToSnake(payload)),
-    },
+    RealmLabelSchema,
+    { method: "PATCH", body: JSON.stringify(camelToSnake(payload)) },
   );
-  return safeJsonParse<RealmLabel>(response);
 }
 
 export async function deleteRealmLabel(
@@ -2561,14 +2513,11 @@ export async function updateRealmIdentity(
     labelId?: string | null;
   },
 ): Promise<RealmMember> {
-  const response = await apiFetch(
+  return fetchJsonZ(
     `/passport/realms/${encodeURIComponent(slug)}/members/me`,
-    {
-      method: "PATCH",
-      body: JSON.stringify(camelToSnake(payload)),
-    },
+    RealmMemberSchema,
+    { method: "PATCH", body: JSON.stringify(camelToSnake(payload)) },
   );
-  return safeJsonParse<RealmMember>(response);
 }
 
 // Settings API - Account Management

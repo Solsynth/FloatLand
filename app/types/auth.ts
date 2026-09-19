@@ -199,6 +199,58 @@ export const PublicAccountConnectionSchema = z.object({
 });
 export type PublicAccountConnection = z.infer<typeof PublicAccountConnectionSchema>;
 
+const RelationshipAccountSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  nick: z.string(),
+  profile: z.object({ picture: z.object({ id: z.string() }).optional() }),
+});
+
+export const RelationshipSchema = z.object({
+  id: z.string(),
+  accountId: z.string(),
+  relatedId: z.string(),
+  status: z.number(),
+  expiredAt: z.string().optional(),
+  account: RelationshipAccountSchema.optional(),
+  related: RelationshipAccountSchema.optional(),
+});
+export type Relationship = z.infer<typeof RelationshipSchema>;
+
+export const RelationshipStatusSchema = z.object({
+  status: z.number(),
+  isFriend: z.boolean(),
+  isBlocked: z.boolean(),
+});
+export type RelationshipStatus = z.infer<typeof RelationshipStatusSchema>;
+
+export const FriendOverviewItemSchema = z.object({
+  account: SnAccountSchema,
+  status: z
+    .object({
+      id: z.string(),
+      attitude: z.number(),
+      isOnline: z.boolean(),
+      isIdle: z.boolean(),
+      type: z.number(),
+      label: z.string(),
+      updatedAt: z.string(),
+    })
+    .nullable(),
+  activities: z.array(
+    z.object({
+      id: z.string(),
+      type: z.string(),
+      title: z.string().nullable().optional(),
+      subtitle: z.string().nullable().optional(),
+      caption: z.string().nullable().optional(),
+      smallImage: z.string().nullable().optional(),
+      largeImage: z.string().nullable().optional(),
+    }),
+  ),
+});
+export type FriendOverviewItem = z.infer<typeof FriendOverviewItemSchema>;
+
 /** Board widget kind: 0/prebuilt or 1/custom_app */
 export type AccountBoardItemKind = "prebuilt" | "custom_app" | 0 | 1;
 
