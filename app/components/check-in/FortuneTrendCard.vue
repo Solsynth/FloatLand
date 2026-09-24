@@ -145,7 +145,11 @@ async function loadData() {
     loading.value = true;
     error.value = null;
     try {
-        const entries = await fetchEventCalendar(year, month, props.username);
+        const entries = await fetchEventCalendar({
+            year,
+            month,
+            username: props.username,
+        });
         const withResults = entries
             .filter((e) => e.checkInResult != null)
             .map((e) => ({

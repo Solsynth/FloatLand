@@ -3109,29 +3109,307 @@ export async function performCheckIn(
 }
 
 // Event Calendar API
-const EventCalendarEntrySchema = z.object({
+
+/** Compact cloud-file reference embedded in calendar payloads. */
+const CloudFileRefSchema = z.object({
+  id: z.string(),
+  name: z.string().optional(),
+  url: z.string().nullable().optional(),
+  mimeType: z.string().optional(),
+  fileMeta: z.record(z.string(), z.unknown()).optional(),
+  userMeta: z.record(z.string(), z.unknown()).optional(),
+  width: z.number().nullable().optional(),
+  height: z.number().nullable().optional(),
+  blurhash: z.string().nullable().optional(),
+});
+export type CloudFileRef = z.infer<typeof CloudFileRefSchema>;
+
+const CalendarRecurrenceSchema = z.object({
+  frequency: z.number(),
+  interval: z.number().nullable().optional(),
+  endDate: z.string().nullable().optional(),
+  occurrences: z.number().nullable().optional(),
+  daysOfWeek: z.array(z.string()).nullable().optional(),
+  dayOfMonth: z.number().nullable().optional(),
+  monthOfYear: z.number().nullable().optional(),
+});
+export type CalendarRecurrence = z.infer<typeof CalendarRecurrenceSchema>;
+
+const CalendarAccountRefSchema = z
+  .object({
+    id: z.string().optional(),
+    name: z.string().optional(),
+    nick: z.string().nullable().optional(),
+  })
+  .nullable()
+  .optional();
+
+export const CalendarEventSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  description: z.string().nullable().optional(),
+  location: z.string().nullable().optional(),
+  startTime: z.string(),
+  endTime: z.string(),
+  isAllDay: z.boolean().optional().default(false),
+  visibility: z.number().optional().default(0),
+  recurrence: CalendarRecurrenceSchema.nullable().optional(),
+  tags: z.array(z.string()).optional().default([]),
+  meta: z.record(z.string(), z.unknown()).nullable().optional(),
+  icon: CloudFileRefSchema.nullable().optional(),
+  background: CloudFileRefSchema.nullable().optional(),
+  accountId: z.string().optional().default(""),
+  account: CalendarAccountRefSchema,
+  createdAt: z.string().optional().default(""),
+  updatedAt: z.string().optional().default(""),
+  deletedAt: z.string().nullable().optional(),
+});
+export type CalendarEvent = z.infer<typeof CalendarEventSchema>;
+
+export const NotableDaySchema = z.object({
   date: z.string(),
-  checkInResult: CheckInResultSchema.nullable(),
+  localName: z.string().optional().default(""),
+  globalName: z.string().optional().default(""),
+  countryCode: z.string().nullable().optional(),
+  localizableKey: z.string().nullable().optional(),
+  holidays: z.array(z.number()).optional().default([]),
+});
+export type NotableDay = z.infer<typeof NotableDaySchema>;
+
+export const NotableDayDetailSchema = z.object({
+  date: z.string(),
+  localName: z.string().optional().default(""),
+  globalName: z.string().optional().default(""),
+  countryCode: z.string().nullable().optional(),
+  localizableKey: z.string().nullable().optional(),
+  description: z.string().nullable().optional(),
+  meta: z.record(z.string(), z.unknown()).nullable().optional(),
+  occurrenceKey: z.string().nullable().optional(),
+  holidays: z.array(z.string()).nullable().optional(),
+  tags: z.array(z.string()).nullable().optional(),
+});
+export type NotableDayDetail = z.infer<typeof NotableDayDetailSchema>;
+
+/** Ambient presence snapshot attached to a calendar day. */
+const CalendarStatusSchema = z.object({
+  id: z.string().optional().default(""),
+  type: z.number().optional().default(0),
+  label: z.string().optional().default(""),
+  symbol: z.string().nullable().optional(),
+  isOnline: z.boolean().optional().default(false),
+  isAutomated: z.boolean().optional().default(false),
+  appIdentifier: z.string().nullable().optional(),
+  attitude: z.number().optional().default(0),
+  icon: CloudFileRefSchema.nullable().optional(),
+});
+export type CalendarStatus = z.infer<typeof CalendarStatusSchema>;
+
+const MergedCalendarEventSchema = z.object({
+  id: z.string().nullable().optional(),
+  type: z.string(),
+  title: z.string(),
+  description: z.string().nullable().optional(),
+  location: z.string().nullable().optional(),
+  startTime: z.string(),
+  endTime: z.string(),
+  isAllDay: z.boolean().optional().default(false),
+  meta: z.record(z.string(), z.unknown()).nullable().optional(),
+});
+export type MergedCalendarEvent = z.infer<typeof MergedCalendarEventSchema>;
+
+export const EventCalendarEntrySchema = z.object({
+  date: z.string(),
+  checkInResult: CheckInResultSchema.nullable().optional().default(null),
+  statuses: z.array(CalendarStatusSchema).optional().default([]),
+  userEvents: z.array(CalendarEventSchema).optional().default([]),
+  notableDays: z.array(NotableDaySchema).optional().default([]),
+  mergedEvents: z.array(MergedCalendarEventSchema).nullable().optional(),
 });
 export type EventCalendarEntry = z.infer<typeof EventCalendarEntrySchema>;
 
+export interface EventCalendarQuery {
+  year: number;
+  month: number;
+  /** Omit for the authenticated user's own calendar. */
+  username?: string;
+  includeNotableDays?: boolean;
+}
+
 export async function fetchEventCalendar(
-  year: number,
-  month: number,
-  username?: string,
+  query: EventCalendarQuery,
 ): Promise<EventCalendarEntry[]> {
+  const { year, month, username, includeNotableDays = false } = query;
   const path = username
     ? `/passport/accounts/${encodeURIComponent(username)}/calendar`
     : "/passport/accounts/me/calendar";
   const params = new URLSearchParams({
     year: String(year),
     month: String(month),
-    includeNotableDays: "false",
+    includeNotableDays: String(includeNotableDays),
   });
   return fetchJsonZ(
     `${path}?${params.toString()}`,
     EventCalendarEntrySchema.array(),
   );
+}
+
+export interface CalendarEventInput {
+  title: string;
+  /** ISO-8601 instant. */
+  startTime: string;
+  endTime: string;
+  description?: string;
+  location?: string;
+  isAllDay?: boolean;
+  /** 0=Private, 100=Friends, 200=Public. */
+  visibility?: number;
+  recurrence?: CalendarRecurrence | null;
+  tags?: string[];
+  meta?: Record<string, unknown> | null;
+  iconId?: string | null;
+  backgroundId?: string | null;
+}
+
+/**
+ * Serialize an event input to the backend's snake_case body. Fields left
+ * undefined are omitted so PATCH-like updates only touch what callers set.
+ */
+function calendarEventBody(
+  input: Partial<CalendarEventInput>,
+): Record<string, unknown> {
+  const body: Record<string, unknown> = {};
+  if (input.title !== undefined) body.title = input.title;
+  if (input.description !== undefined) body.description = input.description;
+  if (input.location !== undefined) body.location = input.location;
+  if (input.startTime !== undefined) body.start_time = input.startTime;
+  if (input.endTime !== undefined) body.end_time = input.endTime;
+  if (input.isAllDay !== undefined) body.is_all_day = input.isAllDay;
+  if (input.visibility !== undefined) body.visibility = input.visibility;
+  if (input.recurrence !== undefined) {
+    const recurrence = input.recurrence;
+    body.recurrence = recurrence
+      ? {
+          frequency: recurrence.frequency,
+          interval: recurrence.interval ?? 1,
+          ...(recurrence.endDate ? { end_date: recurrence.endDate } : {}),
+          ...(recurrence.occurrences != null
+            ? { occurrences: recurrence.occurrences }
+            : {}),
+          ...(recurrence.daysOfWeek?.length
+            ? { days_of_week: recurrence.daysOfWeek }
+            : {}),
+          ...(recurrence.dayOfMonth != null
+            ? { day_of_month: recurrence.dayOfMonth }
+            : {}),
+          ...(recurrence.monthOfYear != null
+            ? { month_of_year: recurrence.monthOfYear }
+            : {}),
+        }
+      : null;
+  }
+  if (input.tags !== undefined) body.tags = input.tags;
+  if (input.meta !== undefined) body.meta = input.meta;
+  if (input.iconId !== undefined) body.icon_id = input.iconId;
+  if (input.backgroundId !== undefined) body.background_id = input.backgroundId;
+  return body;
+}
+
+export async function createCalendarEvent(
+  input: CalendarEventInput,
+): Promise<CalendarEvent> {
+  return fetchJsonZ(
+    "/passport/accounts/me/calendar/events",
+    CalendarEventSchema,
+    { method: "POST", body: JSON.stringify(calendarEventBody(input)) },
+  );
+}
+
+export async function updateCalendarEvent(
+  id: string,
+  input: Partial<CalendarEventInput>,
+): Promise<CalendarEvent> {
+  return fetchJsonZ(
+    `/passport/accounts/me/calendar/events/${encodeURIComponent(id)}`,
+    CalendarEventSchema,
+    { method: "PUT", body: JSON.stringify(calendarEventBody(input)) },
+  );
+}
+
+export async function deleteCalendarEvent(id: string): Promise<void> {
+  await apiFetch(
+    `/passport/accounts/me/calendar/events/${encodeURIComponent(id)}`,
+    { method: "DELETE" },
+  );
+}
+
+export async function fetchCalendarTags(): Promise<string[]> {
+  return fetchJsonZ(
+    "/passport/accounts/me/calendar/tags",
+    z.array(z.string()),
+  );
+}
+
+export type CalendarSearchKind = "UserEvent" | "NotableDay";
+
+export interface CalendarSearchItem {
+  type: CalendarSearchKind;
+  startTime: string;
+  endTime: string;
+  userEvent: CalendarEvent | null;
+  notableDay: NotableDayDetail | null;
+}
+
+const CalendarSearchItemSchema = z.object({
+  type: z.union([z.number(), z.string()]),
+  startTime: z.string(),
+  endTime: z.string(),
+  userEvent: CalendarEventSchema.nullable().optional(),
+  notableDay: NotableDayDetailSchema.nullable().optional(),
+});
+
+export interface CalendarSearchQuery {
+  query?: string;
+  tags?: string[];
+  startTime?: string;
+  endTime?: string;
+  /** 0=Holiday, 1=Event, 2=Anniversary, 3=Memorial, 4=Festival. */
+  notableDayTag?: number | null;
+  take?: number;
+  offset?: number;
+}
+
+/** Searches accessible calendar events and notable days. */
+export async function searchCalendarEvents(
+  options: CalendarSearchQuery = {},
+): Promise<CalendarSearchItem[]> {
+  const params = new URLSearchParams({
+    take: String(options.take ?? 50),
+    offset: String(options.offset ?? 0),
+  });
+  if (options.query) params.set("query", options.query);
+  if (options.startTime) params.set("startTime", options.startTime);
+  if (options.endTime) params.set("endTime", options.endTime);
+  if (options.notableDayTag != null)
+    params.set("notableDayTag", String(options.notableDayTag));
+  for (const tag of options.tags ?? []) params.append("tags", tag);
+
+  const raw = await fetchJsonZ(
+    `/passport/accounts/me/calendar/search?${params.toString()}`,
+    CalendarSearchItemSchema.array(),
+  );
+  return raw.map((item) => {
+    const isUserEvent =
+      typeof item.type === "number"
+        ? item.type === 0
+        : item.type === "UserEvent";
+    return {
+      type: (isUserEvent ? "UserEvent" : "NotableDay") as CalendarSearchKind,
+      startTime: item.startTime,
+      endTime: item.endTime,
+      userEvent: item.userEvent ?? null,
+      notableDay: item.notableDay ?? null,
+    };
+  });
 }
 
 // Drive API

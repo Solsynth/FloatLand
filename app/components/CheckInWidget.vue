@@ -1,6 +1,6 @@
 <template>
     <NuxtLink
-        to="/accounts/me/check-in"
+        to="/calendar"
         class="card bg-base-100 shadow-sm hover:shadow-md transition-shadow cursor-pointer block"
     >
         <div class="card-body p-4 gap-3">

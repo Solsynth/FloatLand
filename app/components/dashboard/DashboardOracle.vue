@@ -1,6 +1,6 @@
 <template>
   <NuxtLink
-    to="/accounts/me/check-in"
+    to="/calendar"
     class="dash-card block p-5 transition-colors hover:border-base-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
   >
     <h3 class="dash-card__title">

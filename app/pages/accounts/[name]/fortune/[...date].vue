@@ -566,7 +566,11 @@ async function loadData() {
     error.value = null;
     try {
         const [calendarData, accountData] = await Promise.all([
-            fetchEventCalendar(year.value, month.value, accountName.value),
+            fetchEventCalendar({
+                year: year.value,
+                month: month.value,
+                username: accountName.value,
+            }),
             fetchAccount(accountName.value).catch(() => null),
         ]);
         entries.value = calendarData;

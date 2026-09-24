@@ -46,6 +46,7 @@ import {
   IconWallet,
   IconPawPrint,
   IconLayoutDashboard,
+  IconCalendarDays,
 } from "#components";
 import {
   DropdownMenuContent,
@@ -73,6 +74,12 @@ const allApps = computed<AppItem[]>(() => {
   const items: AppItem[] = [
     { href: "/", label: t("nav.dashboard"), icon: IconLayoutDashboard },
     { href: "/timeline", label: t("nav.timeline"), icon: IconCompass },
+    {
+      href: "/calendar",
+      label: t("nav.calendar"),
+      icon: IconCalendarDays,
+      requiresAuth: true,
+    },
     { href: "/mail", label: t("nav.mail"), icon: IconMail, requiresAuth: true },
     { href: "/drive", label: t("nav.drive"), icon: IconHardDrive },
     { href: "/creators", label: t("nav.creatorHub"), icon: IconPalette },
