@@ -369,14 +369,14 @@
                 </div>
 
                 <div
-                  v-if="file.fileMeta?.width && file.fileMeta?.height"
+                  v-if="dimensions"
                   class="stat bg-base-200 rounded-lg p-3"
                 >
                   <div class="stat-title text-xs">
                     {{ t("drive.dimensions") }}
                   </div>
                   <div class="stat-value text-sm">
-                    {{ file.fileMeta.width }} × {{ file.fileMeta.height }}
+                    {{ dimensions.width }} × {{ dimensions.height }}
                   </div>
                 </div>
 
@@ -486,12 +486,12 @@
           </div>
 
           <div
-            v-if="file.fileMeta?.width && file.fileMeta?.height"
+            v-if="dimensions"
             class="stat bg-base-200 rounded-lg p-3"
           >
             <div class="stat-title text-xs">{{ t("drive.dimensions") }}</div>
             <div class="stat-value text-sm">
-              {{ file.fileMeta.width }} × {{ file.fileMeta.height }}
+              {{ dimensions.width }} × {{ dimensions.height }}
             </div>
           </div>
 
@@ -551,7 +551,7 @@
 
 <script setup lang="ts">
 import type { SnCloudFile } from "~/types/drive";
-import { getFileUrl } from "~/utils/files";
+import { getFileUrl, resolveImageDimensions } from "~/utils/files";
 import {
   isImageFile,
   isVideoFile,
@@ -622,6 +622,15 @@ const attachment = computed<FileAttachment>(() => ({
 const isImage = computed(() =>
   file.value ? isImageFile(attachment.value) : false,
 );
+
+// Full dimensions for the info panel; the backend may omit one of
+// width/height, so the aspect ratio fills the gap.
+const dimensions = computed(() => {
+  if (!file.value) return null;
+  const meta = file.value.fileMeta;
+  return resolveImageDimensions(meta.width, meta.height, file.value.ratio);
+});
+
 const isVideo = computed(() =>
   file.value ? isVideoFile(attachment.value) : false,
 );
