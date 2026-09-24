@@ -29,7 +29,7 @@
         "mitt": "^3.0.1",
         "nuxt": "^4.5.1",
         "nuxt-email-renderer": "^2.10.0",
-        "nuxt-og-image": "^6.7.4",
+        "nuxt-og-image": "6.7.4",
         "nuxt-schema-org": "^6.2.7",
         "nuxt-seo-utils": "^8.3.2",
         "pinia": "^3.0.4",
