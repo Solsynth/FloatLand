@@ -220,5 +220,3 @@ export function toFileAttachments(files?: TicketFileRef[] | null): FileAttachmen
       }
     })
 }
-
-export { apiFetch, safeJsonParse }

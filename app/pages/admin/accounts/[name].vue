@@ -1207,7 +1207,7 @@ import {
   clearVerification,
   fetchAccountBadges,
   grantBadge,
-  activateBadge,
+  activateAccountBadge,
   revokeBadge,
   fetchAccountDevices,
   adminUpdateDeviceLabel,
@@ -1607,7 +1607,7 @@ async function doGrantBadge() {
 }
 
 async function doActivateBadge(badgeId: string) {
-  try { await activateBadge(identifier.value, badgeId); await loadBadges() } catch { }
+  try { await activateAccountBadge(identifier.value, badgeId); await loadBadges() } catch { }
 }
 
 async function doRevokeBadge(badgeId: string) {

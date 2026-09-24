@@ -9,7 +9,6 @@ import {
   setNoImagesCookie,
   type LegacyLocale,
 } from "./legacy"
-export { legacyBase, legacyLocale } from "./legacy"
 
 const HOST_MAIN = "solian.app"
 const HOST_LEGACY = "legacy.solian.app"

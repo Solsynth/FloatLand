@@ -12,10 +12,9 @@ import {
   renderMd,
   rewriteInternalLinks,
   stripTags,
+  type LegacyLocale,
 } from "./legacy"
 import { normalizePost, type LegacyPost } from "./legacyModels"
-
-export type LegacyLocale = "en" | "zh"
 
 export interface CardOpts {
   base: string

@@ -5,7 +5,7 @@
 
 import type { H3Event } from "h3"
 import { getRouterParam } from "h3"
-import { apiGet, escHtml, fileUrl, L10N, parseJson, renderMd, rewriteInternalLinks } from "./legacy"
+import { apiGet, escHtml, fileUrl, L10N, legacyBase, legacyLocale, parseJson, renderMd, rewriteInternalLinks } from "./legacy"
 import { renderLegacyDoc } from "./legacyShell"
 import {
   normalizePost,
@@ -20,7 +20,7 @@ import {
   type LegacyAccount,
 } from "./legacyModels"
 import { postCard, renderAttachments } from "./legacyContent"
-import { legacyBase, legacyLocale, modernUrl } from "./legacyReq"
+import { modernUrl } from "./legacyReq"
 import { legacyNoImages } from "./legacy"
 
 type L = (typeof L10N)["en"] | (typeof L10N)["zh"]
@@ -634,5 +634,3 @@ function safeDecode(value: string): string {
     return value
   }
 }
-
-export type { LegacyAccount, LegacyPublisher, LegacyRealm }

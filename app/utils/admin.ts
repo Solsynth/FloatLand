@@ -1145,7 +1145,7 @@ export async function grantBadge(
   })
 }
 
-export async function activateBadge(
+export async function activateAccountBadge(
   identifier: string,
   badgeId: string,
 ): Promise<void> {
