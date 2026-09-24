@@ -1007,23 +1007,57 @@ export async function fetchPostReactionList(
   return { items: data, total };
 }
 
+/**
+ * React to a post. Matches the Solian app contract: the server decides
+ * add/remove — an HTTP 204 response means the reaction was removed, anything
+ * else (200/201) means it was added. Callers use `response.status === 204`
+ * to flip the optimistic delta.
+ */
 export async function reactToPost(
   postId: string,
   symbol: string,
   attitude: number,
-): Promise<void> {
-  await apiFetch(`/sphere/posts/${postId}/reactions`, {
+): Promise<Response> {
+  return apiFetch(`/sphere/posts/${postId}/reactions`, {
     method: "POST",
     body: JSON.stringify({ symbol, attitude }),
   });
 }
 
-export async function removeReaction(
-  postId: string,
-  symbol: string,
-): Promise<void> {
-  await apiFetch(`/sphere/posts/${postId}/reactions/${symbol}`, {
-    method: "DELETE",
+/** Create a reply to a post via the post compose endpoint. */
+export async function createPost(
+  payload: Record<string, unknown>,
+  publisherName: string,
+): Promise<Post> {
+  return fetchJson<Post>(
+    `/sphere/posts?pub=${encodeURIComponent(publisherName)}`,
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    },
+  );
+}
+
+/** Boost a post (POST /sphere/posts/{id}/boost). */
+export async function boostPost(postId: string): Promise<void> {
+  await apiFetch(`/sphere/posts/${postId}/boost`, { method: "POST" });
+}
+
+/** Remove a boost (DELETE /sphere/posts/{id}/boost). */
+export async function unboostPost(postId: string): Promise<void> {
+  await apiFetch(`/sphere/posts/${postId}/boost`, { method: "DELETE" });
+}
+
+/** Delete a post (author only). */
+export async function deletePost(postId: string): Promise<void> {
+  await apiFetch(`/sphere/posts/${postId}`, { method: "DELETE" });
+}
+
+/** Fetch the post chain around a post (head-first list, GET /sphere/posts/{id}/chain). */
+export async function fetchPostChain(postId: string): Promise<Post[]> {
+  const { isAuthenticated } = useAuth();
+  return fetchJsonZ(`/sphere/posts/${postId}/chain`, PostSchema.array(), {
+    skipAuth: !isAuthenticated.value,
   });
 }
 
@@ -2798,10 +2832,11 @@ const PostCategorySchema = z.object({
   id: z.string(),
   slug: z.string(),
   name: z.string(),
-  description: z.string().nullable(),
-  color: z.string().nullable(),
-  icon: z.string().nullable(),
-  usage: z.number(),
+  // The list endpoint omits these; the detail endpoint returns null.
+  description: z.string().nullable().optional(),
+  color: z.string().nullable().optional(),
+  icon: z.string().nullable().optional(),
+  usage: z.number().nullable().optional(),
   createdAt: z.string(),
   updatedAt: z.string(),
 });

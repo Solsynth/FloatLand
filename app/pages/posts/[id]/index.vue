@@ -27,6 +27,13 @@
 				/>
 
 				<template v-else-if="post">
+					<!-- Chain preceding this post -->
+					<PostChainSection
+						v-if="chainPreceding.length > 0"
+						:posts="chainPreceding"
+						class="mb-2"
+					/>
+
 					<!-- Original Post -->
 					<PostCard
 						:post="post"
@@ -35,6 +42,14 @@
 						@share="handleShare"
 						@reply="handleReply"
 						@refresh="refreshPost"
+						@deleted="handlePostDeleted"
+					/>
+
+					<!-- Chain following this post -->
+					<PostChainSection
+						v-if="chainFollowing.length > 0"
+						:posts="chainFollowing"
+						class="mt-2"
 					/>
 
 					<!-- Interaction Tabs -->
@@ -79,6 +94,12 @@
 												:placeholder="t('post.replyPlaceholder')"
 												class="textarea textarea-bordered w-full min-h-[80px] resize-none"
 											/>
+											<p
+												v-if="replyError"
+												class="mt-2 text-xs text-error"
+											>
+												{{ replyError }}
+											</p>
 											<div class="flex justify-end mt-2">
 												<button
 													class="btn btn-primary btn-sm gap-1"
@@ -292,7 +313,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Post } from '~/types/post';
+import type { Post, Publisher } from '~/types/post';
 import type { Boost, PostReaction } from '~/utils/api';
 import {
 	fetchPost,
@@ -326,6 +347,7 @@ const postId = computed(() => route.params.id as string);
 // Reply state
 const replyContent = ref('');
 const submittingReply = ref(false);
+const replyError = ref('');
 
 // User info
 const userName = computed(() => user.value?.nick || user.value?.name || '');
@@ -344,7 +366,7 @@ const [
 		status: postStatus,
 		refresh: refreshPost,
 	},
-	{ data: replies },
+	{ data: replies, refresh: refreshReplies },
 	{ data: forwards },
 	{ data: boosts },
 	{ data: reactionList },
@@ -567,16 +589,76 @@ function handleReply(post?: Post) {
 }
 
 function handleBoost(_p: Post) {
-	// TODO: Implement boost
+	// PostCard performs the API call; re-fetch so the rail counts stay in
+	// sync with the server.
+	void refreshPost();
 }
 
 function handleShare(p: Post) {
+	const url = `${window.location.origin}/posts/${p.id}`;
 	if (navigator.share) {
 		navigator.share({
 			title: p.title || t('home.sharePostFallbackTitle'),
 			text: p.content.slice(0, 100),
-			url: window.location.href,
+			url,
 		});
+	} else {
+		navigator.clipboard.writeText(url);
+	}
+}
+
+function handlePostDeleted() {
+	// The post was deleted from PostCard's menu — leave the page.
+	if (typeof window !== 'undefined' && window.history.length > 1) {
+		router.back();
+	} else {
+		router.push('/timeline');
+	}
+}
+
+// Post chain: posts chained to this one form a head-first list; split into
+// preceding/following around the current post (Solian post_chain.dart).
+const chainPosts = ref<Post[]>([]);
+const chainLoaded = ref(false);
+
+const chainIndex = computed(() =>
+	chainPosts.value.findIndex((p) => p.id === postId.value),
+);
+const chainPreceding = computed(() =>
+	chainIndex.value > 0 ? chainPosts.value.slice(0, chainIndex.value) : [],
+);
+const chainFollowing = computed(() =>
+	chainIndex.value >= 0
+		? chainPosts.value.slice(chainIndex.value + 1)
+		: chainPosts.value,
+);
+
+async function loadChain() {
+	if (chainLoaded.value) return;
+	chainLoaded.value = true;
+	try {
+		const { fetchPostChain } = await import('~/utils/api');
+		chainPosts.value = await fetchPostChain(postId.value);
+	} catch (e) {
+		console.error('Failed to load post chain:', e);
+	}
+}
+
+// Compose state: replies are posted as the current publisher, matching the
+// Solian quick-reply bar's publisher picker.
+const compose = useCompose();
+const { publishers, currentPublisher } = compose;
+
+async function loadReplyPublishers() {
+	if (!isAuthenticated.value || publishers.value.length > 0) return;
+	try {
+		const { fetchJson } = await import('~/utils/api');
+		const response = await fetchJson<Publisher[]>(
+			'/sphere/publishers?mine=true&take=100',
+		);
+		if (response?.length) compose.setPublishers(response);
+	} catch (e) {
+		console.error('Failed to load reply publishers:', e);
 	}
 }
 
@@ -584,16 +666,50 @@ async function submitReply() {
 	if (!replyContent.value.trim() || submittingReply.value) return;
 
 	submittingReply.value = true;
+	replyError.value = '';
 	try {
-		// TODO: Implement reply submission via API
+		await loadReplyPublishers();
+		const publisher = currentPublisher.value ?? publishers.value[0] ?? null;
+		if (!publisher) {
+			replyError.value = t('post.replyNoPublisher');
+			return;
+		}
+
+		const { createPost } = await import('~/utils/api');
+		await createPost(
+			{
+				content: replyContent.value.trim(),
+				replied_post_id: postId.value,
+				type: 0,
+			},
+			publisher.name,
+		);
+
 		replyContent.value = '';
-		// Refresh replies
+		await Promise.all([refreshPost(), refreshReplies()]);
 	} catch (e) {
 		console.error('Failed to submit reply:', e);
+		replyError.value = t('post.replyFailed');
 	} finally {
 		submittingReply.value = false;
 	}
 }
+
+// After any compose action (reply/forward/edit/chain) the submitted post is
+// reflected back; refresh the post and its replies so counts stay current.
+function handlePostComposed() {
+	void refreshPost();
+	void refreshReplies();
+}
+
+onMounted(() => {
+	window.addEventListener('post-composed', handlePostComposed);
+	void loadChain();
+});
+
+onUnmounted(() => {
+	window.removeEventListener('post-composed', handlePostComposed);
+});
 </script>
 
 <style scoped>

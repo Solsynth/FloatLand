@@ -11,15 +11,39 @@
         >
           <IconReply v-if="referenceIsReply" class="h-3.5 w-3.5" />
           <IconForward v-else class="h-3.5 w-3.5" />
-          <span>{{ referenceIsReply ? "Replied to" : "Forwarded" }}</span>
+          <span>{{
+            referenceIsReply ? t("post.repliedTo") : t("post.forwarded")
+          }}</span>
           <IconChevronDown
             class="ml-auto h-3.5 w-3.5 transition-transform"
             :class="{ 'rotate-180': referenceCollapsed }"
           />
         </button>
 
+        <!-- Referenced post no longer exists -->
         <div
-          v-if="!referenceCollapsed && referencePost"
+          v-if="!referenceCollapsed && referenceGone"
+          class="mt-2 grid grid-cols-[40px_1fr] gap-3"
+        >
+          <div class="flex flex-col items-center">
+            <div class="avatar avatar-placeholder h-10 w-10">
+              <div
+                class="h-10 w-10 rounded-full bg-base-200 text-base-content/40"
+              >
+                <IconUserX class="h-5 w-5" />
+              </div>
+            </div>
+            <div class="mt-1 min-h-2 w-px flex-1 bg-base-300/80" />
+          </div>
+          <div class="min-w-0 pb-2">
+            <p class="text-xs italic text-base-content/45">
+              {{ t("post.referenceUnavailable") }}
+            </p>
+          </div>
+        </div>
+
+        <div
+          v-else-if="!referenceCollapsed && referencePost"
           class="mt-2 grid grid-cols-[40px_1fr] gap-3"
         >
           <div class="flex flex-col items-center">
@@ -52,7 +76,7 @@
               class="mt-1 inline-flex items-center gap-1 text-xs italic text-base-content/50"
             >
               <IconEllipsis class="h-3 w-3" />
-              <span>Post truncated</span>
+              <span>{{ t("post.postTruncated") }}</span>
             </div>
                       </div>
         </div>
@@ -61,8 +85,24 @@
           class="mt-1 inline-flex items-center gap-1 text-xs text-base-content/50"
         >
           <IconPaperclip class="h-3 w-3" />
-          <span>{{ referencePost.attachments.length }} attachment(s)</span>
+          <span>{{
+            t("post.attachmentCount", {
+              count: referencePost.attachments.length,
+            })
+          }}</span>
         </div>
+      </div>
+
+      <!-- Boosted by -->
+      <div
+        v-if="post.boostedBy"
+        class="mb-1.5 flex items-center gap-1.5 text-xs text-base-content/50"
+      >
+        <IconRepeat2 class="h-3.5 w-3.5 shrink-0" />
+        <span>{{ t("post.boostedBy") }}</span>
+        <span class="min-w-0 truncate font-medium text-base-content/65">
+          {{ post.boostedBy.nick || post.boostedBy.name }}
+        </span>
       </div>
 
       <!-- Header -->
@@ -103,7 +143,7 @@
             <span>{{ formatDate(post.publishedAt, isDetail) }}</span>
             <span v-if="hasEdits" class="flex items-center gap-0.5">
               <IconPenLine class="h-3 w-3" />
-              edited
+              {{ t("post.editedAt", { time: formatDate(post.editedAt!, isDetail) }) }}
             </span>
           </div>
         </div>
@@ -126,40 +166,46 @@
             <ul class="menu w-48 rounded-box bg-base-100 shadow-lg">
               <li v-if="isAuthor">
                 <button @click.stop="handleEdit">
-                  <IconPencil class="h-4 w-4" /> Edit
+                  <IconPencil class="h-4 w-4" /> {{ t("common.edit") }}
                 </button>
               </li>
               <li v-if="isAuthor">
                 <button class="text-error" @click.stop="handleDelete">
-                  <IconTrash class="h-4 w-4" /> Delete
+                  <IconTrash class="h-4 w-4" /> {{ t("common.delete") }}
                 </button>
               </li>
               <li v-if="isAuthor"><div class="divider my-0" /></li>
               <li>
                 <button @click.stop="handleReply">
-                  <IconReply class="h-4 w-4" /> Reply
+                  <IconReply class="h-4 w-4" /> {{ t("post.replyBtn") }}
                 </button>
               </li>
               <li>
                 <button @click.stop="handleForward">
-                  <IconForward class="h-4 w-4" /> Forward
+                  <IconForward class="h-4 w-4" /> {{ t("post.forward") }}
+                </button>
+              </li>
+              <li>
+                <button @click.stop="handleBoost">
+                  <IconRepeat2 class="h-4 w-4" />
+                  {{ hasBoosted ? t("post.unboost") : t("post.boost") }}
                 </button>
               </li>
               <li><div class="divider my-0" /></li>
               <li>
                 <button @click.stop="handleCopyLink">
-                  <IconLink class="h-4 w-4" /> Copy link
+                  <IconLink class="h-4 w-4" /> {{ t("post.copyLink") }}
                 </button>
               </li>
               <li>
                 <button @click.stop="handleShare">
-                  <IconShare class="h-4 w-4" /> Share
+                  <IconShare class="h-4 w-4" /> {{ t("post.share") }}
                 </button>
               </li>
               <li><div class="divider my-0" /></li>
               <li>
                 <button @click.stop="handleReport">
-                  <IconFlag class="h-4 w-4" /> Report
+                  <IconFlag class="h-4 w-4" /> {{ t("post.report") }}
                 </button>
               </li>
             </ul>
@@ -186,7 +232,7 @@
             />
           </div>
           <div class="p-3">
-            <div class="badge badge-primary badge-sm mb-2">Article</div>
+            <div class="badge badge-primary badge-sm mb-2">{{ t("post.article") }}</div>
             <h3 v-if="post.title" class="line-clamp-2 text-base font-bold">
               {{ post.title }}
             </h3>
@@ -203,7 +249,7 @@
       <!-- Body -->
       <div v-if="!isArticle || isDetail" class="mt-2">
         <div v-if="isArticle && isDetail" class="mb-3">
-          <div class="badge badge-primary badge-sm mb-2">Article</div>
+          <div class="badge badge-primary badge-sm mb-2">{{ t("post.article") }}</div>
           <h3 v-if="post.title" class="text-xl font-bold">
             {{ post.title }}
           </h3>
@@ -226,6 +272,7 @@
       <AttachmentGrid
         v-if="!isArticle && post.attachments.length > 0"
         :attachments="post.attachments"
+        flush
       />
 
       <div v-if="post.tags.length > 0" class="mt-3 flex flex-wrap gap-1.5">
@@ -337,8 +384,6 @@
         :post-id="post.id"
         :total-replies="post.repliesCount"
         class="mt-2"
-        @reply="handleReply"
-        @boost="handleBoost"
       />
 
       <!-- Actions -->
@@ -360,11 +405,18 @@
             @click.stop="handleBoost"
           >
             <IconRepeat2 class="h-4 w-4" />
-            <span class="text-xs tabular-nums">{{ formatNumber(post.boostCount) }}</span>
+            <span class="text-xs tabular-nums">{{ formatNumber(boostedCount) }}</span>
           </button>
         </div>
       </div>
     </div>
+
+    <!-- Abuse report -->
+    <PostReportDialog
+      v-model:open="reportOpen"
+      :post-id="post.id"
+      @submitted="emit('refresh')"
+    />
   </article>
 </template>
 
@@ -387,7 +439,11 @@ import {
   IconUsers,
   IconEyeOff,
   IconLock,
+  IconEye,
+  IconUserX,
 } from "#components";
+
+const { t } = useI18n();
 
 interface EmbedItem {
   type?: string;
@@ -431,6 +487,7 @@ const emit = defineEmits<{
   share: [post: Post];
   reply: [post: Post];
   refresh: [];
+  deleted: [];
 }>();
 
 const auth = useAuth();
@@ -457,8 +514,20 @@ watch(
 // State
 const showMenu = ref(false);
 const referenceCollapsed = ref(false);
-const hasBoosted = ref(false);
 const menuWrapper = ref<HTMLElement | null>(null);
+const reportOpen = ref(false);
+const boostBusy = ref(false);
+
+// Optimistic boost state (local; server truth re-syncs via prop watch)
+const hasBoosted = ref(Boolean(props.post.boostedAt));
+const boostedCount = ref(props.post.boostCount);
+watch(
+  () => [props.post.boostCount, props.post.boostedAt] as const,
+  ([count, boostedAt]) => {
+    boostedCount.value = count;
+    hasBoosted.value = Boolean(boostedAt);
+  },
+);
 
 // Close the menu when clicking outside of it
 function handleDocumentClick(e: MouseEvent) {
@@ -560,7 +629,18 @@ const handleMarkdownClick = (e: MouseEvent) => {
 const referencePost = computed(
   () => props.post.repliedPost ?? props.post.forwardedPost,
 );
-const hasReference = computed(() => Boolean(referencePost.value));
+const hasReference = computed(() =>
+  Boolean(
+    referencePost.value ||
+      props.post.repliedGone ||
+      props.post.forwardedGone,
+  ),
+);
+const referenceGone = computed(
+  () =>
+    !referencePost.value &&
+    (props.post.repliedGone || props.post.forwardedGone),
+);
 const referenceIsReply = computed(() => Boolean(props.post.repliedPost));
 const renderedReferenceContent = computed(() => {
   if (!referencePost.value) return "";
@@ -599,17 +679,28 @@ const metadataItems = computed(() => {
   const items: Array<{ icon: typeof IconFlag; label: string }> = [];
 
   if (props.post.visibility === 1) {
-    items.push({ icon: IconUsers, label: "Friends only" });
+    items.push({ icon: IconUsers, label: t("compose.friends") });
   } else if (props.post.visibility === 2) {
-    items.push({ icon: IconEyeOff, label: "Unlisted" });
+    items.push({ icon: IconEyeOff, label: t("compose.unlisted") });
   } else if (props.post.visibility === 3) {
-    items.push({ icon: IconLock, label: "Private" });
+    items.push({ icon: IconLock, label: t("compose.private") });
   }
 
   if (props.post.attachments.length > 0) {
     items.push({
       icon: IconPaperclip,
-      label: `${props.post.attachments.length} attachment(s)`,
+      label: t("post.attachmentCount", {
+        count: props.post.attachments.length,
+      }),
+    });
+  }
+
+  // Full-post metadata: server tracks views; show on the detail page only,
+  // matching the Flutter `postViewsCount` row.
+  if (props.isDetail && props.post.viewsTotal > 0) {
+    items.push({
+      icon: IconEye,
+      label: t("post.viewsCount", { count: props.post.viewsTotal }),
     });
   }
 
@@ -761,67 +852,148 @@ function handleEdit() {
   window.dispatchEvent(new CustomEvent("open-compose"));
 }
 
-function handleDelete() {
+async function handleDelete() {
   closeMenu();
-  // TODO: Implement delete
+  const { destructive } = useAlert();
+  const confirmed = await destructive(
+    t("post.deletePostHint"),
+    t("post.deletePost"),
+  );
+  if (!confirmed) return;
+
+  try {
+    const { deletePost } = await import("~/utils/api");
+    await deletePost(props.post.id);
+    $toast.success(t("post.deleteSuccess"));
+    emit("deleted");
+    emit("refresh");
+  } catch (e) {
+    console.error("Failed to delete post:", e);
+    $toast.error(t("post.deleteFailed"));
+  }
 }
 
 function handleReport() {
   closeMenu();
-  // TODO: Implement report
+  reportOpen.value = true;
 }
 
-function handleBoost() {
-  hasBoosted.value = !hasBoosted.value;
-  emit("boost", props.post);
-}
+async function handleBoost() {
+  if (boostBusy.value) return;
+  boostBusy.value = true;
 
-async function handleReact(symbol: string, attitude: number) {
+  const wasBoosted = hasBoosted.value;
   // Optimistic update
-  localReactionsCount.value = {
-    ...localReactionsCount.value,
-    [symbol]: (localReactionsCount.value[symbol] || 0) + 1,
-  };
-  localReactionsMade.value = { ...localReactionsMade.value, [symbol]: true };
+  hasBoosted.value = !wasBoosted;
+  boostedCount.value = Math.max(
+    0,
+    boostedCount.value + (wasBoosted ? -1 : 1),
+  );
 
   try {
-    const { reactToPost } = await import("~/utils/api");
-    await reactToPost(props.post.id, symbol, attitude);
-    $toast.success("Reaction sent!");
+    const { boostPost, unboostPost } = await import("~/utils/api");
+    if (wasBoosted) {
+      await unboostPost(props.post.id);
+    } else {
+      await boostPost(props.post.id);
+    }
+    emit("boost", props.post);
   } catch (e) {
     // Revert on failure
-    localReactionsCount.value = {
-      ...localReactionsCount.value,
-      [symbol]: Math.max(0, (localReactionsCount.value[symbol] || 1) - 1),
-    };
-    localReactionsMade.value = { ...localReactionsMade.value, [symbol]: false };
-    console.error("Failed to react:", e);
-    $toast.error("Failed to send reaction");
+    hasBoosted.value = wasBoosted;
+    boostedCount.value = props.post.boostCount;
+    console.error("Failed to toggle boost:", e);
+    $toast.error(t("post.boostFailed"));
+  } finally {
+    boostBusy.value = false;
   }
 }
 
-async function handleRemoveReaction(symbol: string) {
-  // Optimistic update
-  const updatedCount = Math.max(0, (localReactionsCount.value[symbol] || 1) - 1);
-  const { [symbol]: _, ...restCounts } = localReactionsCount.value;
-  localReactionsCount.value =
-    updatedCount > 0 ? { ...restCounts, [symbol]: updatedCount } : restCounts;
-  localReactionsMade.value = { ...localReactionsMade.value, [symbol]: false };
+async function toggleReaction(symbol: string, attitude: number) {
+  const wasReacted = localReactionsMade.value[symbol] || false;
 
-  try {
-    const { removeReaction } = await import("~/utils/api");
-    await removeReaction(props.post.id, symbol);
-    $toast.success("Reaction removed!");
-  } catch (e) {
-    // Revert on failure
+  // Optimistic update: mirror the assumed server decision (add/remove).
+  if (wasReacted) {
+    const updatedCount = Math.max(
+      0,
+      (localReactionsCount.value[symbol] || 1) - 1,
+    );
+    const { [symbol]: _, ...restCounts } = localReactionsCount.value;
+    localReactionsCount.value =
+      updatedCount > 0 ? { ...restCounts, [symbol]: updatedCount } : restCounts;
+    localReactionsMade.value = { ...localReactionsMade.value, [symbol]: false };
+  } else {
     localReactionsCount.value = {
       ...localReactionsCount.value,
       [symbol]: (localReactionsCount.value[symbol] || 0) + 1,
     };
     localReactionsMade.value = { ...localReactionsMade.value, [symbol]: true };
-    console.error("Failed to remove reaction:", e);
-    $toast.error("Failed to remove reaction");
   }
+
+  try {
+    const { reactToPost } = await import("~/utils/api");
+    const response = await reactToPost(props.post.id, symbol, attitude);
+    // Server decides add/remove: HTTP 204 means the reaction was removed.
+    const serverRemoved = response.status === 204;
+    if (serverRemoved === wasReacted) {
+      $toast.success(
+        serverRemoved
+          ? t("post.reactionRemoved")
+          : t("post.reactionSent"),
+      );
+      return;
+    }
+    // Server disagreed with the optimistic assumption — flip it back.
+    if (serverRemoved) {
+      localReactionsCount.value = {
+        ...localReactionsCount.value,
+        [symbol]: (localReactionsCount.value[symbol] || 0) + 1,
+      };
+      localReactionsMade.value = { ...localReactionsMade.value, [symbol]: true };
+    } else {
+      const updatedCount = Math.max(
+        0,
+        (localReactionsCount.value[symbol] || 1) - 1,
+      );
+      const { [symbol]: _, ...restCounts } = localReactionsCount.value;
+      localReactionsCount.value =
+        updatedCount > 0
+          ? { ...restCounts, [symbol]: updatedCount }
+          : restCounts;
+      localReactionsMade.value = { ...localReactionsMade.value, [symbol]: false };
+    }
+    $toast.success(serverRemoved ? t("post.reactionRemoved") : t("post.reactionSent"));
+  } catch (e) {
+    // Revert on failure
+    if (wasReacted) {
+      localReactionsCount.value = {
+        ...localReactionsCount.value,
+        [symbol]: (localReactionsCount.value[symbol] || 0) + 1,
+      };
+      localReactionsMade.value = { ...localReactionsMade.value, [symbol]: true };
+    } else {
+      const updatedCount = Math.max(
+        0,
+        (localReactionsCount.value[symbol] || 1) - 1,
+      );
+      const { [symbol]: _, ...restCounts } = localReactionsCount.value;
+      localReactionsCount.value =
+        updatedCount > 0
+          ? { ...restCounts, [symbol]: updatedCount }
+          : restCounts;
+      localReactionsMade.value = { ...localReactionsMade.value, [symbol]: false };
+    }
+    console.error("Failed to react:", e);
+    $toast.error(t("post.reactionFailed"));
+  }
+}
+
+async function handleReact(symbol: string, attitude: number) {
+  await toggleReaction(symbol, attitude);
+}
+
+async function handleRemoveReaction(symbol: string) {
+  await toggleReaction(symbol, 0);
 }
 </script>
 <style scoped>

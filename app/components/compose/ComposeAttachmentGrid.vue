@@ -14,7 +14,7 @@
             <FileImage
               v-if="attachment.preview || attachment.cloudFile?.id"
               :file="attachment.cloudFile ?? undefined"
-              :src="attachment.preview"
+              :src="attachment.preview ?? undefined"
               class="w-full h-full object-cover"
               alt="Attachment preview"
             />
@@ -58,7 +58,7 @@
           <div class="aspect-video relative">
             <video
               v-if="attachment.preview"
-              :src="attachment.preview"
+              :src="attachment.preview ?? undefined"
               class="w-full h-full object-cover"
               preload="metadata"
             />

@@ -3,7 +3,7 @@ import { z } from "zod";
 export const FileAttachmentSchema = z.object({
   id: z.string(),
   name: z.string(),
-  url: z.string().optional(),
+  url: z.string().nullable().optional(),
   mimeType: z.string(),
   hasCompression: z.boolean(),
   hasThumbnail: z.boolean(),
@@ -94,6 +94,29 @@ export interface Post {
   tags: Tag[]
   repliedPost: Post | null
   forwardedPost: Post | null
+  /** Actor whose boost surfaced this post in a feed (posts.new.boosted). */
+  boostedBy?: Account | null
+  /** When the current user boosted this post (null when not boosted). */
+  boostedAt?: string | null
+  /** Set when the referenced (replied/forwarded) post no longer exists. */
+  repliedGone?: boolean
+  forwardedGone?: boolean
+  /** Chained post the current one replies to via `chained_post_id`. */
+  chainedPost?: Post | null
+  /** Chained children of this post (head-first, from GET /sphere/posts/{id}/chain). */
+  chainedPosts?: Post[] | null
+  chainedCount?: number
+  sponsored?: boolean
+  pinMode?: number | null
+  awardedScore?: number
+  featuredRecords?: unknown[] | null
+  fediverseUri?: string | null
+  isBookmarked?: boolean
+  realm?: {
+    id: string
+    slug: string
+    name: string
+  } | null
   meta?: {
     embeds?: unknown[]
     [key: string]: unknown
@@ -132,6 +155,27 @@ export const PostSchema: z.ZodType<Post> = z.lazy(() =>
     tags: z.array(TagSchema),
     repliedPost: PostSchema.nullable(),
     forwardedPost: PostSchema.nullable(),
+    boostedBy: AccountSchema.nullable().optional(),
+    boostedAt: z.string().nullable().optional(),
+    repliedGone: z.boolean().optional(),
+    forwardedGone: z.boolean().optional(),
+    chainedPost: PostSchema.nullable().optional(),
+    chainedPosts: z.array(PostSchema).nullable().optional(),
+    chainedCount: z.number().optional(),
+    sponsored: z.boolean().optional(),
+    pinMode: z.number().nullable().optional(),
+    awardedScore: z.number().optional(),
+    featuredRecords: z.array(z.unknown()).nullable().optional(),
+    fediverseUri: z.string().nullable().optional(),
+    isBookmarked: z.boolean().optional(),
+    realm: z
+      .object({
+        id: z.string(),
+        slug: z.string(),
+        name: z.string(),
+      })
+      .nullable()
+      .optional(),
     meta: z
       .object({ embeds: z.array(z.unknown()).optional() })
       .catchall(z.unknown())

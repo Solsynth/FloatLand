@@ -5,15 +5,41 @@
       <div class="min-w-0">
         <!-- Feed shell: continuous list like Flutter explore -->
         <div class="feed-stream">
-          <!-- Featured -->
-          <ClientOnly>
-            <FeaturedPostsCarousel
-              class="border-b border-base-300/80"
-              @boost="handleBoost"
-              @share="handleShare"
-              @reply="handleReply"
-            />
-          </ClientOnly>
+          <!-- Feed controls: filter tabs + ranking mode (Solian explore parity) -->
+          <div
+            class="flex flex-wrap items-center justify-between gap-2 border-b border-base-300/80 px-4 py-2"
+          >
+            <div class="flex items-center gap-1 rounded-box bg-base-200/60 p-1">
+              <button
+                v-for="tab in timelineFilterTabs"
+                :key="tab.value ?? 'explore'"
+                type="button"
+                class="btn btn-ghost btn-xs h-7 gap-1 px-3"
+                :class="{
+                  'bg-base-100 shadow-sm': timelineFilter === tab.value,
+                }"
+                @click="changeTimelineFilter(tab.value)"
+              >
+                {{ tab.label }}
+              </button>
+            </div>
+
+            <select
+              :value="timelineMode"
+              class="select select-ghost select-xs h-7 min-h-7 w-auto pl-2 pr-8 text-xs"
+              :title="t('home.rankingMode')"
+              :aria-label="t('home.rankingMode')"
+              @change="changeTimelineMode"
+            >
+              <option
+                v-for="mode in timelineModes"
+                :key="mode.value"
+                :value="mode.value"
+              >
+                {{ mode.label }}
+              </option>
+            </select>
+          </div>
 
           <!-- Loading -->
           <div
@@ -483,9 +509,38 @@ const RETRY_ADJUSTMENT_MS = 10_000;
 const timelineEvents = useState<SnTimelineEvent[]>("home-timeline", () => []);
 const cursor = ref<string | null>(null);
 const timelineMode = ref("personalized");
+const timelineFilter = ref<string | null>(null);
 const hasMore = ref(true);
 const fetchingMore = ref(false);
 const loadMoreSentinel = ref<HTMLElement | null>(null);
+
+// Ranking modes and feed filters, matching the Solian explore screen
+// (explore.dart: _RankingToolbar / filter tabs).
+const timelineModes = computed(() => [
+  { value: "personalized", label: t("home.modePersonalized") },
+  { value: "top", label: t("home.modeTop") },
+  { value: "latest", label: t("home.modeLatest") },
+]);
+
+const timelineFilterTabs = computed(() => [
+  { value: null, label: t("home.filterExplore") },
+  { value: "subscriptions", label: t("home.filterSubscriptions") },
+  { value: "friends", label: t("home.filterFriends") },
+]);
+
+function changeTimelineMode(event: Event) {
+  timelineMode.value = (event.target as HTMLSelectElement).value;
+  cursor.value = null;
+  hasMore.value = true;
+  void refreshAsyncData();
+}
+
+function changeTimelineFilter(filter: string | null) {
+  timelineFilter.value = filter;
+  cursor.value = null;
+  hasMore.value = true;
+  void refreshAsyncData();
+}
 
 const userAvatar = computed(() => user.value?.profile?.picture ?? null);
 const userName = computed(() => user.value?.nick || user.value?.name || "");
@@ -798,6 +853,8 @@ const {
   () =>
     fetchTimeline(PAGE_SIZE, {
       aggressive: true,
+      mode: timelineMode.value,
+      filter: timelineFilter.value ?? undefined,
     }),
   {
     // The Explore feed is personalized and not required for the initial HTML.
@@ -832,12 +889,23 @@ async function fetchTimelinePage(
   const result = await fetchTimeline(PAGE_SIZE, {
     cursor: pageCursor,
     mode: timelineMode.value,
+    filter: timelineFilter.value ?? undefined,
     aggressive: true,
   });
 
-  const existing = new Set(timelineEvents.value.map((e) => e.id));
-  const uniqueItems = (result?.items ?? []).filter((e) => !existing.has(e.id));
+  const items = result?.items ?? [];
   const nextCursor = result?.nextCursor ?? null;
+
+  // Transparently skip pages that contain no post events (presence/status/
+  // discovery only) so they never advance or end pagination — same behavior
+  // as the Solian timeline pod (posts_pod.dart:266-269).
+  const hasPosts = items.some((e) => e.type.startsWith("posts.new"));
+  if (!hasPosts && nextCursor) {
+    return fetchTimelinePage(nextCursor, retryCount);
+  }
+
+  const existing = new Set(timelineEvents.value.map((e) => e.id));
+  const uniqueItems = items.filter((e) => !existing.has(e.id));
 
   if (result?.mode) {
     timelineMode.value = result.mode;
@@ -941,7 +1009,9 @@ function handleReply(post: Post) {
   inlineComposeExpanded.value = true;
 }
 function handleBoost(_post: Post) {
-  // TODO: Implement boost
+  // PostCard performs the boost API call and keeps its own optimistic
+  // count; nothing to do at the feed level (a full refetch would jump the
+  // scroll position).
 }
 
 function handleShare(post: Post) {

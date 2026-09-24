@@ -8,10 +8,10 @@
       <PopoverRoot v-if="showAddButton" v-model:open="showReactionPicker">
         <PopoverTrigger
           class="react-trigger btn btn-ghost btn-xs h-7 gap-1 !pl-0"
-          aria-label="Add reaction"
+          :aria-label="t('post.react')"
         >
           <IconSmilePlus class="h-3.5 w-3.5" />
-          <span class="text-xs">React</span>
+          <span class="text-xs">{{ t("post.react") }}</span>
         </PopoverTrigger>
 
         <PopoverPortal>
@@ -54,21 +54,26 @@
       v-for="reaction in displayReactions"
       :key="reaction.symbol"
       type="button"
-      class="inline-flex h-7 items-center gap-1 rounded-box px-2 text-xs font-medium transition-colors"
-      :class="
+      class="inline-flex items-center gap-1 rounded-full font-medium transition-colors"
+      :class="[
+        props.compact
+          ? 'h-5 rounded-full px-1.5 text-[11px]'
+          : 'h-7 rounded-box px-2 text-xs',
         reaction.userReacted
           ? 'bg-primary/15 text-primary'
-          : 'bg-base-200 text-base-content/70 hover:bg-base-300'
-      "
+          : 'bg-base-200 text-base-content/70 hover:bg-base-300',
+      ]"
+      :disabled="props.readonly"
       @click.stop="toggleReaction(reaction)"
     >
       <img
         v-if="hasSticker(reaction.symbol)"
         :src="getStickerUrl(reaction.symbol)"
         :alt="getReactionLabel(reaction.symbol)"
-        class="w-5 h-5 object-contain"
+        class="object-contain"
+        :class="props.compact ? 'w-3.5 h-3.5' : 'w-5 h-5'"
       />
-      <span v-else class="text-base">{{
+      <span v-else :class="props.compact ? 'text-sm leading-none' : 'text-base'">{{
         getReactionEmoji(reaction.symbol)
       }}</span>
       <span>{{ reaction.count }}</span>
@@ -78,7 +83,9 @@
     <button
       v-if="reactions.length > maxVisible"
       type="button"
-      class="inline-flex h-7 items-center rounded-box bg-base-200 px-2 text-xs font-medium text-base-content/70 hover:bg-base-300"
+      class="inline-flex items-center bg-base-200 font-medium text-base-content/70 hover:bg-base-300"
+      :class="props.compact ? 'h-5 rounded-full px-1.5 text-[11px]' : 'h-7 rounded-box px-2 text-xs'"
+      :disabled="props.readonly"
       @click.stop="showAll = !showAll"
     >
       +{{ reactions.length - maxVisible }}
@@ -109,11 +116,17 @@ interface Props {
   postId: string;
   showAddButton?: boolean;
   maxVisible?: number;
+  /** Compact chip sizing for inline preview rows. */
+  compact?: boolean;
+  /** Display-only chips (no toggle). */
+  readonly?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   showAddButton: true,
   maxVisible: 5,
+  compact: false,
+  readonly: false,
 });
 
 const emit = defineEmits<{
@@ -123,6 +136,8 @@ const emit = defineEmits<{
 
 const showReactionPicker = ref(false);
 const showAll = ref(false);
+
+const { t } = useI18n();
 
 const availableReactions = [
   // Positive (attitude: 0)

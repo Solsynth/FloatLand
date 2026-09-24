@@ -1484,6 +1484,8 @@ async function handleSubmit() {
     if (realmId.value) payload.realm_id = realmId.value
     if (replyingTo.value) payload.replied_post_id = replyingTo.value.id
     if (forwardingTo.value) payload.forwarded_post_id = forwardingTo.value.id
+    if (compose.chainingTo.value)
+      payload.chained_post_id = compose.chainingTo.value.id
 
     let response: Post
     const publisherName = currentPublisher.value?.name
@@ -1509,6 +1511,10 @@ async function handleSubmit() {
     }
     emit('submit', response)
     emit('close')
+    // Let pages (timeline, post detail) refresh after a compose action.
+    window.dispatchEvent(
+      new CustomEvent('post-composed', { detail: { postId: response.id } }),
+    )
     reset()
   } catch (error) {
     console.error('Failed to submit post:', error)

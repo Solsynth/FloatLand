@@ -5,7 +5,7 @@
     class="rounded-box bg-base-200/50 overflow-hidden"
   >
     <!-- Header -->
-    <div class="px-3 py-2 flex items-center justify-between">
+    <div class="px-3 py-1.5 flex items-center justify-between">
       <span class="text-sm font-semibold text-base-content/70">
         {{ totalReplies }} {{ totalReplies === 1 ? 'reply' : 'replies' }}
       </span>
@@ -14,7 +14,7 @@
     <!-- Explore page: featured reply only -->
     <div
       v-if="isExplorePage && featuredReply"
-      class="px-3 pb-3 cursor-pointer hover:bg-base-200/40 transition-colors"
+      class="px-3 py-1.5 cursor-pointer hover:bg-base-200/40 transition-colors"
       @click.stop="navigateToPost(featuredReply.id)"
     >
       <div class="min-w-0">
@@ -66,6 +66,7 @@
             :post-id="featuredReply.id"
             :show-add-button="false"
             :max-visible="3"
+            compact
             class="mt-1"
             @react="handleReact"
             @remove="handleRemoveReaction"
@@ -74,112 +75,108 @@
     </div>
 
     <!-- Nested reply list -->
-    <div v-else class="space-y-1 p-1">
+    <div v-else class="p-1">
       <div
         v-for="node in displayReplyNodes"
         :key="node.reply.id"
-        class="rounded-box px-3 py-2 hover:bg-base-100/70 cursor-pointer transition-colors"
-        :style="{ paddingLeft: `${12 + node.depth * 18}px` }"
+        class="flex gap-2 rounded-box px-2 py-1.5 hover:bg-base-100/70 cursor-pointer transition-colors"
+        :style="{ paddingLeft: `${8 + node.depth * 14}px` }"
         @click.stop="navigateToPost(node.reply.id)"
       >
-        <div class="flex gap-2">
-          <!-- Avatar -->
-          <NuxtLink
-            v-if="node.reply.publisher"
-            :to="`/publishers/${node.reply.publisher.name}`"
-            class="shrink-0"
-            @click.stop
-          >
-            <div v-if="getAvatarUrl(node.reply)" class="avatar">
-              <div class="h-8 w-8 rounded-full">
-                <FileImage
-                  :file="getAvatarUrl(node.reply)"
-                  :alt="getDisplayName(node.reply.publisher)"
-                  class="h-full w-full rounded-full object-cover"
-                />
-              </div>
-            </div>
-            <div v-else class="avatar avatar-placeholder">
-              <div class="h-8 w-8 rounded-full bg-primary text-primary-content">
-                <span class="text-xs font-medium">
-                  {{ getInitials(getDisplayName(node.reply.publisher)) }}
-                </span>
-              </div>
-            </div>
-          </NuxtLink>
-
-          <!-- Content -->
-          <div class="flex-1 min-w-0">
-            <div class="flex items-center gap-1.5 mb-0.5">
-              <NuxtLink
-                v-if="node.reply.publisher"
-                :to="`/publishers/${node.reply.publisher.name}`"
-                class="text-xs font-semibold truncate hover:underline"
-                @click.stop
-              >
-                {{ getDisplayName(node.reply.publisher) }}
-              </NuxtLink>
-              <span
-                v-if="node.reply.publisher?.name"
-                class="text-xs text-base-content/50 truncate"
-              >
-                @{{ node.reply.publisher.name }}
-              </span>
-              <span class="text-xs text-base-content/40">
-                {{ formatRelativeTime(node.reply.publishedAt) }}
-              </span>
-            </div>
-
-            <!-- Reply content preview -->
-            <!-- eslint-disable vue/no-v-html -->
-            <div
-              v-if="node.reply.content"
-              class="prose prose-xs max-w-none break-words text-xs line-clamp-2 prose-p:my-0.5 prose-a:text-primary"
-              v-html="renderMarkdown(node.reply.content)"
-              @click="handleMarkdownClick"
-            />
-            <!-- eslint-enable vue/no-v-html -->
-
-            <!-- Attachments indicator -->
-            <div
-              v-if="node.reply.attachments.length > 0"
-              class="mt-1 flex items-center gap-1 text-xs text-base-content/50"
-            >
-              <IconPaperclip class="h-3 w-3" />
-              <span>{{ node.reply.attachments.length }} attachment(s)</span>
-            </div>
-
-            <!-- Reply actions -->
-            <div class="mt-1 flex items-center gap-2 text-xs text-base-content/50">
-              <button
-                class="flex items-center gap-1 hover:text-primary transition-colors"
-                @click.stop="handleReplyToReply(node.reply)"
-              >
-                <IconReply class="h-3 w-3" />
-                <span>{{ node.reply.repliesCount || 0 }}</span>
-              </button>
-              <button
-                class="flex items-center gap-1 hover:text-primary transition-colors"
-                @click.stop="handleBoostReply(node.reply)"
-              >
-                <IconRepeat2 class="h-3 w-3" />
-                <span>{{ node.reply.boostCount || 0 }}</span>
-              </button>
+        <!-- Avatar (compact) -->
+        <NuxtLink
+          v-if="node.reply.publisher"
+          :to="`/publishers/${node.reply.publisher.name}`"
+          class="shrink-0"
+          @click.stop
+        >
+          <div v-if="getAvatarUrl(node.reply)" class="avatar">
+            <div class="h-6 w-6 rounded-full">
+              <FileImage
+                :file="getAvatarUrl(node.reply)"
+                :alt="getDisplayName(node.reply.publisher)"
+                class="h-full w-full rounded-full object-cover"
+              />
             </div>
           </div>
+          <div v-else class="avatar avatar-placeholder">
+            <div class="h-6 w-6 rounded-full bg-primary text-primary-content">
+              <span class="text-[10px] font-medium">
+                {{ getInitials(getDisplayName(node.reply.publisher)) }}
+              </span>
+            </div>
+          </div>
+        </NuxtLink>
+
+        <!-- Content -->
+        <div class="min-w-0 flex-1">
+          <div class="flex items-baseline gap-1.5 min-w-0">
+            <NuxtLink
+              v-if="node.reply.publisher"
+              :to="`/publishers/${node.reply.publisher.name}`"
+              class="truncate text-xs font-semibold hover:underline"
+              @click.stop
+            >
+              {{ getDisplayName(node.reply.publisher) }}
+            </NuxtLink>
+            <span class="shrink-0 text-[11px] text-base-content/40">
+              {{ formatRelativeTime(node.reply.publishedAt) }}
+            </span>
+          </div>
+
+          <!-- Reply content preview -->
+          <!-- eslint-disable vue/no-v-html -->
+          <div
+            v-if="node.reply.content"
+            class="prose prose-xs max-w-none break-words text-xs line-clamp-2 prose-p:my-0.5 prose-a:text-primary"
+            v-html="renderMarkdown(node.reply.content)"
+            @click="handleMarkdownClick"
+          />
+          <!-- eslint-enable vue/no-v-html -->
+
+          <!-- Attachments indicator -->
+          <div
+            v-if="node.reply.attachments.length > 0"
+            class="mt-0.5 flex items-center gap-1 text-[11px] text-base-content/45"
+          >
+            <IconPaperclip class="h-3 w-3" />
+            <span>{{ node.reply.attachments.length }} attachment(s)</span>
+          </div>
+
+          <!-- Compact reaction preview -->
+          <div v-if="postReactions(node.reply).length > 0" class="mt-1">
+            <PostReactionList
+              :reactions="postReactions(node.reply)"
+              :post-id="node.reply.id"
+              :show-add-button="false"
+              :max-visible="3"
+              compact
+              readonly
+              class="flex-wrap"
+            />
+          </div>
+
+          <!-- Replies count -->
+          <span
+            v-if="node.reply.repliesCount > 0"
+            class="mt-0.5 block text-[11px] text-base-content/45"
+          >
+            {{ node.reply.repliesCount }}
+            {{ node.reply.repliesCount === 1 ? 'reply' : 'replies' }}
+          </span>
         </div>
       </div>
 
       <!-- Load more -->
       <button
         v-if="hasMore && !loading"
-        class="w-full px-3 py-2 text-sm text-primary hover:bg-base-200/50 transition-colors"
+        class="w-full px-3 py-1.5 text-xs text-primary hover:bg-base-200/50 transition-colors"
         @click.stop="loadMore"
       >
         Load more replies...
       </button>
 
-      <div v-if="loading" class="px-3 py-2 text-xs text-base-content/50">
+      <div v-if="loading" class="px-3 py-1.5 text-xs text-base-content/50">
         Loading replies...
       </div>
 
@@ -187,7 +184,7 @@
       <NuxtLink
         v-if="totalReplies > 3"
         :to="`/posts/${postId}`"
-        class="block px-3 py-2 text-sm text-primary hover:bg-base-200/50 transition-colors text-center"
+        class="block px-3 py-1.5 text-xs text-primary hover:bg-base-200/50 transition-colors text-center"
         @click.stop
       >
         View all {{ totalReplies }} replies
@@ -199,12 +196,10 @@
 <script setup lang="ts">
 import type { Post } from '~/types/post';
 import { useIntersectionObserver } from '@vueuse/core';
-import { fetchPostRepliesThreaded, reactToPost, removeReaction } from '~/utils/api';
+import { fetchPostRepliesThreaded, reactToPost } from '~/utils/api';
 import { renderMarkdown } from '~/utils/markdown';
 import {
   IconPaperclip,
-  IconReply,
-  IconRepeat2,
 } from '#components';
 
 interface Props {
@@ -216,11 +211,6 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
   initialReplies: () => [],
 });
-
-const emit = defineEmits<{
-  reply: [post: Post];
-  boost: [post: Post];
-}>();
 
 const containerRef = ref<HTMLElement | null>(null);
 const replies = ref<Post[]>(props.initialReplies);
@@ -238,9 +228,10 @@ const displayReplyNodes = computed(() => {
 
 const featuredReply = computed(() => replies.value[0] ?? null);
 
-const featuredReactions = computed(() => {
-  if (!featuredReply.value?.reactionsCount) return [];
-  return Object.entries(featuredReply.value.reactionsCount)
+// Compact reaction preview for a reply row (top 3 by count).
+function postReactions(post: Post | null) {
+  if (!post?.reactionsCount) return [];
+  return Object.entries(post.reactionsCount)
     .filter(([, count]) => (count as number) > 0)
     .sort((a, b) => (b[1] as number) - (a[1] as number))
     .slice(0, 3)
@@ -248,9 +239,11 @@ const featuredReactions = computed(() => {
       symbol,
       attitude: 0,
       count: count as number,
-      userReacted: featuredReply.value?.reactionsMade?.[symbol] || false,
+      userReacted: post.reactionsMade?.[symbol] || false,
     }));
-});
+}
+
+const featuredReactions = computed(() => postReactions(featuredReply.value));
 
 async function loadReplies() {
   if (loading.value) return;
@@ -356,22 +349,15 @@ function handleMarkdownClick(e: MouseEvent) {
   }
 }
 
-function handleReplyToReply(post: Post) {
-  emit('reply', post);
-}
-
-function handleBoostReply(post: Post) {
-  emit('boost', post);
-}
-
 async function handleReact(symbol: string, attitude: number) {
   if (!featuredReply.value) return;
+  // Server decides add/remove: 204 means the reaction was removed.
   await reactToPost(featuredReply.value.id, symbol, attitude);
 }
 
 async function handleRemoveReaction(symbol: string) {
   if (!featuredReply.value) return;
-  await removeReaction(featuredReply.value.id, symbol);
+  await reactToPost(featuredReply.value.id, symbol, 0);
 }
 
 // Replies are loaded via Intersection Observer when visible

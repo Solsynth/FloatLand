@@ -1,12 +1,12 @@
 <template>
-  <div class="relative overflow-hidden rounded-box bg-base-300" :class="{ 'cursor-pointer': props.clickable }" @click="handleClick">
+  <div class="relative overflow-hidden" :class="{ 'cursor-pointer': props.clickable, 'rounded-none': props.flush, 'rounded-box': !props.flush, 'bg-transparent': props.transparent, 'bg-base-300': !props.transparent }" @click="handleClick">
     <!-- Image -->
     <template v-if="isImage">
       <FileImage
         v-if="fileUrl"
         :file="attachment"
         :alt="attachment.name"
-        class="w-full h-full object-cover"
+        :class="fitClass"
         loading="lazy"
         decoding="async"
       />
@@ -22,7 +22,7 @@
         <video
           v-if="fileUrl"
           :src="fileUrl"
-          class="w-full h-full object-cover"
+          :class="fitClass"
           preload="metadata"
           playsinline
         />
@@ -66,8 +66,17 @@ import { isImageFile, isVideoFile, isAudioFile } from '~/utils/fileType';
 const props = withDefaults(defineProps<{
   attachment: FileAttachment;
   clickable?: boolean;
+  /** Full-bleed presentation: no corner rounding (flush with card edges). */
+  flush?: boolean;
+  /** Image/video fit inside the box (object-contain letterboxes + centers). */
+  fit?: 'cover' | 'contain';
+  /** Transparent background (used as a foreground layer over a backdrop). */
+  transparent?: boolean;
 }>(), {
   clickable: true,
+  flush: false,
+  fit: 'cover',
+  transparent: false,
 });
 
 const emit = defineEmits<{
@@ -83,6 +92,12 @@ const fileUrl = computed(() => {
 const isImage = computed(() => isImageFile(props.attachment));
 const isVideo = computed(() => isVideoFile(props.attachment));
 const isAudio = computed(() => isAudioFile(props.attachment));
+
+const fitClass = computed(() =>
+  props.fit === 'contain'
+    ? 'w-full h-full object-contain'
+    : 'w-full h-full object-cover',
+);
 
 function handleClick() {
   if (!props.clickable) {

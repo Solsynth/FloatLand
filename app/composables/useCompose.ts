@@ -4,7 +4,7 @@ import type { Realm } from '~/types/realm'
 export interface ComposeAttachment {
 	id: string
 	file: File
-	preview?: string
+	preview?: string | null
 	progress?: number
 	uploaded?: boolean
 	cloudFile?: FileAttachment
@@ -38,6 +38,7 @@ export interface ComposeInitialState {
 	attachments?: FileAttachment[]
 	replyingTo?: Post
 	forwardingTo?: Post
+	chainingTo?: Post
 	originalPost?: Post
 }
 
@@ -83,6 +84,7 @@ export function useCompose() {
 	const originalPost = useState<Post | null>('compose:originalPost', () => null)
 	const replyingTo = useState<Post | undefined>('compose:replyingTo', () => undefined)
 	const forwardingTo = useState<Post | undefined>('compose:forwardingTo', () => undefined)
+	const chainingTo = useState<Post | undefined>('compose:chainingTo', () => undefined)
 
 	const drafts = useState<Record<string, ComposeDraft>>('compose:drafts', () => ({}))
 	const currentDraftId = useState<string | null>('compose:currentDraftId', () => null)
@@ -392,6 +394,7 @@ export function useCompose() {
 		realmId.value = state?.realmId ?? null
 		replyingTo.value = state?.replyingTo
 		forwardingTo.value = state?.forwardingTo
+		chainingTo.value = state?.chainingTo
 		originalPost.value = state?.originalPost ?? null
 
 		if (state?.attachments) {
@@ -424,6 +427,7 @@ export function useCompose() {
 		realm.value = null
 		replyingTo.value = post.repliedPost ?? undefined
 		forwardingTo.value = post.forwardedPost ?? undefined
+		chainingTo.value = undefined
 
 		attachments.value = post.attachments.map((att) => ({
 			id: generateAttachmentId(),
@@ -451,6 +455,7 @@ export function useCompose() {
 		attachments.value = []
 		replyingTo.value = undefined
 		forwardingTo.value = undefined
+		chainingTo.value = undefined
 		originalPost.value = null
 		currentDraftId.value = null
 		isDirty.value = false
@@ -476,6 +481,7 @@ export function useCompose() {
 		originalPost.value = null
 		replyingTo.value = undefined
 		forwardingTo.value = undefined
+		chainingTo.value = undefined
 		currentDraftId.value = null
 		lastSaved.value = null
 		isDirty.value = false
@@ -512,6 +518,7 @@ export function useCompose() {
 		originalPost,
 		replyingTo,
 		forwardingTo,
+		chainingTo,
 		drafts,
 		currentDraftId,
 

@@ -1,26 +1,53 @@
 <template>
-	<div v-if="attachments.length" class="attachment-collection">
+	<div v-if="attachments.length" class="attachment-collection" :class="{ 'attachment-collection--flush': flush }">
 		<!-- Single attachment -->
 		<div v-if="attachments.length === 1" class="single-attachment">
 			<div
-				class="relative overflow-hidden rounded-box cursor-pointer"
+				class="relative overflow-hidden cursor-pointer"
+				:class="flush ? 'rounded-none' : 'rounded-box'"
 				:style="singleAttachmentStyle"
 				@click.prevent.stop="openViewer(0)"
 			>
+				<!-- Full-bleed: capped box with a blurred copy / blurhash backdrop
+				     filling the empty bands, real media contained + centered -->
+				<template v-if="flush && singleAttachment">
+					<div class="absolute inset-0">
+						<FileImage
+							v-if="isImageAttachment(singleAttachment)"
+							:file="singleAttachment"
+							:alt="singleAttachment.name"
+							class="h-full w-full scale-110 object-cover blur-2xl"
+							loading="lazy"
+							decoding="async"
+						/>
+						<div v-else class="h-full w-full bg-base-300" />
+					</div>
+					<div class="relative h-full w-full">
+						<AttachmentItem
+							:attachment="singleAttachment"
+							:clickable="false"
+							:flush="flush"
+							fit="contain"
+							transparent
+							class="h-full w-full"
+						/>
+					</div>
+				</template>
 				<AttachmentItem
-					v-if="attachments[0]"
-					:attachment="attachments[0]"
+					v-else-if="singleAttachment"
+					:attachment="singleAttachment"
 					:clickable="false"
+					:flush="flush"
 					class="w-full h-full"
 				/>
 			</div>
 		</div>
 
 		<!-- Multiple attachments - horizontal scroll list -->
-		<div v-else class="relative group">
+		<div v-else class="relative group multi-attachment">
 			<div
 				ref="scrollContainer"
-				class="flex gap-2 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-1"
+				class="flex gap-2 overflow-x-auto scrollbar-hide snap-x snap-mandatory px-4 scroll-pl-4 scroll-pr-4 pb-1"
 				@scroll="updateScrollState"
 			>
 				<div
@@ -97,11 +124,15 @@ interface Props {
 	attachments: FileAttachment[];
 	maxHeight?: number;
 	maxVisible?: number;
+	/** Full-bleed presentation: breaks out of the card padding and touches the
+	 * card edges (single attachment unrounded), matching the Solian app. */
+	flush?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
 	maxHeight: 0,
-	maxVisible: 6
+	maxVisible: 6,
+	flush: false
 });
 
 const showAll = ref(false);
@@ -116,6 +147,9 @@ const displayAttachments = computed(() => {
 	if (showAll.value) return props.attachments;
 	return props.attachments.slice(0, props.maxVisible);
 });
+
+// The sole attachment when the collection has exactly one item.
+const singleAttachment = computed(() => props.attachments[0] ?? null);
 
 // Check attachment type
 function isImageAttachment(attachment: FileAttachment): boolean {
@@ -136,12 +170,26 @@ function getAspectRatio(attachment: FileAttachment): number {
 	return 4 / 3; // Default aspect ratio
 }
 
-// Single attachment style
+// Single attachment style. In flush mode match the Solian full-bleed
+// presentation: ratio clamped to [0.1, 10], landscape capped at 300px,
+// portrait at 380px (post_shared.dart FullBleedSingleAttachment). `width`
+// must be explicit — `aspect-ratio` + `max-height` alone shrink the box.
 const singleAttachmentStyle = computed(() => {
-	if (!props.attachments[0]) return {};
-	const ratio = getAspectRatio(props.attachments[0]);
+	const attachment = singleAttachment.value;
+	if (!attachment) return { width: '100%' };
+	const rawRatio = getAspectRatio(attachment);
+	if (props.flush) {
+		const ratio = Math.min(Math.max(rawRatio, 0.1), 10);
+		const maxHeight = ratio > 1 ? 300 : 380;
+		return {
+			width: '100%',
+			aspectRatio: ratio,
+			maxHeight: `${maxHeight}px`
+		};
+	}
 	return {
-		aspectRatio: ratio,
+		width: '100%',
+		aspectRatio: rawRatio,
 		maxHeight: props.maxHeight ? `${props.maxHeight}px` : '500px'
 	};
 });
@@ -221,5 +269,26 @@ onMounted(() => {
 
 .scrollbar-hide::-webkit-scrollbar {
 	display: none;
+}
+
+/* Full-bleed: the single attachment breaks out of the card body's 1rem
+   horizontal padding so it snaps to the card edges (backdrop fills the
+   capped box); 4px vertical gap like the Solian app. The multi-attachment
+   list spans the card width but carries its own horizontal padding +
+   matching scroll-padding, so snapped items always rest inset from the card
+   edges instead of sliding flush against them while scrolling. */
+.attachment-collection--flush {
+	margin-top: 0.25rem;
+	margin-bottom: 0.25rem;
+}
+
+.attachment-collection--flush .single-attachment {
+	margin-left: -1rem;
+	margin-right: -1rem;
+}
+
+.attachment-collection--flush .multi-attachment {
+	margin-left: -1rem;
+	margin-right: -1rem;
 }
 </style>

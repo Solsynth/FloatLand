@@ -64,6 +64,19 @@ const props = defineProps<{
   item: DiscoveryItem;
 }>();
 
+const account = computed(() => {
+  const data = props.item.data as unknown as {
+    id: string;
+    name: string;
+    nick?: string | null;
+    profile?: {
+      picture?: { id: string };
+      bio?: string | null;
+    } | null;
+  };
+  return data;
+});
+
 const accountPicture = computed(() => {
   return account.value.profile?.picture ?? undefined;
 });
