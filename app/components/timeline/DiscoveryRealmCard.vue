@@ -1,60 +1,59 @@
 <template>
-  <div
-    class="feed-discovery-card flex h-full flex-col p-3"
+  <NuxtLink
+    :to="`/realms/${realm.slug}`"
+    class="feed-discovery-card relative block aspect-[16/7] w-full overflow-hidden"
   >
-    <div class="flex items-center gap-2.5">
-      <div v-if="realmPicture" class="avatar shrink-0">
-        <div class="h-11 w-11 rounded-lg">
+    <!-- Cover background -->
+    <FileImage
+      v-if="realmBackground"
+      :file="realmBackground"
+      :alt="realm.name"
+      class="absolute inset-0 h-full w-full object-cover"
+    />
+    <div
+      v-else
+      class="absolute inset-0 bg-gradient-to-br from-base-300 to-base-200"
+    />
+
+    <!-- Bottom gradient overlay -->
+    <div
+      class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-2"
+    >
+      <div class="flex items-start gap-2">
+        <!-- Avatar (24px, mirrored Flutter ProfilePictureWidget radius 12) -->
+        <div
+          v-if="realmPicture"
+          class="h-6 w-6 shrink-0 overflow-hidden rounded-full shadow-[0_2px_4px_rgba(0,0,0,0.5)]"
+        >
           <FileImage
             :file="realmPicture"
             :alt="realm.name"
-            class="h-full w-full rounded-lg object-cover"
+            class="h-full w-full rounded-full object-cover"
           />
         </div>
-      </div>
-      <div
-        v-else
-        class="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-base-200"
-      >
-        <IconGlobe class="h-5 w-5 text-base-content/55" />
-      </div>
-      <div class="min-w-0 flex-1">
-        <p class="truncate text-sm font-semibold">{{ realm.name }}</p>
-        <p v-if="realm.slug" class="truncate text-xs text-base-content/50">
-          /{{ realm.slug }}
+        <div
+          v-else
+          class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-primary-content shadow-[0_2px_4px_rgba(0,0,0,0.5)]"
+        >
+          <IconGlobe class="h-3.5 w-3.5" />
+        </div>
+        <p class="min-w-0 truncate text-sm font-bold leading-tight text-white">
+          {{ realm.name }}
         </p>
       </div>
     </div>
 
-    <p
-      v-if="realm.description"
-      class="mt-2 line-clamp-2 text-xs leading-relaxed text-base-content/60"
-    >
-      {{ realm.description }}
-    </p>
-
-    <p
-      v-if="reasons.length > 0"
-      class="mt-2 flex items-start gap-1 text-[11px] text-base-content/45"
-    >
-      <IconSparkles class="mt-0.5 h-3 w-3 shrink-0" />
-      <span class="line-clamp-2">{{ reasons[0] }}</span>
-    </p>
-
-    <NuxtLink
-      :to="`/realms/${realm.slug}`"
-      class="btn btn-sm btn-ghost mt-3 border border-base-300/80 bg-base-200/50 hover:bg-base-200"
-    >
-      {{ t("home.discovery.viewRealm") }}
-    </NuxtLink>
-  </div>
+    <!-- Feedback (more/less like this, not interested) -->
+    <div class="absolute right-2 top-2">
+      <DiscoveryFeedback kind="realm" :reference-id="realm.id" />
+    </div>
+  </NuxtLink>
 </template>
 
 <script setup lang="ts">
 import type { DiscoveryItem } from "~/types/post";
-import { IconGlobe, IconSparkles } from "#components";
-
-const { t } = useI18n();
+import { IconGlobe } from "#components";
+import DiscoveryFeedback from "~/components/timeline/DiscoveryFeedback.vue";
 
 const props = defineProps<{
   item: DiscoveryItem;
@@ -65,15 +64,12 @@ const realm = computed(() => {
     id: string;
     name: string;
     slug: string;
-    description?: string;
     picture?: { id: string };
+    background?: { id: string };
   };
   return data;
 });
 
-const realmPicture = computed(() => {
-  return realm.value.picture ?? undefined;
-});
-
-const reasons = computed(() => props.item.reasons ?? []);
+const realmPicture = computed(() => realm.value.picture ?? undefined);
+const realmBackground = computed(() => realm.value.background ?? undefined);
 </script>

@@ -4,8 +4,8 @@
     class="feed-insert"
   >
     <div class="feed-insert__header">
-      <component :is="titleIcon" class="h-3.5 w-3.5 text-base-content/55" />
-      <h3 class="text-xs font-semibold tracking-wide text-base-content/65">
+      <component :is="titleIcon" class="h-4 w-4 text-base-content/55" />
+      <h3 class="text-sm font-semibold tracking-wide text-base-content/65">
         {{ title }}
       </h3>
     </div>
@@ -19,6 +19,19 @@
         @share="$emit('share', $event)"
         @reply="$emit('reply', $event)"
       />
+
+      <!-- Suggestion reasons (mirrored Flutter: icon + up to 3 reasons below the card) -->
+      <p
+        v-if="singleReasons.length > 0"
+        class="mt-2 flex items-start gap-1.5 px-2 text-xs leading-relaxed text-base-content/70"
+      >
+        <IconSparkles class="mt-0.5 h-3.5 w-3.5 shrink-0" />
+        <span class="flex flex-wrap gap-x-3 gap-y-1">
+          <span v-for="(reason, idx) in singleReasons" :key="idx">
+            {{ reason }}
+          </span>
+        </span>
+      </p>
     </div>
 
     <!-- Multi-item carousel -->
@@ -154,6 +167,8 @@ const items = computed<DiscoveryItem[]>(() =>
 const isSingleSuggestion = computed(
   () => discoveryType.value !== "post" && items.value.length === 1,
 );
+
+const singleReasons = computed(() => items.value[0]?.reasons ?? []);
 
 const title = computed(() => {
   switch (discoveryType.value) {

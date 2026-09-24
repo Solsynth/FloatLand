@@ -174,12 +174,12 @@
             <div v-else class="p-4 sm:p-5">
               <div class="flex gap-3">
                 <!-- Publisher avatar (tap to switch) -->
-                <div class="relative shrink-0 pt-1" data-compose-menu>
+                <div class="relative shrink-0 pt-1">
                   <button
                     type="button"
                     class="avatar block"
                     :title="t('compose.selectPublisher')"
-                    @click.stop="publisherPickerOpen = !publisherPickerOpen"
+                    @click.stop="publisherModalOpen = true"
                   >
                     <div class="h-10 w-10 rounded-full ring-1 ring-base-300">
                       <FileImage
@@ -202,57 +202,6 @@
                       </div>
                     </div>
                   </button>
-
-                  <!-- Publisher dropdown -->
-                  <div
-                    v-if="publisherPickerOpen"
-                    class="absolute left-0 top-12 z-20 w-56 overflow-hidden rounded-box bg-base-100 shadow-sm"
-                    @click.stop
-                  >
-                    <button
-                      v-for="pub in publishers"
-                      :key="pub.id"
-                      type="button"
-                      class="flex w-full items-center gap-2.5 px-3 py-2 text-left transition-colors hover:bg-base-200"
-                      :class="{ 'bg-primary/10': currentPublisher?.id === pub.id }"
-                      @click="selectPublisher(pub)"
-                    >
-                      <div class="avatar">
-                        <div class="h-7 w-7 rounded-full">
-                          <FileImage
-                            v-if="pub.picture?.id"
-                            :src="getFileUrlSafe(pub.picture.id)"
-                            alt=""
-                            class="h-full w-full object-cover"
-                          />
-                          <div
-                            v-else
-                            class="flex h-full w-full items-center justify-center bg-base-200 text-[10px] font-bold"
-                          >
-                            {{ getInitials(publisherDisplayName(pub)) }}
-                          </div>
-                        </div>
-                      </div>
-                      <div class="min-w-0 flex-1">
-                        <div class="truncate text-sm font-medium">
-                          {{ pub.nick || pub.name }}
-                        </div>
-                        <div class="truncate text-[11px] text-base-content/40">
-                          @{{ pub.name }}
-                        </div>
-                      </div>
-                      <IconCheck
-                        v-if="currentPublisher?.id === pub.id"
-                        class="h-4 w-4 shrink-0 text-primary"
-                      />
-                    </button>
-                    <p
-                      v-if="publishers.length === 0"
-                      class="px-3 py-3 text-sm text-base-content/50"
-                    >
-                      {{ t('compose.noPublishers') }}
-                    </p>
-                  </div>
                 </div>
 
                 <!-- Fields -->
@@ -893,6 +842,16 @@
         </DrawerContent>
       </DrawerPortal>
     </DrawerRoot>
+
+    <!-- Publisher selector (mirrors Flutter's PublisherModal bottom sheet) -->
+    <ClientOnly>
+      <PublisherSelectorModal
+        v-model:open="publisherModalOpen"
+        :publishers="publishers"
+        :current-publisher-id="currentPublisher?.id ?? null"
+        @select="selectPublisher"
+      />
+    </ClientOnly>
     <template #fallback>
       <span />
     </template>
@@ -993,7 +952,7 @@ const showSettingsPanel = ref(false)
 const showDraftsPanel = ref(false)
 const filePickerOpen = ref(false)
 const attachMenuOpen = ref(false)
-const publisherPickerOpen = ref(false)
+const publisherModalOpen = ref(false)
 const checkedDraftRestore = ref(false)
 const draftSearch = ref('')
 const tagInput = ref('')
@@ -1072,7 +1031,7 @@ watch(isOpen, (open) => {
   } else {
     stopAutoSave()
     attachMenuOpen.value = false
-    publisherPickerOpen.value = false
+    publisherModalOpen.value = false
     autocompleteOpen.value = false
   }
 })
@@ -1081,7 +1040,6 @@ function onDocumentClick(e: MouseEvent) {
   const target = e.target as HTMLElement
   if (!target.closest?.('[data-compose-menu]')) {
     attachMenuOpen.value = false
-    publisherPickerOpen.value = false
   }
 }
 
@@ -1139,7 +1097,7 @@ async function maybeRestoreLatestDraft() {
 
 function selectPublisher(pub: Publisher) {
   setCurrentPublisher(pub)
-  publisherPickerOpen.value = false
+  publisherModalOpen.value = false
 }
 
 function isCategorySelected(cat: Category) {

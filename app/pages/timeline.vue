@@ -5,40 +5,60 @@
       <div class="min-w-0">
         <!-- Feed shell: continuous list like Flutter explore -->
         <div class="feed-stream">
-          <!-- Feed controls: filter tabs + ranking mode (Solian explore parity) -->
+          <!-- Feed controls: sliding-pill filter tabs + ranking mode (Solian explore parity) -->
           <div
-            class="flex flex-wrap items-center justify-between gap-2 border-b border-base-300/80 px-4 py-2"
+            class="flex flex-col gap-2 border-b border-base-300/80 px-4 py-2"
           >
-            <div class="flex items-center gap-1 rounded-box bg-base-200/60 p-1">
-              <button
-                v-for="tab in timelineFilterTabs"
-                :key="tab.value ?? 'explore'"
-                type="button"
-                class="btn btn-ghost btn-xs h-7 gap-1 px-3"
-                :class="{
-                  'bg-base-100 shadow-sm': timelineFilter === tab.value,
-                }"
-                @click="changeTimelineFilter(tab.value)"
-              >
-                {{ tab.label }}
-              </button>
+            <div class="flex items-center gap-2">
+              <!-- Segmented filter control with sliding highlight -->
+              <div class="relative flex flex-1 items-center rounded-xl bg-base-200/60 p-1">
+                <span
+                  class="absolute bottom-1 top-1 rounded-lg bg-primary/15 transition-[left] duration-200 ease-out"
+                  :style="pillStyle"
+                />
+                <button
+                  v-for="tab in timelineFilterTabs"
+                  :key="tab.value ?? 'explore'"
+                  type="button"
+                  class="relative z-10 flex h-9 w-1/3 items-center justify-center gap-1.5 rounded-lg text-xs transition-colors"
+                  :class="
+                    timelineFilter === tab.value
+                      ? 'font-bold text-primary'
+                      : 'font-medium text-base-content/60 hover:text-base-content'
+                  "
+                  @click="changeTimelineFilter(tab.value)"
+                >
+                  <component :is="tab.icon" class="h-4 w-4" />
+                  {{ tab.label }}
+                </button>
+              </div>
             </div>
 
-            <select
-              :value="timelineMode"
-              class="select select-ghost select-xs h-7 min-h-7 w-auto pl-2 pr-8 text-xs"
-              :title="t('home.rankingMode')"
-              :aria-label="t('home.rankingMode')"
-              @change="changeTimelineMode"
+            <!-- Ranking toolbar: shown on the Explore tab only (mirrors Flutter) -->
+            <div
+              v-if="timelineFilter === null"
+              class="flex items-center gap-2.5 rounded-xl border border-base-300/60 bg-base-200/60 px-3 py-2"
             >
-              <option
-                v-for="mode in timelineModes"
-                :key="mode.value"
-                :value="mode.value"
+              <IconSlidersHorizontal class="h-4 w-4 shrink-0 text-base-content/50" />
+              <span class="min-w-0 flex-1 truncate text-sm text-base-content/50">
+                {{ t("home.explorePreferred") }}
+              </span>
+              <select
+                :value="timelineMode"
+                class="select select-ghost select-xs h-7 min-h-7 w-auto pl-2 pr-8 text-xs"
+                :title="t('home.rankingMode')"
+                :aria-label="t('home.rankingMode')"
+                @change="changeTimelineMode"
               >
-                {{ mode.label }}
-              </option>
-            </select>
+                <option
+                  v-for="mode in timelineModes"
+                  :key="mode.value"
+                  :value="mode.value"
+                >
+                  {{ mode.label }}
+                </option>
+              </select>
+            </div>
           </div>
 
           <!-- Loading -->
@@ -173,7 +193,7 @@
                   type="button"
                   class="avatar block h-9 w-9 rounded-full"
                   :title="t('compose.selectPublisher')"
-                  @click.stop="publisherPickerOpen = !publisherPickerOpen"
+                  @click.stop="publisherModalOpen = true"
                 >
                   <div
                     class="h-9 w-9 overflow-hidden rounded-full ring-1 ring-base-300"
@@ -192,53 +212,6 @@
                     </div>
                   </div>
                 </button>
-
-                <div
-                  v-if="publisherPickerOpen"
-                  class="absolute left-0 top-11 z-30 w-56 overflow-hidden rounded-box bg-base-100 shadow-lg ring-1 ring-base-300"
-                  @click.stop
-                >
-                  <button
-                    v-for="publisher in publishers"
-                    :key="publisher.id"
-                    type="button"
-                    class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm hover:bg-base-200"
-                    :class="{
-                      'bg-primary/10': currentPublisher?.id === publisher.id,
-                    }"
-                    @click="selectInlinePublisher(publisher)"
-                  >
-                    <div class="h-7 w-7 shrink-0 overflow-hidden rounded-full">
-                      <FileImage
-                        v-if="publisher.picture"
-                        :file="publisher.picture"
-                        :alt="publisher.nick || publisher.name"
-                        class="h-full w-full object-cover"
-                      />
-                      <div
-                        v-else
-                        class="flex h-full w-full items-center justify-center bg-base-200 text-[10px] font-semibold"
-                      >
-                        {{ getInitials(publisher.nick || publisher.name) }}
-                      </div>
-                    </div>
-                    <span class="min-w-0 flex-1 truncate">
-                      {{ publisher.nick || publisher.name }}
-                    </span>
-                    <span
-                      v-if="currentPublisher?.id === publisher.id"
-                      class="text-xs text-primary"
-                    >
-                      ✓
-                    </span>
-                  </button>
-                  <p
-                    v-if="publishers.length === 0"
-                    class="px-3 py-3 text-xs text-base-content/50"
-                  >
-                    {{ t("compose.noPublishers") }}
-                  </p>
-                </div>
               </div>
 
               <div class="min-w-0 flex-1">
@@ -449,6 +422,16 @@
         usage="post.attachment"
         @select="handleCloudFilesSelected"
       />
+
+      <!-- Publisher selector (mirrors Flutter's PublisherModal bottom sheet) -->
+      <ClientOnly>
+        <PublisherSelectorModal
+          v-model:open="publisherModalOpen"
+          :publishers="publishers"
+          :current-publisher-id="currentPublisher?.id ?? null"
+          @select="selectInlinePublisher"
+        />
+      </ClientOnly>
     </div>
   </NuxtLayout>
 </template>
@@ -469,14 +452,18 @@ import {
   IconAtSign,
   IconBold,
   IconCloud,
+  IconCompass,
   IconFile,
   IconImage,
   IconItalic,
   IconLink,
   IconLoader,
   IconPaperclip,
+  IconRss,
   IconSearch,
   IconSend,
+  IconSlidersHorizontal,
+  IconUsers,
   IconVideo,
   IconX,
 } from "#components";
@@ -523,10 +510,24 @@ const timelineModes = computed(() => [
 ]);
 
 const timelineFilterTabs = computed(() => [
-  { value: null, label: t("home.filterExplore") },
-  { value: "subscriptions", label: t("home.filterSubscriptions") },
-  { value: "friends", label: t("home.filterFriends") },
+  { value: null, label: t("home.filterExplore"), icon: IconCompass },
+  { value: "subscriptions", label: t("home.filterSubscriptions"), icon: IconRss },
+  { value: "friends", label: t("home.filterFriends"), icon: IconUsers },
 ]);
+
+// Sliding highlight position (mirrors Flutter's AnimatedAlign primaryContainer pill).
+const pillStyle = computed(() => {
+  const idx =
+    timelineFilter.value === "subscriptions"
+      ? 1
+      : timelineFilter.value === "friends"
+        ? 2
+        : 0;
+  return {
+    width: "calc((100% - 0.5rem) / 3)",
+    left: `calc(0.25rem + ${idx} * (100% - 0.5rem) / 3)`,
+  };
+});
 
 function changeTimelineMode(event: Event) {
   timelineMode.value = (event.target as HTMLSelectElement).value;
@@ -562,7 +563,7 @@ const {
 } = compose;
 const inlineComposeExpanded = ref(false);
 const inlineComposeError = ref("");
-const publisherPickerOpen = ref(false);
+const publisherModalOpen = ref(false);
 const attachMenuOpen = ref(false);
 const filePickerOpen = ref(false);
 const localFileAccept = ref("*/*");
@@ -602,11 +603,9 @@ function handleSidebarSearch() {
 }
 function selectInlinePublisher(publisher: Publisher) {
   compose.setCurrentPublisher(publisher);
-  publisherPickerOpen.value = false;
 }
 
 function dismissInlinePopovers() {
-  publisherPickerOpen.value = false;
   attachMenuOpen.value = false;
 }
 

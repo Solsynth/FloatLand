@@ -1024,6 +1024,45 @@ export async function reactToPost(
   });
 }
 
+// Discovery feedback API (matches the Solian app contract).
+/**
+ * Submit explicit discovery feedback for a suggested item
+ * (POST /sphere/timeline/discovery/feedback). `feedback` is `good` for
+ * "show more like this" and `bad` for "show less like this".
+ */
+export async function submitDiscoveryFeedback(
+  kind: string,
+  referenceId: string,
+  feedback: "good" | "bad",
+): Promise<void> {
+  await apiFetch("/sphere/timeline/discovery/feedback", {
+    method: "POST",
+    body: JSON.stringify({ kind, reference_id: referenceId, feedback }),
+  });
+}
+
+/** Mark a discovery item as not interested (POST .../uninterested). */
+export async function markDiscoveryUninterested(
+  kind: string,
+  referenceId: string,
+): Promise<void> {
+  await apiFetch("/sphere/timeline/discovery/uninterested", {
+    method: "POST",
+    body: JSON.stringify({ kind, reference_id: referenceId }),
+  });
+}
+
+/** Remove a not-interested mark (DELETE .../uninterested). */
+export async function removeDiscoveryUninterested(
+  kind: string,
+  referenceId: string,
+): Promise<void> {
+  await apiFetch("/sphere/timeline/discovery/uninterested", {
+    method: "DELETE",
+    body: JSON.stringify({ kind, reference_id: referenceId }),
+  });
+}
+
 /** Create a reply to a post via the post compose endpoint. */
 export async function createPost(
   payload: Record<string, unknown>,
