@@ -75,7 +75,15 @@ import {
   DriveQuotaSchema,
   DriveFilePermissionSchema,
 } from "~/types/drive";
-import { SnChatRoomSchema } from "~/types/chat";
+import {
+  SnChatRoomSchema,
+  SnChatMessageSchema,
+  SnChatSummarySchema,
+  SnChatMemberSchema,
+  SnChatMessagePinSchema,
+  SnChatOnlineStatusSchema,
+  ThreadReplyListResponseSchema,
+} from "~/types/chat";
 import {
   PostSchema,
   PublisherSchema,
@@ -150,7 +158,16 @@ import type {
   DriveFilePermission,
   PaginatedResult,
 } from "~/types/drive";
-import type { SnChatRoom } from "~/types/chat";
+import type {
+  SnChatRoom,
+  SnChatMessage,
+  SnChatSummary,
+  SnChatMember,
+  SnChatMessagePin,
+  SnChatOnlineStatus,
+  SnChatReaction,
+  ThreadReplyListResponse,
+} from "~/types/chat";
 
 export type {
   WalletOrder,
@@ -3761,10 +3778,484 @@ export async function fetchChatRoomBySlug(
 }
 
 export async function fetchChatRooms(take = 20): Promise<SnChatRoom[]> {
+  // `/messager/chat/rooms` does not exist on the backend (404); the live list
+  // route is `/messager/chat`, answering a bare array or `{ rooms: [...] }`.
+  const page = await fetchChatRoomsPage({ take, offset: 0 });
+  return page.rooms;
+}
+
+// ── Chat API (full client) ───────────────────────────────────────────────
+// Wire shapes follow the reference clients (Solian app-runtime calls and the
+// Sokai web client): snake_case bodies, `take`+`offset` pagination with the
+// row count in `x-total`, and room-list payloads that may be a bare array or
+// a `{ rooms: [...] }` wrapper.
+
+/** A room-list payload may be a bare array or `{ rooms: [...] }`. */
+function parseRoomListPayload(data: unknown): SnChatRoom[] {
+  if (Array.isArray(data)) return data as SnChatRoom[];
+  if (data && typeof data === "object" && "rooms" in data) {
+    const rooms = data.rooms;
+    if (Array.isArray(rooms)) return rooms as SnChatRoom[];
+  }
+  return [];
+}
+
+function headerTotal(headers: Headers, fallback: number): number {
+  const raw = headers.get("x-total");
+  if (!raw) return fallback;
+  const total = Number(raw);
+  return Number.isFinite(total) ? total : fallback;
+}
+
+export async function fetchChatRoomsPage(options: {
+  take?: number;
+  offset?: number;
+  query?: string;
+} = {}): Promise<{ rooms: SnChatRoom[]; total: number }> {
+  const { take = 20, offset = 0, query = "" } = options;
+  const suffix = query ? `&query=${encodeURIComponent(query)}` : "";
+  // `/messager/chat` is the live list route (also answers `?query=` search);
+  // it 200s with a session and 401s anonymously. `/messager/chat/rooms` 404s
+  // on the current backend (it existed in older deployments), so it stays as
+  // a fallback only — the live route goes first, and the dead one is never
+  // hit when the live one answers.
+  const attempts = [
+    `/messager/chat?take=${take}&offset=${offset}${suffix}`,
+    `/messager/chat/rooms?take=${take}&offset=${offset}${suffix}`,
+  ];
+  let lastError: unknown = null;
+  for (const endpoint of attempts) {
+    try {
+      const { data, headers } = await fetchJsonZHeaders(endpoint, z.unknown());
+      const rooms = parseRoomListPayload(data);
+      // First non-throwing response wins — even an empty list is authoritative
+      // (a 404 on `/rooms` must fall through, but an empty answer must not
+      // resurrect the earlier error).
+      return { rooms, total: headerTotal(headers, rooms.length) };
+    } catch (err) {
+      lastError = err;
+    }
+  }
+  throw lastError;
+}
+
+const CHAT_ROOM_PAGE = 100;
+const CHAT_ROOM_PAGES = 10;
+
+/** The whole room list, walked page by page (the list is presented whole). */
+export async function fetchAllChatRooms(): Promise<SnChatRoom[]> {
+  const loaded: SnChatRoom[] = [];
+  for (let index = 0; index < CHAT_ROOM_PAGES; index++) {
+    const page = await fetchChatRoomsPage({
+      take: CHAT_ROOM_PAGE,
+      offset: index * CHAT_ROOM_PAGE,
+    });
+    loaded.push(...page.rooms);
+    if (page.rooms.length < CHAT_ROOM_PAGE) break;
+  }
+  return loaded;
+}
+
+/** Server-side room search — the room list route answers `?query=`. */
+export async function searchChatRooms(query: string, take = 50): Promise<SnChatRoom[]> {
+  const page = await fetchChatRoomsPage({ take, offset: 0, query });
+  return page.rooms;
+}
+
+/** Unread summaries keyed by room id. */
+export async function fetchChatSummaries(): Promise<Record<string, SnChatSummary>> {
   return fetchJsonZ(
-    `/messager/chat/rooms?offset=0&take=${take}`,
-    SnChatRoomSchema.array().nullable().transform((v) => v ?? []),
+    "/messager/chat/summary",
+    z.record(z.string(), SnChatSummarySchema),
   );
+}
+
+/** A single room (public for anonymous callers). Null on 404. */
+export async function fetchChatRoom(roomId: string): Promise<SnChatRoom | null> {
+  try {
+    return await fetchJsonZ(
+      `/messager/chat/${encodeURIComponent(roomId)}`,
+      SnChatRoomSchema,
+    );
+  } catch (err) {
+    if (err instanceof ApiError && err.status === 404) return null;
+    throw err;
+  }
+}
+
+/** A room's messages, newest-first at offset 0; count in `x-total`. */
+export async function fetchChatMessages(
+  roomId: string,
+  take: number,
+  offset: number,
+): Promise<{ items: SnChatMessage[]; total: number }> {
+  const { data, headers } = await fetchJsonZHeaders(
+    `/messager/chat/${encodeURIComponent(roomId)}/messages?take=${take}&offset=${offset}`,
+    SnChatMessageSchema.array(),
+  );
+  return { items: data, total: headerTotal(headers, data.length) };
+}
+
+export interface ChatSendPayload {
+  content: string;
+  attachments_id?: string[];
+  client_message_id?: string;
+  replied_message_id?: string | null;
+  thread_id?: string | null;
+  meta?: Record<string, unknown>;
+}
+
+export async function sendChatMessage(
+  roomId: string,
+  payload: ChatSendPayload,
+): Promise<SnChatMessage> {
+  return fetchJsonZ(
+    `/messager/chat/${encodeURIComponent(roomId)}/messages`,
+    SnChatMessageSchema,
+    {
+      method: "POST",
+      body: JSON.stringify({
+        content: payload.content,
+        attachments_id: payload.attachments_id ?? [],
+        meta: payload.meta ?? {},
+        client_message_id: payload.client_message_id,
+        replied_message_id: payload.replied_message_id ?? null,
+        thread_id: payload.thread_id ?? null,
+      }),
+    },
+  );
+}
+
+/** Voice message: multipart upload+send in one request (`durationMs` field name per iOS/Sokai). */
+export async function sendChatVoice(
+  roomId: string,
+  file: Blob,
+  name: string,
+  durationMs: number,
+  clientMessageId: string,
+): Promise<SnChatMessage> {
+  const form = new FormData();
+  form.append("file", file, name);
+  form.append("client_message_id", clientMessageId);
+  form.append("durationMs", String(durationMs));
+  const response = await apiFetch(
+    `/messager/chat/${encodeURIComponent(roomId)}/messages/voice`,
+    { method: "POST", body: form },
+  );
+  const data = await safeJsonParse(response);
+  return parseWithSchema(
+    `/messager/chat/${roomId}/messages/voice`,
+    SnChatMessageSchema,
+    data,
+  );
+}
+
+/** Edit a message's text; attachments are replaced by the named list. */
+export async function editChatMessage(
+  roomId: string,
+  messageId: string,
+  content: string,
+  attachmentIds: string[] = [],
+): Promise<SnChatMessage> {
+  return fetchJsonZ(
+    `/messager/chat/${encodeURIComponent(roomId)}/messages/${encodeURIComponent(messageId)}`,
+    SnChatMessageSchema,
+    {
+      method: "PATCH",
+      body: JSON.stringify({
+        content,
+        attachments_id: attachmentIds,
+        meta: {},
+      }),
+    },
+  );
+}
+
+export async function deleteChatMessage(
+  roomId: string,
+  messageId: string,
+): Promise<void> {
+  await apiFetch(
+    `/messager/chat/${encodeURIComponent(roomId)}/messages/${encodeURIComponent(messageId)}`,
+    { method: "DELETE" },
+  );
+}
+
+/** Toggle a reaction; resolves true when the reaction now sits on the message. */
+export async function reactToChatMessage(
+  roomId: string,
+  messageId: string,
+  symbol: string,
+  attitude: number,
+): Promise<boolean> {
+  const response = await apiFetch(
+    `/messager/chat/${encodeURIComponent(roomId)}/messages/${encodeURIComponent(messageId)}/reactions`,
+    {
+      method: "POST",
+      body: JSON.stringify({ symbol, attitude }),
+    },
+  );
+  return response.status !== 204;
+}
+
+export async function fetchChatReactions(
+  roomId: string,
+  messageId: string,
+  symbol: string,
+  take = 50,
+  offset = 0,
+): Promise<{ items: SnChatReaction[]; total: number }> {
+  const { data, headers } = await fetchJsonZHeaders(
+    `/messager/chat/${encodeURIComponent(roomId)}/messages/${encodeURIComponent(messageId)}/reactions?symbol=${encodeURIComponent(symbol)}&take=${take}&offset=${offset}`,
+    SnChatReactionSchema.array(),
+  );
+  return { items: data, total: headerTotal(headers, data.length) };
+}
+
+/** Pinned messages. */
+export async function fetchChatPins(roomId: string): Promise<SnChatMessagePin[]> {
+  return fetchJsonZ(
+    `/messager/chat/${encodeURIComponent(roomId)}/pins?include_expired=false`,
+    SnChatMessagePinSchema.array(),
+  );
+}
+
+export async function pinChatMessage(
+  roomId: string,
+  messageId: string,
+): Promise<SnChatMessagePin> {
+  return fetchJsonZ(
+    `/messager/chat/${encodeURIComponent(roomId)}/pins`,
+    SnChatMessagePinSchema,
+    { method: "POST", body: JSON.stringify({ message_id: messageId }) },
+  );
+}
+
+export async function unpinChatMessage(
+  roomId: string,
+  pinId: string,
+): Promise<void> {
+  await apiFetch(
+    `/messager/chat/${encodeURIComponent(roomId)}/pins/${encodeURIComponent(pinId)}`,
+    { method: "DELETE" },
+  );
+}
+
+/** Pending invitations (rows are chat members). */
+export async function fetchChatInvites(): Promise<SnChatMember[]> {
+  return fetchJsonZ(
+    "/messager/chat/invites",
+    SnChatMemberSchema.array().nullable().transform((v) => v ?? []),
+  );
+}
+
+export async function createChatInvite(
+  roomId: string,
+  accountId: string,
+  role = 0,
+): Promise<unknown> {
+  return fetchJsonZ(
+    `/messager/chat/invites/${encodeURIComponent(roomId)}`,
+    z.unknown(),
+    {
+      method: "POST",
+      body: JSON.stringify({ related_user_id: accountId, role }),
+    },
+  );
+}
+
+export async function acceptChatInvite(roomId: string): Promise<void> {
+  await apiFetch(`/messager/chat/invites/${encodeURIComponent(roomId)}/accept`, {
+    method: "POST",
+  });
+}
+
+export async function declineChatInvite(roomId: string): Promise<void> {
+  await apiFetch(`/messager/chat/invites/${encodeURIComponent(roomId)}/decline`, {
+    method: "POST",
+  });
+}
+
+/** Get-or-create a direct room with an account. */
+export async function startDirectChat(accountId: string): Promise<SnChatRoom> {
+  try {
+    return await fetchJsonZ(
+      `/messager/chat/direct/${encodeURIComponent(accountId)}`,
+      SnChatRoomSchema,
+    );
+  } catch (err) {
+    if (err instanceof ApiError && err.status === 404) {
+      return fetchJsonZ("/messager/chat/direct", SnChatRoomSchema, {
+        method: "POST",
+        body: JSON.stringify({ related_user_id: accountId }),
+      });
+    }
+    throw err;
+  }
+}
+
+export interface ChatRoomInput {
+  name?: string;
+  description?: string;
+  slug?: string;
+  background_id?: string;
+  picture_id?: string;
+  realm_id?: string;
+  is_public?: boolean;
+  is_community?: boolean;
+  is_read_receipts_public?: boolean;
+}
+
+export async function createChatRoom(input: ChatRoomInput): Promise<SnChatRoom> {
+  return fetchJsonZ("/messager/chat", SnChatRoomSchema, {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export async function updateChatRoom(
+  roomId: string,
+  input: ChatRoomInput,
+): Promise<SnChatRoom> {
+  return fetchJsonZ(`/messager/chat/${encodeURIComponent(roomId)}`, SnChatRoomSchema, {
+    method: "PATCH",
+    body: JSON.stringify(input),
+  });
+}
+
+export async function deleteChatRoom(roomId: string): Promise<void> {
+  await apiFetch(`/messager/chat/${encodeURIComponent(roomId)}`, { method: "DELETE" });
+}
+
+export async function joinChatRoom(roomId: string): Promise<void> {
+  await apiFetch(`/messager/chat/${encodeURIComponent(roomId)}/members/me`, {
+    method: "POST",
+  });
+}
+
+export async function leaveChatRoom(roomId: string): Promise<void> {
+  await apiFetch(`/messager/chat/${encodeURIComponent(roomId)}/members/me`, {
+    method: "DELETE",
+  });
+}
+
+export async function fetchChatMembers(
+  roomId: string,
+  take = 50,
+  offset = 0,
+): Promise<{ items: SnChatMember[]; total: number }> {
+  const { data, headers } = await fetchJsonZHeaders(
+    `/messager/chat/${encodeURIComponent(roomId)}/members?take=${take}&offset=${offset}`,
+    SnChatMemberSchema.array(),
+  );
+  return { items: data, total: headerTotal(headers, data.length) };
+}
+
+export async function removeChatMember(
+  roomId: string,
+  accountId: string,
+): Promise<void> {
+  await apiFetch(
+    `/messager/chat/${encodeURIComponent(roomId)}/members/${encodeURIComponent(accountId)}`,
+    { method: "DELETE" },
+  );
+}
+
+export async function fetchChatOnlineStatus(
+  roomId: string,
+): Promise<SnChatOnlineStatus> {
+  return fetchJsonZ(
+    `/messager/chat/${encodeURIComponent(roomId)}/members/online`,
+    SnChatOnlineStatusSchema,
+  );
+}
+
+export async function updateChatNotifyLevel(
+  roomId: string,
+  notifyLevel: number,
+): Promise<void> {
+  await apiFetch(
+    `/messager/chat/${encodeURIComponent(roomId)}/members/me/notify`,
+    { method: "PATCH", body: JSON.stringify({ notify_level: notifyLevel }) },
+  );
+}
+
+export async function markAllChatRead(): Promise<void> {
+  await apiFetch("/messager/chat/read-all", { method: "POST" });
+}
+
+/** Cloud message search across accessible rooms: `[{room, messages}]` groups. */
+export async function searchChatMessages(
+  query: string,
+  take = 20,
+  offset = 0,
+): Promise<{ groups: Array<{ room: SnChatRoom; messages: SnChatMessage[] }>; total: number }> {
+  const { data, headers } = await fetchJsonZHeaders(
+    `/messager/chat/messages/search?query=${encodeURIComponent(query)}&take=${take}&offset=${offset}`,
+    z.array(
+      z.object({
+        room: SnChatRoomSchema,
+        messages: z.array(SnChatMessageSchema).default([]),
+      }),
+    ),
+  );
+  return { groups: data, total: headerTotal(headers, data.length) };
+}
+
+/** A message's thread (root + replies with depth). */
+export async function fetchChatMessageThread(
+  roomId: string,
+  messageId: string,
+  take = 50,
+  offset = 0,
+): Promise<ThreadReplyListResponse> {
+  return fetchJsonZ(
+    `/messager/chat/${encodeURIComponent(roomId)}/messages/${encodeURIComponent(messageId)}/thread?take=${take}&offset=${offset}`,
+    ThreadReplyListResponseSchema,
+  );
+}
+
+// ── Stickers (chat picker) ────────────────────────────────────────────────
+
+const StickerSchema = z.object({
+  id: z.string(),
+  slug: z.string(),
+  name: z.string().default(""),
+  image: z.object({ id: z.string() }).nullable().optional(),
+});
+export type ChatSticker = z.infer<typeof StickerSchema>;
+
+const StickerPackSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  prefix: z.string(),
+  icon: z.object({ id: z.string() }).nullable().optional(),
+  stickers: z.array(StickerSchema).default([]),
+});
+export type ChatStickerPack = z.infer<typeof StickerPackSchema>;
+
+/** Owned packs first; the public marketplace stands in when there are none. */
+export async function fetchChatStickerPacks(): Promise<ChatStickerPack[]> {
+  try {
+    const mine = await fetchJsonZ("/sphere/stickers/me", StickerPackSchema.array());
+    if (mine.length) return mine;
+  } catch {
+    // Fall through to the marketplace.
+  }
+  return fetchJsonZ("/sphere/stickers?take=20", StickerPackSchema.array());
+}
+
+/** The drive file id behind a sticker placeholder (`:prefix+slug:`). */
+export async function lookupChatStickerImage(placeholder: string): Promise<string | null> {
+  try {
+    const data = await fetchJsonZ(
+      `/sphere/stickers/lookup/${encodeURIComponent(placeholder)}`,
+      z.object({ image: z.object({ id: z.string() }).nullable().optional() }),
+    );
+    return data.image?.id ?? null;
+  } catch {
+    return null;
+  }
 }
 
 // Device Authorization Flow (RFC 8628)

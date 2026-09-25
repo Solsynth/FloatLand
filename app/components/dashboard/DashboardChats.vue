@@ -84,9 +84,9 @@ function roomSubtitle(room: SnChatRoom): string {
   return "";
 }
 
-// Chat rooms open by realm + room slug; rooms without either stay non-navigable.
+// Chat rooms open by room id in the web chat.
 function href(room: SnChatRoom): string | null {
-  if (room.slug && room.realm?.slug) return `/chat/${room.realm.slug}/${room.slug}`;
+  if (room.id) return `/chat/${room.id}`;
   return null;
 }
 

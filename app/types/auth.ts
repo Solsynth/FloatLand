@@ -99,15 +99,15 @@ export const SnAccountBadgeSchema = z.object({
 export type SnAccountBadge = z.infer<typeof SnAccountBadgeSchema>;
 
 export const SnAccountProfileSchema = z.object({
-  id: z.string().optional(),
-  bio: z.string().optional(),
-  firstName: z.string().optional(),
-  middleName: z.string().optional(),
-  lastName: z.string().optional(),
-  gender: z.string().optional(),
-  pronouns: z.string().optional(),
-  location: z.string().optional(),
-  timeZone: z.string().optional(),
+  id: z.string().nullish(),
+  bio: z.string().nullish(),
+  firstName: z.string().nullish(),
+  middleName: z.string().nullish(),
+  lastName: z.string().nullish(),
+  gender: z.string().nullish(),
+  pronouns: z.string().nullish(),
+  location: z.string().nullish(),
+  timeZone: z.string().nullish(),
   birthday: z.string().nullable().optional(),
   lastSeenAt: z.string().nullable().optional(),
   picture: z.object({ id: z.string() }).nullable().optional(),
@@ -115,18 +115,18 @@ export const SnAccountProfileSchema = z.object({
   links: z
     .array(
       z.object({
-        url: z.string(),
-        name: z.string().optional(),
-        label: z.string().optional(),
+        url: z.string().nullish(),
+        name: z.string().nullish(),
+        label: z.string().nullish(),
       }),
     )
-    .optional(),
+    .nullish(),
   verification: z
     .object({
       type: z.number(),
-      title: z.string().optional(),
-      description: z.string().optional(),
-      verifiedBy: z.string().optional(),
+      title: z.string().nullish(),
+      description: z.string().nullish(),
+      verifiedBy: z.string().nullish(),
     })
     .nullable()
     .optional(),
@@ -134,20 +134,20 @@ export const SnAccountProfileSchema = z.object({
   verified: z
     .object({
       type: z.number(),
-      title: z.string().optional(),
-      description: z.string().optional(),
-      verifiedBy: z.string().optional(),
+      title: z.string().nullish(),
+      description: z.string().nullish(),
+      verifiedBy: z.string().nullish(),
     })
     .nullable()
     .optional(),
   activeBadge: SnAccountBadgeSchema.nullable().optional(),
-  level: z.number().optional(),
-  experience: z.number().optional(),
-  levelingProgress: z.number().optional(),
-  socialCredits: z.number().optional(),
-  socialCreditsLevel: z.number().optional(),
-  createdAt: z.string().optional(),
-  updatedAt: z.string().optional(),
+  level: z.number().nullish(),
+  experience: z.number().nullish(),
+  levelingProgress: z.number().nullish(),
+  socialCredits: z.number().nullish(),
+  socialCreditsLevel: z.number().nullish(),
+  createdAt: z.string().nullish(),
+  updatedAt: z.string().nullish(),
 });
 export type SnAccountProfile = z.infer<typeof SnAccountProfileSchema>;
 
@@ -165,19 +165,19 @@ export type SnContactMethod = z.infer<typeof SnContactMethodSchema>;
 export const SnAccountSchema = z.object({
   id: z.string(),
   name: z.string(),
-  nick: z.string().optional(),
-  language: z.string().optional(),
-  region: z.string().optional(),
+  nick: z.string().nullish(),
+  language: z.string().nullish(),
+  region: z.string().nullish(),
   activatedAt: z.string().nullable().optional(),
   automatedId: z.string().nullable().optional(),
-  isSuperuser: z.boolean().optional(),
-  perkLevel: z.number().optional(),
+  isSuperuser: z.boolean().nullish(),
+  perkLevel: z.number().nullish(),
   perkSubscription: z.record(z.string(), z.unknown()).nullable().optional(),
-  profile: SnAccountProfileSchema.optional(),
-  badges: z.array(SnAccountBadgeSchema).optional(),
-  contacts: z.array(SnContactMethodSchema).optional(),
-  createdAt: z.string().optional(),
-  updatedAt: z.string().optional(),
+  profile: SnAccountProfileSchema.nullish(),
+  badges: z.array(SnAccountBadgeSchema).nullish(),
+  contacts: z.array(SnContactMethodSchema).nullish(),
+  createdAt: z.string().nullish(),
+  updatedAt: z.string().nullish(),
   deletedAt: z.string().nullable().optional(),
 });
 export type SnAccount = z.infer<typeof SnAccountSchema>;

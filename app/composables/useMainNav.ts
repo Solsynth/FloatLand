@@ -4,6 +4,7 @@ import {
   IconBriefcaseBusiness,
   IconHardDrive,
   IconMail,
+  IconMessagesSquare,
   IconPalette,
   IconCode,
   IconWallet,
@@ -29,6 +30,7 @@ export interface NavItem {
  */
 export function useMainNav() {
   const { isSuperuser } = useAuth();
+  const { unreadTotal: chatUnread } = useChat();
 
   const navItems = computed<NavItem[]>(() => [
     {
@@ -49,6 +51,13 @@ export function useMainNav() {
       icon: IconMail,
       labelKey: "nav.mail",
       href: "/mail",
+      requiresAuth: true,
+    },
+    {
+      icon: IconMessagesSquare,
+      labelKey: "nav.chat",
+      href: "/chat",
+      badge: chatUnread.value || null,
       requiresAuth: true,
     },
     { icon: IconWallet, labelKey: "nav.wallet", href: "/wallets" },
