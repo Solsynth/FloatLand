@@ -64,7 +64,10 @@
               >
                 <span class="mt-0.5 shrink-0 text-[10px] text-base-content/40">{{ messageTime(message) }}</span>
                 <span class="min-w-0 flex-1 truncate text-xs text-base-content/70">
-                  {{ messagePreview(message) }}
+                  <span class="inline-flex min-w-0 items-center gap-1">
+                    <IconPaperclip v-if="messageHasAttachment(message)" class="h-3 w-3 shrink-0" />
+                    <span class="truncate">{{ messagePreview(message) }}</span>
+                  </span>
                 </span>
               </button>
             </div>
@@ -85,7 +88,7 @@
 </template>
 
 <script setup lang="ts">
-import { IconX, IconMessagesSquare } from "#components";
+import { IconX, IconMessagesSquare, IconPaperclip } from "#components";
 import { searchChatRooms, searchChatMessages } from "~/utils/api";
 import { voiceUrlOf } from "~/composables/useChat";
 import { formatTime } from "~/utils/datetime";
@@ -134,8 +137,12 @@ async function runSearch(): Promise<void> {
 function messagePreview(message: Awaited<ReturnType<typeof searchChatMessages>>["groups"][number]["messages"][number]): string {
   if (message.deletedAt) return t("chat.messageDeleted")
   if (voiceUrlOf(message)) return t("chat.voiceMessage")
-  if (message.attachments?.length) return `📎 ${message.attachments[0]?.name ?? t("chat.attachment")}`
+  if (message.attachments?.length) return message.attachments[0]?.name ?? t("chat.attachment")
   return message.content || t("chat.message")
+}
+
+function messageHasAttachment(message: Awaited<ReturnType<typeof searchChatMessages>>["groups"][number]["messages"][number]): boolean {
+  return Boolean(message.attachments?.length)
 }
 
 function messageTime(message: Awaited<ReturnType<typeof searchChatMessages>>["groups"][number]["messages"][number]): string {

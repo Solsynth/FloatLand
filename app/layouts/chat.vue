@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-base-200">
+  <div class="flex h-screen flex-col overflow-hidden bg-base-200">
     <header
       class="sticky top-0 z-40 w-full border-b border-base-300 bg-base-100"
     >
@@ -106,10 +106,10 @@
     </header>
 
     <!-- Desktop Chat Layout -->
-    <div class="hidden min-h-[calc(100vh-3.5rem)] lg:flex">
+    <div class="hidden min-h-0 flex-1 lg:flex">
       <!-- Room list column -->
       <aside
-        class="sticky top-16 z-40 h-[calc(100vh-3.5rem)] shrink-0 overflow-y-auto border-r border-base-300 bg-[#f7f7f8] scrollbar-none"
+        class="z-40 h-full shrink-0 overflow-y-auto border-r border-base-300 bg-[#f7f7f8] scrollbar-none"
         :style="{ width: `${sidebarWidth}px` }"
       >
         <ChatSidebar />
@@ -138,7 +138,7 @@
     </div>
 
     <!-- Mobile Layout -->
-    <div class="lg:hidden flex flex-col min-h-screen">
+    <div class="lg:hidden flex min-h-0 flex-1 flex-col">
       <!-- Mobile Header -->
       <header
         v-if="!isRoom"
@@ -179,7 +179,7 @@
       </Transition>
 
       <!-- Mobile Main Content -->
-      <main :class="isRoom ? 'flex-1' : 'flex-1 pt-18'">
+      <main :class="isRoom ? 'min-h-0 flex-1' : 'min-h-0 flex-1 pt-18'">
         <div class="h-full">
           <slot />
         </div>

@@ -16,7 +16,7 @@
       </span>
     </div>
 
-    <div class="px-3 py-2 sm:px-4">
+    <div class="px-3 py-2">
       <template v-if="messageStatus === 'loading' && messages.length === 0">
         <div v-for="index in 5" :key="index" class="flex gap-3 py-2" :class="index % 2 ? 'justify-end' : ''">
           <div class="skeleton h-12 w-2/3 rounded-box" />
@@ -33,33 +33,75 @@
       </template>
 
       <template v-else>
-        <!-- The store keeps threads newest-first (paging-friendly); the view
-             renders them oldest-first so the newest message sits at the
-             bottom, pinned by the scroll-to-bottom behavior. -->
-        <template v-for="(message, index) in threadNewestLast" :key="message.id">
-          <div
-            v-if="showDateSeparator(message, index)"
-            class="my-5 flex items-center gap-3"
-          >
-            <span class="h-px flex-1 bg-base-300/70" />
-            <span class="text-[11px] font-medium text-base-content/40">
-              {{ dateLabel(message.createdAt ?? "") }}
-            </span>
-            <span class="h-px flex-1 bg-base-300/70" />
-          </div>
-          <ChatMessageBubble
-            :id="`chat-message-${message.id}`"
-            :message="message"
-            :room="room"
-            :show-sender="showSender(message, index)"
-            :replying-to="resolveReply(message)"
-            @reply="emit('reply', $event)"
-            @thread="emit('thread', $event)"
-            @edit="emit('edit', $event)"
-            @delete="emit('delete', $event)"
-            @react="emit('react', $event)"
-            @pin="emit('pin', $event)"
-          />
+        <!-- DMs: no avatars, own bubbles on the right (classic messenger). -->
+        <template v-if="room.type === 1">
+          <template v-for="(message, index) in threadNewestLast" :key="message.id">
+            <ChatMessageBubble
+              :id="`chat-message-${message.id}`"
+              :message="message"
+              :room="room"
+              :show-sender="false"
+              :connects-above="connectsAbove(message, index)"
+              :connects-below="connectsBelow(message, index)"
+              :replying-to="resolveReply(message)"
+              @reply="emit('reply', $event)"
+              @thread="emit('thread', $event)"
+              @edit="emit('edit', $event)"
+              @delete="emit('delete', $event)"
+              @react="emit('react', $event)"
+              @pin="emit('pin', $event)"
+            />
+          </template>
+        </template>
+
+        <!-- Group chats: sticky-avatar stacks, Solian bubble style. -->
+        <template v-else>
+          <template v-for="group in groups" :key="group.messages[0].id">
+            <!-- Avatar sits in its own grid column spanning the whole group,
+                 pinned to the top of the list while the group scrolls past. -->
+            <div class="grid grid-cols-[2rem_minmax(0,1fr)] gap-x-2">
+              <div
+                v-if="groupShowsSender(group)"
+                class="sticky top-3 z-10 h-8 w-8 self-start"
+              >
+                <div class="avatar">
+                  <div class="h-8 w-8 rounded-full">
+                    <FileImage
+                      v-if="groupAvatarId(group)"
+                      :file="{ id: groupAvatarId(group) }"
+                      :alt="groupSenderName(group)"
+                      class="h-full w-full rounded-full object-cover"
+                    />
+                    <div v-else class="flex h-full w-full items-center justify-center rounded-full bg-primary/15 text-[11px] font-bold text-primary">
+                      {{ groupInitials(group) }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div v-else />
+
+              <div class="min-w-0">
+                <ChatMessageBubble
+                  v-for="(message, messageIndex) in group.messages"
+                  :id="`chat-message-${message.id}`"
+                  :key="message.id"
+                  :message="message"
+                  :room="room"
+                  :avatar-gutter="false"
+                  :show-sender="messageIndex === 0 && groupShowsSender(group)"
+                  :connects-above="messageIndex > 0"
+                  :connects-below="messageIndex < group.messages.length - 1"
+                  :replying-to="resolveReply(message)"
+                  @reply="emit('reply', $event)"
+                  @thread="emit('thread', $event)"
+                  @edit="emit('edit', $event)"
+                  @delete="emit('delete', $event)"
+                  @react="emit('react', $event)"
+                  @pin="emit('pin', $event)"
+                />
+              </div>
+            </div>
+          </template>
         </template>
 
         <!-- Typing indicator -->
@@ -77,8 +119,12 @@
 </template>
 
 <script setup lang="ts">
+import { FileImage } from "#components";
 import type { SnChatRoom, SnChatMessage } from "~/types/chat";
-import { isSameDay, formatChatDate } from "~/utils/datetime";
+
+interface MessageGroup {
+  messages: SnChatMessage[];
+}
 
 const props = defineProps<{
   room: SnChatRoom;
@@ -103,10 +149,131 @@ let stickToBottom = true;
 
 const messages = computed(() => messagesFor(props.roomId));
 /** Chronological order for rendering (oldest at top, newest at bottom). */
-const threadNewestLast = computed(() => messages.value.slice().reverse());
+const threadNewestLast = computed(() =>
+  messages.value.slice().reverse().filter(shouldShowMessage),
+);
 const messageStatus = computed(() => state.messageStatus[props.roomId] ?? "idle");
 const olderStatus = computed(() => state.olderStatus[props.roomId] ?? "idle");
 const typingUsers = computed(() => typingFor(props.roomId));
+
+const selfId = computed(() => user.value?.id ?? "");
+
+// ── Visibility filter (Solian parity) ───────────────────────────────────
+// Some rows are not timeline content: `messages.*` envelopes exist only to
+// sync/update other rows, and system.* types outside the user-facing set are
+// internal markers. Placeholders are only meaningful while the sender's own
+// upload/stream is in flight — expired rows and unknown kinds are dropped.
+
+const DISPLAYABLE_SYSTEM_TYPES = new Set([
+  "system.member.joined",
+  "system.member.left",
+  "system.chat.updated",
+  "system.e2ee.enabled",
+  "system.e2ee.rotate_required",
+  "system.e2ee.history_unavailable",
+  "system.call.member.joined",
+  "system.call.member.left",
+  "system.member.timed_out",
+  "system.member.timeout_removed",
+]);
+
+function shouldShowMessage(message: SnChatMessage): boolean {
+  const type = message.type
+  if (type.startsWith("messages.")) return false
+  if (type.startsWith("system.") && !DISPLAYABLE_SYSTEM_TYPES.has(type)) return false
+  if (type !== "placeholder") return true
+
+  // Upload/streaming placeholders belong to the sender only.
+  if (message.senderId && message.senderId !== selfId.value) return false
+  const kind = message.meta?.placeholderKind?.toString() ?? ""
+  if (kind !== "streaming" && kind !== "uploading") return false
+  const expiresAt = message.meta?.placeholderExpiresAt
+  if (typeof expiresAt === "string" && expiresAt) {
+    const at = new Date(expiresAt).getTime()
+    if (Number.isFinite(at) && at <= Date.now()) return false
+  }
+  return true
+}
+
+// ── Grouping (Solian parity) ────────────────────────────────────────────
+// A group is consecutive messages from the same sender within 3 minutes.
+// Deleted messages and missing/invalid timestamps always break the group —
+// that avoids silently merging rows that should stand apart.
+
+function isDeleted(message: SnChatMessage): boolean {
+  return Boolean(message.deletedAt)
+}
+
+function isSystemType(message: SnChatMessage): boolean {
+  return message.senderId === "system" || message.type.startsWith("system.")
+}
+
+function inSameGroup(a: SnChatMessage, b: SnChatMessage | null): boolean {
+  if (!b) return false
+  if (isDeleted(a) || isDeleted(b)) return false
+  if (isSystemType(a) || isSystemType(b)) return false
+  if (a.type === "placeholder" || b.type === "placeholder") return false
+  if (!a.senderId || a.senderId !== b.senderId) return false
+  const at = new Date(a.createdAt ?? "").getTime()
+  const bt = new Date(b.createdAt ?? "").getTime()
+  if (!Number.isFinite(at) || !Number.isFinite(bt)) return false
+  return Math.abs(at - bt) <= 3 * 60 * 1000
+}
+
+/** Runs of grouped messages, oldest first. */
+const groups = computed<MessageGroup[]>(() => {
+  const rows = threadNewestLast.value
+  const result: MessageGroup[] = []
+  for (let i = 0; i < rows.length; i++) {
+    const message = rows[i]
+    const previous = i > 0 ? rows[i - 1] : null
+    if (!previous || !inSameGroup(previous, message)) {
+      result.push({ messages: [message] })
+    } else {
+      result[result.length - 1].messages.push(message)
+    }
+  }
+  return result
+})
+
+/** DM adjacency (no avatars, but bubbles still connect within a run).
+ * `threadNewestLast` renders oldest-first, so the row visually above `index`
+ * is `index - 1` and the one below is `index + 1`. */
+function connectsAbove(message: SnChatMessage, index: number): boolean {
+  return inSameGroup(message, threadNewestLast.value[index - 1] ?? null)
+}
+
+function connectsBelow(message: SnChatMessage, index: number): boolean {
+  return inSameGroup(message, threadNewestLast.value[index + 1] ?? null)
+}
+
+/** Whether a group's oldest message carries the avatar + sender header. */
+function groupShowsSender(group: MessageGroup): boolean {
+  const first = group.messages[0]
+  if (isDeleted(first)) return false
+  if (isSystemType(first) || first.type === "placeholder") return false
+  if (first.senderId === selfId.value) return false
+  return true
+}
+
+function groupSenderName(group: MessageGroup): string {
+  const member = group.messages[0].sender
+  if (!member) return ""
+  return member.nick || member.account?.nick || member.account?.name || ""
+}
+
+function groupInitials(group: MessageGroup): string {
+  return (groupSenderName(group) || "?").slice(0, 2).toUpperCase()
+}
+
+function groupAvatarId(group: MessageGroup): string | null {
+  return group.messages[0].sender?.account?.profile?.picture?.id ?? null
+}
+
+function resolveReply(message: SnChatMessage): SnChatMessage | null {
+  if (!message.repliedMessageId) return null
+  return findMessage(props.roomId, message.repliedMessageId)
+}
 
 /** Load an older page, keeping the scroll position anchored to the visible row. */
 async function loadOlderClick(): Promise<void> {
@@ -118,35 +285,6 @@ async function loadOlderClick(): Promise<void> {
       el.scrollTop += el.scrollHeight - previousHeight
     })
   }
-}
-
-const selfId = computed(() => user.value?.id ?? "");
-
-function showSender(message: SnChatMessage, index: number): boolean {
-  if (props.room.type === 1) return false
-  if (message.senderId === selfId.value) return false
-  if (message.deletedAt) return false
-  // `index` is in render order (oldest first); the previous row is above.
-  const previous = threadNewestLast.value[index + 1]
-  if (!previous) return true
-  if (previous.senderId !== message.senderId) return true
-  const gap = new Date(message.createdAt ?? "").getTime() - new Date(previous.createdAt ?? "").getTime()
-  return gap > 3 * 60 * 1000
-}
-
-function dateLabel(dateStr: string): string {
-  return formatChatDate(dateStr)
-}
-
-function showDateSeparator(message: SnChatMessage, index: number): boolean {
-  const previous = threadNewestLast.value[index + 1]
-  if (!previous) return true
-  return !isSameDay(message.createdAt ?? "", previous.createdAt ?? "")
-}
-
-function resolveReply(message: SnChatMessage): SnChatMessage | null {
-  if (!message.repliedMessageId) return null
-  return findMessage(props.roomId, message.repliedMessageId)
 }
 
 function onScroll(): void {

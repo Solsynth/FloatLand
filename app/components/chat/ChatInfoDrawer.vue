@@ -62,8 +62,9 @@
           <div v-else class="mt-2 space-y-1.5">
             <div v-for="pin in pinned" :key="pin.id" class="group flex items-start gap-2 rounded-box border border-base-300 px-2.5 py-2">
               <div class="min-w-0 flex-1">
-                <p class="truncate text-xs font-medium text-base-content/80">
-                  {{ pinPreview(pin) }}
+                <p class="flex items-center gap-1 text-xs font-medium text-base-content/80">
+                  <IconPaperclip v-if="pinHasAttachment(pin)" class="h-3 w-3 shrink-0" />
+                  <span class="truncate">{{ pinPreview(pin) }}</span>
                 </p>
                 <p class="text-[10px] text-base-content/40">
                   {{ pinTime(pin) }}
@@ -164,7 +165,7 @@
 </template>
 
 <script setup lang="ts">
-import { IconX, IconPin, IconPinOff, IconLogOut } from "#components";
+import { IconX, IconPin, IconPinOff, IconLogOut, IconPaperclip } from "#components";
 import type { SnChatRoom, SnChatMember, SnChatMessagePin } from "~/types/chat";
 import { fetchChatMembers, updateChatNotifyLevel, createChatInvite, leaveChatRoom, searchAccounts } from "~/utils/api";
 import { voiceUrlOf } from "~/composables/useChat";
@@ -212,12 +213,16 @@ function memberMeta(member: SnChatMember): string {
   return ""
 }
 
+function pinHasAttachment(pin: SnChatMessagePin): boolean {
+  return Boolean(pin.message?.attachments?.length)
+}
+
 function pinPreview(pin: SnChatMessagePin): string {
   const message = pin.message
   if (!message) return t("chat.message")
   if (message.deletedAt) return t("chat.messageDeleted")
   if (voiceUrlOf(message)) return t("chat.voiceMessage")
-  if (message.attachments?.length) return `📎 ${message.attachments[0]?.name ?? t("chat.attachment")}`
+  if (message.attachments?.length) return message.attachments[0]?.name ?? t("chat.attachment")
   return message.content || t("chat.message")
 }
 

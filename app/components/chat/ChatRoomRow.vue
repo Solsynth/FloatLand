@@ -1,23 +1,17 @@
 <template>
   <NuxtLink
     :to="`/chat/${room.id}`"
-    class="group relative flex items-center gap-2.5 rounded-md px-2 py-1.5 text-left transition-colors"
-    :class="active ? 'bg-base-300/80' : 'hover:bg-base-300/50'"
+    class="flex items-center gap-3 rounded-xl px-2.5 py-2.5 text-left transition-colors"
+    :class="active ? 'bg-primary/10' : 'hover:bg-base-300/50'"
   >
-    <!-- Active accent bar (Discord-style left rail on the active row) -->
-    <span
-      v-if="active"
-      class="absolute top-1/2 left-0 h-6 w-0.5 -translate-y-1/2 rounded-full bg-primary"
-    />
-
     <!-- Avatar -->
     <div class="relative shrink-0">
       <div class="avatar">
-        <div :class="isGroup ? 'h-8 w-8 rounded-md' : 'h-8 w-8 rounded-full'">
-          <FileImage v-if="avatarId" :file="{ id: avatarId }" :alt="title" :class="isGroup ? 'h-full w-full rounded-md object-cover' : 'h-full w-full rounded-full object-cover'" />
+        <div :class="isGroup ? 'h-10 w-10 rounded-lg' : 'h-10 w-10 rounded-full'">
+          <FileImage v-if="avatarId" :file="{ id: avatarId }" :alt="title" :class="isGroup ? 'h-full w-full rounded-lg object-cover' : 'h-full w-full rounded-full object-cover'" />
           <div
             v-else
-            :class="['flex h-full w-full items-center justify-center bg-primary/20 text-xs font-bold text-primary-content', isGroup ? 'rounded-md' : 'rounded-full']"
+            :class="['flex h-full w-full items-center justify-center bg-primary/20 text-sm font-bold text-primary-content', isGroup ? 'rounded-lg' : 'rounded-full']"
           >
             {{ initials }}
           </div>
@@ -44,14 +38,17 @@
         <span v-if="unread > 0" class="h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
       </div>
       <p
-        class="truncate text-xs"
+        class="flex items-center gap-1 text-xs"
         :class="unread > 0 ? 'font-medium text-base-content/80' : 'text-base-content/50'"
       >
-        <span v-if="typingUsers.length" class="italic text-primary">
+        <span v-if="typingUsers.length" class="truncate italic text-primary">
           {{ t("chat.typingEllipsis") }}
         </span>
-        <span v-else-if="preview">{{ preview }}</span>
-        <span v-else class="text-base-content/40">{{ t("chat.noMessagesYet") }}</span>
+        <template v-else-if="preview">
+          <IconPaperclip v-if="previewIsAttachment" class="h-3 w-3 shrink-0" />
+          <span class="truncate">{{ preview }}</span>
+        </template>
+        <span v-else class="truncate text-base-content/40">{{ t("chat.noMessagesYet") }}</span>
       </p>
     </div>
 
@@ -66,6 +63,7 @@
 </template>
 
 <script setup lang="ts">
+import { IconPaperclip } from "#components";
 import type { SnChatRoom } from "~/types/chat";
 import { formatRelativeTime } from "~/utils/datetime";
 
@@ -103,12 +101,16 @@ const senderName = computed(() => {
   return member.nick || member.account?.nick || member.account?.name || ""
 });
 
+const previewIsAttachment = computed(() =>
+  Boolean(lastMessage.value?.attachments?.length),
+);
+
 const preview = computed(() => {
   const message = lastMessage.value
   if (!message) return ""
   if (message.deletedAt) return t("chat.messageDeleted")
   if (message.type === "voice" || voiceUrlOf(message)) return t("chat.voiceMessage")
-  if (message.attachments?.length) return `📎 ${message.attachments[0]?.name ?? t("chat.attachment")}`
+  if (message.attachments?.length) return message.attachments[0]?.name ?? t("chat.attachment")
   if (message.content) {
     return senderName.value ? `${senderName.value}: ${message.content}` : message.content
   }

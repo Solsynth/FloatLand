@@ -37,21 +37,30 @@
       </button>
     </div>
 
-    <!-- Filters -->
-    <div class="flex items-center gap-3 px-3 pb-1.5" role="tablist" aria-label="Room filters">
-      <button
-        v-for="option in filters"
-        :key="option.value"
-        type="button"
-        role="tab"
-        class="text-xs transition-colors"
-        :class="state.filter === option.value
-          ? 'font-bold text-base-content'
-          : 'font-medium text-base-content/40 hover:text-base-content/70'"
-        @click="state.filter = option.value"
-      >
-        {{ option.label }}
-      </button>
+    <!-- Filters (sliding-pill tab switch, timeline parity) -->
+    <div class="px-3 pb-2" role="tablist" aria-label="Room filters">
+      <div class="relative flex items-center rounded-xl bg-base-200/60 p-1">
+        <span
+          class="absolute bottom-1 top-1 rounded-lg bg-primary/15 transition-[left] duration-200 ease-out"
+          :style="pillStyle"
+        />
+        <button
+          v-for="option in filters"
+          :key="option.value"
+          type="button"
+          role="tab"
+          :aria-selected="state.filter === option.value"
+          class="relative z-10 flex h-8 flex-1 items-center justify-center rounded-lg text-xs transition-colors"
+          :class="
+            state.filter === option.value
+              ? 'font-bold text-primary'
+              : 'font-medium text-base-content/55 hover:text-base-content'
+          "
+          @click="state.filter = option.value"
+        >
+          {{ option.label }}
+        </button>
+      </div>
     </div>
 
     <!-- Invites banner -->
@@ -69,10 +78,10 @@
     </button>
 
     <!-- Room list -->
-    <div class="flex-1 overflow-y-auto px-2 py-1.5 scrollbar-thin">
-      <div v-if="state.roomStatus === 'loading'" class="space-y-0.5">
-        <div v-for="index in 8" :key="index" class="flex items-center gap-2.5 rounded-md px-2 py-1.5">
-          <div class="skeleton h-8 w-8 shrink-0 rounded-md" />
+    <div class="flex-1 overflow-y-auto px-2 py-2 scrollbar-thin">
+      <div v-if="state.roomStatus === 'loading'" class="space-y-1">
+        <div v-for="index in 8" :key="index" class="flex items-center gap-3 rounded-xl px-2.5 py-2.5">
+          <div class="skeleton h-10 w-10 shrink-0 rounded-full" />
           <div class="min-w-0 flex-1 space-y-1.5">
             <div class="skeleton h-3 w-2/3" />
             <div class="skeleton h-2.5 w-1/3" />
@@ -107,7 +116,7 @@
         </button>
       </div>
 
-      <div v-else class="space-y-0.5">
+      <div v-else class="space-y-1">
         <ChatRoomRow
           v-for="room in visibleRooms"
           :key="room.id"
@@ -122,15 +131,6 @@
     <ChatNewDialog v-model:open="newOpen" />
     <ChatInvitesDialog v-model:open="invitesOpen" />
     <ChatSearchDialog v-model:open="searchOpen" />
-
-    <!-- Dev diagnostics (dev builds only) -->
-    <div
-      v-if="isDev"
-      class="shrink-0 border-t border-base-300 px-3 py-1.5 text-[10px] leading-relaxed text-base-content/40"
-    >
-      <p>chat: {{ state.roomStatus }} · rooms {{ state.rooms.length }} · authed {{ isAuthenticated }}</p>
-      <p v-if="state.error" class="break-words text-error/70">{{ state.error }}</p>
-    </div>
   </aside>
 </template>
 
@@ -155,13 +155,21 @@ const { isAuthenticated } = useAuth();
 const newOpen = ref(false);
 const invitesOpen = ref(false);
 const searchOpen = ref(false);
-const isDev = import.meta.dev;
 
 const filters = computed(() => [
   { value: "all", label: t("chat.filterAll") },
   { value: "direct", label: t("chat.filterDirect") },
   { value: "group", label: t("chat.filterGroups") },
 ] as const);
+
+// Sliding highlight position (mirrors timeline.vue's segmented filter).
+const pillStyle = computed(() => {
+  const idx = state.filter === "direct" ? 1 : state.filter === "group" ? 2 : 0;
+  return {
+    width: "calc((100% - 0.5rem) / 3)",
+    left: `calc(0.25rem + ${idx} * (100% - 0.5rem) / 3)`,
+  };
+});
 
 const activeRoomId = computed(() => state.activeRoomId);
 
