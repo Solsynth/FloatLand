@@ -658,8 +658,8 @@ export const SpellInfoSchema = z.object({
     name: z.string(),
   }),
   createdAt: z.string(),
-  /** null until the spell has been used. */
-  affectedAt: z.string().nullable(),
+  /** Absent (or null) until the spell has been used. */
+  affectedAt: z.string().nullish(),
   expiredAt: z.string().nullable().optional(),
 });
 export type SpellInfo = z.infer<typeof SpellInfoSchema>;
