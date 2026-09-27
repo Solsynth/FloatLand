@@ -87,6 +87,11 @@
 								<p class="text-sm text-base-content/50">
 									wants access to your account
 								</p>
+								<AppOwnerInfo
+									:publisher="appPublisher"
+									:verification="appVerification"
+									:home-page="appHomePage"
+								/>
 							</div>
 
 							<!-- Permissions -->
@@ -162,51 +167,6 @@
 				</section>
 			</div>
 		</div>
-
-		<div class="auth-authorization__utilities">
-			<DialogRoot v-model:open="showAppLinkDialog">
-				<DialogTrigger class="btn btn-ghost btn-sm text-base-content/60">
-					<IconExternalLink class="w-4 h-4" />
-					Open in App
-				</DialogTrigger>
-				<DialogPortal>
-					<DialogOverlay class="fixed inset-0 bg-black/50 z-50" />
-					<DialogContent class="fixed top-1/2 left-1/2 z-50 flex w-[calc(100%-2rem)] max-w-xs -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-4 rounded-box bg-base-100 p-6 shadow-sm">
-						<DialogTitle class="text-lg font-bold">Open in App</DialogTitle>
-						<DialogDescription class="text-sm text-base-content/50 text-center">
-							Scan the QR code or tap below to open in the Solar Network app.
-						</DialogDescription>
-						<img
-							:src="`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(appDeepLink)}`"
-							alt="QR Code"
-							class="w-48 h-48 rounded-xl"
-						/>
-						<a
-							:href="appDeepLink"
-							class="btn btn-primary w-full gap-2"
-						>
-							<IconExternalLink class="w-4 h-4" />
-							Open in App
-						</a>
-						<DialogClose class="btn btn-ghost btn-sm w-full">
-							Close
-						</DialogClose>
-					</DialogContent>
-				</DialogPortal>
-			</DialogRoot>
-			<button
-				class="btn btn-ghost btn-sm text-base-content/60"
-				:disabled="isLoggingOut || isAuthorizing"
-				@click="handleLogoutForAnotherAccount"
-			>
-				<IconLoader
-					v-if="isLoggingOut"
-					class="w-4 h-4 animate-spin"
-				/>
-				<IconLogOut v-else class="w-4 h-4" />
-				Use another account
-			</button>
-		</div>
 	</div>
 </template>
 
@@ -217,23 +177,11 @@ import {
 	IconAlertTriangle,
 	IconAlertCircle,
 	IconLoader,
-	IconLogOut,
 	IconX,
 	IconShield,
 	IconUser,
-	IconExternalLink
 } from '#components';
-
-import {
-	DialogClose,
-	DialogContent,
-	DialogDescription,
-	DialogOverlay,
-	DialogPortal,
-	DialogRoot,
-	DialogTitle,
-	DialogTrigger,
-} from 'reka-ui';
+import type { AuthorizeClientInfo, PublicApp } from '~/utils/api';
 
 definePageMeta({
 	layout: false,
@@ -249,20 +197,12 @@ useSolarSeo({
 
 const route = useRoute();
 const auth = useAuth();
-const appDeepLink = computed(() => `solian:/${route.fullPath}`);
-const showAppLinkDialog = ref(false);
 const loading = ref(true);
 const isAuthorizing = ref(false);
-const isLoggingOut = ref(false);
 const error = ref<string | null>(null);
 
-const clientInfo = ref<{
-	clientName?: string;
-	homeUri?: string;
-	picture?: { id?: string };
-	background?: { id?: string };
-	scopes?: string[];
-} | null>(null);
+const clientInfo = ref<AuthorizeClientInfo | null>(null);
+const appInfo = ref<PublicApp | null>(null);
 
 // Cached image URLs
 const userAvatarUrl = computed(() => {
@@ -270,7 +210,20 @@ const userAvatarUrl = computed(() => {
 });
 
 const clientPictureUrl = computed(() => {
-	return clientInfo.value?.picture ?? null;
+	return clientInfo.value?.picture ?? appInfo.value?.picture ?? null;
+});
+
+// Publisher (developer) and verification mark of the requesting app.
+const appPublisher = computed(() => {
+	return appInfo.value?.project?.developer?.publisher ?? null;
+});
+
+const appVerification = computed(() => {
+	return appInfo.value?.verification ?? null;
+});
+
+const appHomePage = computed(() => {
+	return appInfo.value?.links?.homePage || clientInfo.value?.homeUri || null;
 });
 
 // User-friendly scope labels
@@ -291,8 +244,17 @@ async function loadClientInfo() {
 		const query = new URLSearchParams(
 			route.query as Record<string, string>
 		);
-		const { getAuthorizeClientInfo } = await import('~/utils/api');
+		const { getAuthorizeClientInfo, getPublicApp } = await import('~/utils/api');
 		clientInfo.value = await getAuthorizeClientInfo(query);
+		// The provider resolves `client_id` to the client slug, which also keys
+		// the public app profile (publisher + verification mark).
+		if (clientInfo.value.clientId) {
+			try {
+				appInfo.value = await getPublicApp(clientInfo.value.clientId);
+			} catch (e) {
+				console.warn('Failed to load app profile:', e);
+			}
+		}
 	} catch (e) {
 		console.error('Failed to load client info:', e);
 		error.value =
@@ -336,18 +298,6 @@ async function handleDeny() {
 	} catch (e) {
 		error.value = e instanceof Error ? e.message : 'Failed to submit denial';
 		isAuthorizing.value = false;
-	}
-}
-
-async function handleLogoutForAnotherAccount() {
-	isLoggingOut.value = true;
-	error.value = null;
-	try {
-		await auth.logout();
-		await navigateTo(`/auth/login?redirect=${encodeURIComponent(route.fullPath)}`);
-	} catch (e) {
-		error.value = e instanceof Error ? e.message : 'Failed to logout';
-		isLoggingOut.value = false;
 	}
 }
 

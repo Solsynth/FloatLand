@@ -1,111 +1,199 @@
 <template>
-	<div class="auth-page">
-		<div class="auth-panel auth-panel--compact">
-			<ConfuseSpinner v-if="loading" message="Loading..." />
-
-			<template v-else-if="status">
-				<!-- Pending: show approval UI -->
-				<template v-if="status.status === 'pending'">
-					<div class="flex flex-col items-center text-center mb-6">
-						<div class="auth-status-icon bg-primary/15 text-primary">
-							<IconPlug class="w-7 h-7 text-primary" />
+	<div class="auth-page auth-page--authorization">
+		<div class="auth-panel auth-panel--authorization">
+			<div class="grid md:grid-cols-[1fr_1.1fr]">
+				<!-- Left Column: Branding & Account -->
+				<section class="auth-rail auth-authorization__rail">
+					<div class="flex flex-col gap-5">
+						<img src="/favicon.png" alt="Solar Network" class="auth-brand-mark">
+						<div>
+							<h1 class="text-3xl leading-tight font-black">Device Authorization</h1>
+							<p class="text-sm text-base-content/60 mt-2">
+								Check that the code below matches the one shown on your device.
+							</p>
 						</div>
-						<h1 class="text-2xl font-bold">Device Authorization</h1>
-						<p class="text-sm text-base-content/60 mt-1">
-							A device is requesting access to your account
-						</p>
-						<div class="mt-4 flex items-center gap-3 text-left">
-							<div class="avatar">
-								<div class="w-11 h-11 overflow-hidden rounded-md border border-base-300">
-									<FileImage
-										v-if="clientPictureUrl"
-										:file="clientPictureUrl"
-										loading="lazy"
-										class="w-full h-full object-cover"
-									/>
-									<div
-										v-else
-										class="w-full h-full flex items-center justify-center bg-primary/15 text-primary"
-									>
-										<IconPlug class="w-5 h-5" />
-									</div>
+					</div>
+
+					<!-- User Account Info -->
+					<div
+						v-if="auth.user.value"
+						class="auth-detail-block flex items-center gap-3"
+					>
+						<div class="avatar">
+							<div class="w-11 h-11 rounded-full overflow-hidden">
+								<FileImage
+									v-if="userAvatarUrl"
+									:file="userAvatarUrl"
+									loading="lazy"
+									class="w-full h-full object-cover"
+								/>
+								<div
+									v-else
+									class="w-full h-full flex items-center justify-center bg-primary/15 text-primary"
+								>
+									<IconUser class="w-5 h-5" />
 								</div>
 							</div>
-							<div class="min-w-0">
-								<p class="font-bold text-base truncate">{{ clientInfo?.clientName || status.clientName || status.clientId }}</p>
-								<p class="text-sm text-base-content/50">wants access to your account</p>
-							</div>
+						</div>
+						<div class="min-w-0">
+							<p class="font-bold truncate text-sm">
+								{{ auth.user.value?.nick || auth.user.value?.name || 'Unknown User' }}
+							</p>
+							<p class="text-xs text-base-content/50 truncate">
+								@{{ auth.user.value?.name }}
+							</p>
 						</div>
 					</div>
+				</section>
 
-					<div v-if="error" class="alert alert-error text-sm mb-4">
-						<IconAlertCircle class="w-4 h-4" />
-						<span>{{ error }}</span>
-					</div>
+				<!-- Right Column: Device & Permissions -->
+				<section class="auth-main min-h-96 justify-between">
+					<ConfuseSpinner v-if="loading" message="Loading..." />
 
-					<div class="auth-detail-block mb-4">
-						<p class="text-xs text-base-content/50 mb-2">User Code</p>
-						<p class="text-2xl font-mono font-bold tracking-wider">{{ status.userCode }}</p>
-					</div>
+					<template v-else-if="status">
+						<!-- Pending: show approval UI -->
+						<template v-if="status.status === 'pending'">
+							<div>
+								<!-- Error Message -->
+								<div
+									v-if="error"
+									class="alert alert-error text-sm mb-4"
+								>
+									<IconAlertCircle class="w-4 h-4" />
+									<span>{{ error }}</span>
+								</div>
 
-					<div class="auth-detail-block mb-6">
-						<p class="mb-3 text-sm font-semibold flex items-center gap-2">
-							<IconShield class="w-4 h-4 text-primary" />
-							Requested permissions
-						</p>
-						<ul v-if="status.scopes?.length" class="space-y-2 text-sm">
-							<li v-for="scope in status.scopes" :key="scope" class="flex items-start gap-2">
-								<IconAlertTriangle v-if="scope === '*'" class="w-4 h-4 mt-0.5 text-warning flex-shrink-0" />
-								<IconCheck v-else class="w-4 h-4 mt-0.5 text-success flex-shrink-0" />
-								<span>{{ getScopeLabel(scope) }}</span>
-							</li>
-						</ul>
-						<p v-else class="text-sm text-base-content/60">No explicit scopes requested.</p>
-					</div>
+								<!-- Device Info Summary -->
+								<div class="flex flex-col items-start text-left mb-6">
+									<div class="avatar self-start mb-2">
+										<div class="w-11 h-11 overflow-hidden rounded-md border border-base-300">
+											<FileImage
+												v-if="clientPictureUrl"
+												:file="clientPictureUrl"
+												loading="lazy"
+												class="w-full h-full object-cover"
+											/>
+											<div
+												v-else
+												class="w-full h-full flex items-center justify-center bg-primary/15 text-primary"
+											>
+												<IconPlug class="w-5 h-5" />
+											</div>
+										</div>
+									</div>
+									<p class="font-bold text-xl">
+										{{ clientName }}
+									</p>
+									<p class="text-sm text-base-content/50">
+										wants access to your account
+									</p>
+									<AppOwnerInfo
+										:publisher="appPublisher"
+										:verification="appVerification"
+										:home-page="appHomePage"
+									/>
+								</div>
 
-					<div class="grid grid-cols-2 gap-3">
-						<button class="btn btn-primary" :disabled="isSubmitting" @click="handleApprove">
-							<IconLoader v-if="isSubmitting" class="w-4 h-4 animate-spin" />
-							<IconCheck v-else class="w-4 h-4" />
-							Approve
-						</button>
-						<button class="btn btn-outline" :disabled="isSubmitting" @click="handleDecline">
-							<IconX class="w-4 h-4" />
-							Deny
-						</button>
-					</div>
-				</template>
+								<!-- User Code -->
+								<div class="auth-detail-block mb-4">
+									<p class="text-xs text-base-content/50 mb-2">User Code</p>
+									<p class="text-2xl font-mono font-bold tracking-wider">
+										{{ status.userCode }}
+									</p>
+								</div>
 
-				<!-- Already approved/declined/expired -->
-				<div v-else class="flex flex-col items-center justify-center py-8 text-center">
+								<!-- Permissions -->
+								<div class="auth-detail-block">
+									<p class="mb-3 text-sm font-semibold flex items-center gap-2">
+										<IconShield class="w-4 h-4 text-primary" />
+										Requested permissions
+									</p>
+									<ul
+										v-if="status.scopes?.length"
+										class="space-y-2 text-sm"
+									>
+										<li
+											v-for="scope in status.scopes"
+											:key="scope"
+											class="flex items-start gap-2"
+										>
+											<IconAlertTriangle
+												v-if="scope === '*'"
+												class="w-4 h-4 mt-0.5 text-warning flex-shrink-0"
+											/>
+											<IconCheck
+												v-else
+												class="w-4 h-4 mt-0.5 text-success flex-shrink-0"
+											/>
+											<span>{{ getScopeLabel(scope) }}</span>
+										</li>
+									</ul>
+									<p v-else class="text-sm text-base-content/60">
+										No explicit scopes requested.
+									</p>
+								</div>
+							</div>
+
+							<!-- Action Buttons -->
+							<div class="mt-6 grid grid-cols-2 gap-3">
+								<button
+									class="btn btn-primary"
+									:disabled="isSubmitting"
+									@click="handleApprove"
+								>
+									<IconLoader
+										v-if="isSubmitting"
+										class="w-4 h-4 animate-spin"
+									/>
+									<IconCheck v-else class="w-4 h-4" />
+									Approve
+								</button>
+								<button
+									class="btn btn-outline"
+									:disabled="isSubmitting"
+									@click="handleDecline"
+								>
+									<IconX class="w-4 h-4" />
+									Deny
+								</button>
+							</div>
+						</template>
+
+						<!-- Already approved/declined/expired -->
+						<div
+							v-else
+							class="flex flex-1 flex-col items-center justify-center py-8 text-center"
+						>
+							<div
+								class="w-16 h-16 rounded-full flex items-center justify-center mb-4"
+								:class="status.status === 'approved' ? 'bg-success/20' : 'bg-error/20'"
+							>
+								<IconCheck v-if="status.status === 'approved'" class="w-8 h-8 text-success" />
+								<IconX v-else class="w-8 h-8 text-error" />
+							</div>
+							<h2 class="text-xl font-bold">
+								{{ status.status === 'approved' ? 'Device Authorized' : status.status === 'expired' ? 'Code Expired' : 'Request Denied' }}
+							</h2>
+							<p class="text-base-content/60 text-sm mt-1">
+								{{ status.status === 'approved' ? 'You can close this page.' : status.status === 'expired' ? 'This code has expired. Request a new one from your device.' : 'The device request was denied.' }}
+							</p>
+						</div>
+					</template>
+
+					<!-- Error State -->
 					<div
-						class="auth-status-icon mb-4"
-						:class="{
-							'bg-success/20': status.status === 'approved',
-							'bg-error/20': status.status === 'declined' || status.status === 'expired',
-						}"
+						v-else
+						class="flex flex-1 flex-col items-center justify-center py-8 text-center"
 					>
-						<IconCheck v-if="status.status === 'approved'" class="w-8 h-8 text-success" />
-						<IconX v-else class="w-8 h-8 text-error" />
+						<div class="w-16 h-16 rounded-full bg-error/20 flex items-center justify-center mb-4">
+							<IconAlertCircle class="w-8 h-8 text-error" />
+						</div>
+						<h2 class="text-xl font-bold">Invalid Code</h2>
+						<p class="text-base-content/60 text-sm mt-1">
+							{{ error || 'Could not find this device code.' }}
+						</p>
 					</div>
-					<h2 class="text-xl font-bold">
-						{{ status.status === 'approved' ? 'Device Authorized' : status.status === 'expired' ? 'Code Expired' : 'Request Denied' }}
-					</h2>
-					<p class="text-base-content/60 text-sm mt-1">
-						{{ status.status === 'approved' ? 'You can close this page.' : status.status === 'expired' ? 'This code has expired. Request a new one from your device.' : 'The device request was denied.' }}
-					</p>
-				</div>
-			</template>
-
-			<!-- Error state -->
-			<div v-else class="flex flex-col items-center justify-center py-8 text-center">
-				<div class="auth-status-icon mb-4 bg-error/20">
-					<IconAlertCircle class="w-8 h-8 text-error" />
-				</div>
-				<h2 class="text-xl font-bold">Invalid Code</h2>
-				<p class="text-base-content/60 text-sm mt-1">
-					{{ error || 'Could not find this device code.' }}
-				</p>
+				</section>
 			</div>
 		</div>
 	</div>
@@ -120,8 +208,9 @@ import {
 	IconLoader,
 	IconX,
 	IconShield,
+	IconUser,
 } from '#components';
-import type { AuthorizeClientInfo } from '~/utils/api';
+import type { DeviceCodeStatus, PublicApp } from '~/utils/api';
 
 definePageMeta({
 	layout: false,
@@ -136,23 +225,37 @@ useSolarSeo({
 });
 
 const route = useRoute();
+const auth = useAuth();
 const loading = ref(true);
 const isSubmitting = ref(false);
 const error = ref<string | null>(null);
 
-const status = ref<{
-	userCode: string;
-	clientId: string;
-	clientName?: string;
-	picture?: { id?: string };
-	scopes: string[];
-	status: string;
-	expiresAt: string;
-} | null>(null);
-const clientInfo = ref<AuthorizeClientInfo | null>(null);
+const status = ref<DeviceCodeStatus | null>(null);
+const appInfo = ref<PublicApp | null>(null);
+
+const userAvatarUrl = computed(() => {
+	return auth.user.value?.profile?.picture ?? null;
+});
+
+const clientName = computed(() => {
+	return status.value?.clientName || appInfo.value?.name || status.value?.clientId || '';
+});
 
 const clientPictureUrl = computed(() => {
-	return clientInfo.value?.picture || status.value?.picture || null;
+	return appInfo.value?.picture ?? status.value?.picture ?? null;
+});
+
+// Publisher (developer) and verification mark of the requesting app.
+const appPublisher = computed(() => {
+	return appInfo.value?.project?.developer?.publisher ?? null;
+});
+
+const appVerification = computed(() => {
+	return appInfo.value?.verification ?? null;
+});
+
+const appHomePage = computed(() => {
+	return appInfo.value?.links?.homePage ?? null;
 });
 
 const scopeLabels: Record<string, string> = {
@@ -175,14 +278,18 @@ async function loadStatus() {
 	}
 
 	try {
-		const { getAuthorizeClientInfo, getDeviceCodeStatus } = await import('~/utils/api');
-		status.value = await getDeviceCodeStatus(code);
-		try {
-			clientInfo.value = await getAuthorizeClientInfo(
-				new URLSearchParams({ client_id: status.value.clientId }),
-			);
-		} catch (e) {
-			console.warn('Failed to load device client info:', e);
+		const { getDeviceCodeStatus, getPublicApp } = await import('~/utils/api');
+		const codeStatus = await getDeviceCodeStatus(code);
+		status.value = codeStatus;
+		// The authorizing app's developer and verification mark; the slug also
+		// supplies the app icon, which the device status payload omits.
+		const slug = codeStatus.clientSlug || codeStatus.clientId;
+		if (slug) {
+			try {
+				appInfo.value = await getPublicApp(slug);
+			} catch (e) {
+				console.warn('Failed to load device app profile:', e);
+			}
 		}
 	} catch (e) {
 		console.error('Failed to load device code:', e);

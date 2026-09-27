@@ -801,6 +801,8 @@ export async function getCaptchaConfig(): Promise<CaptchaConfig> {
 }
 
 export interface AuthorizeClientInfo {
+  /** Canonical client identifier (the client slug), per the provider response. */
+  clientId?: string;
   clientName?: string;
   homeUri?: string;
   picture?: { id?: string };
@@ -3130,14 +3132,14 @@ export async function performCheckIn(
 /** Compact cloud-file reference embedded in calendar payloads. */
 const CloudFileRefSchema = z.object({
   id: z.string(),
-  name: z.string().optional(),
-  url: z.string().nullable().optional(),
-  mimeType: z.string().optional(),
-  fileMeta: z.record(z.string(), z.unknown()).optional(),
-  userMeta: z.record(z.string(), z.unknown()).optional(),
-  width: z.number().nullable().optional(),
-  height: z.number().nullable().optional(),
-  blurhash: z.string().nullable().optional(),
+  name: z.string().nullish(),
+  url: z.string().nullish(),
+  mimeType: z.string().nullish(),
+  fileMeta: z.record(z.string(), z.unknown()).nullish(),
+  userMeta: z.record(z.string(), z.unknown()).nullish(),
+  width: z.number().nullish(),
+  height: z.number().nullish(),
+  blurhash: z.string().nullish(),
 });
 export type CloudFileRef = z.infer<typeof CloudFileRefSchema>;
 
@@ -4263,6 +4265,7 @@ const DeviceCodeStatusSchema = z.object({
   userCode: z.string(),
   clientId: z.string(),
   clientName: z.string().optional(),
+  clientSlug: z.string().optional(),
   picture: z.object({ id: z.string().optional() }).optional(),
   scopes: z.array(z.string()),
   status: z.enum(["pending", "approved", "declined", "expired"]),
@@ -4292,4 +4295,54 @@ export async function declineDeviceCode(userCode: string): Promise<void> {
     `/stargate/auth/open/device/code/${encodeURIComponent(userCode)}/decline`,
     { method: "POST" },
   );
+}
+
+// Public app profile — the publisher (developer) and verification mark shown on
+// the authorization consent screens. Served by Develop, unauthenticated.
+const VerificationMarkSchema = z.object({
+  type: z.number().nullish(),
+  title: z.string().nullish(),
+  description: z.string().nullish(),
+  verifiedBy: z.string().nullish(),
+});
+
+const AppPublisherSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  nick: z.string().nullish(),
+  bio: z.string().nullish(),
+  type: z.number().nullish(),
+  picture: CloudFileRefSchema.nullish(),
+});
+
+const PublicAppSchema = z.object({
+  id: z.string(),
+  slug: z.string(),
+  name: z.string(),
+  description: z.string().nullish(),
+  picture: CloudFileRefSchema.nullish(),
+  verification: VerificationMarkSchema.nullish(),
+  links: z
+    .object({
+      homePage: z.string().nullish(),
+      privacyPolicy: z.string().nullish(),
+      termsOfService: z.string().nullish(),
+    })
+    .nullish(),
+  project: z
+    .object({
+      developer: z
+        .object({ publisher: AppPublisherSchema.nullish() })
+        .nullish(),
+    })
+    .nullish(),
+});
+export type PublicApp = z.infer<typeof PublicAppSchema>;
+export type AppPublisher = z.infer<typeof AppPublisherSchema>;
+export type VerificationMark = z.infer<typeof VerificationMarkSchema>;
+
+export async function getPublicApp(slug: string): Promise<PublicApp> {
+  return fetchJsonZ(`/develop/apps/${encodeURIComponent(slug)}`, PublicAppSchema, {
+    skipAuth: true,
+  });
 }

@@ -118,13 +118,6 @@
 
   .auth-authorization__rail { min-height: 24rem; }
 
-  .auth-authorization__utilities {
-    display: flex;
-    width: min(100%, 56rem);
-    align-items: center;
-    justify-content: space-between;
-  }
-
   .auth-rail {
     position: relative;
     display: flex;
