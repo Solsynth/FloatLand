@@ -12,17 +12,24 @@ export interface SnCloudFile {
   isMarkedRecycle: boolean;
   parentId: string | null;
   objectId: string | null;
-  storageId: string | null;
+  /** Legacy field: the drive service no longer sends `storageId`. */
+  storageId?: string | null;
   storageUrl: string | null;
-  poolId: string | null;
+  /** Legacy field: the drive service no longer sends `poolId`. */
+  poolId?: string | null;
   usage: string | null;
   applicationType: string | null;
-  ratio: number | null;
-  blurhash: string | null;
+  /** Legacy image fields: the service reports these via `fileMeta` instead. */
+  ratio?: number | null;
+  blurhash?: string | null;
   childrenCount: number;
+  /** Omitted when empty on the wire; the schema normalizes it to `[]`. */
   children: SnCloudFile[];
-  sensitiveMarks: string[];
+  /** Sensitive-mark enum ordinals, as emitted by the drive service. */
+  sensitiveMarks: number[];
+  /** `null` when the file carries no user metadata; normalized to `{}`. */
   userMeta: Record<string, unknown>;
+  /** `null` until the file is analyzed; normalized to `{}`. */
   fileMeta: { width?: number; height?: number } & Record<string, unknown>;
   hasCompression: boolean;
   hasThumbnail: boolean;
@@ -38,6 +45,26 @@ export interface SnCloudFile {
   expiredAt: string | null;
 }
 
+/**
+ * The drive service serializes empty `user_meta`/`file_meta` as `null`; the
+ * frontend treats both as dictionaries, so normalize `null` to `{}` at the
+ * boundary instead of leaking nullable metadata into every consumer.
+ */
+const DriveMetaMapSchema = z.preprocess(
+  (value) => value ?? {},
+  z.record(z.string(), z.unknown()),
+);
+
+const DriveFileMetaSchema = z.preprocess(
+  (value) => value ?? {},
+  z
+    .object({
+      width: z.number().optional(),
+      height: z.number().optional(),
+    })
+    .catchall(z.unknown()),
+);
+
 export const SnCloudFileSchema: z.ZodType<SnCloudFile> = z.lazy(() =>
   z.object({
     id: z.string(),
@@ -51,23 +78,19 @@ export const SnCloudFileSchema: z.ZodType<SnCloudFile> = z.lazy(() =>
     isMarkedRecycle: z.boolean(),
     parentId: z.string().nullable(),
     objectId: z.string().nullable(),
-    storageId: z.string().nullable(),
+    storageId: z.string().nullish(),
     storageUrl: z.string().nullable(),
-    poolId: z.string().nullable(),
+    poolId: z.string().nullish(),
     usage: z.string().nullable(),
     applicationType: z.string().nullable(),
-    ratio: z.number().nullable(),
-    blurhash: z.string().nullable(),
+    ratio: z.number().nullish(),
+    blurhash: z.string().nullish(),
     childrenCount: z.number(),
-    children: z.array(SnCloudFileSchema),
-    sensitiveMarks: z.array(z.string()),
-    userMeta: z.record(z.string(), z.unknown()),
-    fileMeta: z
-      .object({
-        width: z.number().optional(),
-        height: z.number().optional(),
-      })
-      .catchall(z.unknown()),
+    // `children` is `omitempty` upstream: absent unless the caller expanded it.
+    children: z.array(SnCloudFileSchema).default([]),
+    sensitiveMarks: z.array(z.number()),
+    userMeta: DriveMetaMapSchema,
+    fileMeta: DriveFileMetaSchema,
     hasCompression: z.boolean(),
     hasThumbnail: z.boolean(),
     permissionStatus: z
@@ -89,7 +112,8 @@ export const SnFilePoolSchema = z.object({
   id: z.string(),
   name: z.string(),
   description: z.string().nullable(),
-  ownerId: z.string(),
+  // The drive service exposes pool ownership as `account_id`, never `owner_id`.
+  accountId: z.string(),
   createdAt: z.string(),
   updatedAt: z.string(),
 });
@@ -100,14 +124,18 @@ export const DriveUsageSchema = z.object({
   totalFileCount: z.number(),
   totalQuota: z.number(),
   usedQuota: z.number(),
-  poolUsages: z.array(
-    z.object({
-      poolId: z.string(),
-      poolName: z.string(),
-      usageBytes: z.number(),
-      fileCount: z.number(),
-    }),
-  ),
+  // The drive service reports usage per account, not per pool: it never sends
+  // `pool_usages`, so the breakdown is optional and normally absent.
+  poolUsages: z
+    .array(
+      z.object({
+        poolId: z.string(),
+        poolName: z.string(),
+        usageBytes: z.number(),
+        fileCount: z.number(),
+      }),
+    )
+    .optional(),
 });
 export type DriveUsage = z.infer<typeof DriveUsageSchema>;
 
@@ -152,11 +180,13 @@ export interface UpdateDriveNodePayload {
   poolName?: string
 }
 
+// QuotaSummary: basedQuota/extraQuota/totalQuota. The service reports consumed
+// quota as `used_quota` on the usage endpoint, not here, so there is no
+// `usedQuota` field.
 export const DriveQuotaSchema = z.object({
   basedQuota: z.number(),
   extraQuota: z.number(),
   totalQuota: z.number(),
-  usedQuota: z.number(),
 });
 export type DriveQuota = z.infer<typeof DriveQuotaSchema>;
 

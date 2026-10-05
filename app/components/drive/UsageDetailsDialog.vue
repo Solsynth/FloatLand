@@ -47,7 +47,7 @@
         <!-- Pool usages -->
         <div v-if="usage?.poolUsages?.length" class="space-y-2">
           <h3 class="text-sm font-medium">{{ t('drive.poolUsage') }}</h3>
-          <div v-for="pool in usage.poolUsages" :key="pool.poolId" class="flex items-center justify-between text-sm">
+          <div v-for="pool in usage?.poolUsages ?? []" :key="pool.poolId" class="flex items-center justify-between text-sm">
             <span class="text-base-content/70">{{ pool.poolName }}</span>
             <span class="font-medium">{{ formatBytes(pool.usageBytes) }}</span>
           </div>

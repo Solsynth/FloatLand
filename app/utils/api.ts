@@ -405,6 +405,13 @@ export async function fetchJson<T>(
   return safeJsonParse<T>(response);
 }
 
+// `zod/v4/classic/external.js` installs the `en` locale at import time, but
+// zod ships `"sideEffects": false`, so the client bundle tree-shakes that
+// `config(en())` call and every issue message degrades to a bare
+// "Invalid input" — useless for diagnosing contract drift. Re-install it here
+// (this module owns contract validation) so messages stay descriptive.
+z.config(z.locales.en());
+
 /**
  * Validate already-parsed data against a schema, failing loudly with a
  * CONTRACT_MISMATCH ApiError when the backend drifts from the contract.
