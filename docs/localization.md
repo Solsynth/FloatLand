@@ -35,7 +35,6 @@ i18n: {
     { code: "en", language: "en-US", name: "English", file: "en.json" },
     { code: "zh", language: "zh-CN", name: "简体中文", file: "zh-CN.json" },
   ],
-  lazy: true,
   detectBrowserLanguage: {
     useCookie: true,
     cookieKey: "i18n_locale",
@@ -48,7 +47,9 @@ i18n: {
 
 - `language` — the BCP-47 tag used to match `Accept-Language` and to set the
   `<html lang>` attribute.
-- `lazy: true` — locale JSON files are loaded only when needed.
+- Messages are loaded on demand: locale JSON files are fetched as separate
+  assets and only for the active locale (`@nuxtjs/i18n` v10 removed the `lazy`
+  option, lazy loading is always on).
 - `alwaysRedirect: false` — once the user manually sets a locale, the app
   honours it instead of re-detecting on every navigation.
 
