@@ -1,4 +1,4 @@
-/** Fortune level → accent color, shared by the dashboard oracle and trend cards. */
+/** Fortune level → accent color, shared by the check-in and trend cards. */
 export const FORTUNE_LEVEL_COLORS: Record<number, string> = {
   0: "#7A587D",
   1: "#79709C",

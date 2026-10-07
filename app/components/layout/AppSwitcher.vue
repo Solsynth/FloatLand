@@ -45,7 +45,6 @@ import {
   IconBriefcaseBusiness,
   IconWallet,
   IconPawPrint,
-  IconLayoutDashboard,
   IconCalendarDays,
 } from "#components";
 import {
@@ -72,7 +71,6 @@ interface AppItem {
 
 const allApps = computed<AppItem[]>(() => {
   const items: AppItem[] = [
-    { href: "/", label: t("nav.dashboard"), icon: IconLayoutDashboard },
     { href: "/timeline", label: t("nav.timeline"), icon: IconCompass },
     {
       href: "/calendar",

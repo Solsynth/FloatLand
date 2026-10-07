@@ -3,12 +3,11 @@
     <header
       class="sticky top-0 z-40 w-full border-b border-base-300 bg-base-100"
     >
-      <div class="navbar w-full min-h-16 px-4 lg:px-6">
+      <div class="navbar w-full min-h-16 px-4 lg:px-6 container mx-auto">
         <!-- Left: Icon + Title -->
         <div class="navbar-start gap-1">
           <NuxtLink to="/" class="flex min-w-0 items-center gap-2.5" aria-label="Home">
             <img src="/favicon.png" alt="Solar Network" class="h-8 w-8 shrink-0" />
-            <span class="truncate text-lg font-semibold text-base-content">Solar Network</span>
           </NuxtLink>
         </div>
 
@@ -99,7 +98,7 @@
           <NuxtLink
             v-else
             to="/auth/login"
-            class="btn btn-ghost btn-sm hidden gap-2 sm:inline-flex"
+            class="btn btn-primary btn-soft btn-sm hidden gap-2 sm:inline-flex"
           >
             <IconLogIn class="h-4 w-4" />
             {{ t("nav.signIn") }}
@@ -133,17 +132,6 @@
         @click.stop
       >
         <nav aria-label="Mobile" class="menu w-full p-0">
-          <NuxtLink
-            to="/"
-            class="flex h-12 min-h-12 items-center gap-3 rounded-box px-3 py-0 text-base leading-5"
-            :class="isNavActive('/') ? 'bg-primary/10 text-primary' : ''"
-            @click="closeMenu"
-          >
-            <span class="flex h-5 w-5 shrink-0 items-center justify-center">
-              <IconLayoutDashboard class="h-5 w-5" />
-            </span>
-            <span class="flex h-5 items-center leading-5">{{ t("nav.dashboard") }}</span>
-          </NuxtLink>
           <NuxtLink
             to="/timeline"
             class="flex h-12 min-h-12 items-center gap-3 rounded-box px-3 py-0 text-base leading-5"
@@ -406,7 +394,6 @@ import {
   IconPawPrint,
   IconShield,
   IconCreditCard,
-  IconLayoutDashboard,
   IconMenu,
   IconUser,
   IconSettings,
@@ -479,4 +466,3 @@ onUnmounted(() => {
 });
 
 </script>
-

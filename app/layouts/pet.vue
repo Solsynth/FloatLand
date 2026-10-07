@@ -134,17 +134,6 @@
       >
         <nav aria-label="Mobile" class="menu w-full p-0">
           <NuxtLink
-            to="/"
-            class="flex h-12 min-h-12 items-center gap-3 rounded-box px-3 py-0 text-base leading-5"
-            :class="isNavActive('/') ? 'bg-primary/10 text-primary' : ''"
-            @click="closeMenu"
-          >
-            <span class="flex h-5 w-5 shrink-0 items-center justify-center">
-              <IconLayoutDashboard class="h-5 w-5" />
-            </span>
-            <span class="flex h-5 items-center leading-5">{{ t("nav.dashboard") }}</span>
-          </NuxtLink>
-          <NuxtLink
             to="/timeline"
             class="flex h-12 min-h-12 items-center gap-3 rounded-box px-3 py-0 text-base leading-5"
             :class="isNavActive('/timeline') ? 'bg-primary/10 text-primary' : ''"
@@ -376,7 +365,6 @@
 <script setup lang="ts">
 import {
   IconCompass,
-  IconLayoutDashboard,
   IconBuilding,
   IconBriefcaseBusiness,
   IconHardDrive,

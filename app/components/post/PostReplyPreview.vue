@@ -220,7 +220,7 @@ const offset = ref(0);
 const hasMore = ref(true);
 const hasLoaded = ref(false);
 const route = useRoute();
-const isExplorePage = computed(() => route.path === '/');
+const isExplorePage = computed(() => route.path === "/timeline");
 
 const displayReplyNodes = computed(() => {
   return replyNodes.value.slice(0, 24);

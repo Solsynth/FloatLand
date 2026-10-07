@@ -1637,7 +1637,7 @@ export async function deleteRelationship(relatedId: string): Promise<void> {
   });
 }
 
-// Friends overview (dashboard module, mirrors the Solian clients).
+// Friends overview, mirrors the Solian clients.
 export async function fetchFriendsOverview(): Promise<FriendOverviewItem[]> {
   return fetchJsonZ(
     "/passport/friends/overview",

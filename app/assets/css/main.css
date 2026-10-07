@@ -444,42 +444,25 @@
     box-shadow: 0 2px 8px color-mix(in oklch, black 8%, transparent);
   }
 
-  /* Dashboard start page — "the resting clock".
-     Flat hairline cards: calm, no shadows, data-colored accents only. */
-  .dash-card {
-    border: 1px solid color-mix(in oklch, var(--color-base-300) 85%, transparent);
-    border-radius: var(--radius-box);
-    background: var(--color-base-100);
+  /* Landing page — the public face of the client. The hero reuses the auth
+     rail's orbital grid and fades it out downward; everything below it is flat
+     hairline cards. */
+  .landing-hero {
+    position: relative;
+    isolation: isolate;
   }
 
-  .dash-card__title {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.8125rem;
-    font-weight: 700;
-    color: var(--color-base-content);
-  }
-
-  .dash-clock {
-    font-family: var(--font-mono);
-    font-variant-numeric: tabular-nums;
-    letter-spacing: -0.02em;
-    line-height: 1;
-    font-weight: 300;
-  }
-
-  .dash-hero-fade {
-    animation: dash-rise 600ms cubic-bezier(0.16, 1, 0.3, 1) both;
-  }
-
-  @keyframes dash-rise {
-    from { opacity: 0; transform: translateY(12px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .dash-hero-fade { animation: none; }
+  .landing-hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background-image:
+      linear-gradient(color-mix(in oklch, var(--color-base-content) 5%, transparent) 1px, transparent 1px),
+      linear-gradient(90deg, color-mix(in oklch, var(--color-base-content) 5%, transparent) 1px, transparent 1px);
+    background-size: 2rem 2rem;
+    mask-image: linear-gradient(to bottom, black 0%, color-mix(in oklch, black 35%, transparent) 55%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, black 0%, color-mix(in oklch, black 35%, transparent) 55%, transparent 100%);
   }
 
   .route-progress {

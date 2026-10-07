@@ -1,4 +1,82 @@
 {
+  "landing": {
+    "seoTitle": "The open-source social platform",
+    "seoDescription": "The open-source social platform. Follow the people you like, join realms, and keep your drive, mail, chat and wallet in one orbit.",
+    "eyebrow": "Open-source social platform",
+    "heroTitle": "One account for your whole social world",
+    "heroDescription": "Solar Network ties the timeline, realms, workspaces, drive, mail, chat and wallet together. FloatLand is the web client, built for browsing and light interaction with no install required.",
+    "getStarted": "Create an account",
+    "signIn": "Sign in",
+    "explore": "Explore the timeline",
+    "haveAccount": "Already have an account?",
+    "openApp": "Open the app",
+    "trySolian": "Try Solian the app",
+    "featuresTitle": "Solar Network Ecosystem",
+    "featuresDescription": "Feature rich and developing rapidly",
+    "features": {
+      "timeline": {
+        "title": "Timeline",
+        "description": "Posts and updates from the people you follow, ranked For you, Top or Latest."
+      },
+      "realms": {
+        "title": "Realms",
+        "description": "Community spaces with their own feeds, members and worlds to explore."
+      },
+      "workspaces": {
+        "title": "Workspaces",
+        "description": "Organization spaces for people, files and shared work, with roles and plans."
+      },
+      "drive": {
+        "title": "Drive",
+        "description": "Files, folders, recent uploads and trash, with storage shared across all clients."
+      },
+      "mail": {
+        "title": "Mail",
+        "description": "A real inbox on the web: folders, labels, attachments and compose."
+      },
+      "chat": {
+        "title": "Chat",
+        "description": "Real-time rooms and direct conversations with friends and realms."
+      },
+      "wallet": {
+        "title": "Wallet",
+        "description": "Wallets for the network's economy, with balances and transfers."
+      },
+      "pet": {
+        "title": "Pet",
+        "description": "Chat with your personal AI agents, right inside the client."
+      }
+    },
+    "hubsTitle": "Build on Solar Network",
+    "hubsDescription": "Publishers, plugins and stores all run on the same open platform.",
+    "hubs": {
+      "creators": {
+        "title": "Creator Hub",
+        "description": "Publish posts, manage publishers and grow an audience."
+      },
+      "developers": {
+        "title": "Developer Hub",
+        "description": "Ship plugins and apps, manage projects and test the API in the playground."
+      },
+      "merchants": {
+        "title": "Merchant Hub",
+        "description": "Sell products, track orders and settlements, and run sponsored posts."
+      }
+    },
+    "membershipTitle": "Stellar membership",
+    "membershipDescription": "Membership fees pay for the servers and the ongoing development of Solar Network. Tiers add storage, faster progression and extra account features. Features that are free today stay free.",
+    "membershipCta": "Compare tiers",
+    "footer": {
+      "links": "Links",
+      "pricing": "Pricing",
+      "realms": "Realms",
+      "developers": "Developers",
+      "support": "Support",
+      "sourceCode": "Source code",
+      "mobile": "Solian",
+      "copyright": "© {year} Solsynth"
+    }
+  },
   "common": {
     "loading": "Loading...",
     "loadMore": "Load more",
@@ -203,7 +281,6 @@
     "overview": "Overview",
     "content": "Content",
     "community": "Community",
-    "dashboard": "Dashboard",
     "adminPanel": "Admin Panel"
   },
   "calendar": {
@@ -306,77 +383,6 @@
     "recurrenceOccurrences": "Occurrences",
     "eventSaveFailed": "Failed to save event",
     "eventDeleteFailed": "Failed to delete event"
-  },
-  "dashboard": {
-    "seoTitle": "Dashboard",
-    "seoDescription": "Your personalized start page for Solar Network.",
-    "searchPlaceholder": "Search anything…",
-    "greetingMorning": "Good morning",
-    "greetingAfternoon": "Good afternoon",
-    "greetingEvening": "Good evening",
-    "greetingNight": "Good night",
-    "shortcuts": "Shortcuts",
-    "viewAll": "View all",
-    "customize": {
-      "title": "Customize dashboard",
-      "reset": "Reset",
-      "moveUp": "Move up",
-      "moveDown": "Move down",
-      "toggle": "Show or hide {module}"
-    },
-    "weather": {
-      "title": "Weather",
-      "clear": "Clear",
-      "mainlyClear": "Mostly clear",
-      "partlyCloudy": "Partly cloudy",
-      "overcast": "Overcast",
-      "fog": "Fog",
-      "drizzle": "Drizzle",
-      "rain": "Rain",
-      "snow": "Snow",
-      "showers": "Showers",
-      "snowShowers": "Snow showers",
-      "thunderstorm": "Thunderstorm",
-      "thunderstormHail": "Thunderstorm with hail",
-      "unknown": "Unknown",
-      "feelsLike": "Feels like {temp}°",
-      "humidity": "{value}%",
-      "wind": "{value} km/h",
-      "dataBy": "Weather data by",
-      "failed": "Weather unavailable"
-    },
-    "notifications": {
-      "title": "Notifications",
-      "empty": "No notifications yet"
-    },
-    "oracle": {
-      "title": "Today's Fortune",
-      "notCheckedIn": "Draw today's fortune at the temple",
-      "drawFortune": "Draw today's fortune"
-    },
-    "friends": {
-      "title": "Friends",
-      "empty": "No friends yet",
-      "failed": "Could not load friends",
-      "online": "Online",
-      "offline": "Offline",
-      "idle": "Idle",
-      "busy": "Busy",
-      "doNotDisturb": "Do not disturb",
-      "invisible": "Invisible"
-    },
-    "chats": {
-      "title": "Recent chats",
-      "empty": "No chats yet",
-      "failed": "Could not load chats"
-    },
-    "fortuneTrend": {
-      "title": "Fortune trend"
-    },
-    "featured": {
-      "title": "Featured Posts",
-      "failed": "Could not load featured posts"
-    }
   },
   "ai": {
     "title": "AI Console",
@@ -1115,7 +1121,7 @@
     "floatingNote": "You're accessing FloatLand, the Solar Network client specialized for browsing content on the web. It does not contain all the features of Solar Network.",
     "floatingNoteCta": "If you want to experience the full features of Solar Network, please use the Solian instead.",
     "openWebVersion": "Open web version",
-    "copyright": "© {year} Solar Network. All rights reserved.",
+    "copyright": "© {year} Solsynth. All rights reserved.",
     "about": "About",
     "privacy": "Privacy",
     "terms": "Terms",
@@ -1126,7 +1132,7 @@
     "solarNetworkTitle": "Solar Network",
     "solarNetworkDesc": "The open-source social platform that powers everything. It's the backend and API that connects all clients together.",
     "solianTitle": "Solian",
-    "solianDesc": "The official Flutter client for iOS & Android. Full-featured, fast, and the recommended way to use Solar Network on mobile.",
+    "solianDesc": "The official Flutter client for all OSs. Full-featured, fast, and the recommended way to use Solar Network in depth.",
     "floatingIslandTitle": "FloatLand",
     "floatingIslandDesc": "This web client, built for browsing and light interaction. Great for desktop users who want quick access without installing an app.",
     "openSolian": "Try Solian",

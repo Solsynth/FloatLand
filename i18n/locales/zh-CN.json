@@ -1,4 +1,82 @@
 {
+  "landing": {
+    "seoTitle": "开源社交平台",
+    "seoDescription": "开源社交平台。关注你喜欢的人、加入领域，把云盘、邮件、聊天和钱包放在同一个轨道里。",
+    "eyebrow": "开源社交平台",
+    "heroTitle": "一个账号，装下整个社交世界",
+    "heroDescription": "Solar Network 把时间线、领域、工作区、云盘、邮件、聊天和钱包连在一起。FloatLand 是网页客户端，为浏览和轻量交互而生，无需安装。",
+    "getStarted": "注册账号",
+    "signIn": "登录",
+    "explore": "浏览时间线",
+    "haveAccount": "已经有账号了？",
+    "openApp": "进入应用",
+    "trySolian": "试试 Solian App",
+    "featuresTitle": "Solar Network 生态",
+    "featuresDescription": "功能丰富、发展迅速",
+    "features": {
+      "timeline": {
+        "title": "时间线",
+        "description": "关注的人的帖子和动态，支持「推荐 / 热门 / 最新」排序。"
+      },
+      "realms": {
+        "title": "领域",
+        "description": "拥有独立信息流和成员的社区空间，去探索新的世界。"
+      },
+      "workspaces": {
+        "title": "工作区",
+        "description": "面向人员、文件和协作的组织空间，带角色和套餐管理。"
+      },
+      "drive": {
+        "title": "云盘",
+        "description": "文件、文件夹、最近上传和回收站，存储在各客户端之间共享。"
+      },
+      "mail": {
+        "title": "邮件",
+        "description": "网页端的完整邮箱：文件夹、标签、附件和撰写。"
+      },
+      "chat": {
+        "title": "聊天",
+        "description": "与好友、领域的实时房间和私聊。"
+      },
+      "wallet": {
+        "title": "钱包",
+        "description": "网络经济体系里的钱包，查看余额和转账。"
+      },
+      "pet": {
+        "title": "宠物",
+        "description": "在客户端里直接和你的个人 AI 智能体聊天。"
+      }
+    },
+    "hubsTitle": "在 Solar Network 上构建",
+    "hubsDescription": "发布者、插件和商店都跑在同一个开放平台上。",
+    "hubs": {
+      "creators": {
+        "title": "创作者中心",
+        "description": "发布帖子、管理发布者、积累你的受众。"
+      },
+      "developers": {
+        "title": "开发者中心",
+        "description": "发布插件和应用、管理项目，并在调试场里测试 API。"
+      },
+      "merchants": {
+        "title": "商户中心",
+        "description": "销售商品、跟踪订单与结算，投放赞助帖子。"
+      }
+    },
+    "membershipTitle": "Stellar 会员",
+    "membershipDescription": "会员费用用于支付服务器开销和 Solar Network 的持续开发。等级提供更多存储空间、更快的成长速度和额外的账号功能。今天免费的功能依旧免费。",
+    "membershipCta": "对比等级",
+    "footer": {
+      "links": "链接",
+      "pricing": "定价",
+      "realms": "领域",
+      "developers": "开发者",
+      "support": "支持",
+      "sourceCode": "源代码",
+      "mobile": "Solian App",
+      "copyright": "© {year} Solsynth"
+    }
+  },
   "common": {
     "loading": "加载中...",
     "loadMore": "加载更多",
@@ -210,7 +288,6 @@
     "overview": "概览",
     "content": "内容",
     "community": "社区",
-    "dashboard": "仪表盘",
     "adminPanel": "管理面板"
   },
   "calendar": {
@@ -313,77 +390,6 @@
     "recurrenceOccurrences": "重复次数",
     "eventSaveFailed": "保存事件失败",
     "eventDeleteFailed": "删除事件失败"
-  },
-  "dashboard": {
-    "seoTitle": "仪表盘",
-    "seoDescription": "你的 Solar Network 个性化起始页。",
-    "searchPlaceholder": "搜索任何内容…",
-    "greetingMorning": "早上好",
-    "greetingAfternoon": "下午好",
-    "greetingEvening": "晚上好",
-    "greetingNight": "夜深了",
-    "shortcuts": "快捷入口",
-    "viewAll": "查看全部",
-    "customize": {
-      "title": "自定义仪表盘",
-      "reset": "重置",
-      "moveUp": "上移",
-      "moveDown": "下移",
-      "toggle": "显示或隐藏 {module}"
-    },
-    "weather": {
-      "title": "天气",
-      "clear": "晴",
-      "mainlyClear": "大部晴朗",
-      "partlyCloudy": "多云",
-      "overcast": "阴",
-      "fog": "雾",
-      "drizzle": "毛毛雨",
-      "rain": "雨",
-      "snow": "雪",
-      "showers": "阵雨",
-      "snowShowers": "阵雪",
-      "thunderstorm": "雷暴",
-      "thunderstormHail": "雷暴伴冰雹",
-      "unknown": "未知",
-      "feelsLike": "体感 {temp}°",
-      "humidity": "{value}%",
-      "wind": "{value} 公里/小时",
-      "dataBy": "天气数据来自",
-      "failed": "天气暂不可用"
-    },
-    "notifications": {
-      "title": "通知",
-      "empty": "暂无通知"
-    },
-    "oracle": {
-      "title": "今日运势",
-      "notCheckedIn": "去神庙抽取今日运势",
-      "drawFortune": "抽取今日运势"
-    },
-    "friends": {
-      "title": "好友",
-      "empty": "还没有好友",
-      "failed": "无法加载好友",
-      "online": "在线",
-      "offline": "离线",
-      "idle": "离开",
-      "busy": "忙碌",
-      "doNotDisturb": "勿扰",
-      "invisible": "隐身"
-    },
-    "chats": {
-      "title": "最近聊天",
-      "empty": "暂无聊天",
-      "failed": "无法加载聊天"
-    },
-    "fortuneTrend": {
-      "title": "运势趋势"
-    },
-    "featured": {
-      "title": "精选帖子",
-      "failed": "无法加载精选帖子"
-    }
   },
   "ai": {
     "title": "AI 控制台",
@@ -1122,7 +1128,7 @@
     "floatingNote": "你正在访问 FloatLand，这是一个专注于网页浏览的 Solar Network 客户端，不包含 Solar Network 的全部功能。",
     "floatingNoteCta": "如需体验 Solar Network 的全部功能，请使用 Solian。",
     "openWebVersion": "打开网页版",
-    "copyright": "© {year} Solar Network。保留所有权利。",
+    "copyright": "© {year} Solsynth。保留所有权利。",
     "about": "关于",
     "privacy": "隐私",
     "terms": "条款",
@@ -1133,7 +1139,7 @@
     "solarNetworkTitle": "Solar Network",
     "solarNetworkDesc": "驱动一切的开源社交平台。它是连接所有客户端的后端和 API。",
     "solianTitle": "Solian",
-    "solianDesc": "适用于 iOS 和 Android 的官方 Flutter 客户端。功能齐全、速度快，是移动端使用 Solar Network 的推荐方式。",
+    "solianDesc": "适用于全平台的的官方客户端。功能齐全、速度快，是深度使用 Solar Network 的推荐方式。",
     "floatingIslandTitle": "FloatLand",
     "floatingIslandDesc": "这个网页客户端专为浏览和轻量交互而构建。非常适合希望快速访问而无需安装应用的桌面用户。",
     "openSolian": "试试 Solian",

@@ -33,11 +33,6 @@ export function useMainNav() {
   const { unreadTotal: chatUnread } = useChat();
 
   const navItems = computed<NavItem[]>(() => [
-    {
-      icon: IconLayoutDashboard,
-      labelKey: "nav.dashboard",
-      href: "/",
-    },
     { icon: IconCompass, labelKey: "nav.explore", href: "/timeline" },
     { icon: IconBuilding, labelKey: "nav.realms", href: "/realms" },
     {

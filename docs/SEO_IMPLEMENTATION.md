@@ -18,8 +18,11 @@
 
 ## 📄 Page-Level SEO Enhancements
 
-### 1. Homepage (`/pages/index.vue`)
-- Added breadcrumbs: Home
+### 1. Landing Page (`/pages/index.vue`)
+- WebPage schema via `useSolarSeo` with the landing copy
+- `UniOgImage` OG card
+- Breadcrumbs: Home
+- Signed-in visitors are redirected to `/timeline` by page middleware
 
 ### 2. Post Detail (`/pages/posts/[id]/index.vue`)
 - Added Article schema with:

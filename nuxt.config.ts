@@ -293,7 +293,12 @@ export default defineNuxtConfig({
     sitemap: "https://solian.app/sitemap.xml",
   },
   nitro: {
-    buildDir: "./.nitro",
+    // Must be absolute: Nitro registers virtual dev modules at
+    // `join(buildDir, "<name>.mjs")`, and a relative buildDir makes the dev
+    // bundle emit an unresolvable relative import for
+    // `dev-request-context.mjs` (e.g. `/Users/server/.nitro/...`), which
+    // crashes the dev worker on every request.
+    buildDir: resolve(process.cwd(), ".nitro"),
     routeRules: {},
     storage: {
       root: {

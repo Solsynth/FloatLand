@@ -255,7 +255,7 @@ export const L10N = {
       tagline: "Solar Network — a federated social network.",
       modernSite: "Switch to the modern site",
       legacyNote: "You are viewing the legacy version built for very old browsers.",
-      copyright: "© {year} Solar Network.",
+      copyright: "© {year} Solsynth.",
     },
     errors: {
       network: "Could not reach Solar Network right now. Please try again later.",
@@ -452,7 +452,7 @@ export const L10N = {
       tagline: "Solar Network — 联邦式社交网络。",
       modernSite: "切换到新版网站",
       legacyNote: "你正在浏览为老旧浏览器准备的旧版网站。",
-      copyright: "© {year} Solar Network。",
+      copyright: "© {year} Solsynth。",
     },
     errors: {
       network: "暂时无法连接 Solar Network，请稍后再试。",

@@ -24,7 +24,7 @@
             </button>
             <button
                 type="button"
-                class="btn btn-ghost mt-auto w-full"
+                class="btn btn-soft mt-auto w-full"
                 :disabled="submitting"
                 @click="$emit('back')"
             >
@@ -53,7 +53,7 @@
             <div class="mt-auto grid grid-cols-2 gap-2 pt-6">
                 <button
                     type="button"
-                    class="btn btn-ghost"
+                    class="btn btn-soft"
                     :disabled="submitting"
                     @click="$emit('back')"
                 >

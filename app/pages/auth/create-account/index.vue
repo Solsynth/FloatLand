@@ -168,7 +168,7 @@
 						<button
 							v-else
 							type="button"
-							class="btn btn-ghost"
+							class="btn btn-soft"
 							:disabled="submitting"
 							@click="back"
 						>
