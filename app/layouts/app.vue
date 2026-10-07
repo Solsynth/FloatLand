@@ -55,21 +55,15 @@
                     </NuxtLink>
                   </DropdownMenuItem>
                   <DropdownMenuItem as-child>
-                    <NuxtLink to="/workspaces" class="flex items-center gap-2 rounded-box px-2.5 py-2 text-sm outline-none cursor-pointer hover:bg-base-200 data-[highlighted]:bg-base-200">
-                      <IconBriefcaseBusiness class="h-4 w-4" />
-                      {{ t("nav.workspaces") }}
-                    </NuxtLink>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem as-child>
                     <NuxtLink to="/wallets" class="flex items-center gap-2 rounded-box px-2.5 py-2 text-sm outline-none cursor-pointer hover:bg-base-200 data-[highlighted]:bg-base-200">
                       <IconWallet class="h-4 w-4" />
                       {{ t("nav.wallet") }}
                     </NuxtLink>
                   </DropdownMenuItem>
                   <DropdownMenuItem as-child>
-                    <NuxtLink to="/pricing" class="flex items-center gap-2 rounded-box px-2.5 py-2 text-sm outline-none cursor-pointer hover:bg-base-200 data-[highlighted]:bg-base-200">
+                    <NuxtLink to="/membership" class="flex items-center gap-2 rounded-box px-2.5 py-2 text-sm outline-none cursor-pointer hover:bg-base-200 data-[highlighted]:bg-base-200">
                       <IconCreditCard class="h-4 w-4" />
-                      {{ t("nav.pricing") }}
+                      {{ t("nav.membership") }}
                     </NuxtLink>
                   </DropdownMenuItem>
                   <DropdownMenuItem as-child>
@@ -153,17 +147,6 @@
               <IconBuilding class="h-5 w-5" />
             </span>
             <span class="flex h-5 items-center leading-5">{{ t("nav.realms") }}</span>
-          </NuxtLink>
-          <NuxtLink
-            to="/workspaces"
-            class="flex h-12 min-h-12 items-center gap-3 rounded-box px-3 py-0 text-base leading-5"
-            :class="isNavActive('/workspaces') ? 'bg-primary/10 text-primary' : ''"
-            @click="closeMenu"
-          >
-            <span class="flex h-5 w-5 shrink-0 items-center justify-center">
-              <IconBriefcaseBusiness class="h-5 w-5" />
-            </span>
-            <span class="flex h-5 items-center leading-5">{{ t("nav.workspaces") }}</span>
           </NuxtLink>
           <NuxtLink
             to="/drive"
@@ -306,21 +289,15 @@
             </NuxtLink>
           </li>
           <li>
-            <NuxtLink to="/workspaces" class="flex h-12 min-h-12 items-center gap-3 px-3 py-0 text-base leading-5" @click="closeMenu">
-              <span class="flex h-5 w-5 shrink-0 items-center justify-center"><IconBriefcaseBusiness class="h-5 w-5" /></span>
-              <span class="flex h-5 items-center leading-5">{{ t("nav.workspaces") }}</span>
-            </NuxtLink>
-          </li>
-          <li>
             <NuxtLink to="/wallets" class="flex h-12 min-h-12 items-center gap-3 px-3 py-0 text-base leading-5" @click="closeMenu">
               <span class="flex h-5 w-5 shrink-0 items-center justify-center"><IconWallet class="h-5 w-5" /></span>
               <span class="flex h-5 items-center leading-5">{{ t("nav.wallet") }}</span>
             </NuxtLink>
           </li>
           <li>
-            <NuxtLink to="/pricing" class="flex h-12 min-h-12 items-center gap-3 px-3 py-0 text-base leading-5" @click="closeMenu">
+            <NuxtLink to="/membership" class="flex h-12 min-h-12 items-center gap-3 px-3 py-0 text-base leading-5" @click="closeMenu">
               <span class="flex h-5 w-5 shrink-0 items-center justify-center"><IconCreditCard class="h-5 w-5" /></span>
-              <span class="flex h-5 items-center leading-5">{{ t("nav.pricing") }}</span>
+              <span class="flex h-5 items-center leading-5">{{ t("nav.membership") }}</span>
             </NuxtLink>
           </li>
           <li>
@@ -383,7 +360,6 @@
 import {
   IconCompass,
   IconBuilding,
-  IconBriefcaseBusiness,
   IconHardDrive,
   IconMail,
   IconWallet,

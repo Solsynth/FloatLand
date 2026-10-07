@@ -7,19 +7,20 @@
     <template v-else-if="product">
       <div class="relative overflow-hidden rounded-box border border-base-300 bg-gradient-to-br from-base-100 via-base-100 to-primary/[0.05] p-5 shadow-sm sm:p-6">
         <div class="min-w-0">
-          <p class="mb-2 font-mono text-[10px] font-semibold uppercase tracking-[0.24em] text-primary/75">{{ t('developer.apps.distribution.releaseControl') }}</p>
+          <p class="mb-2 font-mono text-[10px] font-semibold uppercase tracking-[0.24em] text-primary/75">{{ t('developer.apps.distribution.title') }}</p>
           <h1 class="mt-2 text-xl font-semibold">
             {{ localizedDistributionText(product.names, product.name, localizationLocales) }}
           </h1>
-          <p class="mt-1 font-mono text-sm text-base-content/55">{{ product.slug }}</p>
+          <p class="mt-1 font-mono text-xs text-base-content/45">{{ product.slug }}</p>
           <button
-            class="btn btn-ghost btn-sm mt-2 h-8 min-h-8 w-8 px-0"
+            class="btn btn-ghost btn-xs mt-1 h-7 min-h-7 gap-1.5 px-2 text-base-content/55"
             type="button"
-            :title="t('developer.apps.distribution.copyAppId')"
+            :title="product.id"
             :aria-label="t('developer.apps.distribution.copyAppId')"
             @click="copyIdentifier(product.id)"
           >
-            <IconCopy class="h-4 w-4" />
+            <IconCopy class="h-3.5 w-3.5" />
+            {{ t('developer.apps.distribution.appId') }}
           </button>
           <p v-if="product.description || Object.keys(product.descriptions || {}).length" class="mt-3 max-w-2xl text-sm text-base-content/65">
             {{ localizedDistributionText(product.descriptions, product.description, localizationLocales) }}
@@ -1203,7 +1204,7 @@ const contentLocaleOptions = computed(() =>
     name: item.name || item.language || item.code,
   })),
 )
-const product = ref<DistributionProduct | null>(null)
+const product = defineModel<DistributionProduct | null>('product', { default: null })
 const isLoading = ref(false)
 const channels = ref<DistributionChannel[]>([])
 const selectedChannel = ref<DistributionChannel | null>(null)

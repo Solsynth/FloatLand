@@ -38,8 +38,8 @@
 ### 4. Realms Index (`/pages/realms/index.vue`)
 - Added breadcrumbs: Home → Realms
 
-### 5. Pricing (`/pages/pricing.vue`)
-- Added breadcrumbs: Home → Pricing
+### 5. Membership (`/pages/membership.vue`)
+- Added breadcrumbs: Home → Membership
 
 ### 6. Search (`/pages/search.vue`)
 - Added breadcrumbs: Home → Search
@@ -53,7 +53,7 @@
 ## 🗺️ Sitemap
 
 Created `server/api/__sitemap__/urls.ts` that dynamically generates sitemap entries for:
-- Static pages (home, pricing, search, realms, creators, developers)
+- Static pages (home, membership, search, realms, creators, developers)
 - Dynamic post pages (fetched from API)
 
 ## 🤖 Robots.txt

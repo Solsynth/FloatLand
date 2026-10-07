@@ -574,26 +574,26 @@ async function realmSearch(c: PageCtx, q: string): Promise<string> {
 }
 
 // ---------------------------------------------------------------------------
-// Pricing
+// Membership
 // ---------------------------------------------------------------------------
 
-export function renderPricing(event: H3Event): Response {
+export function renderMembership(event: H3Event): Response {
   const c = ctx(event)
   const { t } = c
-  const p = t.pricing
+  const p = t.membership
   const tiers = [
     { name: p.tiers.stellar, tagline: p.taglines.stellar, desc: p.descriptions.stellar, features: p.featuresStellar },
     { name: p.tiers.nova, tagline: p.taglines.nova, desc: p.descriptions.nova, features: p.featuresNova },
     { name: p.tiers.supernova, tagline: p.taglines.supernova, desc: p.descriptions.supernova, features: p.featuresSupernova },
   ]
-  const cards = tiers.map((tier) => `<div style="background: #fffdf6; border: 1px solid #d8cfb4; padding: 14px 16px; margin: 0 0 10px 0"><h2 style="margin: 0 0 2px 0; color: #17222d; font-size: 18px">${escHtml(tier.name)}</h2><p style="margin: 0 0 6px 0; color: #8a6d1a; font-size: 12px; text-transform: uppercase">${escHtml(tier.tagline)}</p><p style="color: #5a524a">${escHtml(tier.desc)}</p><ul style="margin: 6px 0 8px 0; padding-left: 18px">${tier.features.map((f) => `<li>${escHtml(f)}</li>`).join("")}</ul><p style="margin: 0"><a href="https://solian.app/pricing" style="color: #17324a">${escHtml(p.learnMore)} &rarr;</a></p></div>`).join("\n")
+  const cards = tiers.map((tier) => `<div style="background: #fffdf6; border: 1px solid #d8cfb4; padding: 14px 16px; margin: 0 0 10px 0"><h2 style="margin: 0 0 2px 0; color: #17222d; font-size: 18px">${escHtml(tier.name)}</h2><p style="margin: 0 0 6px 0; color: #8a6d1a; font-size: 12px; text-transform: uppercase">${escHtml(tier.tagline)}</p><p style="color: #5a524a">${escHtml(tier.desc)}</p><ul style="margin: 6px 0 8px 0; padding-left: 18px">${tier.features.map((f) => `<li>${escHtml(f)}</li>`).join("")}</ul><p style="margin: 0"><a href="https://solian.app/membership" style="color: #17324a">${escHtml(p.learnMore)} &rarr;</a></p></div>`).join("\n")
   const body = [
     `<p style="color: #5a524a">${escHtml(p.description)}</p>`,
     `<p style="color: #8a8578; font-size: 12px">${escHtml(p.billingNote)}</p>`,
     cards,
     `<p style="margin-top: 14px"><a href="${c.base}/" style="color: #17324a">&larr; ${escHtml(t.common.back)}</a></p>`,
   ].join("\n")
-  return html(c, p.title, body, p.description, "/pricing", "public, max-age=3600")
+  return html(c, p.title, body, p.description, "/membership", "public, max-age=3600")
 }
 
 // ---------------------------------------------------------------------------

@@ -13,6 +13,7 @@ export function useDeveloper() {
     currentProject,
     currentBot,
     currentApp,
+    currentDistributionProduct,
   } = storeToRefs(store)
 
   return {
@@ -25,6 +26,7 @@ export function useDeveloper() {
     currentProject,
     currentBot,
     currentApp,
+    currentDistributionProduct,
     loadDevelopers: store.loadDevelopers,
     selectDeveloper: store.selectDeveloper,
     selectByPublisherName: store.selectByPublisherName,
@@ -32,6 +34,7 @@ export function useDeveloper() {
     loadProject: store.loadProject,
     loadBot: store.loadBot,
     loadApp: store.loadApp,
+    setDistributionProduct: store.setDistributionProduct,
     clearProjectContext: store.clearProjectContext,
   }
 }

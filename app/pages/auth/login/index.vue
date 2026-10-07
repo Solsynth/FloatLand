@@ -264,7 +264,10 @@
                                 </p>
                             </div>
 
-                            <div class="mt-auto grid grid-cols-2 gap-2 pt-6">
+                            <div
+                                class="mt-auto grid gap-2 pt-6"
+                                :class="auth.factors.value.length > 0 ? 'grid-cols-2' : ''"
+                            >
                                 <button
                                     type="button"
                                     class="btn btn-ghost"
@@ -275,6 +278,7 @@
                                     {{ t("auth.back") }}
                                 </button>
                                 <button
+                                    v-if="auth.factors.value.length > 0"
                                     type="button"
                                     class="btn btn-outline"
                                     :disabled="submitting"
@@ -444,9 +448,11 @@ let qrPollTimer: ReturnType<typeof setInterval> | null = null;
 let qrCountdownTimer: ReturnType<typeof setInterval> | null = null;
 let qrFinishing = false;
 
-// Prompt login state (InAppCode factor)
-let promptEventSource: EventSource | null = null;
-let promptFinishing = false;
+// Cross-device approval polling: Stargate publishes every challenge to the
+// account's other trusted devices, so the page watches it for an approval while
+// the user may also complete a factor locally.
+let challengePollSource: EventSource | null = null;
+let challengePollFinished = false;
 
 const qrImageUrl = computed(() => {
     if (!qrData.value) return "";
@@ -499,7 +505,7 @@ function goBackToLookup() {
     clearLoginFlow();
     stopQrPolling();
     resetQrState();
-    stopPromptPolling();
+    stopChallengePolling();
     step.value = "lookup";
     updateQuery({});
     focusAccountInput();
@@ -634,62 +640,117 @@ async function startQrLogin() {
     }
 }
 
-// ── Prompt login (InAppCode factor) ───────────────────────────────────
+// ── Cross-device approval polling ─────────────────────────────────────
 
-function stopPromptPolling() {
-    if (promptEventSource) {
-        promptEventSource.close();
-        promptEventSource = null;
+function stopChallengePolling() {
+    challengePollFinished = true;
+    if (challengePollSource) {
+        challengePollSource.close();
+        challengePollSource = null;
     }
 }
 
-function startPromptPolling(challengeId: string) {
-    stopPromptPolling();
-    promptFinishing = false;
-    step.value = "prompt";
+/**
+ * Watch a challenge for cross-device approval. Stargate offers every challenge
+ * to the account's other trusted devices; when one accepts it the login
+ * completes here without any local factor entry.
+ */
+function startChallengePolling(challengeId: string) {
+    stopChallengePolling();
+    challengePollFinished = false;
 
-    const url = `/api/auth/challenge-poll/${challengeId}`;
-    const es = new EventSource(url);
-    promptEventSource = es;
+    const es = new EventSource(`/api/auth/challenge-poll/${challengeId}`);
+    challengePollSource = es;
 
-    es.onmessage = async (event) => {
-        if (promptFinishing) return;
+    es.onmessage = (event) => {
+        if (challengePollFinished) return;
+
+        let data: { status?: string };
         try {
-            const data = JSON.parse(event.data) as { status: string };
-            if (data.status === "approved") {
-                promptFinishing = true;
-                stopPromptPolling();
-                step.value = "success";
-                const redirectUrl = (route.query.redirect as string) || getRedirect();
-                await exchangeToken(challengeId);
-                clearLoginFlow();
-                clearRedirect();
-                router.replace({ query: {} });
-                navigateTo(redirectUrl || "/");
-            } else if (data.status === "expired" || data.status === "declined") {
-                stopPromptPolling();
-                error.value = data.status === "declined"
-                    ? t("auth.promptDeclined")
-                    : t("auth.promptExpired");
-                step.value = "picker";
-                clearFactor();
-            }
+            data = JSON.parse(event.data) as { status?: string };
         } catch {
-            // Parse error — ignore, keep polling
+            return; // Malformed frame — keep waiting.
+        }
+
+        if (data.status === "approved") {
+            void finishApprovedChallenge(challengeId);
+        } else if (data.status === "declined") {
+            stopChallengePolling();
+            error.value = t("auth.promptDeclined");
+            void fallBackFromDecline();
+        } else if (data.status === "expired") {
+            stopChallengePolling();
+            error.value = t("auth.promptExpired");
+            clearFactor();
+            clearLoginFlow();
+            step.value = "lookup";
+            updateQuery({});
+            focusAccountInput();
         }
     };
 
     es.onerror = () => {
-        if (!promptFinishing) {
-            stopPromptPolling();
-            // Only show error if we're still on the prompt step
-            if (step.value === "prompt") {
-                error.value = t("auth.promptConnectionLost");
-                step.value = "picker";
-                clearFactor();
-            }
+        if (challengePollFinished) return;
+        // A dropped connection is not fatal: EventSource reconnects on its own
+        // while readyState stays CONNECTING. Only a CLOSED source — the endpoint
+        // failed or is not an event stream — counts as a lost connection.
+        if (es.readyState !== EventSource.CLOSED) return;
+        stopChallengePolling();
+        if (step.value === "prompt") {
+            error.value = t("auth.promptConnectionLost");
         }
     };
+}
+
+/** Complete the login a trusted device just approved. */
+async function finishApprovedChallenge(challengeId: string) {
+    stopChallengePolling();
+    submitting.value = true;
+    error.value = null;
+
+    try {
+        step.value = "success";
+        const redirectUrl = (route.query.redirect as string) || getRedirect();
+        await exchangeToken(challengeId);
+        clearLoginFlow();
+        clearRedirect();
+        router.replace({ query: {} });
+        navigateTo(redirectUrl || "/");
+    } catch (e) {
+        error.value = e instanceof Error ? e.message : t("auth.verificationFailed");
+        step.value = auth.factors.value.length > 0 ? "picker" : "lookup";
+    } finally {
+        submitting.value = false;
+    }
+}
+
+/**
+ * A trusted device declined the challenge. Accounts with local factors can
+ * still continue (Stargate escalates the challenge rather than killing it); an
+ * in-app-only account has nothing left to complete.
+ */
+async function fallBackFromDecline() {
+    password.value = "";
+    clearFactor();
+    const challengeId = auth.challenge.value?.id;
+
+    if (!challengeId || auth.factors.value.length === 0) {
+        clearLoginFlow();
+        step.value = "lookup";
+        updateQuery({});
+        focusAccountInput();
+        return;
+    }
+
+    try {
+        // The decline escalated the challenge and cleared the used factors.
+        await loadChallenge(challengeId);
+        await loadFactors(challengeId);
+    } catch {
+        // Keep the current factor list — the error above explains the state.
+    }
+    step.value = "picker";
+    updateQuery({ challenge: challengeId, step: "picker" });
 }
 
 async function handleLookup() {
@@ -704,18 +765,21 @@ async function handleLookup() {
         const challengeId = auth.challenge.value!.id;
         const factors = await loadFactors(challengeId);
 
-        updateQuery({
-            challenge: challengeId,
-            step: factors.length > 1 ? "picker" : "check",
-        });
+        // Watch the challenge for cross-device approval from here on.
+        startChallengePolling(challengeId);
 
-        if (factors.length === 1) {
+        if (factors.length === 0) {
+            // In-app-only account: there is no local factor to pick, so a
+            // trusted device has to approve the challenge.
+            updateQuery({ challenge: challengeId, step: "prompt" });
+            step.value = "prompt";
+        } else if (factors.length === 1) {
             auth.selectFactor(factors[0]!);
+            updateQuery({ challenge: challengeId, step: "check" });
             step.value = "check";
-        } else if (factors.length > 1) {
-            step.value = "picker";
         } else {
-            error.value = t("auth.noMethods");
+            updateQuery({ challenge: challengeId, step: "picker" });
+            step.value = "picker";
         }
     } catch (e) {
         error.value = e instanceof Error ? e.message : t("auth.failedToStartLogin");
@@ -732,10 +796,6 @@ async function handleFactorSelect() {
     submitting.value = true;
     error.value = null;
 
-    // InAppCode (type 2) → request code (triggers push to native app), then
-    // switch to prompt polling instead of the password/code entry screen.
-    const isInAppCode = factor.type === 2;
-
     try {
         await auth.requestCode(challengeId, factor.id);
     } catch (e) {
@@ -748,13 +808,8 @@ async function handleFactorSelect() {
     }
 
     submitting.value = false;
-
-    if (isInAppCode) {
-        startPromptPolling(challengeId);
-    } else {
-        step.value = "check";
-        updateQuery({ challenge: challengeId, step: "check" });
-    }
+    step.value = "check";
+    updateQuery({ challenge: challengeId, step: "check" });
 }
 
 async function handleVerify() {
@@ -993,16 +1048,20 @@ onMounted(async () => {
         try {
             await loadChallenge(challengeId);
             const factors = await loadFactors(challengeId);
-            if (factors.length > 0) {
-                if (requestedStep === "check" && factors.length === 1) {
-                    auth.selectFactor(factors[0]!);
-                    step.value = "check";
-                } else if (requestedStep === "picker" || factors.length > 1) {
-                    step.value = "picker";
-                } else if (factors.length === 1) {
-                    auth.selectFactor(factors[0]!);
-                    step.value = "check";
-                }
+
+            // Resume watching the live challenge for cross-device approval.
+            startChallengePolling(challengeId);
+
+            if (factors.length === 0) {
+                step.value = "prompt";
+            } else if (requestedStep === "check" && factors.length === 1) {
+                auth.selectFactor(factors[0]!);
+                step.value = "check";
+            } else if (requestedStep === "picker" || factors.length > 1) {
+                step.value = "picker";
+            } else if (factors.length === 1) {
+                auth.selectFactor(factors[0]!);
+                step.value = "check";
             }
         } catch {
             clearLoginFlow();
@@ -1017,6 +1076,6 @@ onMounted(async () => {
 
 onUnmounted(() => {
     stopQrPolling();
-    stopPromptPolling();
+    stopChallengePolling();
 });
 </script>

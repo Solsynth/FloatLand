@@ -29,6 +29,7 @@ import {
   IconTestTube,
   IconBot,
   IconBoxes,
+  IconRocket,
   IconStore,
 } from "#components";
 import type { Developer } from "~/types/developer";
@@ -130,7 +131,7 @@ const navGroups = computed(() => {
           href: `/developers/${p}/settings`,
         },
         {
-          icon: IconStore,
+          icon: IconRocket,
           label: t("developer.apps.distribution.title"),
           href: `/developers/${encodeURIComponent(p)}/distribution`,
         },

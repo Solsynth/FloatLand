@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-base-200">
+  <div class="flex min-h-screen flex-col bg-base-200 lg:h-screen lg:overflow-hidden">
     <header
       class="sticky top-0 z-40 w-full border-b border-base-300 bg-base-100"
     >
@@ -110,10 +110,10 @@
     </header>
 
     <!-- Desktop Admin Layout -->
-    <div class="hidden min-h-[calc(100vh-3.5rem)] lg:flex">
+    <div class="hidden min-h-0 flex-1 lg:flex">
       <!-- Sidebar -->
       <aside
-        class="sticky top-16 z-40 h-[calc(100vh-3.5rem)] shrink-0 overflow-y-auto border-r border-base-300 scrollbar-none transition-[width] duration-200 ease-out motion-reduce:transition-none"
+        class="h-full z-40 shrink-0 overflow-y-auto border-r border-base-300 scrollbar-none transition-[width] duration-200 ease-out motion-reduce:transition-none"
         :class="sidebarCollapsed ? 'w-16' : 'w-[16.5rem]'"
       >
         <AdminSidebar

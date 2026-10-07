@@ -85,7 +85,7 @@ export const L10N = {
       creators: "Creators",
       realms: "Realms",
       search: "Search",
-      pricing: "Pricing",
+      membership: "Membership",
       signIn: "Sign In",
       modernSite: "Modern site",
       noJsNotice: "Legacy version",
@@ -206,7 +206,7 @@ export const L10N = {
       modernPage: "Open in the modern site",
       memberSince: "Member since",
     },
-    pricing: {
+    membership: {
       title: "Solar Network Shop",
       description: "Pick the Stellar plan that matches how you use Solar Network.",
       signInToPurchase: "Sign in to purchase",
@@ -282,7 +282,7 @@ export const L10N = {
       creators: "创作者",
       realms: "领域",
       search: "搜索",
-      pricing: "定价",
+      membership: "会员",
       signIn: "登录",
       modernSite: "新版网站",
       noJsNotice: "旧版",
@@ -403,7 +403,7 @@ export const L10N = {
       modernPage: "在新版网站打开",
       memberSince: "加入于",
     },
-    pricing: {
+    membership: {
       title: "Solar Network 商店",
       description: "选择适合你的 Solar Network 使用方式的 Stellar 方案。",
       signInToPurchase: "登录后购买",

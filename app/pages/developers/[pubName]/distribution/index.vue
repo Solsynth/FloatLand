@@ -10,7 +10,7 @@
         <p class="text-xs font-bold uppercase tracking-[0.16em] text-primary">{{ t('developer.apps.distribution.title') }}</p>
         <div class="mt-2 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div class="min-w-0">
-            <h1 class="text-2xl font-black tracking-tight">{{ t('developer.apps.distribution.title') }}</h1>
+            <h1 class="text-2xl font-black tracking-tight">{{ t('developer.apps.distribution.products') }}</h1>
             <p class="mt-1 max-w-xl text-sm text-base-content/55">{{ t('developer.apps.distribution.description') }}</p>
           </div>
           <button class="btn btn-primary btn-sm shrink-0" type="button" @click="openCreateDrawer">
@@ -62,15 +62,20 @@
                 <IconPackage class="h-5 w-5 text-base-content/60" />
               </div>
               <div class="min-w-0">
-                <h2 class="font-semibold">
-                  {{ localizedDistributionText(product.names, product.name, localizationLocales) }}
+                <h2 class="truncate text-base font-semibold">
+                  <NuxtLink
+                    class="outline-offset-2 hover:text-primary focus-visible:outline-2 focus-visible:outline-primary"
+                    :to="productPath(product.slug)"
+                  >
+                    {{ localizedDistributionText(product.names, product.name, localizationLocales) }}
+                  </NuxtLink>
                 </h2>
-                <p class="font-mono text-xs text-base-content/55">{{ product.slug }}</p>
-                <p v-if="product.description || Object.keys(product.descriptions || {}).length" class="mt-2 max-w-2xl text-sm text-base-content/65">
+                <p v-if="product.description || Object.keys(product.descriptions || {}).length" class="mt-1.5 max-w-2xl text-sm text-base-content/65">
                   {{ localizedDistributionText(product.descriptions, product.description, localizationLocales) }}
                 </p>
-                <p class="mt-2 text-xs text-base-content/50">
-                  {{ t('developer.apps.distribution.updatedAt') }} {{ formatDate(product.updatedAt) }}
+                <p class="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-base-content/50">
+                  <span>{{ t('developer.apps.distribution.updatedAt') }} {{ formatDate(product.updatedAt) }}</span>
+                  <span class="font-mono text-[11px] text-base-content/40">{{ product.slug }}</span>
                 </p>
               </div>
             </div>
@@ -160,6 +165,7 @@
                     class="input w-full"
                     :placeholder="t('developer.apps.distribution.productName')"
                     required
+                    @input="syncSlugFromNames"
                   />
                 </div>
               </fieldset>
@@ -192,8 +198,11 @@
               :placeholder="t('developer.apps.distribution.productSlug')"
               pattern="[a-z0-9]+(?:-[a-z0-9]+)*"
               required
+              @input="slugTouched = true"
             />
-            <p class="label">{{ t('developer.apps.distribution.productSlugHint') }}</p>
+            <p class="label">
+              {{ slugTouched ? t('developer.apps.distribution.productSlugHint') : t('developer.apps.distribution.productSlugAuto') }}
+            </p>
           </fieldset>
           <div class="flex justify-end gap-2 pt-1">
             <button class="btn btn-ghost outline-offset-2 focus-visible:outline-2 focus-visible:outline-base-content" type="button" @click="createDrawerOpen = false">
@@ -291,6 +300,24 @@ function newProductLocalization(localeCode = contentLocale.value): ProductLocali
   return { id: crypto.randomUUID(), locale: localeCode, name: '', description: '' }
 }
 
+/** Slug stays a URL detail: derive it from the human-readable name until edited by hand. */
+const slugTouched = ref(false)
+
+function slugify(value: string) {
+  return value
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+}
+
+function syncSlugFromNames() {
+  if (slugTouched.value) return
+  const primary = productForm.localizations.find((entry) => entry.name.trim())
+  productForm.slug = slugify(primary?.name ?? '')
+}
+
 function addProductLocalization() {
   if (!newProductLanguage.value || productForm.localizations.some((entry) => entry.locale === newProductLanguage.value)) return
   productForm.localizations.push(newProductLocalization(newProductLanguage.value))
@@ -309,7 +336,9 @@ function localizedMap(entries: ProductLocalizationEntry[], field: 'name' | 'desc
 }
 
 function openCreateDrawer() {
+  productForm.slug = ''
   productForm.localizations = [newProductLocalization()]
+  slugTouched.value = false
   newProductLanguage.value = ''
   createDrawerOpen.value = true
 }

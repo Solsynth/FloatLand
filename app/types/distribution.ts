@@ -1,5 +1,8 @@
 export type DistributionMetadata = Record<string, unknown>
 
+/** Localized strings keyed by BCP-47 locale code, e.g. `{ "en-US": "Client" }`. */
+export type DistributionLocalizedText = Record<string, string>
+
 /**
  * Reference to a Solar Network Drive cloud file, mirroring the
  * DistributionCenter cloud-file profile object. Either `id` (a Drive file)

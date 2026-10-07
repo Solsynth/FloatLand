@@ -15,10 +15,10 @@
                     class="fixed left-1/2 top-1/2 z-[60] w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 -translate-y-1/2 space-y-5 rounded-box bg-base-100 p-6 shadow-sm"
                 >
                 <DialogTitle class="text-center text-lg font-bold">
-                    {{ t('pricing.payment.enterPinTitle') }}
+                    {{ t('membership.payment.enterPinTitle') }}
                 </DialogTitle>
                 <p class="text-center text-sm text-base-content/50">
-                    {{ t('pricing.payment.enterPinDesc') }}
+                    {{ t('membership.payment.enterPinDesc') }}
                 </p>
                 <PinInputRoot
                     v-model="pinDigits"
@@ -49,7 +49,7 @@
                         @click="submit"
                     >
                         <IconLoader v-if="busy" class="h-4 w-4 animate-spin" />
-                        {{ busy ? t('pricing.payment.processing') : t('pricing.payment.payNow') }}
+                        {{ busy ? t('membership.payment.processing') : t('membership.payment.payNow') }}
                     </button>
                 </div>
                 </DialogContent>

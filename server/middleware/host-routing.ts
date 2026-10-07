@@ -18,7 +18,7 @@ import {
   renderHome,
   renderNotFound,
   renderPost,
-  renderPricing,
+  renderMembership,
   renderPublisher,
   renderRealm,
   renderRealmsIndex,
@@ -44,7 +44,7 @@ function dispatchLegacy(event: H3Event, path: string): Response {
   if (path === "/") return renderHome(event)
   if (path === "/search") return renderSearch(event)
   if (path === "/creators") return renderCreators(event)
-  if (path === "/pricing") return renderPricing(event)
+  if (path === "/membership") return renderMembership(event)
   if (path === "/realms") return renderRealmsIndex(event)
 
   const realmMatch = /^\/realms\/([^/]+)$/.exec(path)

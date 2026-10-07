@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-base-200">
+  <div class="flex min-h-screen flex-col bg-base-200 lg:h-screen lg:overflow-hidden">
     <header
       class="sticky top-0 z-40 w-full border-b border-base-300 bg-base-100"
     >
@@ -110,10 +110,10 @@
     </header>
 
     <!-- Desktop Drive Layout -->
-    <div class="hidden min-h-[calc(100vh-3.5rem)] lg:flex">
+    <div class="hidden min-h-0 flex-1 lg:flex">
       <!-- Sidebar -->
       <aside
-        class="sticky top-16 z-40 h-[calc(100vh-3.5rem)] w-[18rem] shrink-0 overflow-y-auto border-r border-base-300 scrollbar-none"
+        class="h-full z-40 w-[18rem] shrink-0 overflow-y-auto border-r border-base-300 scrollbar-none"
       >
         <DriveSidebar
           :usage="usage"

@@ -143,7 +143,7 @@
               {{ t("landing.membershipDescription") }}
             </p>
           </div>
-          <NuxtLink to="/pricing" class="btn btn-primary shrink-0 gap-2">
+          <NuxtLink to="/membership" class="btn btn-primary shrink-0 gap-2">
             {{ t("landing.membershipCta") }}
             <IconSparkles class="h-4 w-4" />
           </NuxtLink>
@@ -167,8 +167,8 @@
             class="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-base-content/65"
             :aria-label="t('landing.footer.links')"
           >
-            <NuxtLink to="/pricing" class="hover:text-base-content">
-              {{ t("landing.footer.pricing") }}
+            <NuxtLink to="/membership" class="hover:text-base-content">
+              {{ t("landing.footer.membership") }}
             </NuxtLink>
             <NuxtLink to="/realms" class="hover:text-base-content">
               {{ t("landing.footer.realms") }}

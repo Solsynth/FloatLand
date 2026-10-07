@@ -1,6 +1,11 @@
 <template>
   <NuxtLayout name="app">
-    <div class="feed-layout">
+    <div class="feed-layout feed-layout--three-col">
+      <!-- Left column: discovery rail (categories + tags) -->
+      <aside class="feed-sidebar">
+        <ExploreDiscovery />
+      </aside>
+
       <!-- Main Content -->
       <div class="min-w-0">
         <!-- Feed shell: continuous list like Flutter explore -->
@@ -155,7 +160,7 @@
         </div>
       </div>
 
-      <!-- Compose + Explore Sidebar (26rem rail) -->
+      <!-- Compose rail: search, inline compose, footer links -->
       <aside class="feed-sidebar">
         <div class="flex w-full flex-col gap-5">
           <!-- Search -->
@@ -185,7 +190,7 @@
           >
             <form
               class="flex items-start gap-3"
-              @click="dismissInlinePopovers"
+              @click="attachMenuOpen = false"
               @submit.prevent="submitInlinePost"
             >
               <div class="relative mt-0.5 shrink-0">
@@ -269,7 +274,7 @@
 
                 <div
                   v-if="inlineComposeExpanded"
-                  class="mt-2 flex flex-wrap items-center gap-1 border-t border-base-300/70 pt-2"
+                  class="mt-1 flex flex-wrap items-center gap-1"
                 >
                   <div class="relative" @click.stop>
                     <button
@@ -319,43 +324,6 @@
                       </button>
                     </div>
                   </div>
-
-                  <button
-                    type="button"
-                    class="btn btn-ghost btn-sm btn-circle"
-                    :title="t('compose.insertBold')"
-                    :disabled="!currentPublisher || submitting"
-                    @click="wrapInlineSelection('**', '**')"
-                  >
-                    <IconBold class="h-4 w-4" />
-                  </button>
-                  <button
-                    type="button"
-                    class="btn btn-ghost btn-sm btn-circle"
-                    :title="t('compose.insertItalic')"
-                    :disabled="!currentPublisher || submitting"
-                    @click="wrapInlineSelection('_', '_')"
-                  >
-                    <IconItalic class="h-4 w-4" />
-                  </button>
-                  <button
-                    type="button"
-                    class="btn btn-ghost btn-sm btn-circle"
-                    :title="t('compose.insertLink')"
-                    :disabled="!currentPublisher || submitting"
-                    @click="insertInlineLink"
-                  >
-                    <IconLink class="h-4 w-4" />
-                  </button>
-                  <button
-                    type="button"
-                    class="btn btn-ghost btn-sm btn-circle"
-                    :title="t('compose.insertMention')"
-                    :disabled="!currentPublisher || submitting"
-                    @click="insertInlineAtCursor('@')"
-                  >
-                    <IconAtSign class="h-4 w-4" />
-                  </button>
 
                   <select
                     v-model="visibility"
@@ -412,7 +380,7 @@
               @change="onLocalFilesPicked"
             />
           </section>
-          <ExploreSidebar :show-search="false" />
+          <ExploreSidebar :show-search="false" :show-discovery="false" />
         </div>
       </aside>
       <CloudFileDrawer
@@ -449,14 +417,10 @@ import { fetchJson, fetchTimeline } from "~/utils/api";
 import { getInitials } from "~/utils/identity";
 import {
   IconAlertCircle,
-  IconAtSign,
-  IconBold,
   IconCloud,
   IconCompass,
   IconFile,
   IconImage,
-  IconItalic,
-  IconLink,
   IconLoader,
   IconPaperclip,
   IconRss,
@@ -605,10 +569,6 @@ function selectInlinePublisher(publisher: Publisher) {
   compose.setCurrentPublisher(publisher);
 }
 
-function dismissInlinePopovers() {
-  attachMenuOpen.value = false;
-}
-
 function clearInlineReply() {
   replyingTo.value = undefined;
   compose.markDirty();
@@ -657,51 +617,6 @@ function handleCloudFilesSelected(
   }
 
   inlineComposeExpanded.value = true;
-}
-
-function wrapInlineSelection(before: string, after: string) {
-  const textarea = contentRef.value;
-  if (!textarea || !currentPublisher.value) return;
-
-  const start = textarea.selectionStart;
-  const end = textarea.selectionEnd;
-  const selected = composeContent.value.slice(start, end) || "text";
-  composeContent.value =
-    composeContent.value.slice(0, start) +
-    before +
-    selected +
-    after +
-    composeContent.value.slice(end);
-  compose.markDirty();
-
-  nextTick(() => {
-    textarea.focus();
-    textarea.setSelectionRange(
-      start + before.length,
-      start + before.length + selected.length,
-    );
-  });
-}
-
-function insertInlineLink() {
-  const textarea = contentRef.value;
-  if (!textarea) return;
-
-  const start = textarea.selectionStart;
-  const end = textarea.selectionEnd;
-  const selected = composeContent.value.slice(start, end) || "link";
-  const markdown = `[${selected}](https://)`;
-  composeContent.value =
-    composeContent.value.slice(0, start) +
-    markdown +
-    composeContent.value.slice(end);
-  compose.markDirty();
-
-  nextTick(() => {
-    textarea.focus();
-    const urlStart = start + selected.length + 3;
-    textarea.setSelectionRange(urlStart, urlStart + "https://".length);
-  });
 }
 
 function insertInlineAtCursor(text: string) {

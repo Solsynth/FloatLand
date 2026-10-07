@@ -15,10 +15,10 @@
                     class="fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-box bg-base-100 p-6 shadow-sm"
                 >
                 <DialogTitle class="text-lg font-extrabold tracking-tight">
-                    {{ t('pricing.choose', { name: tierName }) }}
+                    {{ t('membership.choose', { name: tierName }) }}
                 </DialogTitle>
                 <p class="mt-1 text-sm text-base-content/60">
-                    {{ t('pricing.payment.oneMonth') }} ·
+                    {{ t('membership.payment.oneMonth') }} ·
                     {{ priceText }}
                 </p>
 
@@ -55,7 +55,7 @@
                         <label
                             class="text-xs font-bold uppercase tracking-[0.12em] text-base-content/45"
                         >
-                            {{ t('pricing.payment.wallet') }}
+                            {{ t('membership.payment.wallet') }}
                         </label>
                         <select
                             v-model="selectedWalletId"
@@ -75,7 +75,7 @@
                         class="mt-4 flex items-center justify-between rounded-box bg-base-200/70 px-4 py-3 text-sm"
                     >
                         <span class="text-base-content/60">
-                            {{ t('pricing.payment.balance') }}
+                            {{ t('membership.payment.balance') }}
                         </span>
                         <span class="font-semibold">
                             {{ formatBalance(selectedWallet) }}
@@ -85,7 +85,7 @@
                         v-if="insufficient"
                         class="mt-2 text-xs leading-5 text-error"
                     >
-                        {{ t('pricing.payment.insufficientBalance') }}
+                        {{ t('membership.payment.insufficientBalance') }}
                     </p>
 
                     <button
@@ -95,21 +95,21 @@
                     >
                         <IconLoader v-if="busy" class="h-4 w-4 animate-spin" />
                         <IconWallet v-else class="h-4 w-4" />
-                        {{ busy ? t('pricing.payment.processing') : t('pricing.payment.payNow') }}
+                        {{ busy ? t('membership.payment.processing') : t('membership.payment.payNow') }}
                     </button>
                     <p
                         v-if="pinStatus?.validationRequired"
                         class="mt-2 flex items-center justify-center gap-1.5 text-xs text-base-content/40"
                     >
                         <IconLock class="h-3 w-3" />
-                        {{ t('pricing.payment.pinEnabledNote') }}
+                        {{ t('membership.payment.pinEnabledNote') }}
                     </p>
                 </template>
 
                 <!-- Afdian method -->
                 <template v-else>
                     <p class="mt-4 text-sm leading-6 text-base-content/65">
-                        {{ t('pricing.payment.afdianHint') }}
+                        {{ t('membership.payment.afdianHint') }}
                     </p>
                     <button
                         class="btn btn-primary mt-5 w-full gap-2"
@@ -118,7 +118,7 @@
                     >
                         <IconLoader v-if="busy" class="h-4 w-4 animate-spin" />
                         <IconExternalLink v-else class="h-4 w-4" />
-                        {{ busy ? t('pricing.payment.processing') : t('pricing.payment.openAfdian') }}
+                        {{ busy ? t('membership.payment.processing') : t('membership.payment.openAfdian') }}
                     </button>
                 </template>
 
@@ -206,8 +206,8 @@ const methods = computed<PaymentMethod[]>(() => {
 
 function methodLabel(m: PaymentMethod): string {
     return m === "wallet"
-        ? t("pricing.payment.methodWallet")
-        : t("pricing.payment.methodAfdian");
+        ? t("membership.payment.methodWallet")
+        : t("membership.payment.methodAfdian");
 }
 
 const selectedWallet = computed(
@@ -275,7 +275,7 @@ async function confirmPay(pin: string) {
             // Already active — nothing to charge.
             showPinDialog.value = false;
             open.value = false;
-            await notify(t("pricing.alreadyActive"));
+            await notify(t("membership.alreadyActive"));
             emit("purchased");
             return;
         }
@@ -291,13 +291,13 @@ async function confirmPay(pin: string) {
         ) {
             showPinDialog.value = false;
             open.value = false;
-            await notify(t("pricing.membershipPurchaseSuccess"));
+            await notify(t("membership.membershipPurchaseSuccess"));
             emit("purchased");
         } else {
-            throw new Error(t("pricing.payment.checkoutFailed"));
+            throw new Error(t("membership.payment.checkoutFailed"));
         }
     } catch (e: any) {
-        const message = e?.message || t("pricing.payment.checkoutFailed");
+        const message = e?.message || t("membership.payment.checkoutFailed");
         if (showPinDialog.value) payError.value = message;
         else error.value = message;
     } finally {
@@ -313,9 +313,9 @@ async function startAfdian() {
         const checkout = await createAfdianCheckout(props.tier.identifier);
         window.open(checkout.checkoutUrl, "_blank", "noopener,noreferrer");
         open.value = false;
-        await notify(t("pricing.payment.afdianHint"));
+        await notify(t("membership.payment.afdianHint"));
     } catch (e: any) {
-        error.value = e?.message || t("pricing.payment.checkoutFailed");
+        error.value = e?.message || t("membership.payment.checkoutFailed");
     } finally {
         busy.value = false;
     }

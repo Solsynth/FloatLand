@@ -9,17 +9,6 @@
         {{ t('developer.apps.distribution.backToProducts') }}
       </NuxtLink>
 
-      <header class="relative isolate overflow-hidden rounded-box bg-base-100 px-5 py-5 shadow-sm sm:px-6">
-        <div class="absolute inset-y-0 right-0 -z-10 w-1/3 bg-primary/[0.06]" aria-hidden="true">
-          <div class="absolute inset-y-0 left-0 w-px bg-primary/15" />
-          <div class="absolute inset-y-0 left-5 w-px bg-primary/10" />
-          <div class="absolute inset-y-0 left-10 w-px bg-primary/10" />
-        </div>
-        <p class="text-xs font-bold uppercase tracking-[0.16em] text-primary">{{ t('developer.apps.distribution.title') }}</p>
-        <h1 class="mt-2 truncate font-mono text-2xl font-black tracking-tight">{{ slug }}</h1>
-        <p class="mt-1 max-w-xl text-sm text-base-content/55">{{ t('developer.apps.distribution.detailDescription') }}</p>
-      </header>
-
       <div v-if="isLoading" class="rounded-box bg-base-100 p-5 shadow-sm sm:p-6" aria-busy="true" :aria-label="t('common.loading')">
         <div class="space-y-4">
           <div class="skeleton h-5 w-40" />
@@ -32,11 +21,13 @@
 
       <DistributionCenterPanel
         v-else-if="publisherName"
+        v-model:product="product"
         :publisher-name="publisherName"
         :product-slug="slug"
       />
 
       <div v-else class="flex flex-col items-center gap-3 rounded-box bg-base-100 px-5 py-14 text-center shadow-sm">
+        <h1 class="sr-only">{{ t('developer.apps.distribution.title') }}</h1>
         <IconAlertTriangle class="h-10 w-10 text-error/60" aria-hidden="true" />
         <p role="alert" class="text-sm text-base-content/60">{{ t('developer.apps.distribution.requestFailed') }}</p>
       </div>
@@ -46,9 +37,11 @@
 
 <script setup lang="ts">
 import { IconArrowLeft, IconAlertTriangle } from '#components'
+import type { DistributionProduct } from '~/types/distribution'
+import { localizedDistributionText } from '~/utils/distribution'
 definePageMeta({ middleware: 'developer' })
 
-const { t } = useI18n()
+const { t, locale, localeProperties } = useI18n()
 const route = useRoute()
 const developer = useDeveloper()
 const { currentDeveloper } = developer
@@ -56,8 +49,28 @@ const pubName = computed(() => route.params.pubName as string)
 const slug = computed(() => route.params.slug as string)
 const publisherName = computed(() => currentDeveloper.value?.publisher?.name || pubName.value)
 const isLoading = ref(false)
+const product = ref<DistributionProduct | null>(null)
+const localizationLocales = computed<readonly string[]>(() =>
+  [localeProperties.value.language, locale.value].filter(
+    (value): value is string => typeof value === 'string' && value.length > 0,
+  ),
+)
+// The product name drives the UI: breadcrumbs, document title, and the panel hero.
+const productName = computed(() =>
+  product.value
+    ? localizedDistributionText(product.value.names, product.value.name, localizationLocales.value)
+    : '',
+)
 
-useSolarSeo({ title: `${t('developer.apps.distribution.title')} · ${slug.value}` })
+watch(product, (value) => {
+  developer.setDistributionProduct(value ? { slug: value.slug, name: productName.value } : null)
+})
+
+useSolarSeo({
+  title: computed(
+    () => `${productName.value || slug.value} · ${t('developer.apps.distribution.title')} · ${pubName.value}`,
+  ),
+})
 
 async function autoLoad() {
   isLoading.value = true

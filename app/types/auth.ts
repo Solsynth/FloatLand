@@ -437,7 +437,7 @@ export type QrLoginStatus =
   | "declined"
   | "expired";
 
-export type LoginStep = "lookup" | "picker" | "check" | "qr";
+export type LoginStep = "lookup" | "picker" | "check" | "success" | "qr" | "prompt";
 
 export const CaptchaConfigSchema = z.object({
   provider: z.string(),

@@ -3,13 +3,14 @@ import { defineEventHandler, getRouterParam, setResponseStatus, getRequestIP, ge
 /**
  * SSE endpoint that polls a Stargate challenge for status changes.
  *
- * Used by the login page when the user selects an InAppCode (prompt) factor:
- * the native app receives a push notification and approves/declines, while
- * this endpoint streams the result back to the browser.
+ * Used by the login page: Stargate publishes every challenge to the account's
+ * other devices, so a trusted session can approve or decline the login from
+ * anywhere. This endpoint streams the outcome back to the browser, which may be
+ * waiting on its own factor entry in the meantime.
  *
  * GET /api/auth/challenge-poll/:challengeId → text/event-stream
  * Events: { status: "pending" | "approved" | "declined" | "expired" }
- * On "approved" or "declined"/"expired" the stream closes.
+ * On "approved", "declined" or "expired" the stream closes.
  */
 export default defineEventHandler(async (event) => {
   const cfg = useRuntimeConfig(event);
@@ -51,7 +52,6 @@ export default defineEventHandler(async (event) => {
 
   const POLL_INTERVAL_MS = 2000;
   const MAX_DURATION_MS = 5 * 60 * 1000; // 5 minutes
-  const startTime = Date.now();
   let timer: ReturnType<typeof setInterval> | null = null;
   let closed = false;
 
@@ -90,25 +90,26 @@ export default defineEventHandler(async (event) => {
       const body = resp._data as Record<string, unknown> | undefined;
       if (!body) return;
 
-      // Challenge is consumed when expired_at is set and stepRemain is 0
-      const stepRemain = body.step_remain as number | undefined;
-      const expiredAt = body.expired_at as string | undefined;
       const approvedAt = body.approved_at as string | undefined;
-
-      if (stepRemain !== undefined && stepRemain <= 0 && approvedAt) {
-        sendEvent({ status: "approved" });
-        cleanup();
-        return;
-      }
+      const declinedAt = body.declined_at as string | undefined;
+      const expiredAt = body.expired_at as string | undefined;
 
       if (approvedAt) {
-        // Already approved but stepRemain not yet 0 (race) — treat as approved
         sendEvent({ status: "approved" });
         cleanup();
         return;
       }
 
-      if (expiredAt) {
+      if (declinedAt) {
+        sendEvent({ status: "declined" });
+        cleanup();
+        return;
+      }
+
+      // `expired_at` is always present — Stargate sets it when the challenge is
+      // created (it is the deadline, not a terminal marker). Only report expiry
+      // once that instant has actually passed.
+      if (expiredAt && Date.parse(expiredAt) <= Date.now()) {
         sendEvent({ status: "expired" });
         cleanup();
         return;
@@ -127,12 +128,11 @@ export default defineEventHandler(async (event) => {
     timer = setInterval(poll, POLL_INTERVAL_MS);
   }
 
-  // Timeout safety
+  // Safety valve: stop polling after the max duration. The stream ends without
+  // a terminal event, so the browser's EventSource reconnects and resumes
+  // polling instead of being told the challenge expired.
   const timeout = setTimeout(() => {
-    if (!closed) {
-      sendEvent({ status: "expired" });
-      cleanup();
-    }
+    if (!closed) cleanup();
   }, MAX_DURATION_MS);
 
   event.node.req.on("close", () => clearTimeout(timeout));

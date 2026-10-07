@@ -54,7 +54,7 @@ export function legacyHeader(page: LegacyPage, suffix: string): string {
       navLink(base, "/creators", t.nav.creators) + "&nbsp;&nbsp;|&nbsp;&nbsp;" +
       navLink(base, "/realms", t.nav.realms) + "&nbsp;&nbsp;|&nbsp;&nbsp;" +
       navLink(base, "/search", t.nav.search) + "&nbsp;&nbsp;|&nbsp;&nbsp;" +
-      navLink(base, "/pricing", t.nav.pricing) + "&nbsp;&nbsp;|&nbsp;&nbsp;",
+      navLink(base, "/membership", t.nav.membership) + "&nbsp;&nbsp;|&nbsp;&nbsp;",
     `<a href="${mainHref}" style="color: #f5e9c8; font-size: 11px">${escHtml(t.nav.modernSite)}</a>`,
     "</td>",
     "</tr>",

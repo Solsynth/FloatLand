@@ -3,10 +3,10 @@
         <h2
             class="text-xl font-extrabold tracking-tight text-base-content md:text-2xl"
         >
-            {{ t('pricing.shopMoreTitle') }}
+            {{ t('membership.shopMoreTitle') }}
         </h2>
         <p class="mt-1.5 max-w-xl text-sm text-base-content/65">
-            {{ t('pricing.shopMoreDesc') }}
+            {{ t('membership.shopMoreDesc') }}
         </p>
 
         <div class="mt-8 grid gap-12 sm:grid-cols-3 sm:gap-6">
@@ -21,11 +21,11 @@
                     <h3
                         class="text-base font-extrabold tracking-tight text-base-content"
                     >
-                        {{ t('pricing.goldsTitle') }}
+                        {{ t('membership.goldsTitle') }}
                     </h3>
                 </div>
                 <p class="mt-2 text-sm leading-5 text-base-content/65">
-                    {{ t('pricing.goldsDesc') }}
+                    {{ t('membership.goldsDesc') }}
                 </p>
                 <div class="mt-auto pt-6">
                     <p
@@ -45,14 +45,14 @@
                             class="h-4 w-4 animate-spin"
                         />
                         <IconExternalLink v-else class="h-4 w-4" />
-                        {{ t('pricing.goldsBuy') }}
+                        {{ t('membership.goldsBuy') }}
                     </button>
                     <button
                         v-else
                         class="btn btn-outline mt-3 w-full"
                         @click="goToLogin"
                     >
-                        {{ t('pricing.signInToPurchase') }}
+                        {{ t('membership.signInToPurchase') }}
                     </button>
                 </div>
             </article>
@@ -68,11 +68,11 @@
                     <h3
                         class="text-base font-extrabold tracking-tight text-base-content"
                     >
-                        {{ t('pricing.nameCardTitle') }}
+                        {{ t('membership.nameCardTitle') }}
                     </h3>
                 </div>
                 <p class="mt-2 text-sm leading-5 text-base-content/65">
-                    {{ t('pricing.nameCardDesc') }}
+                    {{ t('membership.nameCardDesc') }}
                 </p>
                 <div class="mt-auto pt-6">
                     <p class="text-sm font-semibold text-base-content/85">
@@ -89,14 +89,14 @@
                             class="h-4 w-4 animate-spin"
                         />
                         <IconBadgeCheck v-else class="h-4 w-4" />
-                        {{ t('pricing.nameCardBuy') }}
+                        {{ t('membership.nameCardBuy') }}
                     </button>
                     <button
                         v-else
                         class="btn btn-outline mt-3 w-full"
                         @click="goToLogin"
                     >
-                        {{ t('pricing.signInToPurchase') }}
+                        {{ t('membership.signInToPurchase') }}
                     </button>
                 </div>
             </article>
@@ -112,11 +112,11 @@
                     <h3
                         class="text-base font-extrabold tracking-tight text-base-content"
                     >
-                        {{ t('pricing.quotaTitle') }}
+                        {{ t('membership.quotaTitle') }}
                     </h3>
                 </div>
                 <p class="mt-2 text-sm leading-5 text-base-content/65">
-                    {{ t('pricing.quotaDesc') }}
+                    {{ t('membership.quotaDesc') }}
                 </p>
                 <div class="mt-auto pt-6">
                     <p
@@ -131,14 +131,14 @@
                         @click="openQuotaDialog"
                     >
                         <IconDatabase class="h-4 w-4" />
-                        {{ t('pricing.quotaBuy') }}
+                        {{ t('membership.quotaBuy') }}
                     </button>
                     <button
                         v-else
                         class="btn btn-outline mt-3 w-full"
                         @click="goToLogin"
                     >
-                        {{ t('pricing.signInToPurchase') }}
+                        {{ t('membership.signInToPurchase') }}
                     </button>
                 </div>
             </article>
@@ -161,16 +161,16 @@
                         class="fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 -translate-y-1/2 space-y-4 rounded-box bg-base-100 p-6 shadow-sm"
                     >
                     <DialogTitle class="text-lg font-extrabold tracking-tight">
-                        {{ t('pricing.quotaBuy') }}
+                        {{ t('membership.quotaBuy') }}
                     </DialogTitle>
                     <p class="text-sm leading-5 text-base-content/60">
-                        {{ t('pricing.quotaDialogDesc') }}
+                        {{ t('membership.quotaDialogDesc') }}
                     </p>
                     <div class="form-control">
                         <label
                             class="text-xs font-bold uppercase tracking-[0.12em] text-base-content/45"
                         >
-                            {{ t('pricing.quotaGbLabel') }}
+                            {{ t('membership.quotaGbLabel') }}
                         </label>
                         <input
                             v-model.number="quotaGb"
@@ -199,7 +199,7 @@
                             class="h-4 w-4 animate-spin"
                         />
                         <IconWallet v-else class="h-4 w-4" />
-                        {{ quotaBusy ? t('pricing.payment.processing') : t('pricing.payment.payNow') }}
+                        {{ quotaBusy ? t('membership.payment.processing') : t('membership.payment.payNow') }}
                     </button>
                     <p
                         v-if="quotaError"
@@ -337,9 +337,9 @@ async function buyGolds() {
     try {
         const checkout = await createGoldsAfdianCheckout();
         window.open(checkout.checkoutUrl, "_blank", "noopener,noreferrer");
-        await notify(t("pricing.payment.afdianHint"));
+        await notify(t("membership.payment.afdianHint"));
     } catch (e: any) {
-        await notify(e?.message || t("pricing.payment.checkoutFailed"));
+        await notify(e?.message || t("membership.payment.checkoutFailed"));
     } finally {
         goldsBusy.value = false;
     }
@@ -370,16 +370,16 @@ async function payNameCard(walletId: string, pin: string) {
         paid.status !== WalletOrderStatus.Paid &&
         paid.status !== WalletOrderStatus.Finished
     ) {
-        throw new Error(t("pricing.payment.checkoutFailed"));
+        throw new Error(t("membership.payment.checkoutFailed"));
     }
-    await notify(t("pricing.nameCardPurchaseSuccess"));
+    await notify(t("membership.nameCardPurchaseSuccess"));
 }
 
 async function openQuotaDialog() {
     if (!authStore.isAuthenticated) return goToLogin();
     quotaConfig.value ??= await fetchQuotaPurchaseConfig();
     if (!quotaConfig.value) {
-        await notify(t("pricing.payment.checkoutFailed"));
+        await notify(t("membership.payment.checkoutFailed"));
         return;
     }
     quotaGb.value = quotaConfig.value.minGb;
@@ -404,7 +404,7 @@ async function confirmQuota() {
         await payQuota(walletId, "", quotaGb.value);
         quotaDialogOpen.value = false;
     } catch (e: any) {
-        quotaError.value = e?.message || t("pricing.payment.checkoutFailed");
+        quotaError.value = e?.message || t("membership.payment.checkoutFailed");
     } finally {
         quotaBusy.value = false;
     }
@@ -417,9 +417,9 @@ async function payQuota(walletId: string, pin: string, quantityGb: number) {
         paid.status !== WalletOrderStatus.Paid &&
         paid.status !== WalletOrderStatus.Finished
     ) {
-        throw new Error(t("pricing.payment.checkoutFailed"));
+        throw new Error(t("membership.payment.checkoutFailed"));
     }
-    await notify(t("pricing.quotaPurchaseSuccess"));
+    await notify(t("membership.quotaPurchaseSuccess"));
 }
 
 async function confirmPinPay(pin: string) {
@@ -436,7 +436,7 @@ async function confirmPinPay(pin: string) {
             quotaDialogOpen.value = false;
         }
     } catch (e: any) {
-        pinError.value = e?.message || t("pricing.payment.checkoutFailed");
+        pinError.value = e?.message || t("membership.payment.checkoutFailed");
     } finally {
         pinBusy.value = false;
     }

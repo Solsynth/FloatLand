@@ -1,14 +1,14 @@
 <template>
     <NuxtLayout name="app">
-        <div class="pricing-page mx-auto w-full max-w-5xl pb-20 md:pb-28">
+        <div class="membership-page mx-auto w-full max-w-5xl pb-20 md:pb-28">
             <!-- Header -->
-            <header class="pricing-header pt-10 md:pt-16">
+            <header class="membership-header pt-10 md:pt-16">
                 <div class="flex items-center gap-2">
                     <IconSparkles class="h-3.5 w-3.5 text-primary" aria-hidden="true" />
                     <p
                         class="text-[0.6875rem] font-bold uppercase tracking-[0.16em] text-base-content/55"
                     >
-                        {{ t('pricing.stellarProgram') }}
+                        {{ t('membership.stellarProgram') }}
                     </p>
                 </div>
                 <div
@@ -18,17 +18,17 @@
                         <h1
                             class="text-3xl font-extrabold tracking-tight text-base-content md:text-[2.5rem] md:leading-[1.08]"
                         >
-                            {{ t('pricing.membershipTiers') }}
+                            {{ t('membership.membershipTiers') }}
                         </h1>
                         <p
                             class="mt-3 text-sm leading-6 text-base-content/70 md:text-base"
                         >
-                            {{ t('pricing.description') }}
+                            {{ t('membership.description') }}
                         </p>
                         <p
                             class="mt-4 text-xs leading-5 text-base-content/50"
                         >
-                            {{ t('pricing.billingNote') }}
+                            {{ t('membership.billingNote') }}
                         </p>
                     </div>
                     <img
@@ -64,7 +64,7 @@
                             v-if="tier.isCurrent"
                             class="current-badge inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[0.6875rem] font-bold uppercase tracking-[0.1em]"
                         >
-                            {{ t('pricing.currentPlan') }}
+                            {{ t('membership.currentPlan') }}
                         </span>
                     </div>
 
@@ -73,7 +73,7 @@
                         :class="tier.nameClass"
                         :style="{ animationDelay: `${120 + index * 140}ms` }"
                     >
-                        @{{ t('pricing.previewName') }}
+                        @{{ t('membership.previewName') }}
                     </p>
 
                     <p class="mt-5 text-sm leading-6 text-base-content/70">
@@ -87,7 +87,7 @@
                             <dt
                                 class="text-[0.6875rem] font-bold uppercase tracking-[0.12em] text-base-content/45"
                             >
-                                {{ t('pricing.storage') }}
+                                {{ t('membership.storage') }}
                             </dt>
                             <dd class="text-sm font-semibold text-base-content/85">
                                 {{ tier.storage }}
@@ -97,7 +97,7 @@
                             <dt
                                 class="text-[0.6875rem] font-bold uppercase tracking-[0.12em] text-base-content/45"
                             >
-                                {{ t('pricing.progression') }}
+                                {{ t('membership.progression') }}
                             </dt>
                             <dd class="text-sm font-semibold text-base-content/85">
                                 {{ tier.levelBoost }}
@@ -107,7 +107,7 @@
                             <dt
                                 class="text-[0.6875rem] font-bold uppercase tracking-[0.12em] text-base-content/45"
                             >
-                                {{ t('pricing.usernameStyle') }}
+                                {{ t('membership.usernameStyle') }}
                             </dt>
                             <dd class="text-sm font-semibold text-base-content/85">
                                 {{ tier.usernameStyle }}
@@ -152,21 +152,21 @@
                                 class="btn btn-primary w-full"
                                 @click="openPurchase(tier)"
                             >
-                                {{ t('pricing.choose', { name: tier.name }) }}
+                                {{ t('membership.choose', { name: tier.name }) }}
                             </button>
                             <button
                                 v-else-if="authStore.isAuthenticated"
                                 class="btn btn-outline w-full"
                                 disabled
                             >
-                                {{ t('pricing.choose', { name: tier.name }) }}
+                                {{ t('membership.choose', { name: tier.name }) }}
                             </button>
                             <button
                                 v-else
                                 class="btn btn-outline w-full"
                                 @click="goToLogin"
                             >
-                                {{ t('pricing.signInToPurchase') }}
+                                {{ t('membership.signInToPurchase') }}
                             </button>
                             <button
                                 v-if="
@@ -177,7 +177,7 @@
                                 class="mt-1 text-xs font-semibold text-error/80 transition-colors hover:text-error"
                                 @click="cancelMembership"
                             >
-                                {{ t('pricing.cancelMembership') }}
+                                {{ t('membership.cancelMembership') }}
                             </button>
                         </div>
                     </div>
@@ -195,16 +195,16 @@
                         <h2
                             class="text-xl font-extrabold tracking-tight text-base-content md:text-2xl"
                         >
-                            {{ t('pricing.compareTitle') }}
+                            {{ t('membership.compareTitle') }}
                         </h2>
                         <p class="mt-1.5 text-sm text-base-content/65">
-                            {{ t('pricing.compareDesc') }}
+                            {{ t('membership.compareDesc') }}
                         </p>
                     </div>
                     <p
                         class="text-xs leading-5 text-base-content/50 md:max-w-64 md:pb-1 md:text-right"
                     >
-                        {{ t('pricing.compareNote') }}
+                        {{ t('membership.compareNote') }}
                     </p>
                 </div>
 
@@ -219,7 +219,7 @@
                                     <span
                                         class="text-[0.6875rem] font-bold uppercase tracking-[0.12em] text-base-content/45"
                                     >
-                                        {{ t('pricing.benefit') }}
+                                        {{ t('membership.benefit') }}
                                     </span>
                                 </th>
                                 <th
@@ -252,7 +252,7 @@
                                                     'var(--color-primary)',
                                             }"
                                         >
-                                            {{ t('pricing.currentPlan') }}
+                                            {{ t('membership.currentPlan') }}
                                         </span>
                                     </div>
                                 </th>
@@ -269,7 +269,7 @@
                                         colspan="4"
                                         class="pt-6 pb-2 text-[0.6875rem] font-bold uppercase tracking-[0.12em] text-base-content/45"
                                     >
-                                        {{ t(`pricing.compareGroups.${group.key}`) }}
+                                        {{ t(`membership.compareGroups.${group.key}`) }}
                                     </th>
                                 </tr>
                                 <tr
@@ -289,8 +289,8 @@
                                         class="whitespace-pre-line py-3 pr-4 align-top text-sm leading-5 text-base-content/70 last:pr-0"
                                         :class="{
                                             'compare-muted':
-                                                value === t('pricing.same') ||
-                                                value === t('pricing.notIncluded'),
+                                                value === t('membership.same') ||
+                                                value === t('membership.notIncluded'),
                                         }"
                                     >
                                         <span
@@ -317,10 +317,10 @@
                 <h2
                     class="text-xl font-extrabold tracking-tight text-base-content md:text-2xl"
                 >
-                    {{ t('pricing.levelQuota.title') }}
+                    {{ t('membership.levelQuota.title') }}
                 </h2>
                 <p class="mt-1.5 max-w-xl text-sm text-base-content/65">
-                    {{ t('pricing.levelQuota.desc') }}
+                    {{ t('membership.levelQuota.desc') }}
                 </p>
                 <ol class="mt-8 grid gap-10 sm:grid-cols-3">
                     <li
@@ -462,17 +462,17 @@ function goToLogin() {
 async function cancelMembership() {
     if (!activeSubscription.value) return;
     const ok = await confirm(
-        t("pricing.cancelMembershipTitle"),
-        t("pricing.cancelMembershipDesc"),
-        { confirmText: t("pricing.cancelMembership") },
+        t("membership.cancelMembershipTitle"),
+        t("membership.cancelMembershipDesc"),
+        { confirmText: t("membership.cancelMembership") },
     );
     if (!ok) return;
     try {
         await cancelStellarSubscription(activeSubscription.value.id);
-        await notify(t("pricing.membershipCancelSuccess"));
+        await notify(t("membership.membershipCancelSuccess"));
         await refreshSubscriptionState();
     } catch (e: any) {
-        await notify(e?.message || t("pricing.payment.checkoutFailed"));
+        await notify(e?.message || t("membership.payment.checkoutFailed"));
     }
 }
 
@@ -482,13 +482,13 @@ const tiers = computed<Tier[]>(() =>
         const catalogItem = catalogByIdentifier.value.get(identifier) ?? null;
         return {
             key: def.key,
-            name: t(`pricing.tiers.${def.key}.name`),
-            tagline: t(`pricing.tiers.${def.key}.tagline`),
-            description: t(`pricing.tiers.${def.key}.description`),
-            storage: t(`pricing.tiers.${def.key}.storage`),
-            levelBoost: t(`pricing.tiers.${def.key}.levelBoost`),
-            usernameStyle: t(`pricing.tiers.${def.key}.usernameStyle`),
-            features: def.featureKeys.map((k) => t(`pricing.tiers.${def.key}.features.${k}`)),
+            name: t(`membership.tiers.${def.key}.name`),
+            tagline: t(`membership.tiers.${def.key}.tagline`),
+            description: t(`membership.tiers.${def.key}.description`),
+            storage: t(`membership.tiers.${def.key}.storage`),
+            levelBoost: t(`membership.tiers.${def.key}.levelBoost`),
+            usernameStyle: t(`membership.tiers.${def.key}.usernameStyle`),
+            features: def.featureKeys.map((k) => t(`membership.tiers.${def.key}.features.${k}`)),
             catalogItem,
             isCurrent: activeSubscription.value?.identifier === identifier,
             tierColor: catalogItem?.displayConfig?.color ?? null,
@@ -507,12 +507,12 @@ const comparisonRows = computed<Record<string, ComparisonRow>>(() => {
     for (const group of comparisonGroups) {
         for (const key of group.rows) {
             map[key] = {
-                label: t(`pricing.compare.${key}.label`),
+                label: t(`membership.compare.${key}.label`),
                 kind: key === "usernameColor" ? "color" : null,
                 values: [
-                    t(`pricing.compare.${key}.stellar`),
-                    t(`pricing.compare.${key}.nova`),
-                    t(`pricing.compare.${key}.supernova`),
+                    t(`membership.compare.${key}.stellar`),
+                    t(`membership.compare.${key}.nova`),
+                    t(`membership.compare.${key}.supernova`),
                 ] as [string, string, string],
             };
         }
@@ -526,7 +526,7 @@ function colorSwatchStyle(index: number): Record<string, string> {
     if (index === 2) {
         // Supernova: unlimited + gradient usernames.
         return {
-            backgroundImage: `linear-gradient(90deg, ${color}, var(--pricing-gold))`,
+            backgroundImage: `linear-gradient(90deg, ${color}, var(--membership-gold))`,
         };
     }
     if (index === 0) {
@@ -541,19 +541,19 @@ function colorSwatchStyle(index: number): Record<string, string> {
 
 const levelQuotaSteps = computed<Array<{ level: string; quota: string }>>(() =>
     levelQuotaStepKeys.map((key) => ({
-        level: t(`pricing.levelQuota.steps.${key}.level`),
-        quota: t(`pricing.levelQuota.steps.${key}.quota`),
+        level: t(`membership.levelQuota.steps.${key}.level`),
+        quota: t(`membership.levelQuota.steps.${key}.quota`),
     })),
 );
 
-defineOgImage('UniOgImage', { title: t('pricing.seoTitle'), description: t('pricing.seoDescription') })
+defineOgImage('UniOgImage', { title: t('membership.seoTitle'), description: t('membership.seoDescription') })
 
 useSolarSeo({
-    title: t('pricing.seoTitle'),
-    description: t('pricing.seoDescription'),
+    title: t('membership.seoTitle'),
+    description: t('membership.seoDescription'),
     breadcrumbs: [
         { name: 'Home', item: 'https://solian.app' },
-        { name: 'Pricing', item: 'https://solian.app/pricing' }
+        { name: 'Membership', item: 'https://solian.app/membership' }
     ]
 });
 </script>
@@ -561,12 +561,12 @@ useSolarSeo({
 <style scoped>
 /* The tier names carry the palette: one quiet color, or the full range.
    A single ignition moment wakes them up, left to right. */
-.pricing-page {
-    --pricing-gold: oklch(0.62 0.12 80);
+.membership-page {
+    --membership-gold: oklch(0.62 0.12 80);
 }
 
-.pricing-header {
-    animation: pricing-rise 500ms ease-out both;
+.membership-header {
+    animation: membership-rise 500ms ease-out both;
 }
 
 .tier-name {
@@ -575,7 +575,7 @@ useSolarSeo({
     font-weight: 800;
     letter-spacing: -0.01em;
     opacity: 0;
-    animation: pricing-ignite 800ms ease-out both;
+    animation: membership-ignite 800ms ease-out both;
 }
 
 /* Limited palette: a muted single color. */
@@ -602,7 +602,7 @@ useSolarSeo({
         background-image: linear-gradient(
             95deg,
             var(--tier-color, var(--color-primary)),
-            var(--pricing-gold)
+            var(--membership-gold)
         );
         -webkit-background-clip: text;
         background-clip: text;
@@ -624,7 +624,7 @@ useSolarSeo({
     color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
 }
 
-@keyframes pricing-ignite {
+@keyframes membership-ignite {
     from {
         opacity: 0;
         filter: blur(3px) saturate(0.35);
@@ -635,7 +635,7 @@ useSolarSeo({
     }
 }
 
-@keyframes pricing-rise {
+@keyframes membership-rise {
     from {
         opacity: 0;
         transform: translateY(6px);
@@ -647,8 +647,8 @@ useSolarSeo({
 }
 
 @media (prefers-color-scheme: dark) {
-    .pricing-page {
-        --pricing-gold: oklch(0.76 0.12 85);
+    .membership-page {
+        --membership-gold: oklch(0.76 0.12 85);
     }
 
     .tier-name--nova {
@@ -681,14 +681,14 @@ useSolarSeo({
                     var(--tier-color, var(--color-primary)) 60%,
                     white
                 ),
-                var(--pricing-gold)
+                var(--membership-gold)
             );
         }
     }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .pricing-header,
+    .membership-header,
     .tier-name {
         animation: none;
         opacity: 1;

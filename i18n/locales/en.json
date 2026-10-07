@@ -68,7 +68,7 @@
     "membershipCta": "Compare tiers",
     "footer": {
       "links": "Links",
-      "pricing": "Pricing",
+      "membership": "Membership",
       "realms": "Realms",
       "developers": "Developers",
       "support": "Support",
@@ -254,7 +254,7 @@
   },
   "nav": {
     "utilities": "Utilities",
-    "pricing": "Pricing",
+    "membership": "Membership",
     "explore": "Explore",
     "timeline": "Timeline",
     "calendar": "Calendar",
@@ -856,7 +856,6 @@
     "back": "Back",
     "loginSuccessful": "Login Successful",
     "redirecting": "Redirecting you to the app...",
-    "noMethods": "No verification methods available",
     "failedToStartLogin": "Failed to start login",
     "passwordRequired": "Password is required",
     "sessionExpired": "Login session expired. Please try again.",
@@ -1639,7 +1638,7 @@
     "seoTitle": "Search",
     "seoDescription": "Search for posts, accounts, and realms on Solar Network."
   },
-  "pricing": {
+  "membership": {
     "stellarProgram": "Stellar Program",
     "membershipTiers": "Membership tiers",
     "description": "Pick the Stellar plan that matches how you use Solar Network. Every tier improves storage, progression, and account capabilities without changing the core experience.",
@@ -1761,20 +1760,20 @@
           "publisherQuota": {
       "label": "Publisher quota",
       "stellar": "2 base\n3 from Lv30+\n+2 per perk level",
-      "nova": "@:pricing.same",
-      "supernova": "@:pricing.same"
+      "nova": "@:membership.same",
+      "supernova": "@:membership.same"
     },
     "realmQuota": {
       "label": "Realm quota",
-      "stellar": "@:pricing.notIncluded",
+      "stellar": "@:membership.notIncluded",
       "nova": "Lv30 · 1\nLv60 · 2\nLv90 · 3\n+1 per perk level",
-      "supernova": "@:pricing.same"
+      "supernova": "@:membership.same"
     },
     "botQuota": {
       "label": "Bot quota",
-      "stellar": "@:pricing.notIncluded",
+      "stellar": "@:membership.notIncluded",
       "nova": "Lv30 · 1\nLv60 · 2\nLv90 · 3\n+1 per perk level",
-      "supernova": "@:pricing.same"
+      "supernova": "@:membership.same"
     }
     },
     "levelQuota": {
@@ -1973,10 +1972,9 @@
       "create": "Create App",
       "detail": "App Detail",
       "distribution": {
-        "title": "Distribution",
+        "title": "Solsynth Express",
         "description": "Upload immutable releases, assign channels, and review update-check metrics.",
         "detailDescription": "Manage channels, releases, and update activity for this product.",
-        "releaseControl": "Release control",
         "channelsSummary": "Available release lanes",
         "artifacts": "Artifacts",
         "artifactsSummary": "Across this channel",
@@ -1996,6 +1994,7 @@
         "product": "Product",
         "productSlug": "Product slug",
         "productSlugHint": "Use lowercase letters, numbers, and hyphens.",
+        "productSlugAuto": "Generated from the product name — edit to override.",
         "productMedia": "Product media",
         "productMediaHint": "Icon, background, and preview images shown in the marketplace.",
         "productIcon": "Icon",

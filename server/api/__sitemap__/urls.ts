@@ -7,7 +7,7 @@ export default defineSitemapEventHandler(async () => {
   // Static pages
   urls.push(
     { loc: '/', changefreq: 'daily', priority: 1.0 },
-    { loc: '/pricing', changefreq: 'monthly', priority: 0.8 },
+    { loc: '/membership', changefreq: 'monthly', priority: 0.8 },
     { loc: '/search', changefreq: 'weekly', priority: 0.6 },
     { loc: '/realms', changefreq: 'daily', priority: 0.7 },
     { loc: '/creators', changefreq: 'weekly', priority: 0.7 },

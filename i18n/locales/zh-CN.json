@@ -68,7 +68,7 @@
     "membershipCta": "对比等级",
     "footer": {
       "links": "链接",
-      "pricing": "定价",
+      "membership": "会员",
       "realms": "领域",
       "developers": "开发者",
       "support": "支持",
@@ -261,7 +261,7 @@
   },
   "nav": {
     "utilities": "工具",
-    "pricing": "定价",
+    "membership": "会员",
     "explore": "探索",
     "timeline": "时间线",
     "calendar": "日历",
@@ -863,7 +863,6 @@
     "back": "返回",
     "loginSuccessful": "登录成功",
     "redirecting": "正在跳转到应用...",
-    "noMethods": "没有可用的验证方式",
     "failedToStartLogin": "登录失败",
     "passwordRequired": "请输入密码",
     "sessionExpired": "登录会话已过期，请重新尝试。",
@@ -1637,7 +1636,7 @@
     "seoTitle": "搜索",
     "seoDescription": "在 Solar Network 上搜索帖子、用户和领域。"
   },
-  "pricing": {
+  "membership": {
     "stellarProgram": "Stellar 计划",
     "membershipTiers": "会员等级",
     "description": "选择适合你使用方式的 Stellar 计划。每个等级都能提升存储、成长速度和账户能力，而不改变核心体验。",
@@ -1759,20 +1758,20 @@
           "publisherQuota": {
       "label": "发布者槽位",
       "stellar": "基础 2 个\nLv30+ 起 3 个\n每级特权 +2",
-      "nova": "@:pricing.same",
-      "supernova": "@:pricing.same"
+      "nova": "@:membership.same",
+      "supernova": "@:membership.same"
     },
     "realmQuota": {
       "label": "领域槽位",
-      "stellar": "@:pricing.notIncluded",
+      "stellar": "@:membership.notIncluded",
       "nova": "Lv30 · 1 个\nLv60 · 2 个\nLv90 · 3 个\n每级特权 +1",
-      "supernova": "@:pricing.same"
+      "supernova": "@:membership.same"
     },
     "botQuota": {
       "label": "机器人槽位",
-      "stellar": "@:pricing.notIncluded",
+      "stellar": "@:membership.notIncluded",
       "nova": "Lv30 · 1 个\nLv60 · 2 个\nLv90 · 3 个\n每级特权 +1",
-      "supernova": "@:pricing.same"
+      "supernova": "@:membership.same"
     }
     },
     "levelQuota": {
@@ -1971,10 +1970,9 @@
       "create": "创建应用",
       "detail": "应用详情",
       "distribution": {
-        "title": "分发",
+        "title": "Solsynth Express",
         "description": "上传不可变版本、分配渠道并查看更新检查指标。",
         "detailDescription": "管理此产品的渠道、版本和更新活动。",
-        "releaseControl": "版本控制台",
         "channelsSummary": "可用发布渠道",
         "artifacts": "构件",
         "artifactsSummary": "当前渠道总数",
@@ -1994,6 +1992,7 @@
         "product": "产品",
         "productSlug": "产品标识",
         "productSlugHint": "仅使用小写字母、数字和连字符。",
+        "productSlugAuto": "根据产品名称自动生成，可手动修改。",
         "productMedia": "产品媒体",
         "productMediaHint": "在市场展示的图标、背景图和预览图。",
         "productIcon": "图标",

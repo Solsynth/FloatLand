@@ -47,6 +47,12 @@ export const useDeveloperStore = defineStore('developer', () => {
   const currentProject = ref<{ id: string; name: string; slug: string } | null>(null)
   const currentBot = ref<{ id: string; name: string; slug: string } | null>(null)
   const currentApp = ref<{ id: string; name: string; slug: string } | null>(null)
+  const currentDistributionProduct = ref<{ name: string; slug: string } | null>(null)
+
+  /** Breadcrumb context for `/developers/{pub}/distribution/{slug}`. */
+  function setDistributionProduct(product: { name: string; slug: string } | null) {
+    currentDistributionProduct.value = product
+  }
 
   async function loadProject(pubName: string, projectId: string) {
     try {
@@ -85,6 +91,7 @@ export const useDeveloperStore = defineStore('developer', () => {
     currentProject,
     currentBot,
     currentApp,
+    currentDistributionProduct,
     loadDevelopers,
     selectDeveloper,
     selectByPublisherName,
@@ -92,6 +99,7 @@ export const useDeveloperStore = defineStore('developer', () => {
     loadProject,
     loadBot,
     loadApp,
+    setDistributionProduct,
     clearProjectContext,
   }
 })

@@ -423,6 +423,9 @@
 
   @media (min-width: 1024px) {
     .feed-layout { grid-template-columns: minmax(0, 1fr) 26rem; column-gap: 1.5rem; }
+    /* Timeline: discovery rail + feed + compose rail. Both side columns share
+       1fr (equal width) and the feed gets 2fr so it stays the widest column. */
+    .feed-layout--three-col { grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) minmax(0, 1fr); }
     .feed-sidebar { display: block; }
   }
 
