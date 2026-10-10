@@ -240,6 +240,14 @@ const segmentLabels: Record<string, string> = {
   marketplace: "Plugin Marketplace",
 };
 
+const expressSectionKeys: Record<string, string> = {
+  releases: "developer.apps.distribution.tabs.releases",
+  channels: "developer.apps.distribution.tabs.channels",
+  metrics: "developer.apps.distribution.tabs.metrics",
+  keys: "developer.apps.distribution.tabs.keys",
+  settings: "developer.apps.distribution.tabs.settings",
+};
+
 const nickLabel = computed(
   () =>
     currentDeveloper.value?.publisher?.nick ||
@@ -293,6 +301,10 @@ const breadcrumbs = computed(() => {
       // Solsynth Express routes: brand the section, name the product.
       if (seg === "distribution") {
         parts.push({ label: t("developer.apps.distribution.title"), href });
+        continue;
+      }
+      if (segments[i - 2] === "distribution" && expressSectionKeys[seg]) {
+        parts.push({ label: t(expressSectionKeys[seg]), href });
         continue;
       }
       if (

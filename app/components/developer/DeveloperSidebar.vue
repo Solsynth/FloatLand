@@ -57,6 +57,8 @@ const pubName = computed(
   () => currentDeveloper?.value?.publisher?.name ?? null,
 );
 
+const isHydrated = useHydrated();
+
 const orgList = computed(
   () =>
     developers.value.map(mapOrg).filter(Boolean) as Array<{
@@ -119,8 +121,10 @@ const navGroups = computed(() => {
     },
   ];
 
-  // Publisher-specific nav
-  if (pubName.value) {
+  // Publisher-specific nav. The publisher is only known after the client-side
+  // developer fetch, so adding this group during hydration would pair its links
+  // with the server-rendered group's DOM nodes (stale href/icon). Wait for mount.
+  if (pubName.value && isHydrated.value) {
     const p = pubName.value;
     groups.unshift({
       label: t("nav.settings"),
@@ -128,7 +132,7 @@ const navGroups = computed(() => {
         {
           icon: IconSettings,
           label: t("developer.settings"),
-          href: `/developers/${p}/settings`,
+          href: `/developers/${encodeURIComponent(p)}/settings`,
         },
         {
           icon: IconRocket,

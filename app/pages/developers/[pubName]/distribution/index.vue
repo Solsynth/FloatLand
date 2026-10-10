@@ -20,7 +20,7 @@
         </div>
       </header>
 
-      <div v-if="isLoading" class="space-y-3" aria-busy="true" :aria-label="t('common.loading')">
+      <div v-if="!isHydrated || isLoading" class="space-y-3" aria-busy="true" :aria-label="t('common.loading')">
         <div v-for="item in 4" :key="item" class="flex items-center gap-4 rounded-box bg-base-100 p-4 shadow-sm sm:p-5">
           <div class="skeleton h-10 w-10 shrink-0 rounded-lg" />
           <div class="flex-1 space-y-2">
@@ -227,12 +227,17 @@ import { createDistributionProduct, deleteDistributionProduct, fetchDistribution
 definePageMeta({ middleware: 'developer' })
 
 const { t, locale, locales, localeProperties } = useI18n()
-const { $toast } = useNuxtApp()
+const toast = useAppToast()
+const isHydrated = useHydrated()
 const route = useRoute()
 const developer = useDeveloper()
 const { currentDeveloper } = developer
 const pubName = computed(() => route.params.pubName as string)
-const localizationLocales = computed(() => [localeProperties.value.language, locale.value])
+const localizationLocales = computed<readonly string[]>(() =>
+  [localeProperties.value.language, locale.value].filter(
+    (value): value is string => typeof value === 'string' && value.length > 0,
+  ),
+)
 const contentLocale = computed(() => localeProperties.value.language || locale.value || 'en-US')
 const contentLocaleOptions = computed(() =>
   (locales.value as Array<{ code: string; language?: string; name?: string }>).map((item) => ({
@@ -288,7 +293,7 @@ function localeName(localeCode: string) {
 
 function localeOptionsFor(entries: ProductLocalizationEntry[], index: number) {
   const used = new Set(entries.filter((_, entryIndex) => entryIndex !== index).map((entry) => entry.locale))
-  return contentLocaleOptions.value.filter((option) => option.code === entries[index].locale || !used.has(option.code))
+  return contentLocaleOptions.value.filter((option) => option.code === entries[index]?.locale || !used.has(option.code))
 }
 
 const availableProductLocaleOptions = computed(() => {
@@ -354,7 +359,7 @@ async function loadData() {
   } catch (error) {
     products.value = []
     loadError.value = true
-    $toast.error(error instanceof Error ? error.message : t('developer.apps.distribution.requestFailed'))
+    toast.error(error instanceof Error ? error.message : t('developer.apps.distribution.requestFailed'))
   } finally {
     isLoading.value = false
   }
@@ -362,7 +367,7 @@ async function loadData() {
 
 async function createProduct() {
   if (!productForm.localizations.length || productForm.localizations.some((entry) => !entry.name.trim() || !entry.description.trim())) {
-    $toast.error(t('developer.apps.distribution.localizationRequired'))
+    toast.error(t('developer.apps.distribution.localizationRequired'))
     return
   }
   isCreatingProduct.value = true
@@ -379,10 +384,10 @@ async function createProduct() {
     })
     products.value = [...products.value, product]
     createDrawerOpen.value = false
-    $toast.success(t('developer.apps.distribution.productCreated'))
+    toast.success(t('developer.apps.distribution.productCreated'))
     await navigateTo(productPath(product.slug))
   } catch (error) {
-    $toast.error(error instanceof Error ? error.message : t('developer.apps.distribution.requestFailed'))
+    toast.error(error instanceof Error ? error.message : t('developer.apps.distribution.requestFailed'))
   } finally {
     isCreatingProduct.value = false
   }
@@ -398,9 +403,9 @@ async function deleteProduct(product: DistributionProduct) {
   try {
     await deleteDistributionProduct(product.id)
     products.value = products.value.filter((item) => item.id !== product.id)
-    $toast.success(t('developer.apps.distribution.productDeleted'))
+    toast.success(t('developer.apps.distribution.productDeleted'))
   } catch (error) {
-    $toast.error(error instanceof Error ? error.message : t('developer.apps.distribution.requestFailed'))
+    toast.error(error instanceof Error ? error.message : t('developer.apps.distribution.requestFailed'))
   } finally {
     deletingProductId.value = null
   }

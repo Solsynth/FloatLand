@@ -1973,6 +1973,22 @@
       "detail": "App Detail",
       "distribution": {
         "title": "Solsynth Express",
+        "tabs": {
+          "overview": "Overview",
+          "releases": "Releases",
+          "channels": "Channels",
+          "metrics": "Metrics",
+          "keys": "Upload keys",
+          "settings": "Settings"
+        },
+        "hints": {
+          "overview": "Product status at a glance.",
+          "releases": "Draft, publish, and retire builds for the selected channel.",
+          "channels": "Release lanes your update clients can subscribe to.",
+          "metrics": "Update checks reported by installed clients.",
+          "keys": "Credentials for CI pipelines that upload artifacts.",
+          "settings": "Name, localized metadata, media, and access."
+        },
         "description": "Upload immutable releases, assign channels, and review update-check metrics.",
         "detailDescription": "Manage channels, releases, and update activity for this product.",
         "channelsSummary": "Available release lanes",
@@ -1992,6 +2008,8 @@
         "publisherHint": "Uses your signed-in developer session.",
         "products": "Products",
         "product": "Product",
+        "productName": "Name",
+        "productDescription": "Description",
         "productSlug": "Product slug",
         "productSlugHint": "Use lowercase letters, numbers, and hyphens.",
         "productSlugAuto": "Generated from the product name — edit to override.",
@@ -2068,6 +2086,8 @@
         "immutableHint": "Yanked releases cannot be edited.",
         "version": "Version",
         "releaseNotes": "Release notes",
+        "releaseTitle": "Title",
+        "releaseTitleRequired": "Add a title for at least one language.",
         "releaseAttachments": "Attachments",
         "releaseAttachmentsHint": "Banners, screenshots, or documents delivered with the release.",
         "appId": "App ID",

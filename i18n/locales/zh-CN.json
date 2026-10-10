@@ -1971,6 +1971,22 @@
       "detail": "应用详情",
       "distribution": {
         "title": "Solsynth Express",
+        "tabs": {
+          "overview": "概览",
+          "releases": "版本",
+          "channels": "渠道",
+          "metrics": "指标",
+          "keys": "上传密钥",
+          "settings": "设置"
+        },
+        "hints": {
+          "overview": "产品状态一览。",
+          "releases": "为所选渠道创建、发布与撤回版本。",
+          "channels": "客户端可订阅的发布渠道。",
+          "metrics": "已安装客户端上报的更新检查。",
+          "keys": "用于在 CI 中上传构件的凭证。",
+          "settings": "名称、本地化信息、媒体与访问。"
+        },
         "description": "上传不可变版本、分配渠道并查看更新检查指标。",
         "detailDescription": "管理此产品的渠道、版本和更新活动。",
         "channelsSummary": "可用发布渠道",
@@ -1990,6 +2006,8 @@
         "publisherHint": "使用当前登录的开发者会话。",
         "products": "产品",
         "product": "产品",
+        "productName": "名称",
+        "productDescription": "描述",
         "productSlug": "产品标识",
         "productSlugHint": "仅使用小写字母、数字和连字符。",
         "productSlugAuto": "根据产品名称自动生成，可手动修改。",
@@ -2066,6 +2084,8 @@
         "immutableHint": "被撤回的版本无法编辑。",
         "version": "版本号",
         "releaseNotes": "版本说明",
+        "releaseTitle": "标题",
+        "releaseTitleRequired": "请至少为一种语言填写版本标题。",
         "releaseAttachments": "附件",
         "releaseAttachmentsHint": "随版本一起展示的横幅、截图或文档。",
         "appId": "应用 ID",

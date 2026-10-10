@@ -18,7 +18,12 @@
 			</div>
 		</div>
 
-		<div class="grid min-w-0 xl:grid-cols-[minmax(0,1fr)_20rem] xl:gap-x-6">
+		<div class="feed-layout feed-layout--three-col">
+			<!-- Left column: discovery rail (categories + tags) -->
+			<aside class="feed-sidebar">
+				<ExploreDiscovery />
+			</aside>
+
 			<!-- Main Content -->
 			<div class="min-w-0">
 				<ConfuseSpinner
@@ -301,8 +306,8 @@
 				</div>
 			</div>
 
-			<!-- Right Sidebar - Publisher Info (20rem, matches ExploreSidebar rail) -->
-			<aside class="hidden w-full self-start sticky top-20 xl:block">
+			<!-- Right column: publisher rail (same sticky shell as the timeline) -->
+			<aside class="feed-sidebar">
 				<PublisherSidebar
 					v-if="post?.publisher"
 					:publisher="post?.publisher"
