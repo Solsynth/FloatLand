@@ -454,6 +454,11 @@ let qrFinishing = false;
 let challengePollSource: EventSource | null = null;
 let challengePollFinished = false;
 
+// Set by the first completion path to reach the token exchange. Every other
+// completion path — and both poll loops — stands down until it resolves, so a
+// finished challenge is never exchanged twice.
+let loginCompleting = false;
+
 const qrImageUrl = computed(() => {
     if (!qrData.value) return "";
     return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrData.value)}`;
@@ -540,25 +545,80 @@ function stopQrLogin() {
     focusAccountInput();
 }
 
-async function finishQrLogin(authChallengeId: string) {
-    if (qrFinishing) return;
-    qrFinishing = true;
-    stopQrPolling();
-    submitting.value = true;
-    error.value = null;
+/** Where the page should land when the token exchange fails. */
+type LoginFallback = "check" | "factors" | "qr";
+
+/**
+ * Nuxt refuses absolute redirect targets (`NUXT_E2001`) unless they are marked
+ * external, and `?redirect=` is user-controllable, so an absolute target is only
+ * honoured when it points back at this origin. Anything else keeps Nuxt's
+ * refusal rather than turning the login page into an open redirect.
+ */
+function resolveRedirectTarget(raw: string | null | undefined): string {
+    if (!raw) return "/";
+    if (import.meta.server) return raw;
     try {
-        step.value = "success";
-        const redirectUrl = (route.query.redirect as string) || getRedirect();
-        await exchangeToken(authChallengeId);
-        clearLoginFlow();
-        clearRedirect();
-        router.replace({ query: {} });
-        navigateTo(redirectUrl || "/");
-    } catch (e) {
-        error.value = e instanceof Error ? e.message : t("auth.verificationFailed");
+        const url = new URL(raw, window.location.origin);
+        if (url.origin === window.location.origin) {
+            return `${url.pathname}${url.search}${url.hash}` || "/";
+        }
+    } catch {
+        // Not a URL at all — let the router treat it as a path.
+    }
+    return raw;
+}
+
+/** Put the page back somewhere the user can act after a failed exchange. */
+function restoreAfterFailedLogin(fallback: LoginFallback) {
+    if (fallback === "qr") {
         step.value = "qr";
         qrStatus.value = "expired";
         qrFinishing = false;
+        return;
+    }
+    if (fallback === "check" && auth.selectedFactor.value) {
+        step.value = "check";
+        return;
+    }
+    step.value = auth.factors.value.length > 0 ? "picker" : "lookup";
+}
+
+/**
+ * Exchange a finished challenge for a session and leave the page.
+ *
+ * Every completion route — typed factor, passkey, cross-device approval, QR
+ * approval — can fire while the challenge-poll stream is still open, and a
+ * challenge reports back as "expired" the moment its token has been exchanged.
+ * Closing the watchers *before* the exchange, and letting only the first caller
+ * through, is what stops a stale frame from resetting the page to "lookup" and
+ * aborting the redirect that is already in flight.
+ */
+async function completeLogin(challengeId: string, fallback: LoginFallback) {
+    if (loginCompleting) return;
+    loginCompleting = true;
+
+    stopChallengePolling();
+    if (fallback === "qr") {
+        // Also marks the QR poll loop as done so it cannot restart itself.
+        qrFinishing = true;
+        stopQrPolling();
+    }
+
+    submitting.value = true;
+    error.value = null;
+    step.value = "success";
+
+    try {
+        const redirectUrl = (route.query.redirect as string) || getRedirect();
+        await exchangeToken(challengeId);
+        clearLoginFlow();
+        clearRedirect();
+        await router.replace({ query: {} });
+        await navigateTo(resolveRedirectTarget(redirectUrl));
+    } catch (e) {
+        error.value = e instanceof Error ? e.message : t("auth.verificationFailed");
+        loginCompleting = false;
+        restoreAfterFailedLogin(fallback);
     } finally {
         submitting.value = false;
     }
@@ -575,7 +635,7 @@ async function pollQrStatus() {
         qrStatus.value = status;
 
         if (status === "approved") {
-            await finishQrLogin(statusRes.authChallengeId || authId);
+            await completeLogin(statusRes.authChallengeId || authId, "qr");
         } else if (status === "declined" || status === "expired") {
             stopQrPolling();
         }
@@ -673,7 +733,7 @@ function startChallengePolling(challengeId: string) {
         }
 
         if (data.status === "approved") {
-            void finishApprovedChallenge(challengeId);
+            void completeLogin(challengeId, "factors");
         } else if (data.status === "declined") {
             stopChallengePolling();
             error.value = t("auth.promptDeclined");
@@ -700,28 +760,6 @@ function startChallengePolling(challengeId: string) {
             error.value = t("auth.promptConnectionLost");
         }
     };
-}
-
-/** Complete the login a trusted device just approved. */
-async function finishApprovedChallenge(challengeId: string) {
-    stopChallengePolling();
-    submitting.value = true;
-    error.value = null;
-
-    try {
-        step.value = "success";
-        const redirectUrl = (route.query.redirect as string) || getRedirect();
-        await exchangeToken(challengeId);
-        clearLoginFlow();
-        clearRedirect();
-        router.replace({ query: {} });
-        navigateTo(redirectUrl || "/");
-    } catch (e) {
-        error.value = e instanceof Error ? e.message : t("auth.verificationFailed");
-        step.value = auth.factors.value.length > 0 ? "picker" : "lookup";
-    } finally {
-        submitting.value = false;
-    }
 }
 
 /**
@@ -851,22 +889,13 @@ async function handleVerify() {
                 step.value = "picker";
             }
         } else {
-            // Login complete - show success and redirect
-            step.value = "success";
-            const code = auth.challenge.value!.id;
-            // Get redirect URL from query or sessionStorage
-            const redirectUrl = (route.query.redirect as string) || getRedirect();
-            await exchangeToken(code);
-            clearLoginFlow();
-            clearRedirect();
-            router.replace({ query: {} });
-            // Redirect to original URL if redirect param exists, otherwise go home
-            navigateTo(redirectUrl || "/");
+            // Login complete — exchange the challenge and leave the page.
+            await completeLogin(auth.challenge.value!.id, "check");
         }
     } catch (e) {
         error.value = e instanceof Error ? e.message : t("auth.verificationFailed");
     } finally {
-        submitting.value = false;
+        if (!loginCompleting) submitting.value = false;
     }
 }
 
@@ -896,13 +925,7 @@ async function finishLoginFromChallenge(result: SnAuthChallenge) {
         return;
     }
 
-    step.value = "success";
-    const redirectUrl = (route.query.redirect as string) || getRedirect();
-    await exchangeToken(result.id);
-    clearLoginFlow();
-    clearRedirect();
-    router.replace({ query: {} });
-    navigateTo(redirectUrl || "/");
+    await completeLogin(result.id, auth.selectedFactor.value ? "check" : "factors");
 }
 
 async function handlePasskeyAuth() {
@@ -955,7 +978,7 @@ async function handlePasskeyAuth() {
     } catch (e) {
         error.value = e instanceof Error ? e.message : t("auth.verificationFailed");
     } finally {
-        submitting.value = false;
+        if (!loginCompleting) submitting.value = false;
     }
 }
 
@@ -1013,7 +1036,7 @@ async function handleDiscoverablePasskeyLogin() {
     } catch (e) {
         error.value = e instanceof Error ? e.message : t("auth.verificationFailed");
     } finally {
-        submitting.value = false;
+        if (!loginCompleting) submitting.value = false;
         discoverablePasskeyBusy.value = false;
     }
 }
