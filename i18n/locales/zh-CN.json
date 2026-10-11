@@ -110,6 +110,14 @@
     "error": "发生错误",
     "remove": "移除"
   },
+  "lightbox": {
+    "viewer": "媒体查看器",
+    "download": "下载",
+    "zoomIn": "放大",
+    "zoomOut": "缩小",
+    "loadFailed": "文件加载失败。",
+    "openInNewTab": "在新标签页打开"
+  },
   "drive": {
     "title": "Solar Network 云盘",
     "description": "管理你在 Solar Network 上的文件。",

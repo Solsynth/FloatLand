@@ -103,6 +103,14 @@
     "error": "An error occurred",
     "remove": "Remove"
   },
+  "lightbox": {
+    "viewer": "Media viewer",
+    "download": "Download",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "loadFailed": "This file failed to load.",
+    "openInNewTab": "Open in a new tab"
+  },
   "drive": {
     "title": "Solar Network Drive",
     "description": "Manage your files on Solar Network.",

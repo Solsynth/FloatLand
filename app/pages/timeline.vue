@@ -454,8 +454,6 @@ const auth = useAuth();
 const { isAuthenticated, user } = auth;
 
 const PAGE_SIZE = 20;
-const MAX_RETRY_ATTEMPTS = 1;
-const RETRY_ADJUSTMENT_MS = 10_000;
 
 const timelineEvents = useState<SnTimelineEvent[]>("home-timeline", () => []);
 const cursor = ref<string | null>(null);
@@ -784,21 +782,46 @@ watch(
   (data) => {
     if (data?.items) {
       timelineEvents.value = data.items;
-      cursor.value = data.nextCursor;
+      cursor.value = nextCursorFrom(data.items);
       timelineMode.value = data.mode;
-      hasMore.value = data.nextCursor !== null;
+      hasMore.value = cursor.value !== null;
     }
   },
   { immediate: true },
 );
 
-async function fetchTimelinePage(
-  pageCursor: string | null,
-  retryCount = 0,
-): Promise<{
+/**
+ * Cursor for the page after `items`: the oldest event `createdAt`.
+ *
+ * The timeline API's cursor is an exclusive `created_at` cut and pages come
+ * back newest-first, so the minimum `createdAt` of a page continues the feed
+ * with no skips and no duplicates. Deriving it locally keeps pagination
+ * independent of the server-provided `nextCursor` (which is the same value,
+ * so nothing is lost).
+ *
+ * The raw string is returned rather than a re-serialized date: API timestamps
+ * carry microsecond precision, and `toISOString()` would floor them to
+ * milliseconds, silently dropping events inside that sub-millisecond window.
+ */
+function nextCursorFrom(items: SnTimelineEvent[]): string | null {
+  let oldestTime = Number.POSITIVE_INFINITY;
+  let oldest = "";
+  for (const item of items) {
+    const timestamp = Date.parse(item.createdAt);
+    // `<=` matters: microseconds are below `Date.parse` resolution, and on a
+    // newest-first page the later entry of an equal-millisecond pair carries
+    // the smaller (exact) timestamp, which is the safe cut.
+    if (!Number.isNaN(timestamp) && timestamp <= oldestTime) {
+      oldestTime = timestamp;
+      oldest = item.createdAt;
+    }
+  }
+  return oldest || null;
+}
+
+async function fetchTimelinePage(pageCursor: string | null): Promise<{
   items: SnTimelineEvent[];
   nextCursor: string | null;
-  mode: string;
 }> {
   const result = await fetchTimeline(PAGE_SIZE, {
     cursor: pageCursor,
@@ -807,41 +830,34 @@ async function fetchTimelinePage(
     aggressive: true,
   });
 
+  if (result?.mode) {
+    timelineMode.value = result.mode;
+  }
+
   const items = result?.items ?? [];
-  const nextCursor = result?.nextCursor ?? null;
+  const nextCursor = nextCursorFrom(items);
+
+  // A cursor must move strictly backwards. If the API echoes the cursor back
+  // (it ignored the cut), end the feed instead of letting the infinite-scroll
+  // observer spin on an unchanging cursor. Compared as strings: `Date.parse`
+  // only resolves to milliseconds, so timestamps a few microseconds apart
+  // would falsely read as "no progress" and truncate the feed.
+  if (nextCursor && nextCursor === pageCursor) {
+    return { items: [], nextCursor: null };
+  }
 
   // Transparently skip pages that contain no post events (presence/status/
   // discovery only) so they never advance or end pagination — same behavior
   // as the Solian timeline pod (posts_pod.dart:266-269).
   const hasPosts = items.some((e) => e.type.startsWith("posts.new"));
   if (!hasPosts && nextCursor) {
-    return fetchTimelinePage(nextCursor, retryCount);
+    return fetchTimelinePage(nextCursor);
   }
 
   const existing = new Set(timelineEvents.value.map((e) => e.id));
   const uniqueItems = items.filter((e) => !existing.has(e.id));
 
-  if (result?.mode) {
-    timelineMode.value = result.mode;
-  }
-
-  if (
-    uniqueItems.length === 0 &&
-    nextCursor &&
-    retryCount < MAX_RETRY_ATTEMPTS
-  ) {
-    const prev = Date.parse(nextCursor);
-    if (!Number.isNaN(prev)) {
-      const adjusted = new Date(prev - RETRY_ADJUSTMENT_MS).toISOString();
-      return fetchTimelinePage(adjusted, retryCount + 1);
-    }
-  }
-
-  return {
-    items: uniqueItems,
-    nextCursor,
-    mode: result?.mode ?? timelineMode.value,
-  };
+  return { items: uniqueItems, nextCursor };
 }
 
 const sentinelVisible = ref(false);
@@ -865,16 +881,11 @@ async function loadMore() {
   try {
     const result = await fetchTimelinePage(cursor.value);
 
-    if (result.items.length === 0) {
-      hasMore.value = result.nextCursor !== null;
-      cursor.value = result.nextCursor;
-      if (!result.nextCursor) hasMore.value = false;
-      return;
-    }
-
-    timelineEvents.value = [...timelineEvents.value, ...result.items];
     cursor.value = result.nextCursor;
     hasMore.value = result.nextCursor !== null;
+    if (result.items.length > 0) {
+      timelineEvents.value = [...timelineEvents.value, ...result.items];
+    }
   } catch (e) {
     console.error("Failed to load more timeline events:", e);
   } finally {

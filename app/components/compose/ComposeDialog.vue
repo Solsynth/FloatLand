@@ -156,11 +156,12 @@
           <!-- Body -->
           <div class="min-h-0 flex-1 overflow-y-auto">
             <div v-if="showPreview" class="p-4 sm:p-5">
-              <div
+              <MarkdownContent
                 v-if="content.trim().length > 0"
+                :content="content"
+                embed-posts
                 class="prose prose-sm max-w-none"
                 @click="handleMarkdownClick"
-                v-html="renderedPreviewContent"
               />
               <div
                 v-else
@@ -879,7 +880,6 @@ import {
   type PostCategory,
   type PostTag,
 } from '~/utils/api'
-import { renderMarkdown } from '~/utils/markdown'
 
 interface AutocompleteItem {
   type: string
@@ -993,10 +993,6 @@ const submitButtonText = computed(() => {
   if (originalPost.value) return t('compose.save')
   return t('compose.post')
 })
-
-const renderedPreviewContent = computed(() =>
-  renderMarkdown(content.value || ''),
-)
 
 const filteredDrafts = computed(() => {
   const q = draftSearch.value.trim().toLowerCase()

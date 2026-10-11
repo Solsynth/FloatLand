@@ -236,7 +236,7 @@ function scrollBy(direction: number) {
 	});
 }
 
-// Open the shared LightGallery viewer for every supported media attachment.
+// Open the shared lightbox for every supported media attachment.
 function openViewer(index: number) {
 	const attachment = displayAttachments.value[index];
 	if (!attachment) return;

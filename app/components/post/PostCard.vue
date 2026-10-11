@@ -265,12 +265,12 @@
         <h3 v-else-if="post.title" class="mb-2 line-clamp-2 text-base font-bold">
           {{ post.title }}
         </h3>
-        <!-- eslint-disable-next-line vue/no-v-html -->
-        <div
+        <MarkdownContent
+          :content="displayContent"
+          :embed-posts="isDetail"
           class="prose prose-sm max-w-none break-words prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-a:break-all prose-blockquote:border-l-4 prose-blockquote:border-primary/30 prose-blockquote:pl-4 prose-blockquote:italic prose-code:bg-base-200 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-primary prose-headings:mb-2 prose-headings:mt-4 prose-ol:my-1.5 prose-p:my-1.5 prose-pre:bg-base-200 prose-pre:overflow-x-auto prose-pre:text-sm prose-ul:my-1.5"
           :class="{ 'prose-lg': isArticle && isDetail }"
           @click="handleMarkdownClick"
-          v-html="renderedContent"
         />
       </div>
 
@@ -575,7 +575,6 @@ const displayContent = computed(() => {
   const content = props.post.content ?? "";
   return props.post.isTruncated ? `${content}...` : content;
 });
-const renderedContent = computed(() => renderMarkdown(displayContent.value));
 
 // Handle markdown element clicks
 const { open: openLightbox } = useLightbox();
