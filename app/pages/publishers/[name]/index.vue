@@ -186,6 +186,33 @@
             @reply="handleReply"
           />
 
+          <!-- Collections -->
+          <section
+            v-if="collections.length > 0"
+            aria-labelledby="publisher-collections-title"
+            class="overflow-hidden rounded-box bg-base-100 shadow-sm"
+          >
+            <div class="flex flex-wrap items-end justify-between gap-3 border-b border-base-300/60 px-4 py-4">
+              <div>
+                <p class="text-xs font-bold uppercase tracking-[0.16em] text-primary">
+                  {{ t('publisher.collections') }}
+                </p>
+                <h2 id="publisher-collections-title" class="mt-1 text-lg font-bold">
+                  {{ t('publisher.collectionsTitle') }}
+                </h2>
+              </div>
+              <span class="text-xs text-base-content/45">{{ t('publisher.collectionsHint') }}</span>
+            </div>
+            <div class="grid gap-3 p-4 sm:grid-cols-2">
+              <CollectionCard
+                v-for="collection in collections"
+                :key="collection.slug"
+                :collection="collection"
+                @select="openCollection"
+              />
+            </div>
+          </section>
+
           <!-- Posts Section with Filters -->
           <section aria-labelledby="publisher-feed-title" class="space-y-4">
             <div class="overflow-hidden rounded-box bg-base-100 shadow-sm">
@@ -382,16 +409,23 @@
           </div>
         </div>
       </div>
+
+      <CollectionDetailDrawer
+        v-model:open="collectionDrawerOpen"
+        :publisher-name="publisherName"
+        :collection="activeCollection"
+      />
     </div>
   </NuxtLayout>
 </template>
 
 <script setup lang="ts">
-import type { Post, Publisher } from "~/types/post";
+import type { Post, PostCollection, Publisher } from "~/types/post";
 import type { HeatmapData } from "~/utils/api";
 import {
   fetchPublisher,
   fetchPublisherPosts,
+  fetchPublisherCollections,
   fetchPublisherHeatmap,
   fetchPublisherPinnedPosts,
   fetchPublisherSubscriptionStatus,
@@ -404,11 +438,15 @@ import { IconSearch } from "#components";
 
 const route = useRoute();
 const auth = useAuth();
+const { t } = useI18n();
 const publisherName = computed(() => route.params.name as string);
 
 // State
 const publisher = ref<Publisher | null>(null);
 const pinnedPosts = ref<Post[]>([]);
+const collections = ref<PostCollection[]>([]);
+const activeCollection = ref<PostCollection | null>(null);
+const collectionDrawerOpen = ref(false);
 const posts = ref<Post[]>([]);
 const heatmap = ref<HeatmapData | null>(null);
 const subStatus = ref<{
@@ -482,6 +520,13 @@ const { data: heatmapData } = await useAsyncData(
   { watch: [publisherName] }
 );
 
+// Fetch collections
+const { data: collectionsData } = await useAsyncData(
+  `publisher-collections-${publisherName.value}`,
+  () => fetchPublisherCollections(publisherName.value),
+  { watch: [publisherName], default: () => [] }
+);
+
 // Watch and update refs
 watch(publisherData, (data) => {
   if (data) {
@@ -500,6 +545,10 @@ watch(heatmapData, (data) => {
     heatmap.value = data;
     heatmapStatus.value = 'success';
   }
+}, { immediate: true });
+
+watch(collectionsData, (data) => {
+  if (data) collections.value = data;
 }, { immediate: true });
 
 watch(publisherError, (err) => {
@@ -713,6 +762,11 @@ async function shareProfile() {
       await navigator.clipboard.writeText(url);
     }
   }
+}
+
+function openCollection(collection: PostCollection) {
+  activeCollection.value = collection;
+  collectionDrawerOpen.value = true;
 }
 
 function handleBoost(_post: Post) {

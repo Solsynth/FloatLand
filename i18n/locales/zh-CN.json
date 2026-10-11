@@ -1858,7 +1858,17 @@
     "reportSubmitted": "感谢！您的举报已提交。",
     "reportFailed": "提交举报失败",
     "replyNoPublisher": "没有可用于回复的发布者。",
-    "replyFailed": "提交回复失败"
+    "replyFailed": "提交回复失败",
+    "collections": {
+      "title": "合集",
+      "hint": "由发布者整理",
+      "more": "还有 {count} 个",
+      "manage": "管理合集",
+      "empty": "还没有合集。",
+      "postsEmpty": "这个合集里还没有帖子。",
+      "postsFailed": "加载合集失败。",
+      "updateFailed": "更新合集失败"
+    }
   },
   "categories": {
     "title": "分类与标签",
@@ -1886,7 +1896,10 @@
     "viewProfile": "查看资料",
     "posts": "帖子",
     "share": "分享",
-    "seoTitle": "发布者"
+    "seoTitle": "发布者",
+    "collections": "合集",
+    "collectionsTitle": "精选合集",
+    "collectionsHint": "按主题整理的帖子"
   },
   "cloudFilePicker": {
     "title": "选择文件",

@@ -14,12 +14,10 @@ import type {
   SnSurveyAnswer,
   SnSurveySubscription,
   SnWebFeed,
-  SnPostCollection,
   PublisherFeatureFlags,
   PublisherLeaderboardEntry,
   SnPublisherVerifiedDomain,
 } from '~/types/creator'
-import type { Post } from '~/types/post'
 import { apiFetch, safeJsonParse } from '~/utils/api'
 import { camelToSnake } from '~/utils/case'
 
@@ -503,125 +501,6 @@ export async function batchUpdateStickers(
     {
       method: 'PATCH',
       body: JSON.stringify(camelToSnake({ stickerIds, ...data })),
-    },
-  )
-}
-
-// ==================== Collections ====================
-
-export async function fetchCollections(
-  publisherName: string,
-): Promise<SnPostCollection[]> {
-  const response = await apiFetch(
-    `/sphere/publishers/${encodeURIComponent(publisherName)}/collections`,
-  )
-  return safeJsonParse<SnPostCollection[]>(response)
-}
-
-export async function createCollection(
-  publisherName: string,
-  data: {
-    slug: string
-    name?: string | null
-    description?: string | null
-    backgroundId?: string | null
-    iconId?: string | null
-  },
-): Promise<SnPostCollection> {
-  const response = await apiFetch(
-    `/sphere/publishers/${encodeURIComponent(publisherName)}/collections`,
-    {
-      method: 'POST',
-      body: JSON.stringify(camelToSnake(data)),
-    },
-  )
-  return safeJsonParse<SnPostCollection>(response)
-}
-
-export async function updateCollection(
-  publisherName: string,
-  slug: string,
-  data: {
-    name?: string | null
-    description?: string | null
-    backgroundId?: string | null
-    iconId?: string | null
-    clearBackground?: boolean
-    clearIcon?: boolean
-  },
-): Promise<SnPostCollection> {
-  const response = await apiFetch(
-    `/sphere/publishers/${encodeURIComponent(publisherName)}/collections/${encodeURIComponent(slug)}`,
-    {
-      method: 'PATCH',
-      body: JSON.stringify(camelToSnake(data)),
-    },
-  )
-  return safeJsonParse<SnPostCollection>(response)
-}
-
-export async function deleteCollection(
-  publisherName: string,
-  slug: string,
-): Promise<void> {
-  await apiFetch(
-    `/sphere/publishers/${encodeURIComponent(publisherName)}/collections/${encodeURIComponent(slug)}`,
-    { method: 'DELETE' },
-  )
-}
-
-export async function fetchCollectionPosts(
-  publisherName: string,
-  slug: string,
-  offset = 0,
-  take = 20,
-): Promise<{ items: Post[]; total: number }> {
-  const response = await apiFetch(
-    `/sphere/publishers/${encodeURIComponent(publisherName)}/collections/${encodeURIComponent(slug)}/posts?offset=${offset}&take=${take}`,
-  )
-  const total = parseInt(response.headers.get('x-total') || '0', 10)
-  const items = await safeJsonParse<Post[]>(response)
-  return { items, total }
-}
-
-export async function reorderCollectionPosts(
-  publisherName: string,
-  slug: string,
-  postIds: string[],
-): Promise<void> {
-  await apiFetch(
-    `/sphere/publishers/${encodeURIComponent(publisherName)}/collections/${encodeURIComponent(slug)}/posts/order`,
-    {
-      method: 'PATCH',
-      body: JSON.stringify({ postIds }),
-    },
-  )
-}
-
-export async function batchAddPostsToCollection(
-  publisherName: string,
-  slug: string,
-  postIds: string[],
-): Promise<void> {
-  await apiFetch(
-    `/sphere/publishers/${encodeURIComponent(publisherName)}/collections/${encodeURIComponent(slug)}/posts`,
-    {
-      method: 'POST',
-      body: JSON.stringify({ postIds }),
-    },
-  )
-}
-
-export async function batchRemovePostsFromCollection(
-  publisherName: string,
-  slug: string,
-  postIds: string[],
-): Promise<void> {
-  await apiFetch(
-    `/sphere/publishers/${encodeURIComponent(publisherName)}/collections/${encodeURIComponent(slug)}/posts`,
-    {
-      method: 'DELETE',
-      body: JSON.stringify({ postIds }),
     },
   )
 }

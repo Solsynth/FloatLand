@@ -74,12 +74,21 @@
             </button>
           </div>
         </template>
-        <p v-if="detailCollection?.description" class="text-sm text-base-content/70 mb-4">
+        <div v-if="detailCollection?.background" class="mb-4 aspect-[16/7] overflow-hidden rounded-box">
+          <FileImage
+            :file="detailCollection.background"
+            :alt="detailCollection.name || detailCollection.slug"
+            class="h-full w-full object-cover"
+          />
+        </div>
+        <p v-if="detailCollection?.description" class="mb-4 text-sm text-base-content/70">
           {{ detailCollection.description }}
         </p>
-        <div class="text-center py-4 text-base-content/50 text-sm">
-          {{ t('creator.posts.title') }}
-        </div>
+        <CollectionPostList
+          v-if="detailCollection"
+          :publisher-name="pubName"
+          :slug="detailCollection.slug"
+        />
       </AdminDrawer>
     </div>
 
@@ -93,10 +102,12 @@ import {
   IconChevronRight,
   IconPencil,
   IconTrash,
-  IconX,
 } from '#components'
-import type { SnPostCollection } from '~/types/creator'
-import { fetchCollections, deleteCollection } from '~/utils/creator'
+import type { PostCollection } from '~/types/post'
+import {
+  fetchPublisherCollections,
+  deletePublisherCollection,
+} from '~/utils/api'
 
 definePageMeta({ middleware: 'creator' })
 
@@ -113,15 +124,15 @@ useSolarSeo({ title: computed(() => `${t('creator.collections.title')} - ${curre
 
 const { data: collections, status, error, refresh } = await useAsyncData(
   `creator-collections-${pubName.value}`,
-  () => fetchCollections(pubName.value),
+  () => fetchPublisherCollections(pubName.value),
 )
 
-const editingCollection = ref<SnPostCollection | null>(null)
-const detailCollection = ref<SnPostCollection | null>(null)
+const editingCollection = ref<PostCollection | null>(null)
+const detailCollection = ref<PostCollection | null>(null)
 const editorModalOpen = ref(false)
 const detailModalOpen = ref(false)
 
-function openEditor(col: SnPostCollection | null) {
+function openEditor(col: PostCollection | null) {
   editingCollection.value = col
   editorModalOpen.value = true
 }
@@ -130,7 +141,7 @@ function closeEditor() {
   editorModalOpen.value = false
 }
 
-function openDetail(col: SnPostCollection) {
+function openDetail(col: PostCollection) {
   detailCollection.value = col
   detailModalOpen.value = true
 }
@@ -148,7 +159,7 @@ async function handleDelete() {
   if (!detailCollection.value) return
   if (!(await useAlert().confirm('Confirm', t('creator.collections.deleteConfirm')))) return
   try {
-    await deleteCollection(pubName.value, detailCollection.value.slug)
+    await deletePublisherCollection(pubName.value, detailCollection.value.slug)
     closeDetail()
     refresh()
   } catch (e) {

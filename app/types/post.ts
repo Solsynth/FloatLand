@@ -56,6 +56,23 @@ export const PublisherSchema = z.object({
 });
 export type Publisher = z.infer<typeof PublisherSchema>;
 
+/**
+ * A publisher-scoped, manually curated set of posts. Post payloads carry the
+ * subset owned by the post's own publisher as `publisher_collections`.
+ */
+export const PostCollectionSchema = z.object({
+  id: z.string(),
+  slug: z.string(),
+  name: z.string().nullable(),
+  description: z.string().nullable(),
+  publisherId: z.string(),
+  background: FileAttachmentSchema.nullable().optional(),
+  icon: FileAttachmentSchema.nullable().optional(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+export type PostCollection = z.infer<typeof PostCollectionSchema>;
+
 export const TagSchema = z.object({
   id: z.string(),
   slug: z.string(),
@@ -92,6 +109,11 @@ export interface Post {
   publisher: Publisher
   attachments: FileAttachment[]
   tags: Tag[]
+  /**
+   * Collections owned by the post's publisher that contain this post.
+   * Hydrated by the backend on post read endpoints (`publisher_collections`).
+   */
+  publisherCollections?: PostCollection[] | null
   repliedPost: Post | null
   forwardedPost: Post | null
   /** Actor whose boost surfaced this post in a feed (posts.new.boosted). */
@@ -153,6 +175,7 @@ export const PostSchema: z.ZodType<Post> = z.lazy(() =>
     publisher: PublisherSchema,
     attachments: z.array(FileAttachmentSchema),
     tags: z.array(TagSchema),
+    publisherCollections: z.array(PostCollectionSchema).nullable().optional(),
     repliedPost: PostSchema.nullable(),
     forwardedPost: PostSchema.nullable(),
     boostedBy: AccountSchema.nullable().optional(),

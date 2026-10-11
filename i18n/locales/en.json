@@ -1860,7 +1860,17 @@
     "reportSubmitted": "Thanks! Your report has been submitted.",
     "reportFailed": "Failed to submit the report",
     "replyNoPublisher": "No publisher available to post this reply.",
-    "replyFailed": "Failed to submit the reply"
+    "replyFailed": "Failed to submit the reply",
+    "collections": {
+      "title": "Collections",
+      "hint": "Curated by the publisher",
+      "more": "+{count} more",
+      "manage": "Manage collections",
+      "empty": "No collections yet.",
+      "postsEmpty": "Nothing in this collection yet.",
+      "postsFailed": "Failed to load this collection.",
+      "updateFailed": "Failed to update collections"
+    }
   },
   "categories": {
     "title": "Categories & Tags",
@@ -1888,7 +1898,10 @@
     "viewProfile": "View Profile",
     "posts": "Posts",
     "share": "Share",
-    "seoTitle": "Publisher"
+    "seoTitle": "Publisher",
+    "collections": "Collections",
+    "collectionsTitle": "Curated collections",
+    "collectionsHint": "Posts grouped into topics"
   },
   "cloudFilePicker": {
     "title": "Select File",

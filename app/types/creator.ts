@@ -193,17 +193,6 @@ export interface SnWebFeed {
   deletedAt: string | null
 }
 
-export interface SnPostCollection {
-  slug: string
-  name: string | null
-  description: string | null
-  background: FileAttachment | null
-  icon: FileAttachment | null
-  publisherId: string
-  createdAt: string
-  updatedAt: string
-}
-
 export interface PublisherFeatureFlags {
   followRequiresApproval: boolean
   postsRequireFollow: boolean

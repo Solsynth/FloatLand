@@ -174,6 +174,11 @@
                   <IconTrash class="h-4 w-4" /> {{ t("common.delete") }}
                 </button>
               </li>
+              <li v-if="isAuthor">
+                <button @click.stop="openCollections">
+                  <IconFolder class="h-4 w-4" /> {{ t("post.collections.manage") }}
+                </button>
+              </li>
               <li v-if="isAuthor"><div class="divider my-0" /></li>
               <li>
                 <button @click.stop="handleReply">
@@ -417,6 +422,14 @@
       :post-id="post.id"
       @submitted="emit('refresh')"
     />
+
+    <!-- Collection membership (author only; backend enforces editor rights) -->
+    <PostCollectionsDrawer
+      v-if="isAuthor"
+      v-model:open="collectionsOpen"
+      :post="post"
+      @changed="emit('refresh')"
+    />
   </article>
 </template>
 
@@ -434,6 +447,7 @@ import {
   IconPenLine,
   IconPencil,
   IconTrash,
+  IconFolder,
   IconExternalLink,
   IconVote,
   IconUsers,
@@ -516,6 +530,7 @@ const showMenu = ref(false);
 const referenceCollapsed = ref(false);
 const menuWrapper = ref<HTMLElement | null>(null);
 const reportOpen = ref(false);
+const collectionsOpen = ref(false);
 const boostBusy = ref(false);
 
 // Optimistic boost state (local; server truth re-syncs via prop watch)
@@ -876,6 +891,11 @@ async function handleDelete() {
 function handleReport() {
   closeMenu();
   reportOpen.value = true;
+}
+
+function openCollections() {
+  closeMenu();
+  collectionsOpen.value = true;
 }
 
 async function handleBoost() {

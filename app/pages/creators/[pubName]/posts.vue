@@ -307,15 +307,16 @@ import {
   IconFolder,
   IconFolderMinus,
 } from "#components";
-import type { Post } from "~/types/post";
-import type { SnPostCollection } from "~/types/creator";
-import { fetchPublisherPosts } from "~/utils/api";
+import type { Post, PostCollection } from "~/types/post";
+import {
+  fetchPublisherPosts,
+  fetchPublisherCollections,
+  batchAddPostsToCollection,
+  batchRemovePostsFromCollection,
+} from "~/utils/api";
 import {
   batchDeletePosts,
   batchUpdatePostVisibility,
-  fetchCollections,
-  batchAddPostsToCollection,
-  batchRemovePostsFromCollection,
 } from "~/utils/creator";
 
 definePageMeta({ middleware: "creator" });
@@ -357,7 +358,7 @@ const selectedVisibility = ref<string>("public");
 // Collection modal
 const collectionModalOpen = ref(false);
 const collectionAction = ref<"add" | "remove">("add");
-const collections = ref<SnPostCollection[]>([]);
+const collections = ref<PostCollection[]>([]);
 const collectionsLoading = ref(false);
 
 const visibilityOptions = computed(() => [
@@ -389,7 +390,7 @@ async function openCollectionModal(action: "add" | "remove") {
   collectionModalOpen.value = true;
   collectionsLoading.value = true;
   try {
-    collections.value = await fetchCollections(pubName.value);
+    collections.value = await fetchPublisherCollections(pubName.value);
   } catch (e) {
     console.error(e);
   } finally {

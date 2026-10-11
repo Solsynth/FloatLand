@@ -57,6 +57,9 @@
 						class="mt-2"
 					/>
 
+					<!-- Collections this post belongs to -->
+					<PostCollectionsSection :post="post" class="mt-2" />
+
 					<!-- Interaction Tabs -->
 					<div class="mt-6">
 						<TabsRoot default-value="replies" class="w-full">

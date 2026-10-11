@@ -87,6 +87,7 @@ import {
 import {
   PostSchema,
   PublisherSchema,
+  PostCollectionSchema,
   TimelineResultSchema,
   ThreadedReplyNodeSchema,
   ReactionSchema,
@@ -182,6 +183,7 @@ export type {
 import type {
   Publisher,
   Post,
+  PostCollection,
   TimelineResult,
   HeatmapData,
   Boost,
@@ -1208,6 +1210,134 @@ export async function fetchPublishers(): Promise<Publisher[]> {
   return fetchJsonZ("/sphere/publishers", PublisherSchema.array(), {
     skipAuth: true,
   });
+}
+
+// Post collections. Reads are anonymous; writes require the caller to be an
+// editor of the owning publisher (the backend enforces that with a 403).
+
+export async function fetchPublisherCollections(
+  publisherName: string,
+): Promise<PostCollection[]> {
+  return fetchJsonZ(
+    `/sphere/publishers/${encodeURIComponent(publisherName)}/collections`,
+    PostCollectionSchema.array(),
+    { skipAuth: true },
+  );
+}
+
+export async function createPublisherCollection(
+  publisherName: string,
+  data: {
+    slug: string;
+    name?: string | null;
+    description?: string | null;
+    backgroundId?: string | null;
+    iconId?: string | null;
+  },
+): Promise<PostCollection> {
+  return fetchJsonZ(
+    `/sphere/publishers/${encodeURIComponent(publisherName)}/collections`,
+    PostCollectionSchema,
+    { method: "POST", body: JSON.stringify(camelToSnake(data)) },
+  );
+}
+
+export async function updatePublisherCollection(
+  publisherName: string,
+  slug: string,
+  data: {
+    name?: string | null;
+    description?: string | null;
+    backgroundId?: string | null;
+    iconId?: string | null;
+  },
+): Promise<PostCollection> {
+  return fetchJsonZ(
+    `/sphere/publishers/${encodeURIComponent(publisherName)}/collections/${encodeURIComponent(slug)}`,
+    PostCollectionSchema,
+    { method: "PATCH", body: JSON.stringify(camelToSnake(data)) },
+  );
+}
+
+export async function deletePublisherCollection(
+  publisherName: string,
+  slug: string,
+): Promise<void> {
+  await apiFetch(
+    `/sphere/publishers/${encodeURIComponent(publisherName)}/collections/${encodeURIComponent(slug)}`,
+    { method: "DELETE" },
+  );
+}
+
+/**
+ * Posts in a collection, in the backend's order (published date descending —
+ * manual ordering is not supported by the backend).
+ */
+export async function fetchCollectionPosts(
+  publisherName: string,
+  slug: string,
+  take = 20,
+  offset = 0,
+): Promise<{ posts: Post[]; total: number }> {
+  const params = new URLSearchParams({
+    take: String(take),
+    offset: String(offset),
+  });
+  const { data, headers } = await fetchJsonZHeaders(
+    `/sphere/publishers/${encodeURIComponent(publisherName)}/collections/${encodeURIComponent(slug)}/posts?${params.toString()}`,
+    PostSchema.array(),
+    { skipAuth: true },
+  );
+  const total = parseInt(headers.get("x-total") || "0", 10);
+  return { posts: data, total };
+}
+
+/** Add a single post to a collection (publisher editor only). */
+export async function addPostToCollection(
+  publisherName: string,
+  slug: string,
+  postId: string,
+): Promise<void> {
+  await apiFetch(
+    `/sphere/publishers/${encodeURIComponent(publisherName)}/collections/${encodeURIComponent(slug)}/posts`,
+    { method: "POST", body: JSON.stringify({ post_id: postId }) },
+  );
+}
+
+/** Remove a single post from a collection (publisher editor only). */
+export async function removePostFromCollection(
+  publisherName: string,
+  slug: string,
+  postId: string,
+): Promise<void> {
+  await apiFetch(
+    `/sphere/publishers/${encodeURIComponent(publisherName)}/collections/${encodeURIComponent(slug)}/posts/${encodeURIComponent(postId)}`,
+    { method: "DELETE" },
+  );
+}
+
+/** Add several posts to a collection in one call (publisher editor only). */
+export async function batchAddPostsToCollection(
+  publisherName: string,
+  slug: string,
+  postIds: string[],
+): Promise<void> {
+  await apiFetch(
+    `/sphere/publishers/${encodeURIComponent(publisherName)}/collections/${encodeURIComponent(slug)}/posts/batch`,
+    { method: "POST", body: JSON.stringify({ post_ids: postIds }) },
+  );
+}
+
+/** Remove several posts from a collection in one call (publisher editor only). */
+export async function batchRemovePostsFromCollection(
+  publisherName: string,
+  slug: string,
+  postIds: string[],
+): Promise<void> {
+  await apiFetch(
+    `/sphere/publishers/${encodeURIComponent(publisherName)}/collections/${encodeURIComponent(slug)}/posts/batch/remove`,
+    { method: "POST", body: JSON.stringify({ post_ids: postIds }) },
+  );
 }
 
 // Search API

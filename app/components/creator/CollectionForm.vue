@@ -72,17 +72,20 @@
 
 <script setup lang="ts">
 import { IconSave } from '#components'
-import type { SnPostCollection } from '~/types/creator'
-import { createCollection, updateCollection } from '~/utils/creator'
+import type { PostCollection } from '~/types/post'
+import {
+  createPublisherCollection,
+  updatePublisherCollection,
+} from '~/utils/api'
 
 const props = defineProps<{
   pubName: string
-  collection?: SnPostCollection | null
+  collection?: PostCollection | null
 }>()
 
 const emit = defineEmits<{
   close: []
-  saved: [collection: SnPostCollection]
+  saved: [collection: PostCollection]
 }>()
 
 const { t } = useI18n()
@@ -98,14 +101,14 @@ const submitting = ref(false)
 async function handleSubmit() {
   submitting.value = true
   try {
-    let result: SnPostCollection
+    let result: PostCollection
     if (props.collection) {
-      result = await updateCollection(props.pubName, props.collection.slug, {
+      result = await updatePublisherCollection(props.pubName, props.collection.slug, {
         name: form.name || null,
         description: form.description || null,
       })
     } else {
-      result = await createCollection(props.pubName, {
+      result = await createPublisherCollection(props.pubName, {
         slug: form.slug,
         name: form.name || null,
         description: form.description || null,
