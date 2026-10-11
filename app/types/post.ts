@@ -76,7 +76,8 @@ export type PostCollection = z.infer<typeof PostCollectionSchema>;
 export const TagSchema = z.object({
   id: z.string(),
   slug: z.string(),
-  name: z.string(),
+  /** Unset for tags created without a display name; callers fall back to `slug`. */
+  name: z.string().nullable(),
 });
 export type Tag = z.infer<typeof TagSchema>;
 
