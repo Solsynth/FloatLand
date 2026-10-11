@@ -1512,7 +1512,7 @@ async function uploadAttachments(): Promise<UploadAttachment[]> {
       attachment.progress = 0
 
       // Same-origin proxy upload; the browser sends the `sid` cookie.
-      const response = await fetch(`/api/proxy/drive/files/upload/direct`, {
+      const response = await fetch(`/cgi/drive/files/upload/direct`, {
         method: 'POST',
         body: formData,
       })

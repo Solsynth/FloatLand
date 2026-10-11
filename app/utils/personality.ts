@@ -211,7 +211,7 @@ export async function personalityChatCompletion(payload: {
   const response = await fetch(
     payload.bearerToken
       ? `${API_BASE_URL}${PERSONALITY_CHAT_COMPLETIONS}`
-      : `/api/proxy${PERSONALITY_CHAT_COMPLETIONS}`,
+      : `/cgi${PERSONALITY_CHAT_COMPLETIONS}`,
     init,
   );
   const data: unknown = await response.json().catch(() => null);

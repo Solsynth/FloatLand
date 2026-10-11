@@ -364,7 +364,7 @@ export async function apiFetch(
   // Build the same-origin proxy URL. On the client a relative URL resolves
   // against the browser origin; on SSR Node's `fetch` rejects relative URLs,
   // so reconstruct an absolute URL from the incoming request's host/protocol.
-  const relativeUrl = `/api/proxy${endpoint}`;
+  const relativeUrl = `/cgi${endpoint}`;
   let url = relativeUrl;
   if (import.meta.server) {
     const event = useRequestEvent();
@@ -766,7 +766,7 @@ export async function logoutApi(): Promise<void> {
 
 export async function refreshSession(): Promise<boolean> {
   try {
-    const response = await fetch("/api/proxy/stargate/auth/refresh", {
+    const response = await fetch("/cgi/stargate/auth/refresh", {
       method: "POST",
     });
     return response.ok;
@@ -3820,7 +3820,7 @@ export async function uploadDriveFile(
 
   // Same-origin proxy upload: the proxy injects the session Bearer and strips
   // any backend cookie. The browser sends the `sid` cookie natively.
-  const url = `/api/proxy/drive/files/upload/direct`;
+  const url = `/cgi/drive/files/upload/direct`;
   const response = await fetch(url, {
     method: "POST",
     body: formData,
