@@ -1,9 +1,11 @@
 // Dedicated-host middleware: one directive per branded surface, dispatched by
 // the Host header. Non-matching hosts and static assets fall through untouched.
 //
-// - legacy.solian.app  → no-JS legacy pages, answered inline (h3 stops the chain).
-// - mail.solarpass.one → /mail is a real Nuxt page tree, so we only redirect the
-//   bare host root to /mail and let the renderer serve every /mail/* route.
+// - legacy.solian.app   → no-JS legacy pages, answered inline (h3 stops the chain).
+// - mail.solarpass.one  → the webmail moved to solarpass.one (path routes under
+//   /mail/* are redirected there by the Nitro route rules below, but this host's
+//   bare root would otherwise fall through to the landing page), so every request
+//   is forwarded to the new home.
 //
 // Security note: the deployment must terminate TLS and route only these hostnames
 // to this middleware (the same trust model as the modern app's host behavior).
@@ -26,7 +28,6 @@ import {
 } from "../utils/legacyPages"
 
 const MAIL_HOST = "mail.solarpass.one"
-const MAIL_HOME = "/mail/inbox"
 
 // --- legacy.solian.app: inline no-JS page rendering ---------------------------
 
@@ -104,19 +105,21 @@ const legacyDirective = {
   },
 }
 
-// --- mail.solarpass.one: native Nuxt /mail, root portaled to the inbox ---------
+// --- mail.solarpass.one: the webmail moved to solarpass.one --------------------
+
+const MAIL_TARGET = "https://solarpass.one"
 
 const mailDirective = {
   host: MAIL_HOST,
-  handle(event: H3Event, rawPath: string): Response | undefined {
-    // Bare root portals to the webmail home.
-    if (rawPath === "/") {
-      return redirectToHost(event, MAIL_HOME)
-    }
-    // Everything else is served by the Nuxt renderer natively: /mail/* are real
-    // pages, and /auth/* must resolve so the mail pages' auth middleware can
-    // send unauthenticated visitors to login (portal-ing it here would loop).
-    return undefined
+  handle(_event: H3Event, _rawPath: string): Response {
+    // The mailbox product now lives at solarpass.one; nothing is served here.
+    return new Response(null, {
+      status: 301,
+      headers: {
+        Location: MAIL_TARGET,
+        "Cache-Control": "no-store",
+      },
+    })
   },
 }
 

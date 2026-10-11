@@ -1,4 +1,4 @@
-import type { WebSocketPacket } from '~/types/chat'
+import type { WebSocketPacket } from '~/types/websocket'
 import type { SnNotification } from '~/types/notification'
 import { eventBus } from '~/utils/eventBus'
 import { snakeToCamel } from '~/utils/case'
@@ -210,19 +210,6 @@ export function useWebSocket() {
         if (packet.type === 'notifications.new') {
           // Packet payload is unvalidated JSON; server contract is SnNotification.
           eventBus.emit('notification:new', camelData as unknown as SnNotification)
-        }
-
-        // ElecPostal publishes mail.changed (create) and mail.moved (folder
-        // moves) through the shared gateway. Both are cache-invalidation
-        // signals carrying only identifiers; the UI refetches on demand.
-        if (
-          packet.type === 'mail.changed' ||
-          packet.type === 'mail.moved'
-        ) {
-          eventBus.emit(
-            'mail:changed',
-            camelData as { mailboxId?: string; emailId?: string; reason?: string },
-          )
         }
       } catch (e) {
         console.error('[WebSocket] Failed to parse message:', e)

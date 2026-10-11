@@ -4,7 +4,6 @@ import {
   IconBriefcaseBusiness,
   IconHardDrive,
   IconMail,
-  IconMessagesSquare,
   IconPalette,
   IconCode,
   IconWallet,
@@ -15,11 +14,19 @@ import {
   IconPawPrint,
 } from "#components";
 
+/** Products that left this app and now live on their own domains. */
+export const EXTERNAL_APPS = {
+  pet: "https://pet.solian.app",
+  drive: "https://solarpass.one",
+  mail: "https://solarpass.one",
+} as const;
+
 export interface NavItem {
   icon: any;
   labelKey: string;
   href: string;
   badge?: number | null;
+  external?: boolean;
   requiresAuth?: boolean;
   requiresSuperuser?: boolean;
 }
@@ -30,7 +37,6 @@ export interface NavItem {
  */
 export function useMainNav() {
   const { isSuperuser } = useAuth();
-  const { unreadTotal: chatUnread } = useChat();
 
   const navItems = computed<NavItem[]>(() => [
     { icon: IconCompass, labelKey: "nav.explore", href: "/timeline" },
@@ -41,18 +47,17 @@ export function useMainNav() {
       href: "/workspaces",
       requiresAuth: true,
     },
-    { icon: IconHardDrive, labelKey: "nav.drive", href: "/drive" },
+    {
+      icon: IconHardDrive,
+      labelKey: "nav.drive",
+      href: EXTERNAL_APPS.drive,
+      external: true,
+    },
     {
       icon: IconMail,
       labelKey: "nav.mail",
-      href: "/mail",
-      requiresAuth: true,
-    },
-    {
-      icon: IconMessagesSquare,
-      labelKey: "nav.chat",
-      href: "/chat",
-      badge: chatUnread.value || null,
+      href: EXTERNAL_APPS.mail,
+      external: true,
       requiresAuth: true,
     },
     { icon: IconWallet, labelKey: "nav.wallet", href: "/wallets" },
@@ -72,7 +77,8 @@ export function useMainNav() {
       {
         icon: IconPawPrint,
         labelKey: "nav.pet",
-        href: "/pet",
+        href: EXTERNAL_APPS.pet,
+        external: true,
         requiresAuth: true,
       },
     ];

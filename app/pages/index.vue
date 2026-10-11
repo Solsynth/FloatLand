@@ -211,13 +211,13 @@ import {
   IconCompass,
   IconHardDrive,
   IconMail,
-  IconMessagesSquare,
   IconPalette,
   IconPawPrint,
   IconSparkles,
   IconTrendingUp,
   IconWallet,
 } from "#components";
+import { EXTERNAL_APPS } from "~/composables/useMainNav";
 
 definePageMeta({
   // `/` is the public landing page — signed-in visitors belong in the app.
@@ -253,22 +253,16 @@ const features = computed(() => [
     description: t("landing.features.workspaces.description"),
   },
   {
-    href: "/drive",
+    href: EXTERNAL_APPS.drive,
     icon: IconHardDrive,
     title: t("landing.features.drive.title"),
     description: t("landing.features.drive.description"),
   },
   {
-    href: "/mail",
+    href: EXTERNAL_APPS.mail,
     icon: IconMail,
     title: t("landing.features.mail.title"),
     description: t("landing.features.mail.description"),
-  },
-  {
-    href: "/chat",
-    icon: IconMessagesSquare,
-    title: t("landing.features.chat.title"),
-    description: t("landing.features.chat.description"),
   },
   {
     href: "/wallets",
@@ -277,7 +271,7 @@ const features = computed(() => [
     description: t("landing.features.wallet.description"),
   },
   {
-    href: "/pet",
+    href: EXTERNAL_APPS.pet,
     icon: IconPawPrint,
     title: t("landing.features.pet.title"),
     description: t("landing.features.pet.description"),

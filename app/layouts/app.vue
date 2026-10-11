@@ -148,29 +148,27 @@
             </span>
             <span class="flex h-5 items-center leading-5">{{ t("nav.realms") }}</span>
           </NuxtLink>
-          <NuxtLink
-            to="/drive"
+          <a
+            :href="EXTERNAL_APPS.drive"
             class="flex h-12 min-h-12 items-center gap-3 rounded-box px-3 py-0 text-base leading-5"
-            :class="isNavActive('/drive') ? 'bg-primary/10 text-primary' : ''"
             @click="closeMenu"
           >
             <span class="flex h-5 w-5 shrink-0 items-center justify-center">
               <IconHardDrive class="h-5 w-5" />
             </span>
             <span class="flex h-5 items-center leading-5">{{ t("nav.drive") }}</span>
-          </NuxtLink>
-          <NuxtLink
+          </a>
+          <a
             v-if="isAuthenticated"
-            to="/mail"
+            :href="EXTERNAL_APPS.mail"
             class="flex h-12 min-h-12 items-center gap-3 rounded-box px-3 py-0 text-base leading-5"
-            :class="isNavActive('/mail') ? 'bg-primary/10 text-primary' : ''"
             @click="closeMenu"
           >
             <span class="flex h-5 w-5 shrink-0 items-center justify-center">
               <IconMail class="h-5 w-5" />
             </span>
             <span class="flex h-5 items-center leading-5">{{ t("nav.mail") }}</span>
-          </NuxtLink>
+          </a>
           <NuxtLink
             to="/wallets"
             class="flex h-12 min-h-12 items-center gap-3 rounded-box px-3 py-0 text-base leading-5"
@@ -231,18 +229,17 @@
             </span>
             <span class="flex h-5 items-center leading-5">{{ t("nav.merchantHub") }}</span>
           </NuxtLink>
-          <NuxtLink
+          <a
             v-if="isAuthenticated"
-            to="/pet"
+            :href="EXTERNAL_APPS.pet"
             class="flex h-12 min-h-12 items-center gap-3 rounded-box px-3 py-0 text-base leading-5"
-            :class="isNavActive('/pet') ? 'bg-primary/10 text-primary' : ''"
             @click="closeMenu"
           >
             <span class="flex h-5 w-5 shrink-0 items-center justify-center">
               <IconPawPrint class="h-5 w-5" />
             </span>
             <span class="flex h-5 items-center leading-5">{{ t("nav.pet") }}</span>
-          </NuxtLink>
+          </a>
           <NuxtLink
             v-if="isSuperuser"
             to="/admin"
@@ -384,6 +381,7 @@ import {
   DropdownMenuTrigger,
 } from "reka-ui";
 import AppSwitcher from "~/components/layout/AppSwitcher.vue";
+import { EXTERNAL_APPS } from "~/composables/useMainNav";
 
 const { t } = useI18n();
 const route = useRoute();

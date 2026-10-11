@@ -60,7 +60,7 @@ Created `server/api/__sitemap__/urls.ts` that dynamically generates sitemap entr
 
 Configured in `nuxt.config.ts`:
 - Allow: `/`
-- Disallow: `/admin`, `/auth`, `/api`, `/compose`, `/drive`
+- Disallow: `/admin`, `/auth`, `/api`, `/compose`
 - Sitemap reference: `https://solian.app/sitemap.xml`
 
 ## 📊 Expected SEO Benefits

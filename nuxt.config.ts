@@ -281,7 +281,7 @@ export default defineNuxtConfig({
   },
   sitemap: {
     gzip: true,
-    exclude: ["/admin/**", "/auth/**", "/api/**", "/compose", "/drive/**", "/tickets/**"],
+    exclude: ["/admin/**", "/auth/**", "/api/**", "/compose", "/tickets/**"],
     defaults: {
       changefreq: "daily",
       priority: 0.7,
@@ -289,7 +289,7 @@ export default defineNuxtConfig({
   },
   robots: {
     allow: "/",
-    disallow: ["/admin", "/auth", "/api", "/compose", "/drive"],
+    disallow: ["/admin", "/auth", "/api", "/compose"],
     sitemap: "https://solian.app/sitemap.xml",
   },
   nitro: {
@@ -299,7 +299,20 @@ export default defineNuxtConfig({
     // `dev-request-context.mjs` (e.g. `/Users/server/.nitro/...`), which
     // crashes the dev worker on every request.
     buildDir: resolve(process.cwd(), ".nitro"),
-    routeRules: {},
+    // Surfaces that moved to dedicated products. Chat, Pet, Drive and Mail no
+    // longer live in this app; every request under their old prefixes must
+    // land on the product's own domain, whatever the host (solian.app,
+    // legacy.solian.app, mail.solarpass.one, …).
+    routeRules: {
+      "/chat": { redirect: { to: "https://solian.app", statusCode: 301 } },
+      "/chat/**": { redirect: { to: "https://solian.app", statusCode: 301 } },
+      "/pet": { redirect: { to: "https://pet.solian.app", statusCode: 301 } },
+      "/pet/**": { redirect: { to: "https://pet.solian.app", statusCode: 301 } },
+      "/drive": { redirect: { to: "https://solarpass.one", statusCode: 301 } },
+      "/drive/**": { redirect: { to: "https://solarpass.one", statusCode: 301 } },
+      "/mail": { redirect: { to: "https://solarpass.one", statusCode: 301 } },
+      "/mail/**": { redirect: { to: "https://solarpass.one", statusCode: 301 } },
+    },
     storage: {
       root: {
         driver: "fs",

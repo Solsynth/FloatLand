@@ -1,5 +1,5 @@
 import mitt from 'mitt'
-import type { WebSocketPacket } from '~/types/chat'
+import type { WebSocketPacket } from '~/types/websocket'
 import type { SnNotification } from '~/types/notification'
 
 // Define all event types
@@ -11,9 +11,6 @@ export type EventBusEvents = {
   // Notifications
   'notification:new': SnNotification
   'notification:count': number
-
-  // Mail realtime (mail.changed / mail.moved)
-  'mail:changed': { mailboxId?: string; emailId?: string; reason?: string }
 }
 
 // Create and export the event bus

@@ -53,6 +53,7 @@ import {
   DropdownMenuRoot,
   DropdownMenuTrigger,
 } from "reka-ui";
+import { EXTERNAL_APPS } from "~/composables/useMainNav";
 
 const { t } = useI18n();
 const route = useRoute();
@@ -78,12 +79,12 @@ const allApps = computed<AppItem[]>(() => {
       icon: IconCalendarDays,
       requiresAuth: true,
     },
-    { href: "/mail", label: t("nav.mail"), icon: IconMail, requiresAuth: true },
-    { href: "/drive", label: t("nav.drive"), icon: IconHardDrive },
+    { href: EXTERNAL_APPS.mail, label: t("nav.mail"), icon: IconMail, requiresAuth: true },
+    { href: EXTERNAL_APPS.drive, label: t("nav.drive"), icon: IconHardDrive },
     { href: "/creators", label: t("nav.creatorHub"), icon: IconPalette },
     { href: "/developers", label: t("nav.developerHub"), icon: IconCode },
     { href: "/merchants", label: t("nav.merchantHub"), icon: IconTrendingUp },
-    { href: "/pet", label: t("nav.pet"), icon: IconPawPrint, requiresAuth: true },
+    { href: EXTERNAL_APPS.pet, label: t("nav.pet"), icon: IconPawPrint, requiresAuth: true },
     { href: "/workspaces", label: t("nav.workspaces"), icon: IconBriefcaseBusiness, requiresAuth: true },
     { href: "/wallets", label: t("nav.wallet"), icon: IconWallet },
   ];

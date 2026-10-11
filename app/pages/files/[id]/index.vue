@@ -119,16 +119,6 @@
           </div>
 
           <div class="flex items-center gap-1">
-            <!-- Edit button for Office files -->
-            <button
-              v-if="isOffice"
-              class="btn btn-circle btn-ghost btn-sm"
-              :title="t('drive.editDocument')"
-              @click="navigateTo(`/drive/files/${fileId}/edit`)"
-            >
-              <IconPencil class="h-5 w-5" />
-            </button>
-
             <!-- Fullscreen button for images -->
             <button
               v-if="isImage"
@@ -264,13 +254,6 @@
                   {{ file.mimeType }}
                 </p>
                 <div class="flex items-center justify-center gap-2 mt-4">
-                  <button
-                    class="btn btn-primary btn-sm"
-                    @click="navigateTo(`/drive/files/${fileId}/edit`)"
-                  >
-                    <IconPencil class="w-4 h-4" />
-                    {{ t("drive.editDocument") }}
-                  </button>
                   <button
                     class="btn btn-outline btn-sm"
                     @click="handleDownload"
@@ -688,7 +671,7 @@ function handleBack() {
   if (window.history.length > 1) {
     window.history.back();
   } else {
-    navigateTo("/drive");
+    navigateTo("/");
   }
 }
 
