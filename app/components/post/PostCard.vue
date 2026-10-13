@@ -1,6 +1,26 @@
 <template>
   <article :class="rootClass">
-    <div :class="bodyClass">
+    <div :class="[bodyClass, 'relative']">
+      <!--
+        Thread rails: a post carrying chain members above or below continues the
+        chain's rail through its own card, so the whole chain reads as one line.
+
+        They run from the avatar's top edge to the card's, so `top-10` (the 40px
+        avatar, either card variant) hides the seam where they meet it. A post
+        showing a reference block has no rail: the avatar no longer starts the
+        card, and the block's height is content-dependent.
+      -->
+      <span
+        v-if="railAbove"
+        aria-hidden="true"
+        class="pointer-events-none absolute top-0 left-9 h-10 w-px bg-base-300/80"
+      />
+      <span
+        v-if="railBelow"
+        aria-hidden="true"
+        class="pointer-events-none absolute top-10 bottom-0 left-9 w-px bg-base-300/80"
+      />
+
       <!-- Reference post (reply / forward) -->
       <div v-if="showReference && hasReference" class="mb-2">
         <button
@@ -180,6 +200,12 @@
                 </button>
               </li>
               <li v-if="isAuthor"><div class="divider my-0" /></li>
+              <!-- Chains stay inside one publisher (POST_CHAIN_DIFFERENT_PUBLISHER). -->
+              <li v-if="isAuthor">
+                <button @click.stop="handleChain">
+                  <IconLink class="h-4 w-4" /> {{ t("compose.chainPost") }}
+                </button>
+              </li>
               <li>
                 <button @click.stop="handleReply">
                   <IconReply class="h-4 w-4" /> {{ t("post.replyBtn") }}
@@ -414,6 +440,16 @@
           </button>
         </div>
       </div>
+
+      <!--
+        Chain members follow the card, in publication order, as one continuous
+        thread: they are published after the head and continue its avatar rail.
+      -->
+      <PostChainThread
+        v-if="!isDetail && chainMembers.length > 0"
+        :posts="chainMembers"
+        class="ml-1"
+      />
     </div>
 
     <!-- Abuse report -->
@@ -468,6 +504,14 @@ interface Props {
   post: Post;
   isDetail?: boolean;
   showReference?: boolean;
+  /**
+   * Whether chain members are rendered above/below this card by its host.
+   *
+   * Unset lets the card decide from its own `chainedPosts`; the detail page
+   * renders the members around the opened post itself and passes them in.
+   */
+  chainAbove?: boolean;
+  chainBelow?: boolean;
   /** Nested card chrome (e.g. featured carousel) */
   embedded?: boolean;
   /**
@@ -485,6 +529,33 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const isFeed = computed(() => props.variant === "feed");
+
+/**
+ * Members chained under this post, in publication order.
+ *
+ * The server hydrates a chain only on its head, so a member (which carries
+ * `chainedPostId`) has nothing to render here: it opens the rest of its chain
+ * on the detail page instead. Children keep arriving truncated, which suits the
+ * two-line preview this feeds.
+ */
+const chainMembers = computed(() => props.post.chainedPosts ?? []);
+
+/**
+ * Rail segments drawn inside this card. The card continues a chain when members
+ * are rendered against it: its own members, or the ones the detail page renders
+ * around it.
+ *
+ * `||` rather than `??`: Vue casts an absent Boolean prop to `false`, so the
+ * fallback has to be reachable through a false as well.
+ */
+const railAbove = computed(
+  () => (props.chainAbove || false) && !hasReference.value,
+);
+const railBelow = computed(
+  () =>
+    (props.chainBelow || (!props.isDetail && chainMembers.value.length > 0)) &&
+    !hasReference.value,
+);
 
 const rootClass = computed(() => {
   if (isFeed.value) return "feed-post";
@@ -846,6 +917,22 @@ function handleReply() {
     replyingTo: props.post,
   });
   emit("reply", props.post);
+  window.dispatchEvent(new CustomEvent("open-compose"));
+}
+
+/**
+ * Chain onto this post: a flat chain of moments a publisher keeps appending to.
+ *
+ * Only the post's own publisher can extend its chain, which the server enforces
+ * with `POST_CHAIN_DIFFERENT_PUBLISHER`.
+ */
+function handleChain() {
+  closeMenu();
+  const compose = useCompose();
+  compose.initializeFromState({
+    content: "",
+    chainingTo: props.post,
+  });
   window.dispatchEvent(new CustomEvent("open-compose"));
 }
 

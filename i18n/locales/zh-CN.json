@@ -1071,6 +1071,7 @@
     "editPost": "编辑帖子",
     "writeReply": "撰写回复",
     "forwardPost": "转发帖子",
+    "chainPost": "串联帖子",
     "editing": "正在编辑",
     "replyingTo": "回复",
     "forwarding": "转发",
@@ -1471,6 +1472,9 @@
     "postTruncated": "帖子已截断",
     "attachmentCount": "{count} 个附件",
     "boostedBy": "由",
+    "chain": {
+      "showMore": "显示另外 {count} 条"
+    },
     "editedAt": "编辑于 {time}",
     "article": "文章",
     "copyLink": "复制链接",

@@ -124,10 +124,20 @@ export interface Post {
   /** Set when the referenced (replied/forwarded) post no longer exists. */
   repliedGone?: boolean
   forwardedGone?: boolean
-  /** Chained post the current one replies to via `chained_post_id`. */
-  chainedPost?: Post | null
-  /** Chained children of this post (head-first, from GET /sphere/posts/{id}/chain). */
+  /**
+   * Chain head this post belongs to, as its child (`chained_post_id`).
+   *
+   * Chains are flat: every member carries the head, a head carries none.
+   */
+  chainedPostId?: string | null
+  /**
+   * Members chained under this post, in publication order.
+   *
+   * Hydrated by the server for chain heads only: a member always arrives with
+   * `[]` here and its head in `chainedPostId`.
+   */
   chainedPosts?: Post[] | null
+  /** Number of members in `chainedPosts` as gated for the current viewer. */
   chainedCount?: number
   sponsored?: boolean
   pinMode?: number | null
@@ -183,7 +193,7 @@ export const PostSchema: z.ZodType<Post> = z.lazy(() =>
     boostedAt: z.string().nullable().optional(),
     repliedGone: z.boolean().optional(),
     forwardedGone: z.boolean().optional(),
-    chainedPost: PostSchema.nullable().optional(),
+    chainedPostId: z.string().nullable().optional(),
     chainedPosts: z.array(PostSchema).nullable().optional(),
     chainedCount: z.number().optional(),
     sponsored: z.boolean().optional(),

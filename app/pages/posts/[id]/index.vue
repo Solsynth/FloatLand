@@ -32,17 +32,20 @@
 				/>
 
 				<template v-else-if="post">
-					<!-- Chain preceding this post -->
-					<PostChainSection
+					<!-- Chain preceding this post: the member thread it continues from -->
+					<PostChainThread
 						v-if="chainPreceding.length > 0"
 						:posts="chainPreceding"
-						class="mb-2"
+						direction="above"
+						class="ml-5"
 					/>
 
 					<!-- Original Post -->
 					<PostCard
 						:post="post"
 						:is-detail="true"
+						:chain-above="chainPreceding.length > 0"
+						:chain-below="chainFollowing.length > 0"
 						@boost="handleBoost"
 						@share="handleShare"
 						@reply="handleReply"
@@ -51,10 +54,10 @@
 					/>
 
 					<!-- Chain following this post -->
-					<PostChainSection
+					<PostChainThread
 						v-if="chainFollowing.length > 0"
 						:posts="chainFollowing"
-						class="mt-2"
+						class="ml-5"
 					/>
 
 					<!-- Collections this post belongs to -->

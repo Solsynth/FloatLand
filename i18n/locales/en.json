@@ -1073,6 +1073,7 @@
     "editPost": "Edit Post",
     "writeReply": "Write a Reply",
     "forwardPost": "Forward Post",
+    "chainPost": "Chain Post",
     "editing": "Editing post",
     "replyingTo": "Replying to",
     "forwarding": "Forwarding",
@@ -1473,6 +1474,9 @@
     "postTruncated": "Post truncated",
     "attachmentCount": "{count} attachment(s)",
     "boostedBy": "Boosted by",
+    "chain": {
+      "showMore": "Show {count} more"
+    },
     "editedAt": "Edited {time}",
     "article": "Article",
     "copyLink": "Copy link",

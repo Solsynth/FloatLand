@@ -116,6 +116,44 @@
           </button>
 
           <button
+            v-if="chainingTo"
+            type="button"
+            class="flex w-full items-start gap-2 bg-base-200/40 px-4 py-2.5 text-left transition-colors hover:bg-base-200/70"
+            @click="openReferencePost(chainingTo)"
+          >
+            <IconLink class="mt-0.5 h-4 w-4 shrink-0 text-base-content/60" />
+            <div class="min-w-0 flex-1">
+              <p class="text-xs font-medium text-base-content/60">
+                {{ t('compose.chainPost') }}
+              </p>
+              <div class="mt-0.5 flex items-center gap-2">
+                <div class="avatar">
+                  <div class="h-5 w-5 rounded-full">
+                    <FileImage
+                      v-if="chainingTo.publisher?.picture?.id"
+                      :src="getFileUrlSafe(chainingTo.publisher.picture.id)"
+                      alt=""
+                      class="h-full w-full object-cover"
+                    />
+                    <div
+                      v-else
+                      class="flex h-full w-full items-center justify-center bg-primary/15 text-[10px] text-primary"
+                    >
+                      {{ getInitials(publisherDisplayName(chainingTo.publisher)) }}
+                    </div>
+                  </div>
+                </div>
+                <span class="truncate text-sm font-medium">
+                  {{ publisherDisplayName(chainingTo.publisher) }}
+                </span>
+                <span class="truncate text-sm text-base-content/45">
+                  {{ chainingTo.content.slice(0, 80) }}
+                </span>
+              </div>
+            </div>
+          </button>
+
+          <button
             v-if="forwardingTo"
             type="button"
             class="flex w-full items-start gap-2 bg-base-200/40 px-4 py-2.5 text-left transition-colors hover:bg-base-200/70"
@@ -924,6 +962,7 @@ const {
   clearDrafts,
   replyingTo,
   forwardingTo,
+  chainingTo,
   originalPost,
   hasContent,
   addAttachments,
@@ -985,6 +1024,7 @@ const dialogTitle = computed(() => {
   if (originalPost.value) return t('compose.editPost')
   if (replyingTo.value) return t('compose.writeReply')
   if (forwardingTo.value) return t('compose.forwardPost')
+  if (chainingTo.value) return t('compose.chainPost')
   return t('compose.newPost')
 })
 
@@ -1076,7 +1116,7 @@ async function loadSettingsData() {
 async function maybeRestoreLatestDraft() {
   if (checkedDraftRestore.value) return
   checkedDraftRestore.value = true
-  if (originalPost.value || replyingTo.value || forwardingTo.value) return
+  if (originalPost.value || replyingTo.value || forwardingTo.value || chainingTo.value) return
   if (hasContent.value) return
 
   const latest = draftList.value[0]
@@ -1438,8 +1478,8 @@ async function handleSubmit() {
     if (realmId.value) payload.realm_id = realmId.value
     if (replyingTo.value) payload.replied_post_id = replyingTo.value.id
     if (forwardingTo.value) payload.forwarded_post_id = forwardingTo.value.id
-    if (compose.chainingTo.value)
-      payload.chained_post_id = compose.chainingTo.value.id
+    if (chainingTo.value)
+      payload.chained_post_id = chainingTo.value.id
 
     let response: Post
     const publisherName = currentPublisher.value?.name
@@ -1579,7 +1619,7 @@ async function confirmClearDrafts() {
 async function handleClose() {
   if (hasContent.value) {
     // Auto-save draft on dismiss for new posts (Island behavior)
-    if (!originalPost.value && !replyingTo.value && !forwardingTo.value) {
+    if (!originalPost.value && !replyingTo.value && !forwardingTo.value && !chainingTo.value) {
       saveCurrentDraft()
     } else {
       const { confirm } = useAlert()
