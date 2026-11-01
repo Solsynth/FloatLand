@@ -1,6 +1,6 @@
 <template>
     <div class="flex w-full flex-col items-center gap-3">
-        <ConfuseSpinner v-if="isLoading" message="Loading captcha..." />
+        <span v-if="isLoading" class="dot animate-pulse bg-primary" aria-hidden="true" />
         <div
             v-else-if="error"
             class="flex flex-col items-center justify-center gap-1 text-sm text-base-content/70"

@@ -1,685 +1,1125 @@
 @import "tailwindcss";
+
 @plugin "daisyui" {
-  themes:
-    light --default,
-    dark --prefersdark;
+  themes: false;
   exclude: indicator, status;
 }
 @plugin "@tailwindcss/typography";
 
-@theme {
-  --font-sans: "Nunito", sans-serif;
-  --default-font-family: var(--font-sans);
-}
+/* ── Themes ────────────────────────────────────────────────────────────────
+   Adopted from Solian's Stargate console (`internal/stargate/web`). The ramp
+   is Solian's own: a near-neutral lavender-gray at chroma ~3.5, not blue-gray
+   and not warm. Indigo is the signal the interface spends by default;
+   semantic colour appears only when state needs it.
 
+   Two themes, one family: `console` is the dark reading surface, `console-light`
+   the same ramp read at the light end. Neither inverts the other. The default
+   pair follows the system preference so a reader's OS choice is honoured on
+   first paint and the appearance setting can pin either one afterwards. */
 @plugin 'daisyui/theme' {
-  name: "light";
-  default: true;
-  prefersdark: false;
-  color-scheme: "light";
-  --color-base-100: oklch(100% 0 0);
-  --color-base-200: oklch(98% 0 0);
-  --color-base-300: oklch(95% 0 0);
-  --color-base-content: oklch(21% 0.006 285.885);
-  --color-primary: oklch(62% 0.0873 281deg);
-  --color-primary-content: oklch(93% 0.034 272.788);
-    --color-secondary: oklch(62% 0.0873 281deg);
-    --color-secondary-content: oklch(93% 0.034 272.788);
-    --color-accent: oklch(62% 0.0873 281deg);
-    --color-accent-content: oklch(93% 0.034 272.788);
-  --color-neutral: oklch(14% 0.005 285.823);
-  --color-neutral-content: oklch(92% 0.004 286.32);
-  --color-info: oklch(82% 0.111 230.318);
-  --color-info-content: oklch(29% 0.066 243.157);
-  --color-success: oklch(79% 0.209 151.711);
-  --color-success-content: oklch(37% 0.077 168.94);
-  --color-warning: oklch(82% 0.189 84.429);
-  --color-warning-content: oklch(41% 0.112 45.904);
-  --color-error: oklch(71% 0.194 13.428);
-  --color-error-content: oklch(27% 0.105 12.094);
-  --radius-selector: 0.625rem;
-  --radius-field: 0.625rem;
-  --radius-box: 0.625rem;
-  --size-selector: 0.25rem;
-  --size-field: 0.25rem;
-  --border: 1px;
-  --depth: 0;
-  --noise: 0;
-}
-
-@plugin 'daisyui/theme' {
-  name: "dark";
+  name: "console";
   default: false;
   prefersdark: true;
   color-scheme: "dark";
-  --color-base-100: oklch(0% 0 0);
-  --color-base-200: oklch(20% 0.016 285.938);
-  --color-base-300: oklch(25% 0.013 285.805);
-  --color-base-content: oklch(97.807% 0.029 256.847);
-  --color-primary: oklch(50% 0.0873 281deg);
-  --color-primary-content: oklch(96% 0.018 272.314);
-    --color-secondary: oklch(50% 0.0873 281deg);
-    --color-secondary-content: oklch(96% 0.018 272.314);
-    --color-accent: oklch(50% 0.0873 281deg);
-    --color-accent-content: oklch(96% 0.018 272.314);
-  --color-neutral: oklch(21% 0.006 285.885);
-  --color-neutral-content: oklch(92% 0.004 286.32);
-  --color-info: oklch(82% 0.111 230.318);
-  --color-info-content: oklch(29% 0.066 243.157);
-  --color-success: oklch(79% 0.209 151.711);
-  --color-success-content: oklch(37% 0.077 168.94);
-  --color-warning: oklch(82% 0.189 84.429);
-  --color-warning-content: oklch(41% 0.112 45.904);
-  --color-error: oklch(64% 0.246 16.439);
-  --color-error-content: oklch(27% 0.105 12.094);
-  --radius-selector: 0.625rem;
-  --radius-field: 0.625rem;
-  --radius-box: 0.625rem;
+
+  --color-base-100: #171618;
+  --color-base-200: #1d1d20;
+  --color-base-300: #2e2e31;
+  --color-base-content: #edeaee;
+
+  --console-line: #4b4b4f;
+  --console-line-soft: #2a2a2d;
+  --console-faint: #97959b;
+  --console-dim: #c8c5ca;
+
+  --color-primary: #bac3ff;
+  --color-primary-content: #222c61;
+  --color-secondary: #c3c5dd;
+  --color-secondary-content: #2d2f42;
+  --color-accent: #d9bfcf;
+  --color-accent-content: #3a2b35;
+  --color-neutral: #242326;
+  --color-neutral-content: #c8c5ca;
+
+  --color-info: #a1cce8;
+  --color-info-content: #171618;
+  --color-success: #a8d1a8;
+  --color-success-content: #171618;
+  --color-warning: #fdba55;
+  --color-warning-content: #171618;
+  --color-error: #ffb4ab;
+  --color-error-content: #171618;
+
+  --radius-selector: 6px;
+  --radius-field: 10px;
+  --radius-box: 12px;
   --size-selector: 0.25rem;
   --size-field: 0.25rem;
   --border: 1px;
   --depth: 0;
   --noise: 0;
+
+  /* Field tones. A field is a tonal well, not an outlined box: the fill alone
+     defines it at rest, the tone steps up under the pointer, and the outline
+     is the only line. Three explicit steps beat one colour with alpha,
+     because a field sits on the page, a plate and a well alike. */
+  --field-fill: #232326;
+  --field-fill-hover: #28282c;
+  --field-fill-focus: #2d2d32;
+  --field-line: #3c3c40;
+}
+
+@plugin 'daisyui/theme' {
+  name: "console-light";
+  default: true;
+  color-scheme: "light";
+
+  --color-base-100: #faf7f9;
+  --color-base-200: #f6f2f6;
+  --color-base-300: #e4e1e5;
+  --color-base-content: #1f1f22;
+
+  --console-line: #d3d1d5;
+  --console-line-soft: #e9e6ea;
+  --console-faint: #636367;
+  --console-dim: #4b4b4f;
+
+  --color-primary: #515b92;
+  --color-primary-content: #ffffff;
+  --color-secondary: #5b5d72;
+  --color-secondary-content: #ffffff;
+  --color-accent: #6d5966;
+  --color-accent-content: #ffffff;
+  --color-neutral: #e4e1e5;
+  --color-neutral-content: #2a2a2d;
+
+  --color-info: #2d5f79;
+  --color-info-content: #ffffff;
+  --color-success: #315936;
+  --color-success-content: #ffffff;
+  --color-warning: #6f4800;
+  --color-warning-content: #ffffff;
+  --color-error: #9f352d;
+  --color-error-content: #ffffff;
+
+  --radius-selector: 6px;
+  --radius-field: 10px;
+  --radius-box: 12px;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+
+  --field-fill: #efeaf0;
+  --field-fill-hover: #eae4eb;
+  --field-fill-focus: #e4dee6;
+  --field-line: #cbc5cc;
+}
+
+@theme {
+  /* Nunito is Solian's default face, so the explorer speaks in the same voice
+     as the app it reads. Mono is not a body default: it is kept for
+     machine-printed data only — ids, slugs, counts, timestamps — where a
+     fixed-width glyph is what makes the string checkable by eye. */
+  --font-sans: "Nunito", "Noto Sans SC", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Chrome colours resolve through the active daisyUI theme, so a theme swap
+     repaints borders and secondary text without duplicating utilities. */
+  --color-line: var(--console-line);
+  --color-line-soft: var(--console-line-soft);
+  --color-faint: var(--console-faint);
+  --color-dim: var(--console-dim);
+  --text-2xs: 0.6875rem;
+
+  /* Corner radius: a tighter reading of Solian's scale, because the explorer
+     is read on a desktop at a fraction of a phone's distance. Every step
+     drops one rank — card 12, field 10, chip 6, inline mark 4, sheet 16 — so
+     the family is preserved and only the amplitude changes. Controls are a
+     6 px rectangle, not a capsule: at 40 px tall a capsule removes the
+     corner entirely and the button stops reading as a surface. */
+  --radius-mark: 4px;
+  --radius-chip: 6px;
+  --radius-input: 10px;
+  --radius-control: 6px;
+  --radius-card: 12px;
+  --radius-sheet: 16px;
+
+  /* Spacing. One 4 px unit, with the named steps the layout actually uses:
+     `page` is the content gutter, `page-wide` the same gutter at desktop,
+     `section` the gap between major regions. */
+  --spacing-page: 1.25rem;
+  --spacing-page-wide: 2rem;
+  --spacing-section: 1.5rem;
+  --spacing-card: 1.25rem;
+  --spacing-field: 0.75rem;
+}
+
+@layer base {
+  html {
+    color-scheme: light;
+    background: var(--color-base-100);
+  }
+
+  html[data-theme="console"] {
+    color-scheme: dark;
+  }
+
+  /* Solian sets body at 1.45–1.5 leading. Nunito's rounded bowls sit a touch
+     smaller than a mono face, so the console gains half a point and a little
+     leading to keep the same optical size. */
+  body {
+    @apply bg-base-100 font-sans text-[13.5px] leading-[1.55] text-base-content antialiased;
+    font-feature-settings: "tnum" 1;
+  }
+
+  ::selection {
+    background: color-mix(in oklab, var(--color-primary) 30%, transparent);
+    color: var(--color-base-content);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+
+  a {
+    text-underline-offset: 3px;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-line);
+    border: 3px solid var(--color-base-100);
+    border-radius: 99px;
+  }
+
+  /* Nunito's bold is heavy enough to carry a headline without a second
+     family, and the negative tracking keeps a rounded face from looking soft
+     at 24 px. */
+  h1,
+  h2,
+  h3 {
+    letter-spacing: -0.005em;
+  }
 }
 
 @layer components {
-  /* Authentication is a focused, quiet gateway. The rail's orbital grid gives
-     each sign-in flow a shared identity without competing with the task. */
-  .auth-page {
-    min-height: 100svh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 1.5rem;
-    background-color: var(--color-base-200);
-    background-image:
-      linear-gradient(color-mix(in oklch, var(--color-base-content) 4%, transparent) 1px, transparent 1px),
-      linear-gradient(90deg, color-mix(in oklch, var(--color-base-content) 4%, transparent) 1px, transparent 1px);
-    background-size: 2rem 2rem;
+  /* ── Text roles ─────────────────────────────────────────────────────── */
+
+  .eyebrow {
+    @apply text-2xs uppercase tracking-[0.14em] text-faint;
   }
 
-  .auth-panel {
-    width: 100%;
-    overflow: hidden;
-    border-radius: var(--radius-box);
-    background: var(--color-base-100);
-    box-shadow: 0 2px 8px color-mix(in oklch, black 8%, transparent);
+  /* Human voice: guidance, descriptions and empty states. Sans is the default
+     face, so this only marks a passage as explanation — one step dimmer than
+     the interface text around it. */
+  .voice {
+    @apply text-[14px] leading-relaxed text-dim;
   }
 
-  .auth-panel--split { max-width: 48rem; }
-  .auth-panel--compact { max-width: 28rem; padding: 1.75rem; }
-  .auth-panel--authorization { max-width: 56rem; }
-
-  .auth-page--authorization {
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    align-content: center;
+  .title {
+    @apply font-bold tracking-[-0.01em];
   }
 
-  .auth-authorization__rail { min-height: 24rem; }
-
-  .auth-rail {
-    position: relative;
-    display: flex;
-    min-height: 22rem;
-    flex-direction: column;
-    justify-content: space-between;
-    gap: 1.5rem;
-    overflow: hidden;
-    padding: 1.75rem;
-    background-color: color-mix(in oklch, var(--color-primary) 5%, var(--color-base-200));
+  .hairline {
+    @apply border-line;
   }
 
-  .auth-rail > * { position: relative; z-index: 1; }
-  .auth-brand-mark { width: 2.25rem; height: 2.25rem; border-radius: var(--radius-box); }
-
-  .auth-main {
-    display: flex;
-    min-height: 22rem;
-    flex-direction: column;
-    padding: 1.75rem;
+  /* Figures read as a column line up when they share a width; the
+     proportional figures Nunito ships suit prose better, so tabular is opt-in
+     rather than the body default. */
+  .numeric {
+    @apply tabular-nums;
   }
 
-  .auth-main .fieldset-legend,
-  .auth-panel .fieldset-legend {
-    margin-bottom: 0.375rem;
-    padding: 0;
-    font-size: 0.8125rem;
-    font-weight: 700;
+  .mono-id {
+    @apply font-mono text-[11.5px] tracking-[-0.01em] text-faint;
   }
 
-  .auth-main .input,
-  .auth-input {
-    border-color: color-mix(in oklch, var(--color-base-content) 16%, var(--color-base-100));
-    background: var(--color-base-100);
-    transition: border-color 150ms ease, box-shadow 150ms ease;
+  /* ── Surfaces ───────────────────────────────────────────────────────── */
+
+  /* Grouping surface: the page sits on `base-100`, and every region inside it
+     is a tonal plate with the same corner as the panel token. */
+  .plate {
+    @apply rounded-card border border-line bg-base-200/30;
   }
 
-  .auth-main .input:focus,
-  .auth-input:focus {
-    border-color: var(--color-primary);
-    outline: none;
-    box-shadow: 0 0 0 3px color-mix(in oklch, var(--color-primary) 14%, transparent);
+  /* A field or option block nested inside a plate, one step tighter. */
+  .well {
+    @apply rounded-card border border-line bg-base-200/40;
   }
 
-  .auth-choice {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    border: 1px solid var(--color-base-300);
-    border-radius: var(--radius-box);
-    padding: 0.75rem;
-    transition: border-color 150ms ease, background-color 150ms ease;
-  }
-
-  .auth-detail-block {
-    border: 1px solid var(--color-base-300);
-    border-radius: var(--radius-box);
-    padding: 1rem;
-    background: color-mix(in oklch, var(--color-base-200) 68%, transparent);
-  }
-
-  .auth-status-icon {
-    display: flex;
-    width: 3.5rem;
-    height: 3.5rem;
-    align-items: center;
-    justify-content: center;
-    border-radius: var(--radius-box);
-  }
-
-  /* The home timeline is one continuous reading surface. Inserts use a thin
-     rule and a muted surface so they remain discoverable without overpowering posts. */
-  .feed-layout {
-    display: grid;
-    min-width: 0;
-  }
-
-  .feed-stream {
-    overflow: hidden;
-    border-top: 1px solid color-mix(in oklch, var(--color-base-300) 85%, transparent);
-    border-bottom: 1px solid color-mix(in oklch, var(--color-base-300) 85%, transparent);
-    background: var(--color-base-100);
-  }
-
-  .feed-compose {
-    display: flex;
-    width: 100%;
-    align-items: center;
-    gap: 0.75rem;
-    border-bottom: 1px solid color-mix(in oklch, var(--color-base-300) 85%, transparent);
-    padding: 0.875rem 1rem;
-    text-align: left;
-    transition: background-color 150ms ease;
-  }
-
-  .feed-compose:hover { background: color-mix(in oklch, var(--color-base-200) 58%, transparent); }
-
-  .feed-post {
-    display: block;
-    transition: background-color 150ms ease;
-  }
-
-  .feed-post:hover { background: color-mix(in oklch, var(--color-base-200) 62%, transparent); }
-
-  .feed-insert,
-  .feed-featured {
-    border-bottom: 1px solid color-mix(in oklch, var(--color-base-300) 85%, transparent);
-    background: color-mix(in oklch, var(--color-base-200) 66%, var(--color-base-100));
-  }
-
-  .feed-insert__header {
-    display: flex;
-    min-height: 2.75rem;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.625rem 1rem 0.25rem;
-  }
-
-  .feed-discovery-card {
-    border: 1px solid color-mix(in oklch, var(--color-base-300) 85%, transparent);
-    border-radius: var(--radius-box);
-    background: var(--color-base-100);
-    transition: border-color 150ms ease, background-color 150ms ease;
-  }
-
-  .feed-discovery-card:hover {
-    border-color: var(--color-base-300);
-    background: color-mix(in oklch, var(--color-base-100) 82%, var(--color-base-200));
-  }
-
-  .feed-footer {
-    display: flex;
-    min-height: 3.5rem;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    padding: 1rem;
-  }
-
-  .feed-sidebar {
-    position: sticky;
-    top: 5rem;
-    display: none;
-    width: 100%;
-    align-self: start;
-  }
-
-  /* Shared application chrome: navigation should orient, not decorate. */
-  .app-sidebar {
-    position: sticky;
-    top: 1rem;
-    max-height: calc(100vh - 2rem);
-    overflow-y: auto;
-  }
-
-  .main-sidebar {
-    display: flex;
-    height: 100%;
-    flex-direction: column;
-    align-items: stretch;
-    padding-block: 1rem;
-    transition: padding 150ms ease;
-  }
-
-  .main-nav-item {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    min-height: 2.75rem;
-    border-radius: var(--radius-box);
-    color: color-mix(in oklch, var(--color-base-content) 72%, transparent);
-    transition: color 150ms ease, background-color 150ms ease;
-  }
-
-  .main-nav-item:hover { background: color-mix(in oklch, var(--color-base-200) 74%, transparent); color: var(--color-base-content); }
-  .main-nav-item--active { background: color-mix(in oklch, var(--color-primary) 10%, var(--color-base-100)); color: var(--color-primary); }
-
-  .main-sidebar-profile {
-    display: flex;
-    width: 100%;
-    align-items: center;
-    gap: 0.75rem;
-    border-radius: var(--radius-box);
-    padding: 0.75rem;
-    transition: background-color 150ms ease;
-  }
-
-  .main-sidebar-profile:hover { background: color-mix(in oklch, var(--color-base-200) 74%, transparent); }
-
-  .main-sidebar-menu {
-    border-radius: var(--radius-box);
-    background: var(--color-base-200);
-    box-shadow: 0 2px 8px color-mix(in oklch, black 8%, transparent);
-  }
-
-  .app-mobile-menu {
-    border-radius: var(--radius-box);
-    background: var(--color-base-200);
-    box-shadow: 0 2px 8px color-mix(in oklch, black 8%, transparent);
-  }
-
-  .rail-search {
-    border-color: var(--color-base-300);
-    background: var(--color-base-100);
+  /* daisyUI surfaces realigned to the console ramp. `card` was a shadowed
+     white box; here it is a plate, because separation in this system comes
+     from the surface tone and the space around it, never from a drop shadow. */
+  .card {
+    border-radius: var(--radius-card);
+    background-color: color-mix(in oklab, var(--color-base-200) 30%, transparent);
+    border: 1px solid var(--color-line);
     box-shadow: none;
   }
 
-  .rail-search:focus {
-    border-color: color-mix(in oklch, var(--color-primary) 55%, var(--color-base-300));
-    box-shadow: 0 0 0 3px color-mix(in oklch, var(--color-primary) 12%, transparent);
-    outline: none;
+  .card-body {
+    padding: 1.25rem;
   }
 
-  .right-rail-section {
-    border: 1px solid color-mix(in oklch, var(--color-base-300) 85%, transparent);
-    border-radius: var(--radius-box);
-    background: var(--color-base-100);
+  .modal-box {
+    border-radius: var(--radius-sheet);
+    border: 1px solid var(--color-line);
+    background-color: var(--color-base-100);
+    box-shadow: 0 30px 80px -40px rgb(0 0 0 / 0.7);
   }
 
-  .search-tabs {
-    display: flex;
-    gap: 0.25rem;
-    border-bottom: 1px solid var(--color-base-300);
+  .dropdown-content,
+  .menu {
+    border-radius: var(--radius-card);
+    background-color: var(--color-base-200);
   }
 
-  .search-tabs__item {
-    display: inline-flex;
-    min-height: 2.5rem;
-    flex: 1;
-    align-items: center;
-    justify-content: center;
-    gap: 0.375rem;
-    border-bottom: 2px solid transparent;
-    padding: 0.5rem 0.75rem;
-    color: color-mix(in oklch, var(--color-base-content) 62%, transparent);
-    font-size: 0.875rem;
-    font-weight: 600;
-    transition: color 150ms ease, border-color 150ms ease;
+  .divider {
+    color: var(--color-line);
   }
 
-  .search-tabs__item:hover { color: var(--color-base-content); }
-  .search-tabs__item--active { border-bottom-color: var(--color-primary); color: var(--color-primary); }
-
-  .search-result-row {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    border: 1px solid color-mix(in oklch, var(--color-base-300) 85%, transparent);
-    border-radius: var(--radius-box);
-    padding: 0.75rem;
-    background: var(--color-base-100);
-    transition: background-color 150ms ease, border-color 150ms ease;
+  .divider::before,
+  .divider::after {
+    background-color: var(--color-line);
   }
 
-  .search-result-row:hover { border-color: var(--color-base-300); background: color-mix(in oklch, var(--color-base-200) 55%, var(--color-base-100)); }
+  /* ── Ledger ─────────────────────────────────────────────────────────── */
 
-  .settings-sidebar { position: sticky; top: 5rem; max-height: calc(100vh - 6rem); overflow-y: auto; border-right: 1px solid var(--color-base-300); }
-  .settings-nav-item { display: flex; align-items: center; gap: 0.75rem; border-radius: var(--radius-box); padding: 0.625rem 0.75rem; color: color-mix(in oklch, var(--color-base-content) 72%, transparent); transition: color 150ms ease, background-color 150ms ease; }
-  .settings-nav-item:hover { background: color-mix(in oklch, var(--color-base-200) 74%, transparent); color: var(--color-base-content); }
-  .settings-nav-item--active { background: color-mix(in oklch, var(--color-primary) 10%, var(--color-base-100)); color: var(--color-primary); }
-
-  .settings-panel {
-    border-radius: var(--radius-box);
-    background: var(--color-base-100);
-    box-shadow: 0 2px 8px color-mix(in oklch, black 6%, transparent);
+  /* Listing: no zebra, hairline rows, hover only tints the row. */
+  .ledger {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
   }
 
-  .settings-panel__body { padding: 1.5rem; }
-
-  .settings-choice {
-    border-radius: var(--radius-box);
-    background: var(--color-base-200);
-    transition: background-color 150ms ease, color 150ms ease;
+  .ledger th {
+    padding: 0 14px 8px 0;
+    border-bottom: 1px solid var(--color-line);
+    color: var(--color-faint);
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    white-space: nowrap;
   }
 
-  .settings-choice:hover { background: var(--color-base-300); }
-  .settings-choice--active { background: color-mix(in oklch, var(--color-primary) 12%, var(--color-base-100)); color: var(--color-primary); }
-
-  .settings-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem;
-    border-radius: var(--radius-box);
-    padding: 1rem;
-    background: var(--color-base-200);
+  .ledger td {
+    padding: 11px 14px 11px 0;
+    border-bottom: 1px solid var(--color-line-soft);
+    vertical-align: middle;
+    font-variant-numeric: tabular-nums;
   }
 
-  .settings-danger-row {
-    border-radius: var(--radius-box);
-    padding: 1rem;
-    background: color-mix(in oklch, var(--color-error) 8%, var(--color-base-100));
+  .ledger tbody tr:last-child td {
+    border-bottom: 0;
   }
 
-  .settings-profile-cover {
-    border-radius: var(--radius-box) var(--radius-box) 0 0;
+  .ledger tbody tr:hover td {
+    background: color-mix(in oklab, var(--color-base-200) 55%, transparent);
   }
 
-  @media (min-width: 640px) {
-    .feed-stream { border: 1px solid color-mix(in oklch, var(--color-base-300) 85%, transparent); border-radius: var(--radius-box); }
+  .ledger td:first-child,
+  .ledger th:first-child {
+    padding-left: 0;
   }
 
-  @media (min-width: 1024px) {
-    .feed-layout { grid-template-columns: minmax(0, 1fr) 26rem; column-gap: 1.5rem; }
-    /* Timeline: discovery rail + feed + compose rail. Both side columns share
-       1fr (equal width) and the feed gets 2fr so it stays the widest column. */
-    .feed-layout--three-col { grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) minmax(0, 1fr); }
-    .feed-sidebar { display: block; }
+  .ledger td:last-child,
+  .ledger th:last-child {
+    padding-right: 0;
+    text-align: right;
   }
 
-  @media (min-width: 768px) {
-    .auth-rail { border-bottom: 0; }
+  /* Full-bleed ledger: cancels the panel body's horizontal padding so row
+     hairlines meet the card edge, while cell text keeps the panel rhythm.
+     The offsets mirror `ConsolePanel`'s 24 px (`px-6`) body inset — keep the
+     two in step, or the table stops short of the edge it is meant to reach. */
+  .table-bleed {
+    margin-inline: -1.5rem;
   }
 
-  @media (max-width: 639px) {
-    .auth-page { padding: 1rem; align-items: stretch; }
-    .auth-panel { margin: auto 0; }
-    .auth-panel--compact { padding: 1.25rem; }
-    .auth-rail, .auth-main { min-height: auto; padding: 1.25rem; }
+  .table-bleed .ledger th:first-child,
+  .table-bleed .ledger td:first-child {
+    padding-left: 1.5rem;
   }
 
-  .app-shell .card {
-    background-color: var(--color-base-100) !important;
-    border: none !important;
-    outline: none !important;
-    box-shadow: 0 2px 8px color-mix(in oklch, black 8%, transparent);
+  .table-bleed .ledger th:last-child,
+  .table-bleed .ledger td:last-child {
+    padding-right: 1.5rem;
   }
 
-  /* Landing page — the public face of the client. The hero reuses the auth
-     rail's orbital grid and fades it out downward; everything below it is flat
-     hairline cards. */
-  .landing-hero {
+  /* ── Fields ─────────────────────────────────────────────────────────── */
+
+  /* One shape for every control: a filled well with a 10 px corner. The
+     outline is the whole edge — there is no underline and no accent bar — so
+     focus is read as the border taking the signal colour, and an error keeps
+     that same edge in the error tone. */
+  .field {
+    display: block;
+    min-inline-size: 0;
+  }
+
+  .field-box {
     position: relative;
-    isolation: isolate;
+    border-radius: var(--radius-input);
   }
 
-  .landing-hero::before {
-    content: "";
+  .field-outline {
     position: absolute;
     inset: 0;
-    z-index: -1;
-    background-image:
-      linear-gradient(color-mix(in oklch, var(--color-base-content) 5%, transparent) 1px, transparent 1px),
-      linear-gradient(90deg, color-mix(in oklch, var(--color-base-content) 5%, transparent) 1px, transparent 1px);
-    background-size: 2rem 2rem;
-    mask-image: linear-gradient(to bottom, black 0%, color-mix(in oklch, black 35%, transparent) 55%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to bottom, black 0%, color-mix(in oklch, black 35%, transparent) 55%, transparent 100%);
-  }
-
-  .route-progress {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    z-index: 9999;
+    margin: 0;
+    padding: 0 calc(var(--field-inset) - 4px);
+    border: 1px solid var(--field-line);
+    border-radius: var(--radius-input);
+    background-color: var(--field-fill);
     pointer-events: none;
-    opacity: 0;
-    transition: opacity 180ms ease;
-  }
-
-  .route-progress.is-visible {
-    opacity: 1;
-  }
-
-  .route-progress__bar {
-    height: 100%;
-    width: 100%;
-    background: var(--color-primary);
-    transform-origin: left center;
-    transform: scaleX(0);
-    transition: transform 130ms ease-out;
-  }
-
-  /* Markdown custom elements */
-  .mention-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-    padding: 0.125rem 0.5rem;
-    border-radius: var(--radius-box);
-    background-color: color-mix(
-      in oklch,
-      var(--color-primary) 10%,
-      transparent
-    );
-    color: var(--color-primary);
-    font-size: 0.875rem;
-    font-weight: 500;
-    text-decoration: none;
-    cursor: pointer;
-    transition: background-color 0.2s;
-  }
-
-  .mention-chip:hover {
-    background-color: color-mix(
-      in oklch,
-      var(--color-primary) 20%,
-      transparent
-    );
-  }
-
-  .highlight,
-  mark.highlight {
-    background-color: color-mix(
-      in oklch,
-      var(--color-warning) 20%,
-      transparent
-    );
-    padding: 0 0.25rem;
-    border-radius: 0.25rem;
-  }
-
-  .spoiler {
-    background-color: var(--color-base-content);
-    color: transparent;
-    cursor: pointer;
-    padding: 0 0.25rem;
-    border-radius: 0.25rem;
-    transition: all 0.2s;
-    user-select: none;
-  }
-
-  .spoiler.revealed {
-    background-color: transparent;
-    color: var(--color-base-content);
-    border: 1px solid var(--color-base-300);
-  }
-
-  .sticker-img {
-    display: inline-block;
-    width: 3rem;
-    height: 3rem;
-    vertical-align: middle;
-    object-fit: contain;
-  }
-
-  .sticker-img[data-sticker-size="small"] {
-    width: 1.5rem;
-    height: 1.5rem;
-  }
-
-  .sticker-img[data-sticker-size="large"] {
-    width: 6rem;
-    height: 6rem;
-  }
-
-  .sticker-img[data-standalone="false"] {
-    margin-inline: 3px;
-  }
-
-  /* Unlazy-powered images: fade the real image in over its blurhash
-     placeholder once loaded. */
-  .file-image-loaded {
-    animation: file-image-in 0.45s ease-out both;
-  }
-
-
-  @media (prefers-reduced-motion: reduce) {
-    .file-image-loaded {
-      animation: none;
-    }
-  }
-
-
-  /* Hide scrollbars in admin portal sections (keeps scrolling functional) */
-  .scrollbar-none {
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
-  .scrollbar-none::-webkit-scrollbar {
-    display: none;
-  }
-
-  /* Portal form fields — used in creator / developer / merchant / admin */
-  .portal-form .fieldset {
-    margin-bottom: 0;
-  }
-
-  .portal-form .fieldset + .fieldset,
-  .portal-form .fieldset-row + .fieldset,
-  .portal-form .fieldset + .fieldset-row {
-    margin-top: 1rem;
-  }
-
-  .portal-form .fieldset-legend {
-    font-size: 0.8125rem;
-    font-weight: 600;
-    color: color-mix(in oklch, var(--color-base-content) 80%, transparent);
-    margin-bottom: 0.375rem;
-    padding: 0;
-  }
-
-  .portal-form .fieldset-label {
-    font-size: 0.75rem;
-    color: color-mix(in oklch, var(--color-base-content) 45%, transparent);
-    margin-top: 0.375rem;
-    line-height: 1.4;
-  }
-
-  .portal-form .input,
-  .portal-form .select,
-  .portal-form .textarea {
-    background-color: color-mix(in oklch, var(--color-base-200) 55%, transparent);
-    border: 1px solid color-mix(in oklch, var(--color-base-300) 70%, transparent);
+    box-sizing: border-box;
+    min-inline-size: 0;
+    text-align: left;
     transition:
-      border-color 150ms ease,
       background-color 150ms ease,
+      border-color 150ms ease,
       box-shadow 150ms ease;
   }
 
-  .portal-form .input:focus,
-  .portal-form .select:focus,
-  .portal-form .textarea:focus {
-    background-color: var(--color-base-100);
-    border-color: color-mix(in oklch, var(--color-primary) 45%, transparent);
-    outline: none;
-    box-shadow: 0 0 0 3px color-mix(in oklch, var(--color-primary) 12%, transparent);
+  .field-box:hover:not(.is-disabled) .field-outline {
+    background-color: var(--field-fill-hover);
+    border-color: color-mix(in oklab, var(--field-line) 65%, var(--color-base-content));
   }
 
-  .portal-form .input:disabled,
-  .portal-form .select:disabled,
-  .portal-form .textarea:disabled {
-    opacity: 0.65;
+  /* Focus is the outline thickened to 2 px in the signal colour via an inset
+     ring, so the control does not move by a pixel. */
+  .field:focus-within:not(.is-disabled) .field-outline {
+    border-color: var(--color-primary);
+    box-shadow: inset 0 0 0 1px var(--color-primary);
+    background-color: var(--field-fill-focus);
+  }
+
+  /* Invalid fields keep the error edge whether or not they hold focus. */
+  .field.is-invalid .field-outline {
+    border-color: var(--color-error);
+  }
+
+  .field.is-invalid:focus-within .field-outline {
+    box-shadow: inset 0 0 0 1px var(--color-error);
+  }
+
+  .field.is-disabled .field-outline {
     cursor: not-allowed;
+    border-color: color-mix(in oklab, var(--field-line) 50%, transparent);
+    background-color: color-mix(in oklab, var(--field-fill) 60%, var(--color-base-100));
   }
 
-  .portal-form-actions {
+  .field-legend {
+    float: unset;
+    display: block;
+    width: auto;
+    padding: 0;
+    height: 11px;
+    font-size: var(--field-label-float);
+    line-height: 11px;
+    visibility: hidden;
+    max-width: 0.01px;
+    white-space: nowrap;
+    overflow: hidden;
+    transition: max-width 150ms cubic-bezier(0, 0, 0.2, 1);
+  }
+
+  .field-legend > span {
+    padding: 0 4px;
+    display: inline-block;
+    opacity: 0;
+    visibility: visible;
+  }
+
+  .field.is-floated .field-legend,
+  .field:focus-within .field-legend {
+    max-width: 1000px;
+  }
+
+  .field-control {
+    display: block;
+    position: relative;
+    z-index: 1;
+    inline-size: 100%;
+    width: 100%;
+    block-size: var(--field-height);
+    min-block-size: var(--field-height);
+    padding: 0 var(--field-inset);
+    border: none;
+    border-radius: var(--radius-input);
+    outline: none;
+    background: transparent;
+    color: var(--color-base-content);
+    font-family: var(--font-sans);
+    font-size: 13.5px;
+    line-height: var(--field-height);
+    caret-color: var(--color-primary);
+    transition: color 150ms ease;
+  }
+
+  .field.has-suffix .field-control,
+  .field:has(.field-action) .field-control {
+    padding-inline-end: calc(var(--field-inset) + 28px);
+  }
+
+  .field-control:disabled {
+    cursor: not-allowed;
+    color: color-mix(in oklab, var(--color-base-content) 45%, transparent);
+  }
+
+  .field-control::placeholder {
+    color: transparent;
+  }
+
+  .field:focus-within .field-control::placeholder,
+  .field-bare .field-control::placeholder {
+    color: color-mix(in oklab, var(--color-faint) 80%, transparent);
+  }
+
+  .field-md {
+    --field-height: 44px;
+    --field-inset: 14px;
+    --field-label-rest: 13.5px;
+    --field-label-float: 10.5px;
+  }
+
+  .field-sm {
+    --field-height: 40px;
+    --field-inset: 13px;
+    --field-label-rest: 13px;
+    --field-label-float: 10px;
+  }
+
+  .field-xs {
+    --field-height: 32px;
+    --field-inset: 10px;
+    --field-label-rest: 12px;
+    --field-label-float: 9px;
+  }
+
+  .field textarea.field-control {
+    block-size: auto;
+    min-block-size: calc(var(--field-height) * 2);
+    padding-block: 10px;
+    line-height: 1.5;
+    resize: vertical;
+  }
+
+  /* A select keeps its own arrow, drawn here because the native control is
+     reset. The extra right inset keeps the text clear of it. */
+  .field select.field-control {
+    appearance: none;
+    padding-inline-end: calc(var(--field-inset) + 20px);
+    background-image:
+      linear-gradient(45deg, transparent 50%, currentColor 50%),
+      linear-gradient(135deg, currentColor 50%, transparent 50%);
+    background-position:
+      calc(100% - 15px) calc(50% + 1px),
+      calc(100% - 10px) calc(50% + 1px);
+    background-size:
+      5px 5px,
+      5px 5px;
+    background-repeat: no-repeat;
+  }
+
+  .field-label-float {
+    position: absolute;
+    z-index: 2;
+    inset-inline-start: calc(var(--field-inset) - 4px);
+    inset-block-start: 50%;
+    translate: 0 -50%;
+    color: var(--color-faint);
+    font-size: var(--field-label-rest);
+    font-weight: 500;
+    line-height: 1;
+    pointer-events: none;
+    transform-origin: left center;
+    padding: 0 4px;
+    transition:
+      inset-block-start 160ms cubic-bezier(0.2, 0.7, 0.2, 1),
+      translate 160ms cubic-bezier(0.2, 0.7, 0.2, 1),
+      font-size 160ms cubic-bezier(0.2, 0.7, 0.2, 1),
+      letter-spacing 160ms ease,
+      color 160ms ease;
+  }
+
+  /* The caption rises to the top border for a value or focus. */
+  .field.is-floated .field-label-float,
+  .field:focus-within .field-label-float {
+    inset-block-start: 0;
+    translate: 0 -50%;
+    font-size: var(--field-label-float);
+    font-weight: 600;
+    letter-spacing: 0.03em;
+  }
+
+  .field:focus-within:not(.is-disabled) .field-label-float {
+    color: var(--color-primary);
+  }
+
+  .field.is-invalid .field-label-float,
+  .field.is-invalid:focus-within .field-label-float {
+    color: var(--color-error);
+  }
+
+  .field.is-disabled .field-label-float {
+    color: color-mix(in oklab, var(--color-faint) 60%, transparent);
+  }
+
+  .field-hint {
+    margin-block-start: 6px;
+    font-size: 11px;
+    line-height: 1.4;
+    color: var(--color-faint);
+  }
+
+  .field-hint-error {
+    color: var(--color-error);
+  }
+
+  .field-hint-warning {
+    color: var(--color-warning);
+  }
+
+  .field-suffix {
+    position: absolute;
+    z-index: 2;
+    inset-inline-end: 12px;
+    inset-block-start: 50%;
+    translate: 0 -50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-faint);
+    pointer-events: none;
+    transition: color 150ms ease;
+  }
+
+  .field:focus-within:not(.is-disabled) .field-suffix {
+    color: var(--color-base-content);
+  }
+
+  /* A trailing control inside the field, e.g. a password reveal. */
+  .field-action {
+    position: absolute;
+    z-index: 2;
+    inset-inline-end: 6px;
+    inset-block-start: 50%;
+    translate: 0 -50%;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem;
-    padding-top: 0.25rem;
+    justify-content: center;
+    block-size: 28px;
+    inline-size: 28px;
+    border-radius: var(--radius-chip);
+    color: var(--color-faint);
+    transition:
+      color 150ms ease,
+      background-color 150ms ease;
   }
 
-  .portal-setting-row {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 1rem;
-    padding: 0.875rem 1rem;
-    border-radius: var(--radius-box);
-    background-color: color-mix(in oklch, var(--color-base-200) 70%, transparent);
-    border: 1px solid color-mix(in oklch, var(--color-base-300) 40%, transparent);
+  .field-action:hover {
+    color: var(--color-base-content);
+    background-color: color-mix(in oklab, var(--color-base-content) 8%, transparent);
   }
 
-  a[data-internal] {
-    color: var(--color-primary);
-    text-decoration: none;
+  /* daisyUI's own controls, aligned to the field shape so a plain `<input>`
+     inside a form reads as the same object as a `TextField`. */
+  .input,
+  .select,
+  .textarea {
+    border-radius: var(--radius-input);
+    border: 1px solid var(--field-line);
+    background-color: var(--field-fill);
+    color: var(--color-base-content);
+    font-family: var(--font-sans);
+    transition:
+      background-color 150ms ease,
+      border-color 150ms ease,
+      box-shadow 150ms ease;
   }
 
-  a[data-internal]:hover {
-    text-decoration: underline;
+  .input:hover:not(:disabled):not(:focus),
+  .select:hover:not(:disabled):not(:focus),
+  .textarea:hover:not(:disabled):not(:focus) {
+    background-color: var(--field-fill-hover);
+    border-color: color-mix(in oklab, var(--field-line) 65%, var(--color-base-content));
+  }
+
+  .input:focus,
+  .select:focus,
+  .textarea:focus,
+  .input:focus-within,
+  .select:focus-within,
+  .textarea:focus-within {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: inset 0 0 0 1px var(--color-primary);
+    background-color: var(--field-fill-focus);
+  }
+
+  .input::placeholder,
+  .textarea::placeholder {
+    color: color-mix(in oklab, var(--color-faint) 80%, transparent);
+  }
+
+  .checkbox,
+  .radio {
+    border-color: var(--field-line);
+  }
+
+  .checkbox:checked,
+  .radio:checked {
+    border-color: var(--color-primary);
+    background-color: var(--color-primary);
+    color: var(--color-primary-content);
+  }
+
+  .toggle:checked {
+    background-color: var(--color-primary);
+    color: var(--color-primary-content);
+    border-color: var(--color-primary);
+  }
+
+  /* ── Buttons ────────────────────────────────────────────────────────── */
+
+  .btn {
+    @apply border-line font-sans text-[13px] font-semibold tracking-[0.005em];
+    border-radius: var(--radius-control);
+    box-shadow: none;
+    transition:
+      background-color 150ms ease,
+      border-color 150ms ease,
+      color 150ms ease;
+  }
+
+  /* Square buttons follow the same corner rather than becoming circles: a
+     circle is a different shape language, and at 6 px the icon tiles read as
+     part of the same family as the fields. */
+  .btn-square,
+  .btn-circle {
+    border-radius: var(--radius-control);
+  }
+
+  .btn-ghost {
+    @apply text-dim;
+  }
+
+  .btn-ghost:hover {
+    @apply bg-base-300 text-base-content;
+  }
+
+  .btn-primary {
+    @apply border-primary;
+  }
+
+  .btn-error {
+    border-color: color-mix(in oklab, var(--color-error) 60%, transparent);
+  }
+
+  /* A quiet action for row headers and filters: no fill at rest, a tonal step
+     under the pointer. */
+  .btn-quiet {
+    @apply border-transparent bg-transparent text-dim;
+  }
+
+  .btn-quiet:hover {
+    background-color: color-mix(in oklab, var(--color-base-300) 60%, transparent);
+    border-color: var(--color-line);
+    @apply text-base-content;
+  }
+
+  .link-quiet {
+    @apply text-dim underline decoration-line underline-offset-4 transition-colors;
+  }
+  .link-quiet:hover {
+    @apply text-base-content decoration-faint;
+  }
+
+  /* ── Chips ──────────────────────────────────────────────────────────── */
+
+  /* The one inline token: a tag, a category, an action filter. A 6 px
+     rectangle on the tonal ramp, so it sits beside a field without competing
+     with a button. */
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-chip border border-line bg-base-200/40 px-2.5 py-1 text-2xs text-dim;
+    transition:
+      background-color 150ms ease,
+      border-color 150ms ease,
+      color 150ms ease;
+  }
+
+  a.chip:hover,
+  button.chip:hover {
+    @apply border-line bg-base-200 text-base-content;
+  }
+
+  .chip-active {
+    @apply border-primary/60 bg-primary/10 text-base-content;
+  }
+
+  .chip-count {
+    @apply font-mono text-[10.5px] text-faint;
+  }
+
+  /* ── Status notes ───────────────────────────────────────────────────── */
+
+  /* The one shape for an inline error, confirmation or warning. A tinted
+     block carries the tone, so a message reads as an object rather than as a
+     stray sentence with a bar beside it. */
+  .note {
+    @apply rounded-chip border px-3.5 py-2.5 text-xs leading-relaxed;
+  }
+
+  .note-error {
+    @apply border-error/40 bg-error/10 text-error;
+  }
+
+  .note-success {
+    @apply border-success/40 bg-success/10 text-success;
+  }
+
+  .note-warning {
+    @apply border-warning/40 bg-warning/10 text-warning;
+  }
+
+  /* daisyUI's alert, collapsed onto the same block. */
+  .alert {
+    border-radius: var(--radius-chip);
+    border-width: 1px;
+    font-size: 12px;
+    line-height: 1.6;
+  }
+
+  .dot {
+    @apply inline-block size-[6px] shrink-0 rounded-full;
+  }
+
+  /* daisyUI badges as the chip's smaller sibling. */
+  .badge {
+    border-radius: var(--radius-chip);
+    border-color: var(--color-line);
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
+
+  /* ── Loading ────────────────────────────────────────────────────────── */
+
+  /* Loading placeholder: a single soft sweep replaces a "reading…" line, so
+     a surface that has not resolved yet still shows its layout. It carries no
+     information and must never be announced as content. */
+  .skeleton {
+    @apply block rounded-chip bg-base-300/70;
+    animation: skeleton-sweep 1.4s ease-in-out infinite;
+  }
+
+  @keyframes skeleton-sweep {
+    0%,
+    100% {
+      opacity: 0.55;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+
+  /* ── Brand ──────────────────────────────────────────────────────────── */
+
+  /* The brand mark is masked rather than drawn, so it takes the theme's text
+     colour: a white glyph would vanish on the light field. */
+  .brand-mark {
+    background-color: currentColor;
+    -webkit-mask: url("/icon-outline.svg") center / contain no-repeat;
+    mask: url("/icon-outline.svg") center / contain no-repeat;
   }
 }
 
-/* =============================================
-   Mobile drawer transitions (creator / developer / drive)
-   ============================================= */
+/* ── Reading surface ──────────────────────────────────────────────────────
+   Long-form post content is the one place the console steps up a size: a
+   13.5 px interface is scanned, a paragraph is read, so body copy gains a
+   point and a half and the leading opens to 1.7. Links are underlined rather
+   than tinted, because a post is the one surface where a coloured word could
+   be a mention, a tag or a username and must not have to be guessed at. */
+.markdown {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--color-base-content);
+  overflow-wrap: anywhere;
+}
 
-/* Backdrop fade */
+.markdown > :first-child {
+  margin-top: 0;
+}
+
+.markdown > :last-child {
+  margin-bottom: 0;
+}
+
+.markdown p {
+  margin-block: 0.7em;
+}
+
+.markdown h1,
+.markdown h2,
+.markdown h3,
+.markdown h4 {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  margin-block: 1.4em 0.6em;
+}
+
+.markdown h1 {
+  font-size: 1.35em;
+}
+.markdown h2 {
+  font-size: 1.2em;
+}
+.markdown h3 {
+  font-size: 1.05em;
+}
+
+.markdown a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.markdown a:hover {
+  text-decoration: underline;
+}
+
+.markdown ul,
+.markdown ol {
+  margin-block: 0.7em;
+  padding-inline-start: 1.4em;
+}
+
+.markdown ul {
+  list-style: disc;
+}
+
+.markdown ol {
+  list-style: decimal;
+}
+
+.markdown li {
+  margin-block: 0.3em;
+}
+
+.markdown blockquote {
+  margin-block: 0.9em;
+  padding-inline-start: 0.9em;
+  border-inline-start: 2px solid var(--color-line);
+  color: var(--color-dim);
+}
+
+.markdown code {
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+  padding: 0.1em 0.35em;
+  border-radius: var(--radius-mark);
+  background: color-mix(in oklab, var(--color-base-300) 55%, transparent);
+}
+
+.markdown pre {
+  margin-block: 0.9em;
+  padding: 0.85rem 1rem;
+  overflow-x: auto;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  background: var(--color-base-200);
+  font-size: 12.5px;
+  line-height: 1.6;
+}
+
+.markdown pre code {
+  padding: 0;
+  background: none;
+  font-size: inherit;
+}
+
+.markdown hr {
+  margin-block: 1.4em;
+  border: 0;
+  border-top: 1px solid var(--color-line-soft);
+}
+
+.markdown img,
+.markdown video {
+  max-width: 100%;
+  border-radius: var(--radius-card);
+}
+
+.markdown table {
+  width: 100%;
+  margin-block: 1em;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.markdown th,
+.markdown td {
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--color-line-soft);
+  text-align: left;
+}
+
+.markdown th {
+  color: var(--color-faint);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* A compact variant for previews: one rank down, no margin at either end. */
+.markdown-compact {
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+
+/* ── Markdown custom elements ─────────────────────────────────────────── */
+
+.mention-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0 0.4rem;
+  border-radius: var(--radius-chip);
+  background-color: color-mix(in oklab, var(--color-primary) 12%, transparent);
+  color: var(--color-primary);
+  font-size: 0.92em;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.mention-chip:hover {
+  background-color: color-mix(in oklab, var(--color-primary) 22%, transparent);
+}
+
+.highlight,
+mark.highlight {
+  background-color: color-mix(in oklab, var(--color-warning) 22%, transparent);
+  padding: 0 0.25rem;
+  border-radius: var(--radius-mark);
+}
+
+.spoiler {
+  background-color: var(--color-dim);
+  color: transparent;
+  cursor: pointer;
+  padding: 0 0.25rem;
+  border-radius: var(--radius-mark);
+  transition:
+    background-color 0.2s,
+    color 0.2s;
+  user-select: none;
+}
+
+.spoiler.revealed {
+  background-color: transparent;
+  color: var(--color-base-content);
+  border: 1px solid var(--color-line);
+}
+
+.sticker-img {
+  display: inline-block;
+  width: 3rem;
+  height: 3rem;
+  vertical-align: middle;
+  object-fit: contain;
+}
+
+.sticker-img[data-sticker-size="small"] {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.sticker-img[data-sticker-size="large"] {
+  width: 6rem;
+  height: 6rem;
+}
+
+.sticker-img[data-standalone="false"] {
+  margin-inline: 3px;
+}
+
+/* Unlazy-powered images: fade the real image in over its blurhash
+   placeholder once loaded. */
+.file-image-loaded {
+  animation: file-image-in 0.45s ease-out both;
+}
+
+@keyframes file-image-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ── Motion ─────────────────────────────────────────────────────────────
+   Motion is short and only explains a change: a row resolving, a notice
+   appearing, a drawer arriving. Nothing moves for decoration. */
+@layer components {
+  .page-region {
+    overflow: hidden;
+    transition: height 220ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  .step-enter-active,
+  .step-leave-active,
+  .row-enter-active,
+  .row-leave-active,
+  .notice-enter-active,
+  .notice-leave-active {
+    transition:
+      opacity 160ms ease,
+      transform 160ms ease;
+  }
+
+  .step-enter-from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  .step-leave-to {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  .row-enter-from,
+  .row-leave-to {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+
+  .row-leave-active {
+    position: absolute;
+    width: 100%;
+  }
+
+  .notice-enter-from,
+  .notice-leave-to {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+}
+
+/* Drawer (compose sheet, filters) — backdrop fades, panel slides. */
 .drawer-fade-enter-active {
   transition: opacity 0.25s ease-out;
 }
@@ -691,7 +1131,6 @@
   opacity: 0;
 }
 
-/* Panel slide from right */
 .drawer-slide-enter-active {
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -703,8 +1142,7 @@
   transform: translateX(100%);
 }
 
-/* Modal dialogs (shop sheets, PIN, quota) — fade the overlay, pop the panel.
-   Driven by Vue <Transition> around forceMount'd reka-ui parts. */
+/* Dialog overlays — fade the backdrop, pop the panel. */
 .dialog-fade-enter-active,
 .dialog-fade-leave-active {
   transition: opacity 180ms ease;
@@ -726,30 +1164,124 @@
   transform: scale(0.96);
 }
 
+@keyframes note-in {
+  from {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+}
+
+.note-in {
+  animation: note-in 160ms ease-out;
+}
+
+/* Hide scrollbars where a strip scrolls horizontally (tab bars, chips). */
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .dialog-fade-enter-active,
-  .dialog-fade-leave-active,
-  .dialog-pop-enter-active,
-  .dialog-pop-leave-active {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .page-region {
     transition: none;
   }
+
+  .step-enter-active,
+  .step-leave-active,
+  .row-enter-active,
+  .row-leave-active,
+  .notice-enter-active,
+  .notice-leave-active {
+    transition: none;
+  }
+
+  .file-image-loaded,
+  .note-in {
+    animation: none;
+  }
 }
 
-@supports (view-transition-name: root) {
-  :root {
-    view-transition-name: root;
-  }
-
-  ::view-transition-old(root),
-  ::view-transition-new(root) {
-    animation-duration: 220ms;
-    animation-timing-function: ease;
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  ::view-transition-old(root),
-  ::view-transition-new(root) {
-    animation-duration: 1ms;
-  }
+/* A menu row in the console: same rhythm for every dropdown, so a post menu
+   and an account menu read as one control. */
+.post-menu-row {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: var(--radius-control);
+  padding: 0.375rem 0.625rem;
+  text-align: left;
+  color: var(--color-dim);
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
+}
+
+.post-menu-row:hover {
+  background-color: var(--color-base-300);
+  color: var(--color-base-content);
+}
+
+/* ── Feed surface ─────────────────────────────────────────────────────────
+   The timeline is one continuous reading surface. The card is not a
+   separate element: it is a hairline between rows. Discovery inserts
+   (suggested publishers, realms, articles) surface just above the
+   same hairline so they do not interrupt the reading rhythm. */
+
+/* A feed row: no outer chrome, just a hairline between posts. */
+.feed-post {
+  display: block;
+  border-bottom: 1px solid var(--color-line-soft);
+  transition: background-color 150ms ease;
+}
+
+.feed-post:last-child {
+  border-bottom: 0;
+}
+
+/* A discovery insert: one step dimmer, same rhythm as a post row. */
+.feed-insert {
+  border-bottom: 1px solid var(--color-line-soft);
+  background: color-mix(in oklab, var(--color-base-200) 60%, var(--color-base-100));
+}
+
+.feed-insert__header {
+  display: flex;
+  min-height: 2.75rem;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem 0.25rem;
+}
+
+/* A discovery card inside the insert carousel. */
+.feed-discovery-card {
+  border: 1px solid var(--color-line-soft);
+  border-radius: var(--radius-card);
+  background: var(--color-base-100);
+  overflow: hidden;
+  transition:
+    border-color 150ms ease,
+    background-color 150ms ease;
+}
+
+.feed-discovery-card:hover {
+  border-color: var(--color-line);
+  background: color-mix(in oklab, var(--color-base-100) 80%, var(--color-base-200));
 }

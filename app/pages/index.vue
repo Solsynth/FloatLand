@@ -1,226 +1,112 @@
 <template>
   <NuxtLayout name="app">
-    <div class="w-full">
-      <!-- Hero: full-bleed band (the app shell only drops its max-width on `/`),
-           copy first, client art below. -->
-      <section
-        class="landing-hero -mx-4 -mt-4 border-b border-base-300 px-4 pb-14 pt-16 md:pt-20 lg:-mx-6 lg:px-6"
-      >
-        <div class="mx-auto max-w-3xl text-center">
-          <p
-            class="inline-flex items-center gap-2 rounded-full border border-base-300 bg-base-100/70 px-3 py-1 text-[0.6875rem] font-bold uppercase tracking-[0.16em] text-base-content/60"
-          >
-            <span class="h-1.5 w-1.5 rounded-full bg-primary" aria-hidden="true" />
-            {{ t("landing.eyebrow") }}
-          </p>
-          <h1
-            class="mt-6 text-[clamp(2.25rem,6vw,3.5rem)] font-extrabold leading-[1.05] tracking-tight text-base-content"
-          >
-            {{ t("landing.heroTitle") }}
-          </h1>
-          <p
-            class="mx-auto mt-5 max-w-2xl text-base leading-7 text-base-content/70 md:text-lg md:leading-8"
-          >
-            {{ t("landing.heroDescription") }}
-          </p>
-          <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <NuxtLink
-              v-if="!isAuthenticated"
-              to="/auth/create-account"
-              class="btn btn-primary gap-2"
-            >
-              {{ t("landing.getStarted") }}
-              <IconArrowRight class="h-4 w-4" />
-            </NuxtLink>
-            <NuxtLink
-              to="/timeline"
-              class="gap-2"
-              :class="isAuthenticated ? 'btn btn-primary' : 'btn btn-ghost border border-base-300'"
-            >
-              {{ isAuthenticated ? t("landing.openApp") : t("landing.explore") }}
-            </NuxtLink>
-          </div>
-          <p v-if="!isAuthenticated" class="mt-4 text-xs text-base-content/55">
+    <!--
+      The landing is a table of contents for the explorer, not a brochure. The
+      hero states what the product reads; the shelves below are the actual
+      routes; and the newest posts are shown live, because a reader arriving
+      with no query is best served by content rather than a promise of it.
+    -->
+    <section class="border-b border-line pb-10 pt-6">
+      <div class="max-w-3xl">
+        <p class="eyebrow flex items-center gap-2">
+          <span class="dot bg-primary" aria-hidden="true" />
+          {{ t("landing.eyebrow") }}
+        </p>
+        <h1 class="title mt-4 text-[clamp(1.85rem,4.5vw,2.75rem)] leading-[1.1] text-base-content">
+          {{ t("landing.heroTitle") }}
+        </h1>
+        <p class="voice mt-4 max-w-2xl text-[15px]">
+          {{ t("landing.heroDescription") }}
+        </p>
+        <div class="mt-6 flex flex-wrap items-center gap-2">
+          <NuxtLink to="/timeline" class="btn btn-primary btn-sm gap-1.5">
+            {{ t("landing.explore") }}
+            <IconArrowRight class="size-3.5" aria-hidden="true" />
+          </NuxtLink>
+          <a v-if="!isAuthenticated" :href="signInHref" class="btn btn-quiet btn-sm">
+            {{ t("landing.getStarted") }}
+          </a>
+          <NuxtLink v-else :to="`/accounts/${user?.name ?? ''}`" class="btn btn-quiet btn-sm">
+            {{ t("nav.account") }}
+          </NuxtLink>
+          <span v-if="!isAuthenticated" class="text-2xs text-faint">
             {{ t("landing.haveAccount") }}
-            <NuxtLink to="/auth/login" class="link link-primary font-medium">
-              {{ t("landing.signIn") }}
-            </NuxtLink>
-            <span class="px-1 text-base-content/30">·</span>
-            <a
-              href="https://web.solian.app"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="link"
-            >
-              {{ t("landing.trySolian") }}
-            </a>
-          </p>
+            <a :href="signInHref" class="link-quiet">{{ t("landing.signIn") }}</a>
+          </span>
         </div>
+      </div>
+    </section>
 
-        <img
-          src="/images/main-visual.jpg"
-          :alt="t('landing.heroTitle')"
-          width="1280"
-          height="720"
-          class="mx-auto mt-12 w-full max-w-4xl rounded-box border border-base-300 object-cover shadow-sm"
+    <!-- Shelves -->
+    <section class="py-10">
+      <header class="mb-5">
+        <h2 class="title text-base text-base-content">{{ t("landing.surfacesTitle") }}</h2>
+        <p class="voice mt-1 text-[13px]">{{ t("landing.surfacesDescription") }}</p>
+      </header>
+
+      <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <NuxtLink
+          v-for="surface in surfaces"
+          :key="surface.href"
+          :to="surface.href"
+          class="plate group p-4 transition-colors hover:bg-base-200/60"
         >
-      </section>
-
-      <!-- Modules: one card per surface the web client ships with -->
-      <section class="px-4 py-16 lg:px-6">
-        <header class="mx-auto max-w-2xl text-center">
-          <h2 class="text-2xl font-extrabold tracking-tight text-base-content md:text-3xl">
-            {{ t("landing.featuresTitle") }}
-          </h2>
-          <p class="mt-3 text-sm leading-6 text-base-content/65 md:text-base">
-            {{ t("landing.featuresDescription") }}
+          <span
+            class="grid size-8 place-items-center rounded-chip border border-line bg-base-200/40 text-dim transition-colors group-hover:text-base-content"
+          >
+            <component :is="surface.icon" class="size-4" aria-hidden="true" />
+          </span>
+          <h3 class="mt-3 text-[13px] font-semibold text-base-content">
+            {{ surface.title }}
+          </h3>
+          <p class="mt-1 text-2xs leading-relaxed text-faint">
+            {{ surface.description }}
           </p>
-        </header>
-        <div class="mx-auto mt-10 grid max-w-6xl gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <NuxtLink
-            v-for="feature in features"
-            :key="feature.href"
-            :to="feature.href"
-            class="rounded-box border border-base-300 bg-base-100 p-5 transition-colors hover:border-primary/40 hover:bg-base-200/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
-          >
-            <span
-              class="flex h-9 w-9 items-center justify-center rounded-box bg-primary/10 text-primary"
-            >
-              <component :is="feature.icon" class="h-5 w-5" />
-            </span>
-            <h3 class="mt-3.5 text-sm font-bold text-base-content">
-              {{ feature.title }}
-            </h3>
-            <p class="mt-1.5 text-sm leading-6 text-base-content/65">
-              {{ feature.description }}
-            </p>
-          </NuxtLink>
-        </div>
-      </section>
+        </NuxtLink>
+      </div>
+    </section>
 
-      <!-- Hubs: the same platform serves publishers, developers and merchants -->
-      <section class="border-t border-base-300 px-4 py-16 lg:px-6">
-        <header class="mx-auto max-w-2xl text-center">
-          <h2 class="text-2xl font-extrabold tracking-tight text-base-content md:text-3xl">
-            {{ t("landing.hubsTitle") }}
-          </h2>
-          <p class="mt-3 text-sm leading-6 text-base-content/65 md:text-base">
-            {{ t("landing.hubsDescription") }}
-          </p>
-        </header>
-        <div class="mx-auto mt-10 grid max-w-5xl gap-4 md:grid-cols-3">
-          <NuxtLink
-            v-for="hub in hubs"
-            :key="hub.href"
-            :to="hub.href"
-            class="rounded-box border border-base-300 bg-base-100 p-5 transition-colors hover:border-primary/40 hover:bg-base-200/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
-          >
-            <span
-              class="flex h-9 w-9 items-center justify-center rounded-box bg-primary/10 text-primary"
-            >
-              <component :is="hub.icon" class="h-5 w-5" />
-            </span>
-            <h3 class="mt-3.5 text-sm font-bold text-base-content">
-              {{ hub.title }}
-            </h3>
-            <p class="mt-1.5 text-sm leading-6 text-base-content/65">
-              {{ hub.description }}
-            </p>
-          </NuxtLink>
+    <!-- Newest posts -->
+    <section class="border-t border-line py-10">
+      <header class="mb-4 flex flex-wrap items-end justify-between gap-2">
+        <div>
+          <h2 class="title text-base text-base-content">{{ t("landing.latestTitle") }}</h2>
+          <p class="voice mt-1 text-[13px]">{{ t("landing.latestDescription") }}</p>
         </div>
-      </section>
+        <NuxtLink to="/timeline" class="text-2xs text-faint transition-colors hover:text-dim">
+          {{ t("sidebar.viewAll") }}
+        </NuxtLink>
+      </header>
 
-      <!-- Membership: optional tiers, quiet single band -->
-      <section class="px-4 pb-16 lg:px-6">
-        <div
-          class="mx-auto flex max-w-5xl flex-col items-start gap-6 rounded-box border border-base-300 bg-base-100 p-8 md:flex-row md:items-center md:justify-between"
-        >
-          <div class="max-w-xl">
-            <h2 class="text-xl font-extrabold tracking-tight text-base-content md:text-2xl">
-              {{ t("landing.membershipTitle") }}
-            </h2>
-            <p class="mt-2 text-sm leading-6 text-base-content/65">
-              {{ t("landing.membershipDescription") }}
-            </p>
-          </div>
-          <NuxtLink to="/membership" class="btn btn-primary shrink-0 gap-2">
-            {{ t("landing.membershipCta") }}
-            <IconSparkles class="h-4 w-4" />
-          </NuxtLink>
-        </div>
-      </section>
+      <ConsolePanel flush>
+        <LoadingSkeleton v-if="status === 'pending'" variant="feed" :rows="4" />
 
-      <footer class="border-t border-base-300 px-4 py-10 lg:px-6">
-        <div
-          class="mx-auto flex max-w-6xl flex-col gap-6 md:flex-row md:items-center md:justify-between"
-        >
-          <div class="flex items-center gap-2.5">
-            <img src="/favicon.png" alt="" width="32" height="32" class="h-8 w-8">
-            <div>
-              <p class="text-sm font-semibold text-base-content">Solar Network</p>
-              <p class="text-xs text-base-content/55">
-                {{ t("landing.footer.copyright", { year: currentYear }) }}
-              </p>
-            </div>
-          </div>
-          <nav
-            class="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-base-content/65"
-            :aria-label="t('landing.footer.links')"
-          >
-            <NuxtLink to="/membership" class="hover:text-base-content">
-              {{ t("landing.footer.membership") }}
-            </NuxtLink>
-            <NuxtLink to="/realms" class="hover:text-base-content">
-              {{ t("landing.footer.realms") }}
-            </NuxtLink>
-            <NuxtLink to="/developers" class="hover:text-base-content">
-              {{ t("landing.footer.developers") }}
-            </NuxtLink>
-            <NuxtLink to="/tickets" class="hover:text-base-content">
-              {{ t("landing.footer.support") }}
-            </NuxtLink>
-            <a
-              href="https://github.com/solsynth"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="hover:text-base-content"
-            >
-              {{ t("landing.footer.sourceCode") }}
-            </a>
-            <a
-              href="https://web.solian.app"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="hover:text-base-content"
-            >
-              {{ t("landing.footer.mobile") }}
-            </a>
-          </nav>
-        </div>
-      </footer>
-    </div>
+        <p v-else-if="!latest.length" class="voice px-6 py-10 text-center">
+          {{ t("home.emptyDesc") }}
+        </p>
+
+        <template v-else>
+          <PostCard v-for="post in latest" :key="post.id" :post="post" variant="feed" />
+        </template>
+      </ConsolePanel>
+    </section>
+
   </NuxtLayout>
 </template>
 
 <script setup lang="ts">
 import {
   IconArrowRight,
-  IconBriefcaseBusiness,
-  IconBuilding,
-  IconCode,
   IconCompass,
-  IconHardDrive,
-  IconMail,
-  IconPalette,
-  IconPawPrint,
-  IconSparkles,
-  IconTrendingUp,
-  IconWallet,
+  IconSearch,
+  IconTag,
+  IconBuilding,
 } from "#components";
-import { EXTERNAL_APPS } from "~/composables/useMainNav";
+import { fetchPosts, signInUrl } from "~/utils/api";
+import type { Post } from "~/types/post";
 
 definePageMeta({
-  // `/` is the public landing page — signed-in visitors belong in the app.
+  // `/` is the public landing page — signed-in visitors belong in the feed.
   middleware: () => {
     if (useAuth().isAuthenticated.value) {
       return navigateTo("/timeline");
@@ -229,75 +115,54 @@ definePageMeta({
 });
 
 const { t } = useI18n();
-const { isAuthenticated } = useAuth();
+const { isAuthenticated, user } = useAuth();
 
-const currentYear = new Date().getFullYear();
+const signInHref = signInUrl("/");
 
-const features = computed(() => [
+const surfaces = computed(() => [
   {
     href: "/timeline",
     icon: IconCompass,
-    title: t("landing.features.timeline.title"),
-    description: t("landing.features.timeline.description"),
+    title: t("landing.surfaces.feed.title"),
+    description: t("landing.surfaces.feed.description"),
+  },
+  {
+    href: "/search",
+    icon: IconSearch,
+    title: t("landing.surfaces.search.title"),
+    description: t("landing.surfaces.search.description"),
+  },
+  {
+    href: "/tags",
+    icon: IconTag,
+    title: t("landing.surfaces.tags.title"),
+    description: t("landing.surfaces.tags.description"),
   },
   {
     href: "/realms",
     icon: IconBuilding,
-    title: t("landing.features.realms.title"),
-    description: t("landing.features.realms.description"),
-  },
-  {
-    href: "/workspaces",
-    icon: IconBriefcaseBusiness,
-    title: t("landing.features.workspaces.title"),
-    description: t("landing.features.workspaces.description"),
-  },
-  {
-    href: EXTERNAL_APPS.drive,
-    icon: IconHardDrive,
-    title: t("landing.features.drive.title"),
-    description: t("landing.features.drive.description"),
-  },
-  {
-    href: EXTERNAL_APPS.mail,
-    icon: IconMail,
-    title: t("landing.features.mail.title"),
-    description: t("landing.features.mail.description"),
-  },
-  {
-    href: "/wallets",
-    icon: IconWallet,
-    title: t("landing.features.wallet.title"),
-    description: t("landing.features.wallet.description"),
-  },
-  {
-    href: EXTERNAL_APPS.pet,
-    icon: IconPawPrint,
-    title: t("landing.features.pet.title"),
-    description: t("landing.features.pet.description"),
+    title: t("landing.surfaces.realms.title"),
+    description: t("landing.surfaces.realms.description"),
   },
 ]);
 
-const hubs = computed(() => [
-  {
-    href: "/creators",
-    icon: IconPalette,
-    title: t("landing.hubs.creators.title"),
-    description: t("landing.hubs.creators.description"),
+// The newest public posts, rendered on the server so the landing carries real
+// content in its first HTML response rather than a placeholder that fills in.
+const { data: latestPosts, status } = await useAsyncData(
+  "landing-latest-posts",
+  async () => {
+    try {
+      const result = await fetchPosts(6, 0, { orderDesc: true });
+      return result.posts;
+    } catch (error) {
+      console.error("Failed to load the newest posts:", error);
+      return [] as Post[];
+    }
   },
-  {
-    href: "/developers",
-    icon: IconCode,
-    title: t("landing.hubs.developers.title"),
-    description: t("landing.hubs.developers.description"),
-  },
-  {
-    href: "/merchants",
-    icon: IconTrendingUp,
-    title: t("landing.hubs.merchants.title"),
-    description: t("landing.hubs.merchants.description"),
-  },
-]);
+  { default: () => [] as Post[] },
+);
+
+const latest = computed(() => latestPosts.value ?? []);
 
 defineOgImage("UniOgImage", {
   title: "Solar Network",

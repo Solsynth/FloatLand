@@ -1,35 +1,36 @@
 <template>
 	<NuxtLayout name="app">
 		<!-- Mobile Header -->
-		<div class="lg:hidden sticky z-10 mb-4 -mx-4 -mt-4 top-16">
+		<div class="lg:hidden sticky top-14 z-10 mb-4 -mx-5 -mt-6 bg-base-100/90 px-5 py-2 backdrop-blur sm:-mx-8">
 			<div
-				class="flex items-center gap-4 bg-base-100 pl-6 pr-4 py-3"
+				class="flex items-center gap-3"
 			>
-				<button class="btn -ml-2 btn-circle btn-ghost btn-sm" @click="handleBack">
+				<button class="btn btn-quiet btn-xs px-1" @click="handleBack">
 					<IconArrowLeft class="w-5 h-5" />
 				</button>
 				<div class="flex-1">
-					<h1 class="text-lg font-bold">{{ t('post.title') }}</h1>
+					<h1 class="title text-sm">{{ t('post.title') }}</h1>
 				</div>
-				<button class="btn btn-sm btn-primary gap-1" @click="() => handleReply(post)">
+				<button class="btn btn-primary btn-xs gap-1" @click="() => handleReply(post)">
 					<IconReply class="w-4 h-4" />
 					<span class="hidden sm:inline">{{ t('post.replyBtn') }}</span>
 				</button>
 			</div>
 		</div>
 
-		<div class="feed-layout feed-layout--three-col">
+		<div class="grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
 			<!-- Left column: discovery rail (categories + tags) -->
-			<aside class="feed-sidebar">
-				<ExploreDiscovery />
+			<aside class="hidden min-w-0 lg:block">
+				<div class="sticky top-20">
+					<ExploreDiscovery />
+				</div>
 			</aside>
 
 			<!-- Main Content -->
 			<div class="min-w-0">
-				<ConfuseSpinner
-					v-if="postStatus === 'pending'"
-					:message="t('post.loading')"
-				/>
+				<ConsolePanel v-if="postStatus === 'pending'" flush>
+					<LoadingSkeleton variant="feed" :rows="3" />
+				</ConsolePanel>
 
 				<template v-else-if="post">
 					<!-- Chain preceding this post: the member thread it continues from -->
@@ -67,12 +68,12 @@
 					<div class="mt-6">
 						<TabsRoot default-value="replies" class="w-full">
 							<!-- Tab Bar -->
-							<TabsList class="tabs tabs-box bg-base-200/50 p-1 mb-4 overflow-x-auto scrollbar-none">
+							<TabsList class="mb-4 flex w-fit max-w-full gap-0.5 overflow-x-auto rounded-card border border-line bg-base-200/30 p-1 scrollbar-none">
 								<TabsTrigger
 									v-for="tab in interactionTabs"
 									:key="tab.value"
 									:value="tab.value"
-							class="tab flex-1 gap-1.5 whitespace-nowrap"
+							class="flex items-center gap-1.5 whitespace-nowrap rounded-control px-3.5 py-1.5 text-2xs tracking-[0.02em] text-faint transition-colors data-[state=active]:bg-base-300 data-[state=active]:text-base-content"
 						>
 							<component :is="tab.icon" class="h-4 w-4 shrink-0" />
 									<span>{{ tab.label }}</span>
@@ -82,8 +83,8 @@
 							<!-- Replies Tab -->
 							<TabsContent value="replies" class="space-y-4">
 							<!-- Reply Input -->
-							<div v-if="isAuthenticated" class="card bg-base-100">
-								<div class="card-body p-4">
+							<div v-if="isAuthenticated" class="plate">
+								<div class="p-4">
 									<div class="flex gap-3">
 										<div v-if="userAvatar" class="avatar shrink-0">
 											<div class="h-8 w-8 rounded-full">
@@ -103,7 +104,7 @@
 											<textarea
 												v-model="replyContent"
 												:placeholder="t('post.replyPlaceholder')"
-												class="textarea textarea-bordered w-full min-h-[80px] resize-none"
+												class="textarea w-full min-h-20 resize-none text-[13px]"
 											/>
 											<p
 												v-if="replyError"
@@ -142,10 +143,10 @@
 							<!-- Empty State -->
 								<div
 									v-if="replies.length === 0"
-									class="text-center py-12"
+									class="py-10 text-center"
 								>
-									<IconMessageCircle class="w-12 h-12 mx-auto text-base-content/20 mb-4" />
-									<p class="text-base-content/50">
+									<IconMessageCircle class="mx-auto mb-3 size-6 text-faint" />
+									<p class="voice text-[13px]">
 										{{ t('post.noReplies') }}
 									</p>
 								</div>
@@ -167,10 +168,10 @@
 
 								<div
 									v-if="forwards.length === 0"
-									class="text-center py-12"
+									class="py-10 text-center"
 								>
-									<IconForward class="w-12 h-12 mx-auto text-base-content/20 mb-4" />
-									<p class="text-base-content/50">
+									<IconForward class="mx-auto mb-3 size-6 text-faint" />
+									<p class="voice text-[13px]">
 										{{ t('post.noForwards') }}
 									</p>
 								</div>
@@ -181,9 +182,9 @@
 							<div
 								v-for="boost in boosts"
 								:key="boost.id"
-								class="card bg-base-100"
+								class="plate"
 							>
-								<div class="card-body p-3">
+								<div class="p-3">
 									<div class="flex items-center gap-3">
 										<NuxtLink
 											v-if="boost.account"
@@ -223,10 +224,10 @@
 
 								<div
 									v-if="boosts.length === 0"
-									class="text-center py-12"
+									class="py-10 text-center"
 								>
-									<IconRepeat2 class="w-12 h-12 mx-auto text-base-content/20 mb-4" />
-									<p class="text-base-content/50">
+									<IconRepeat2 class="mx-auto mb-3 size-6 text-faint" />
+									<p class="voice text-[13px]">
 										{{ t('post.noBoosts') }}
 									</p>
 								</div>
@@ -237,9 +238,9 @@
 							<div
 								v-for="reaction in reactionList"
 								:key="reaction.id"
-								class="card bg-base-100"
+								class="plate"
 							>
-								<div class="card-body p-3">
+								<div class="p-3">
 									<div class="flex items-center gap-3">
 										<NuxtLink
 											v-if="reaction.account"
@@ -293,10 +294,10 @@
 
 								<div
 									v-if="reactionList.length === 0"
-									class="text-center py-12"
+									class="py-10 text-center"
 								>
-									<IconSmilePlus class="w-12 h-12 mx-auto text-base-content/20 mb-4" />
-									<p class="text-base-content/50">
+									<IconSmilePlus class="mx-auto mb-3 size-6 text-faint" />
+									<p class="voice text-[13px]">
 										{{ t('post.noReactions') }}
 									</p>
 								</div>
@@ -313,11 +314,13 @@
 			</div>
 
 			<!-- Right column: publisher rail (same sticky shell as the timeline) -->
-			<aside class="feed-sidebar">
-				<PublisherSidebar
-					v-if="post?.publisher"
-					:publisher="post?.publisher"
-				/>
+			<aside class="hidden min-w-0 lg:block">
+				<div class="sticky top-20">
+					<PublisherSidebar
+						v-if="post?.publisher"
+						:publisher="post?.publisher"
+					/>
+				</div>
 			</aside>
 		</div>
 	</NuxtLayout>

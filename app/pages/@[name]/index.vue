@@ -1,20 +1,21 @@
 <template>
-    <div class="min-h-[50vh] flex items-center justify-center">
-        <ConfuseSpinner message="Redirecting..." />
-    </div>
+  <ConsolePanel flush>
+    <LoadingSkeleton variant="feed" :rows="2" />
+  </ConsolePanel>
 </template>
 
 <script setup lang="ts">
+/**
+ * `/@name` is the short form of a profile, and the form that gets shared. It
+ * is a redirect rather than a second page so there is one canonical profile
+ * URL: a search engine or a link preview never sees two addresses for one
+ * account.
+ */
 const route = useRoute();
-const router = useRouter();
 const name = computed(() => route.params.name as string);
 
-// Redirect /@name to /accounts/name
-onMounted(() => {
-    if (name.value) {
-        router.replace(`/accounts/${name.value}`);
-    } else {
-        router.replace('/');
-    }
-});
+await navigateTo(
+  name.value ? `/accounts/${encodeURIComponent(name.value)}` : "/",
+  { replace: true },
+);
 </script>

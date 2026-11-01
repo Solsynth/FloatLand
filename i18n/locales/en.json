@@ -1,64 +1,38 @@
 {
   "landing": {
-    "seoTitle": "The open-source social platform",
-    "seoDescription": "The open-source social platform. Follow the people you like, join realms, and keep your drive, mail, chat and wallet in one orbit.",
-    "eyebrow": "Open-source social platform",
-    "heroTitle": "One account for your whole social world",
-    "heroDescription": "Solar Network ties the timeline, realms, workspaces, drive, mail, chat and wallet together. FloatLand is the web client, built for browsing and light interaction with no install required.",
+    "seoTitle": "A reader for the open network",
+    "seoDescription": "Browse posts, articles, realms and the people writing them. No account needed to read.",
+    "eyebrow": "Post explorer",
+    "heroTitle": "Everything being written on the network, in one feed",
+    "heroDescription": "FloatLand reads Solar Network: posts and articles from every publisher, the realms they belong to, and the tags that tie them together. Read without an account; sign in only when you want to reply.",
     "getStarted": "Create an account",
     "signIn": "Sign in",
-    "explore": "Explore the timeline",
+    "explore": "Open the feed",
     "haveAccount": "Already have an account?",
-    "openApp": "Open the app",
+    "openApp": "Open the feed",
     "trySolian": "Try Solian the app",
-    "featuresTitle": "Solar Network Ecosystem",
-    "featuresDescription": "Feature rich and developing rapidly",
-    "features": {
-      "timeline": {
-        "title": "Timeline",
-        "description": "Posts and updates from the people you follow, ranked For you, Top or Latest."
+    "surfacesTitle": "Ways in",
+    "surfacesDescription": "Four shelves, one index. Every post on the network is reachable from each of them.",
+    "surfaces": {
+      "feed": {
+        "title": "Feed",
+        "description": "A continuous stream of posts and articles, ranked For you, Top or Latest, filtered to the people and realms you follow."
+      },
+      "search": {
+        "title": "Search",
+        "description": "One query across posts, people and realms, with results as you type."
+      },
+      "tags": {
+        "title": "Tags",
+        "description": "Every tag in use, most used first, each one a page of everything filed under it."
       },
       "realms": {
         "title": "Realms",
-        "description": "Community spaces with their own feeds, members and worlds to explore."
-      },
-      "workspaces": {
-        "title": "Workspaces",
-        "description": "Organization spaces for people, files and shared work, with roles and plans."
-      },
-      "drive": {
-        "title": "Drive",
-        "description": "Files, folders, recent uploads and trash, with storage shared across all clients."
-      },
-      "mail": {
-        "title": "Mail",
-        "description": "A real inbox on the web: folders, labels, attachments and compose."
-      },
-      "wallet": {
-        "title": "Wallet",
-        "description": "Wallets for the network's economy, with balances and transfers."
-      },
-      "pet": {
-        "title": "Pet",
-        "description": "Chat with your personal AI agents, right inside the client."
+        "description": "Community spaces with their own members and feeds, browsable as a grid or a compact list."
       }
     },
-    "hubsTitle": "Build on Solar Network",
-    "hubsDescription": "Publishers, plugins and stores all run on the same open platform.",
-    "hubs": {
-      "creators": {
-        "title": "Creator Hub",
-        "description": "Publish posts, manage publishers and grow an audience."
-      },
-      "developers": {
-        "title": "Developer Hub",
-        "description": "Ship plugins and apps, manage projects and test the API in the playground."
-      },
-      "merchants": {
-        "title": "Merchant Hub",
-        "description": "Sell products, track orders and settlements, and run sponsored posts."
-      }
-    },
+    "latestTitle": "Recently published",
+    "latestDescription": "The newest posts on the network, whichever realm they came from.",
     "membershipTitle": "Stellar membership",
     "membershipDescription": "Membership fees pay for the servers and the ongoing development of Solar Network. Tiers add storage, faster progression and extra account features. Features that are free today stay free.",
     "membershipCta": "Compare tiers",
@@ -97,7 +71,9 @@
     "required": "Required",
     "default": "Default",
     "error": "An error occurred",
-    "remove": "Remove"
+    "remove": "Remove",
+    "gridView": "Grid view",
+    "listView": "List view"
   },
   "lightbox": {
     "viewer": "Media viewer",
@@ -122,8 +98,7 @@
     "usage": "Usage",
     "applicationType": "Application Type",
     "share": "Share",
-    "previewInViewer": "Preview in viewer",
-    "createdAt": "Created"
+    "previewInViewer": "Preview in viewer"
   },
   "nav": {
     "membership": "Membership",
@@ -151,7 +126,15 @@
     "overview": "Overview",
     "content": "Content",
     "community": "Community",
-    "adminPanel": "Admin Panel"
+    "adminPanel": "Admin Panel",
+    "primary": "Primary",
+    "footer": "Footer",
+    "badges": "Badges",
+    "categories": "Categories",
+    "tags": "Tags",
+    "skipToContent": "Skip to content",
+    "switchToLight": "Switch to light",
+    "switchToDark": "Switch to dark"
   },
   "calendar": {
     "title": "Calendar",
@@ -369,7 +352,9 @@
     "noActivity": "No activity yet.",
     "about": "About",
     "verifiedBy": "Verified by",
-    "loadingActivity": "Loading activity..."
+    "loadingActivity": "Loading activity...",
+    "automated": "Automated account",
+    "membership": "Membership"
   },
   "activation": {
     "title": "Account activation",
@@ -894,7 +879,8 @@
     "lv": "Lv {level}",
     "xp": "{xp} XP",
     "membersCount": "{count} members",
-    "by": "By {name}"
+    "by": "By {name}",
+    "failedToCreate": "Could not create the realm"
   },
   "workspaces": {
     "title": "Workspaces",
@@ -960,100 +946,100 @@
     "createError": "Could not create the workspace.",
     "signInTitle": "Sign in to manage workspaces",
     "signInDescription": "Your workspaces, members, and shared activity are available after you sign in.",
-    "refresh": "Refresh"
-    ,"back": "Back"
-    ,"detailTitle": "Workspace"
-    ,"notFound": "Workspace not found."
-    ,"noDescription": "No workspace description yet."
-    ,"overview": "Overview"
-    ,"management": "Management"
-    ,"bundledPlan": "Bundled plan"
-    ,"paidPlan": "Paid plan"
-    ,"planDescription": "Review the current plan and upgrade this workspace."
-    ,"membersDescription": "Invite people and manage their workspace roles."
-     ,"mailboxesDescription": "Create and manage shared mailboxes for this workspace."
-     ,"customDomains": "Custom domains"
-     ,"customDomainsDescription": "Connect a domain, publish its DKIM records, and use it for workspace mailboxes."
-     ,"addCustomDomain": "Add custom domain"
-     ,"customDomain": "Domain"
-     ,"customDomainHint": "Enter the domain you want to use for workspace mail."
-     ,"recordName": "Name"
-     ,"recordType": "Type"
-     ,"recordValue": "Value"
-     ,"readyForSending": "Ready for sending"
-     ,"dnsVerificationRequired": "DNS verification required"
-     ,"noCustomDomains": "No custom domains connected."
-     ,"customDomainsError": "Could not load or update custom domains."
-     ,"removeCustomDomainConfirm": "Remove this custom domain? Its mailbox aliases must be removed first."
-     ,"mailboxRouting": "Aliases and forwarding"
-     ,"mailboxRoutingDescription": "Manage custom-domain addresses and forwarding rules for a mailbox."
-     ,"aliases": "Aliases"
-     ,"forwarding": "Forwarding"
-     ,"selectCustomDomain": "Select a verified custom domain"
-     ,"selectAlias": "Select an alias"
-     ,"aliasLocalPart": "Alias address, for example support"
-     ,"aliasName": "Alias name (optional)"
-     ,"addAlias": "Add alias"
-     ,"addForwarding": "Add forwarding rule"
-     ,"forwardingDestination": "Destination email address"
-     ,"noAliases": "No aliases configured."
-     ,"noForwarding": "No forwarding rules configured."
-     ,"mailboxDetailsError": "Could not load or update mailbox routing."
-     ,"removeAliasConfirm": "Remove this alias? Its forwarding rules will also stop working."
-     ,"removeForwardingConfirm": "Remove this forwarding rule?"
-     ,"mailboxQuota": "Mailbox quota"
-     ,"mailboxQuotaDescription": "Raw email storage allocated to this mailbox's workspace."
-     ,"used": "Used"
-     ,"limit": "Limit"
-     ,"remaining": "Remaining"
-     ,"mailboxUsage": "Mailbox usage"
-     ,"mailboxUsageDescription": "Mailboxes created against this workspace's plan limit."
-     ,"mailboxUsageError": "Could not load mailbox usage."
-     ,"sendUsage": "Send usage"
-     ,"sendUsageDescription": "Workspace-wide outbound email usage for the current day and calendar month."
-     ,"daily": "Daily"
-     ,"monthly": "Monthly"
-     ,"disabled": "Disabled"
-     ,"dnsRecords": "DNS records"
-     ,"dkimRecords": "DKIM"
-     ,"mailFromRecords": "MAIL FROM"
-     ,"inboundRecords": "Inbound mail"
-     ,"noRecords": "No records required."
-     ,"domainStageBasic": "Basic"
-     ,"domainStageFull": "Full"
-     ,"domainStageCompleted": "Completed"
-    ,"flywheelDescription": "Manage encrypted application saves and audit history."
-    ,"flywheelQuotaDescription": "Flywheel blob storage may use up to 50% of this workspace's storage quota."
-    ,"nameHint": "You can change the workspace name later from its detail page."
-    ,"descriptionHint": "A short description helps members understand this workspace."
-     ,"mailboxAddressHint": "Enter a local part, or a complete address for a custom domain."
-     ,"mailboxLocalPartPlaceholder": "support"
-     ,"mailboxAddressPlaceholder": "support at example.com"
-     ,"configuredHost": "Configured host"
-    ,"mailboxNameHint": "An optional label shown to workspace members."
-    ,"mailCredentials": "Mail credentials"
-    ,"mailCredentialsDescription": "Create app passwords for SMTP, IMAP, or POP3 clients. The secret is shown only once."
-    ,"createCredential": "Create credential"
-    ,"credentialLabel": "Credential label"
-    ,"credentialLabelHint": "Use a name that identifies the device or mail client."
-    ,"credentialMailbox": "Mailbox"
-    ,"selectMailbox": "Select a mailbox"
-    ,"credentialProtocols": "Protocols"
-    ,"credentialProtocolsHint": "Choose the protocols this credential may use."
-    ,"credentialCreated": "Credential created"
-    ,"saveSecretOnce": "Save this secret now. It will not be shown again."
-    ,"noCredentials": "No mail credentials configured."
-    ,"credentialsError": "Could not load or update mail credentials."
-    ,"revokeCredentialConfirm": "Revoke this mail credential? Existing clients will stop authenticating."
-    ,"clientConfiguration": "Mail client configuration"
-    ,"clientConfigurationDescription": "Use these settings in your mail client. Prefer TLS ports when available."
-    ,"service": "Service"
-    ,"server": "Server"
-    ,"port": "Port"
-    ,"security": "Security"
-    ,"clientUsernameHint": "Username: your full mailbox address. Password: the generated credential secret."
-    ,"searchAccountsHint": "Search by account name or a primary contact email."
-    ,"role": "Role"
+    "refresh": "Refresh",
+    "back": "Back",
+    "detailTitle": "Workspace",
+    "notFound": "Workspace not found.",
+    "noDescription": "No workspace description yet.",
+    "overview": "Overview",
+    "management": "Management",
+    "bundledPlan": "Bundled plan",
+    "paidPlan": "Paid plan",
+    "planDescription": "Review the current plan and upgrade this workspace.",
+    "membersDescription": "Invite people and manage their workspace roles.",
+    "mailboxesDescription": "Create and manage shared mailboxes for this workspace.",
+    "customDomains": "Custom domains",
+    "customDomainsDescription": "Connect a domain, publish its DKIM records, and use it for workspace mailboxes.",
+    "addCustomDomain": "Add custom domain",
+    "customDomain": "Domain",
+    "customDomainHint": "Enter the domain you want to use for workspace mail.",
+    "recordName": "Name",
+    "recordType": "Type",
+    "recordValue": "Value",
+    "readyForSending": "Ready for sending",
+    "dnsVerificationRequired": "DNS verification required",
+    "noCustomDomains": "No custom domains connected.",
+    "customDomainsError": "Could not load or update custom domains.",
+    "removeCustomDomainConfirm": "Remove this custom domain? Its mailbox aliases must be removed first.",
+    "mailboxRouting": "Aliases and forwarding",
+    "mailboxRoutingDescription": "Manage custom-domain addresses and forwarding rules for a mailbox.",
+    "aliases": "Aliases",
+    "forwarding": "Forwarding",
+    "selectCustomDomain": "Select a verified custom domain",
+    "selectAlias": "Select an alias",
+    "aliasLocalPart": "Alias address, for example support",
+    "aliasName": "Alias name (optional)",
+    "addAlias": "Add alias",
+    "addForwarding": "Add forwarding rule",
+    "forwardingDestination": "Destination email address",
+    "noAliases": "No aliases configured.",
+    "noForwarding": "No forwarding rules configured.",
+    "mailboxDetailsError": "Could not load or update mailbox routing.",
+    "removeAliasConfirm": "Remove this alias? Its forwarding rules will also stop working.",
+    "removeForwardingConfirm": "Remove this forwarding rule?",
+    "mailboxQuota": "Mailbox quota",
+    "mailboxQuotaDescription": "Raw email storage allocated to this mailbox's workspace.",
+    "used": "Used",
+    "limit": "Limit",
+    "remaining": "Remaining",
+    "mailboxUsage": "Mailbox usage",
+    "mailboxUsageDescription": "Mailboxes created against this workspace's plan limit.",
+    "mailboxUsageError": "Could not load mailbox usage.",
+    "sendUsage": "Send usage",
+    "sendUsageDescription": "Workspace-wide outbound email usage for the current day and calendar month.",
+    "daily": "Daily",
+    "monthly": "Monthly",
+    "disabled": "Disabled",
+    "dnsRecords": "DNS records",
+    "dkimRecords": "DKIM",
+    "mailFromRecords": "MAIL FROM",
+    "inboundRecords": "Inbound mail",
+    "noRecords": "No records required.",
+    "domainStageBasic": "Basic",
+    "domainStageFull": "Full",
+    "domainStageCompleted": "Completed",
+    "flywheelDescription": "Manage encrypted application saves and audit history.",
+    "flywheelQuotaDescription": "Flywheel blob storage may use up to 50% of this workspace's storage quota.",
+    "nameHint": "You can change the workspace name later from its detail page.",
+    "descriptionHint": "A short description helps members understand this workspace.",
+    "mailboxAddressHint": "Enter a local part, or a complete address for a custom domain.",
+    "mailboxLocalPartPlaceholder": "support",
+    "mailboxAddressPlaceholder": "support at example.com",
+    "configuredHost": "Configured host",
+    "mailboxNameHint": "An optional label shown to workspace members.",
+    "mailCredentials": "Mail credentials",
+    "mailCredentialsDescription": "Create app passwords for SMTP, IMAP, or POP3 clients. The secret is shown only once.",
+    "createCredential": "Create credential",
+    "credentialLabel": "Credential label",
+    "credentialLabelHint": "Use a name that identifies the device or mail client.",
+    "credentialMailbox": "Mailbox",
+    "selectMailbox": "Select a mailbox",
+    "credentialProtocols": "Protocols",
+    "credentialProtocolsHint": "Choose the protocols this credential may use.",
+    "credentialCreated": "Credential created",
+    "saveSecretOnce": "Save this secret now. It will not be shown again.",
+    "noCredentials": "No mail credentials configured.",
+    "credentialsError": "Could not load or update mail credentials.",
+    "revokeCredentialConfirm": "Revoke this mail credential? Existing clients will stop authenticating.",
+    "clientConfiguration": "Mail client configuration",
+    "clientConfigurationDescription": "Use these settings in your mail client. Prefer TLS ports when available.",
+    "service": "Service",
+    "server": "Server",
+    "port": "Port",
+    "security": "Security",
+    "clientUsernameHint": "Username: your full mailbox address. Password: the generated credential secret.",
+    "searchAccountsHint": "Search by account name or a primary contact email.",
+    "role": "Role"
   },
   "login": {
     "authenticateWithPasskey": "Authenticate with Passkey",
@@ -1149,7 +1135,8 @@
     "minutesAgo": "{n}m ago",
     "hoursAgo": "{n}h ago",
     "seoTitle": "Compose",
-    "seoDescription": "Write a new post"
+    "seoDescription": "Write a new post",
+    "createPublisherInApp": "Create a publisher in Solian"
   },
   "surveys": {
     "title": "Survey",
@@ -1217,25 +1204,25 @@
     "selectAtLeast": "Select at least 3 categories to continue.",
     "selectAtMost": "Select no more than 5 categories.",
     "categories": {
-        "english": "English",
-        "history": "History",
-        "esports": "Esports",
-        "indie-games": "Indie Games",
-        "movie": "Movie",
-        "computer": "Computer",
-        "rhythm-game": "Rhythm Game",
-        "photography": "Photography",
-        "internet": "Internet",
-        "3a-games": "AAA Games",
-        "anime-games": "Anime Games",
-        "developer": "Developer",
-        "geography": "Geography",
-        "chemistry": "Chemistry",
-        "math": "Math",
-        "vocaloid": "Vocaloid",
-        "physics": "Physics",
-        "rikki-mahjong": "Rikki Mahjong",
-        "biology": "Biology"
+      "english": "English",
+      "history": "History",
+      "esports": "Esports",
+      "indie-games": "Indie Games",
+      "movie": "Movie",
+      "computer": "Computer",
+      "rhythm-game": "Rhythm Game",
+      "photography": "Photography",
+      "internet": "Internet",
+      "3a-games": "AAA Games",
+      "anime-games": "Anime Games",
+      "developer": "Developer",
+      "geography": "Geography",
+      "chemistry": "Chemistry",
+      "math": "Math",
+      "vocaloid": "Vocaloid",
+      "physics": "Physics",
+      "rikki-mahjong": "Rikki Mahjong",
+      "biology": "Biology"
     },
     "result": {
       "title": "Test result",
@@ -1394,37 +1381,71 @@
       }
     },
     "compare": {
-      "storage": { "label": "Extra storage", "stellar": "+10GB/perk", "nova": "+25GB/perk", "supernova": "+50GB/perk" },
-      "usernameColor": { "label": "Username color", "stellar": "Limited", "nova": "Unlimited", "supernova": "Unlimited" },
-      "translation": { "label": "Translation", "stellar": "Included", "nova": "Included", "supernova": "Included" },
-      "levelingBoost": { "label": "Leveling boost", "stellar": "1.5x", "nova": "2x", "supernova": "2.5x" },
-      "verification": { "label": "Verification access", "stellar": "Eligible", "nova": "Eligible", "supernova": "Eligible" },
-          "publisherQuota": {
-      "label": "Publisher quota",
-      "stellar": "2 base\n3 from Lv30+\n+2 per perk level",
-      "nova": "@:membership.same",
-      "supernova": "@:membership.same"
-    },
-    "realmQuota": {
-      "label": "Realm quota",
-      "stellar": "@:membership.notIncluded",
-      "nova": "Lv30 · 1\nLv60 · 2\nLv90 · 3\n+1 per perk level",
-      "supernova": "@:membership.same"
-    },
-    "botQuota": {
-      "label": "Bot quota",
-      "stellar": "@:membership.notIncluded",
-      "nova": "Lv30 · 1\nLv60 · 2\nLv90 · 3\n+1 per perk level",
-      "supernova": "@:membership.same"
-    }
+      "storage": {
+        "label": "Extra storage",
+        "stellar": "+10GB/perk",
+        "nova": "+25GB/perk",
+        "supernova": "+50GB/perk"
+      },
+      "usernameColor": {
+        "label": "Username color",
+        "stellar": "Limited",
+        "nova": "Unlimited",
+        "supernova": "Unlimited"
+      },
+      "translation": {
+        "label": "Translation",
+        "stellar": "Included",
+        "nova": "Included",
+        "supernova": "Included"
+      },
+      "levelingBoost": {
+        "label": "Leveling boost",
+        "stellar": "1.5x",
+        "nova": "2x",
+        "supernova": "2.5x"
+      },
+      "verification": {
+        "label": "Verification access",
+        "stellar": "Eligible",
+        "nova": "Eligible",
+        "supernova": "Eligible"
+      },
+      "publisherQuota": {
+        "label": "Publisher quota",
+        "stellar": "2 base\n3 from Lv30+\n+2 per perk level",
+        "nova": "@:membership.same",
+        "supernova": "@:membership.same"
+      },
+      "realmQuota": {
+        "label": "Realm quota",
+        "stellar": "@:membership.notIncluded",
+        "nova": "Lv30 · 1\nLv60 · 2\nLv90 · 3\n+1 per perk level",
+        "supernova": "@:membership.same"
+      },
+      "botQuota": {
+        "label": "Bot quota",
+        "stellar": "@:membership.notIncluded",
+        "nova": "Lv30 · 1\nLv60 · 2\nLv90 · 3\n+1 per perk level",
+        "supernova": "@:membership.same"
+      }
     },
     "levelQuota": {
       "title": "Free storage by level",
       "desc": "Every account gets free cloud storage that grows with your level. Membership tiers add extra storage on top.",
       "steps": {
-        "lv0": { "level": "Lv0", "quota": "0.5GiB" },
-        "lv10": { "level": "Lv10", "quota": "1GiB" },
-        "lv120": { "level": "Lv120", "quota": "10GiB" }
+        "lv0": {
+          "level": "Lv0",
+          "quota": "0.5GiB"
+        },
+        "lv10": {
+          "level": "Lv10",
+          "quota": "1GiB"
+        },
+        "lv120": {
+          "level": "Lv120",
+          "quota": "10GiB"
+        }
       }
     }
   },
@@ -1515,7 +1536,9 @@
       "postsEmpty": "Nothing in this collection yet.",
       "postsFailed": "Failed to load this collection.",
       "updateFailed": "Failed to update collections"
-    }
+    },
+    "options": "Post options",
+    "linkCopied": "Link copied"
   },
   "categories": {
     "title": "Categories & Tags",
@@ -1533,7 +1556,10 @@
     "noTags": "No tags found",
     "loadMore": "Load More",
     "seoTitle": "Tags",
-    "seoDescription": "Browse tags on Solar Network."
+    "seoDescription": "Browse tags on Solar Network.",
+    "subscribe": "Subscribe",
+    "unsubscribe": "Unsubscribe",
+    "noPosts": "Nothing filed under this tag yet."
   },
   "publisher": {
     "loading": "Loading publisher...",

@@ -1,59 +1,41 @@
 <template>
-  <div class="flex w-full flex-col gap-5">
-    <!-- Categories -->
-    <section v-if="categories.length > 0" class="right-rail-section">
-      <div class="p-4">
-        <div class="flex items-center justify-between mb-3">
-          <h3 class="text-sm font-semibold text-base-content/70">{{ t("sidebar.categories") }}</h3>
+  <div class="flex flex-col gap-4">
+    <ConsolePanel v-if="categories.length > 0" :title="t('sidebar.categories')">
+      <template #header>
+        <NuxtLink to="/categories" class="text-2xs text-faint transition-colors hover:text-dim">
+          {{ t("sidebar.viewAll") }}
+        </NuxtLink>
+      </template>
+      <ul class="-mx-1.5 space-y-0.5">
+        <li v-for="category in categories" :key="category.id">
           <NuxtLink
-            to="/categories"
-            class="text-xs text-primary hover:underline"
-          >
-            {{ t("sidebar.viewAll") }}
-          </NuxtLink>
-        </div>
-        <div class="space-y-1">
-          <NuxtLink
-            v-for="category in categories.slice(0, 5)"
-            :key="category.id"
             :to="`/categories/${category.slug}`"
-            class="flex items-center gap-2 rounded-md p-2 transition-colors hover:bg-base-200"
+            class="flex items-center gap-2 rounded-control px-1.5 py-1.5 text-[13px] text-dim transition-colors hover:bg-base-300/60 hover:text-base-content"
           >
-            <div
-              class="flex h-6 w-6 items-center justify-center rounded-md bg-base-200 text-primary"
-            >
-              <IconFolder class="h-3 w-3" />
-            </div>
-            <span class="text-sm truncate">{{ category.name }}</span>
+            <IconFolder class="size-3.5 shrink-0 text-faint" aria-hidden="true" />
+            <span class="truncate">{{ category.name }}</span>
           </NuxtLink>
-        </div>
-      </div>
-    </section>
+        </li>
+      </ul>
+    </ConsolePanel>
 
-    <!-- Tags -->
-    <section v-if="tags.length > 0" class="right-rail-section">
-      <div class="p-4">
-        <div class="flex items-center justify-between mb-3">
-          <h3 class="text-sm font-semibold text-base-content/70">{{ t("sidebar.tags") }}</h3>
-          <NuxtLink
-            to="/categories?tab=tags"
-            class="text-xs text-primary hover:underline"
-          >
-            {{ t("sidebar.viewAll") }}
-          </NuxtLink>
-        </div>
-        <div class="flex flex-wrap gap-1.5">
-          <NuxtLink
-            v-for="tag in tags.slice(0, 10)"
-            :key="tag.id"
-            :to="`/tags/${tag.slug}`"
-            class="badge badge-sm badge-ghost hover:badge-primary transition-colors"
-          >
-            #{{ tag.name || tag.slug }}
-          </NuxtLink>
-        </div>
+    <ConsolePanel v-if="tags.length > 0" :title="t('sidebar.tags')">
+      <template #header>
+        <NuxtLink to="/tags" class="text-2xs text-faint transition-colors hover:text-dim">
+          {{ t("sidebar.viewAll") }}
+        </NuxtLink>
+      </template>
+      <div class="flex flex-wrap gap-1.5">
+        <NuxtLink
+          v-for="tag in tags"
+          :key="tag.id"
+          :to="`/tags/${tag.slug}`"
+          class="chip"
+        >
+          #{{ tag.name || tag.slug }}
+        </NuxtLink>
       </div>
-    </section>
+    </ConsolePanel>
   </div>
 </template>
 

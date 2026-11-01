@@ -1,13 +1,15 @@
 <template>
 	<NuxtLayout name="app">
 		<!-- Loading -->
-		<ConfuseSpinner v-if="status === 'pending'" :message="t('realms.loading')" />
+		<ConsolePanel v-if="status === 'pending'" flush>
+			<LoadingSkeleton variant="rows" :rows="5" />
+		</ConsolePanel>
 
 		<!-- Not Found -->
 		<div v-else-if="notFound" class="mx-auto max-w-2xl p-6">
 			<div class="card">
 				<div class="card-body items-center text-center">
-					<IconUsers class="text-base-content/50 w-10 h-10" />
+					<IconUsers class="text-dim w-10 h-10" />
 					<h1 class="text-xl font-bold">{{ t("realms.notFound") }}</h1>
 				</div>
 			</div>
@@ -29,7 +31,7 @@
 				</NuxtLink>
 				<div class="min-w-0 flex-1">
 					<h1 class="text-xl font-bold truncate">{{ realm.name }}</h1>
-					<p class="text-sm text-base-content/60">
+					<p class="text-sm text-dim">
 						{{ t("realms.membersCount", { count: total }) }}
 					</p>
 				</div>
@@ -45,7 +47,7 @@
 
 			<!-- Filters -->
 			<div class="card">
-				<div class="card-body p-4">
+				<div class="p-4">
 					<div class="flex flex-wrap gap-2">
 						<div class="join flex-1">
 							<input
@@ -77,7 +79,7 @@
 					:key="member.id"
 					class="card bg-base-200/50 hover:bg-base-200 transition-colors"
 				>
-					<div class="card-body p-4">
+					<div class="p-4">
 						<div class="flex items-start gap-3">
 							<!-- Avatar -->
 							<NuxtLink :to="`/@${member.account?.name}`" class="shrink-0">
@@ -107,20 +109,20 @@
 										{{ member.nick || member.account?.nick || member.account?.name }}
 									</NuxtLink>
 									<span
-										class="badge badge-sm"
+										class="chip"
 										:class="getRoleBadgeClass(member.role)"
 									>
                                         {{ getRoleLabel(member.role) }}
                                     </span>
 									<span
 										v-if="member.label"
-										class="badge badge-sm"
+										class="chip"
 										:style="getLabelStyle(member.label)"
 									>
                                         {{ member.label.name }}
                                     </span>
 								</div>
-								<p class="text-sm text-base-content/60 truncate">
+								<p class="text-sm text-dim truncate">
 									@{{ member.account?.name }}
 								</p>
 								<!-- eslint-disable vue/no-v-html -->
@@ -130,7 +132,7 @@
 									v-html="renderMarkdown(member.bio)"
 								/>
 								<!-- eslint-enable vue/no-v-html -->
-								<div class="flex items-center gap-3 mt-2 text-xs text-base-content/40">
+								<div class="flex items-center gap-3 mt-2 text-xs text-faint">
                                     <span class="flex items-center gap-1">
                                         <IconZap class="w-3 h-3" />
                                         {{ t("realms.lv", { level: member.level }) }}
@@ -146,7 +148,7 @@
 								<button class="btn btn-ghost btn-square btn-sm">
 									<IconMoreVertical class="w-4 h-4" />
 								</button>
-								<ul class="dropdown-content menu menu-sm bg-base-100 rounded-box z-10 shadow-lg w-40">
+								<ul class="dropdown-content menu menu-sm bg-base-100 rounded-card z-10  w-40">
 									<li v-if="myRole && myRole > member.role">
 										<button @click="promoteMember(member)">
 											<IconArrowUp class="w-4 h-4" />
@@ -184,7 +186,7 @@
 					<IconLoader v-if="isLoading" class="w-4 h-4 animate-spin" />
 					<span>{{ t("common.loadMore") }}</span>
 				</button>
-				<p v-else-if="members.length > 10" class="text-sm text-base-content/50">
+				<p v-else-if="members.length > 10" class="text-sm text-dim">
 					{{ t("realms.noMoreMembers") }}
 				</p>
 			</div>
@@ -192,9 +194,9 @@
 			<!-- Empty State -->
 			<div v-else class="card bg-base-200/50">
 				<div class="card-body items-center text-center py-12">
-					<IconSearch class="w-12 h-12 text-base-content/30 mb-4" />
+					<IconSearch class="w-12 h-12 text-faint mb-4" />
 					<h2 class="text-lg font-bold">{{ t("realms.noMembersFound") }}</h2>
-					<p class="text-base-content/60 text-sm">
+					<p class="text-dim text-sm">
 						{{ t("realms.noMembersHint") }}
 					</p>
 				</div>

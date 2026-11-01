@@ -1,103 +1,76 @@
 <template>
   <NuxtLayout name="app">
-    <div class="grid min-w-0 xl:grid-cols-[minmax(0,1fr)_20rem] xl:gap-x-6">
-      <!-- Main Content -->
-      <div class="space-y-4 min-w-0">
-        <!-- Loading State -->
-        <div v-if="isLoading" class="flex justify-center py-12">
-          <IconLoader class="w-8 h-8 animate-spin text-primary" />
-        </div>
+    <div class="grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
+      <div class="min-w-0">
+        <p v-if="error" class="note note-error mb-4">{{ error }}</p>
 
-        <!-- Error State -->
-        <div v-else-if="error" class="alert alert-error">
-          <IconAlertCircle class="h-5 w-5" />
-          <span>{{ error }}</span>
-          <button class="btn btn-sm btn-ghost" @click="loadData">Retry</button>
-        </div>
-
-        <!-- Content -->
-        <template v-else>
-          <!-- Header Card -->
-          <div class="card bg-base-100">
-            <div class="card-body p-6">
-              <div class="flex items-start gap-4">
-                <div
-                  v-if="isCategory"
-                  class="w-12 h-12 rounded-lg flex items-center justify-center shrink-0"
-                  :style="{ backgroundColor: category?.color || '#6366f1' }"
-                >
-                  <IconFolder class="w-6 h-6 text-white" />
-                </div>
-                <div v-else class="w-12 h-12 rounded-lg bg-primary/20 flex items-center justify-center shrink-0">
-                  <IconTag class="w-6 h-6 text-primary" />
-                </div>
-                <div class="flex-1 min-w-0">
-                  <h1 class="text-2xl font-bold mb-1">
-                    {{ isCategory ? category?.name : (tag?.name || '#' + slug) }}
-                  </h1>
-                  <p class="text-base-content/60">
-                    {{ isCategory ? (category?.description || 'A category') : 'A tag' }}
-                  </p>
-                </div>
-              </div>
-
-              <!-- Subscribe Button -->
-              <div class="mt-4">
-                <button
-                  v-if="isSubscribed"
-                  class="btn btn-error btn-outline btn-sm"
-                  :disabled="isSubscribing"
-                  @click="handleUnsubscribe"
-                >
-                  <IconUserMinus class="w-4 h-4 mr-2" />
-                  Unsubscribe
-                </button>
-                <button
-                  v-else
-                  class="btn btn-primary btn-sm"
-                  :disabled="isSubscribing"
-                  @click="handleSubscribe"
-                >
-                  <IconUserPlus class="w-4 h-4 mr-2" />
-                  Subscribe
-                </button>
-              </div>
+        <div class="mb-5 flex flex-wrap items-start justify-between gap-3">
+          <div class="flex min-w-0 items-center gap-3">
+            <span
+              v-if="isCategory"
+              class="grid size-10 shrink-0 place-items-center rounded-chip border border-line"
+              :style="{ color: category?.color || 'var(--color-primary)' }"
+            >
+              <IconFolder class="size-5" aria-hidden="true" />
+            </span>
+            <span
+              v-else
+              class="grid size-10 shrink-0 place-items-center rounded-chip border border-line bg-base-200/40 text-primary"
+            >
+              <IconTag class="size-5" aria-hidden="true" />
+            </span>
+            <div class="min-w-0">
+              <h1 class="title truncate text-xl text-base-content">
+                {{ isCategory ? category?.name : `#${tag?.name || slug}` }}
+              </h1>
+              <p class="voice mt-0.5 text-[13px]">
+                {{ isCategory ? (category?.description || t("categories.title")) : t("tags.seoDescription") }}
+              </p>
             </div>
           </div>
 
-          <!-- Posts Section -->
-          <div v-if="isLoadingPosts && posts.length === 0" class="flex justify-center py-8">
-            <IconLoader class="w-6 h-6 animate-spin text-primary" />
-          </div>
+          <button
+            type="button"
+            class="btn btn-xs"
+            :class="isSubscribed ? 'btn-error' : 'btn-primary'"
+            :disabled="isSubscribing"
+            @click="isSubscribed ? handleUnsubscribe() : handleSubscribe()"
+          >
+            <IconUserMinus v-if="isSubscribed" class="size-3.5" aria-hidden="true" />
+            <IconUserPlus v-else class="size-3.5" aria-hidden="true" />
+            {{ isSubscribed ? t("tags.unsubscribe") : t("tags.subscribe") }}
+          </button>
+        </div>
 
-          <div v-else-if="posts.length === 0" class="text-center py-8">
-            <IconFileText class="w-12 h-12 mx-auto mb-4 text-base-content/30" />
-            <p class="text-base-content/60">No posts found</p>
-          </div>
+        <ConsolePanel flush>
+          <LoadingSkeleton v-if="isLoading || (isLoadingPosts && posts.length === 0)" variant="feed" :rows="4" />
+
+          <p v-else-if="posts.length === 0" class="voice px-6 py-10 text-center">
+            {{ t("tags.noPosts") }}
+          </p>
 
           <template v-else>
-            <PostCard
-              v-for="post in posts"
-              :key="post.id"
-              :post="post"
-            />
-          </template>
+            <PostCard v-for="post in posts" :key="post.id" :post="post" variant="feed" />
 
-          <!-- Load More -->
-          <div
-            v-if="hasMorePosts && !isLoadingPosts"
-            class="flex justify-center"
-          >
-            <button class="btn btn-outline" @click="loadMorePosts">
-              Load More
-            </button>
-          </div>
-        </template>
+            <div class="flex justify-center border-t border-line-soft px-6 py-4">
+              <span v-if="isLoadingPosts" class="mono-id">{{ t("common.loading") }}</span>
+              <button
+                v-else-if="hasMorePosts"
+                type="button"
+                class="btn btn-quiet btn-xs"
+                @click="loadMorePosts"
+              >
+                {{ t("tags.loadMore") }}
+              </button>
+            </div>
+          </template>
+        </ConsolePanel>
       </div>
 
-      <!-- Right Sidebar (Desktop only) -->
-      <aside class="hidden w-full self-start sticky top-20 xl:block">
-        <ExploreSidebar />
+      <aside class="hidden min-w-0 lg:block">
+        <div class="sticky top-20">
+          <ExploreDiscovery />
+        </div>
       </aside>
     </div>
   </NuxtLayout>
@@ -118,17 +91,11 @@ import {
   type PostCategory,
   type PostTag,
   type CategorySubscription,
-  type Post,
 } from '~/utils/api'
-import {
-  IconFolder,
-  IconTag,
-  IconLoader,
-  IconAlertCircle,
-  IconUserPlus,
-  IconUserMinus,
-  IconFileText,
-} from '#components'
+import type { Post } from '~/types/post'
+import { IconFolder, IconTag, IconUserPlus, IconUserMinus } from "#components"
+
+const { t } = useI18n()
 
 const route = useRoute()
 const slug = computed(() => route.params.slug as string)

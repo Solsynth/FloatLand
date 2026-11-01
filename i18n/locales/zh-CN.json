@@ -1,64 +1,38 @@
 {
   "landing": {
-    "seoTitle": "开源社交平台",
-    "seoDescription": "开源社交平台。关注你喜欢的人、加入领域，把云盘、邮件、聊天和钱包放在同一个轨道里。",
-    "eyebrow": "开源社交平台",
-    "heroTitle": "一个账号，装下整个社交世界",
-    "heroDescription": "Solar Network 把时间线、领域、工作区、云盘、邮件、聊天和钱包连在一起。FloatLand 是网页客户端，为浏览和轻量交互而生，无需安装。",
+    "seoTitle": "开放网络的阅读器",
+    "seoDescription": "浏览帖子、文章、领域以及写下它们的人。阅读无需账号。",
+    "eyebrow": "内容浏览器",
+    "heroTitle": "网络上正在写的一切，都在同一条信息流里",
+    "heroDescription": "FloatLand 用来阅读 Solar Network：来自所有发布者的帖子和文章、它们所属的领域，以及把它们串起来的标签。不登录也能读，只有想回复时才需要账号。",
     "getStarted": "注册账号",
     "signIn": "登录",
-    "explore": "浏览时间线",
+    "explore": "打开信息流",
     "haveAccount": "已经有账号了？",
-    "openApp": "进入应用",
+    "openApp": "打开信息流",
     "trySolian": "试试 Solian App",
-    "featuresTitle": "Solar Network 生态",
-    "featuresDescription": "功能丰富、发展迅速",
-    "features": {
-      "timeline": {
-        "title": "时间线",
-        "description": "关注的人的帖子和动态，支持「推荐 / 热门 / 最新」排序。"
+    "surfacesTitle": "进入的方式",
+    "surfacesDescription": "四个书架，同一个索引。网络上的每一篇内容都能从其中任何一个到达。",
+    "surfaces": {
+      "feed": {
+        "title": "信息流",
+        "description": "连续的帖子和文章，支持「推荐 / 热门 / 最新」排序，可按你关注的人和领域筛选。"
+      },
+      "search": {
+        "title": "搜索",
+        "description": "一次查询覆盖帖子、用户和领域，边输入边出结果。"
+      },
+      "tags": {
+        "title": "标签",
+        "description": "所有在用的标签，按使用量排序，每个标签都是一页归档。"
       },
       "realms": {
         "title": "领域",
-        "description": "拥有独立信息流和成员的社区空间，去探索新的世界。"
-      },
-      "workspaces": {
-        "title": "工作区",
-        "description": "面向人员、文件和协作的组织空间，带角色和套餐管理。"
-      },
-      "drive": {
-        "title": "云盘",
-        "description": "文件、文件夹、最近上传和回收站，存储在各客户端之间共享。"
-      },
-      "mail": {
-        "title": "邮件",
-        "description": "网页端的完整邮箱：文件夹、标签、附件和撰写。"
-      },
-      "wallet": {
-        "title": "钱包",
-        "description": "网络经济体系里的钱包，查看余额和转账。"
-      },
-      "pet": {
-        "title": "宠物",
-        "description": "在客户端里直接和你的个人 AI 智能体聊天。"
+        "description": "拥有独立成员和信息流的社区空间，可以网格或紧凑列表浏览。"
       }
     },
-    "hubsTitle": "在 Solar Network 上构建",
-    "hubsDescription": "发布者、插件和商店都跑在同一个开放平台上。",
-    "hubs": {
-      "creators": {
-        "title": "创作者中心",
-        "description": "发布帖子、管理发布者、积累你的受众。"
-      },
-      "developers": {
-        "title": "开发者中心",
-        "description": "发布插件和应用、管理项目，并在调试场里测试 API。"
-      },
-      "merchants": {
-        "title": "商户中心",
-        "description": "销售商品、跟踪订单与结算，投放赞助帖子。"
-      }
-    },
+    "latestTitle": "最近发布",
+    "latestDescription": "网络上最新的帖子，不分领域。",
     "membershipTitle": "Stellar 会员",
     "membershipDescription": "会员费用用于支付服务器开销和 Solar Network 的持续开发。等级提供更多存储空间、更快的成长速度和额外的账号功能。今天免费的功能依旧免费。",
     "membershipCta": "对比等级",
@@ -85,8 +59,8 @@
     "delete": "删除",
     "edit": "编辑",
     "back": "返回",
-    "previous": "上一个",
-    "next": "下一个",
+    "previous": "上一页",
+    "next": "下一页",
     "confirm": "确认",
     "viewAll": "查看全部",
     "refresh": "刷新",
@@ -104,7 +78,9 @@
     "required": "必填",
     "default": "默认",
     "error": "发生错误",
-    "remove": "移除"
+    "remove": "移除",
+    "gridView": "网格视图",
+    "listView": "列表视图"
   },
   "lightbox": {
     "viewer": "媒体查看器",
@@ -129,8 +105,7 @@
     "usage": "用途",
     "applicationType": "应用类型",
     "share": "分享",
-    "previewInViewer": "在查看器中预览",
-    "createdAt": "创建时间"
+    "previewInViewer": "在查看器中预览"
   },
   "nav": {
     "membership": "会员",
@@ -158,7 +133,15 @@
     "overview": "概览",
     "content": "内容",
     "community": "社区",
-    "adminPanel": "管理面板"
+    "adminPanel": "管理面板",
+    "primary": "主导航",
+    "footer": "页脚",
+    "badges": "徽章",
+    "categories": "分类",
+    "tags": "标签",
+    "skipToContent": "跳到正文",
+    "switchToLight": "切换到浅色",
+    "switchToDark": "切换到深色"
   },
   "calendar": {
     "title": "日历",
@@ -376,7 +359,9 @@
     "noActivity": "暂无动态。",
     "about": "关于",
     "verifiedBy": "认证方",
-    "loadingActivity": "正在加载动态..."
+    "loadingActivity": "正在加载动态...",
+    "automated": "自动化账号",
+    "membership": "会员"
   },
   "activation": {
     "title": "账户激活",
@@ -900,7 +885,8 @@
     "failedToJoinRealm": "加入领域失败",
     "lv": "Lv {level}",
     "xp": "{xp} XP",
-    "membersCount": "{count} 名成员"
+    "membersCount": "{count} 名成员",
+    "failedToCreate": "创建领域失败"
   },
   "workspaces": {
     "title": "工作区",
@@ -1147,7 +1133,8 @@
     "minutesAgo": "{n} 分钟前",
     "hoursAgo": "{n} 小时前",
     "seoTitle": "发布",
-    "seoDescription": "撰写新帖子"
+    "seoDescription": "撰写新帖子",
+    "createPublisherInApp": "在 Solian 中创建发布者"
   },
   "surveys": {
     "title": "问卷",
@@ -1215,25 +1202,25 @@
     "attemptsUsed": "{used}/{max}",
     "maxAttemptsReached": "你已达到此测试的最大尝试次数。",
     "categories": {
-        "english": "英语",
-        "history": "历史",
-        "esports": "电竞",
-        "indie-games": "独立游戏",
-        "movie": "电影",
-        "computer": "计算机",
-        "rhythm-game": "音游",
-        "photography": "摄影",
-        "internet": "网络",
-        "3a-games": "3A 游戏",
-        "anime-games": "动漫游戏",
-        "developer": "开发",
-        "geography": "地理",
-        "chemistry": "化学",
-        "math": "数学",
-        "vocaloid": "Vocaloid",
-        "physics": "物理",
-        "rikki-mahjong": "立直麻将",
-        "biology": "生物"
+      "english": "英语",
+      "history": "历史",
+      "esports": "电竞",
+      "indie-games": "独立游戏",
+      "movie": "电影",
+      "computer": "计算机",
+      "rhythm-game": "音游",
+      "photography": "摄影",
+      "internet": "网络",
+      "3a-games": "3A 游戏",
+      "anime-games": "动漫游戏",
+      "developer": "开发",
+      "geography": "地理",
+      "chemistry": "化学",
+      "math": "数学",
+      "vocaloid": "Vocaloid",
+      "physics": "物理",
+      "rikki-mahjong": "立直麻将",
+      "biology": "生物"
     },
     "result": {
       "title": "测试结果",
@@ -1392,37 +1379,71 @@
       }
     },
     "compare": {
-      "storage": { "label": "额外存储", "stellar": "+10GB/级特权", "nova": "+25GB/级特权", "supernova": "+50GB/级特权" },
-      "usernameColor": { "label": "用户名颜色", "stellar": "有限", "nova": "无限", "supernova": "无限" },
-      "translation": { "label": "翻译", "stellar": "包含", "nova": "包含", "supernova": "包含" },
-      "levelingBoost": { "label": "升级加成", "stellar": "1.5x", "nova": "2x", "supernova": "2.5x" },
-      "verification": { "label": "认证资格", "stellar": "符合条件", "nova": "符合条件", "supernova": "符合条件" },
-          "publisherQuota": {
-      "label": "发布者槽位",
-      "stellar": "基础 2 个\nLv30+ 起 3 个\n每级特权 +2",
-      "nova": "@:membership.same",
-      "supernova": "@:membership.same"
-    },
-    "realmQuota": {
-      "label": "领域槽位",
-      "stellar": "@:membership.notIncluded",
-      "nova": "Lv30 · 1 个\nLv60 · 2 个\nLv90 · 3 个\n每级特权 +1",
-      "supernova": "@:membership.same"
-    },
-    "botQuota": {
-      "label": "机器人槽位",
-      "stellar": "@:membership.notIncluded",
-      "nova": "Lv30 · 1 个\nLv60 · 2 个\nLv90 · 3 个\n每级特权 +1",
-      "supernova": "@:membership.same"
-    }
+      "storage": {
+        "label": "额外存储",
+        "stellar": "+10GB/级特权",
+        "nova": "+25GB/级特权",
+        "supernova": "+50GB/级特权"
+      },
+      "usernameColor": {
+        "label": "用户名颜色",
+        "stellar": "有限",
+        "nova": "无限",
+        "supernova": "无限"
+      },
+      "translation": {
+        "label": "翻译",
+        "stellar": "包含",
+        "nova": "包含",
+        "supernova": "包含"
+      },
+      "levelingBoost": {
+        "label": "升级加成",
+        "stellar": "1.5x",
+        "nova": "2x",
+        "supernova": "2.5x"
+      },
+      "verification": {
+        "label": "认证资格",
+        "stellar": "符合条件",
+        "nova": "符合条件",
+        "supernova": "符合条件"
+      },
+      "publisherQuota": {
+        "label": "发布者槽位",
+        "stellar": "基础 2 个\nLv30+ 起 3 个\n每级特权 +2",
+        "nova": "@:membership.same",
+        "supernova": "@:membership.same"
+      },
+      "realmQuota": {
+        "label": "领域槽位",
+        "stellar": "@:membership.notIncluded",
+        "nova": "Lv30 · 1 个\nLv60 · 2 个\nLv90 · 3 个\n每级特权 +1",
+        "supernova": "@:membership.same"
+      },
+      "botQuota": {
+        "label": "机器人槽位",
+        "stellar": "@:membership.notIncluded",
+        "nova": "Lv30 · 1 个\nLv60 · 2 个\nLv90 · 3 个\n每级特权 +1",
+        "supernova": "@:membership.same"
+      }
     },
     "levelQuota": {
       "title": "按等级解锁免费存储",
       "desc": "每个账户都会获得随等级增长的免费云存储。会员等级在此基础上叠加额外存储空间。",
       "steps": {
-        "lv0": { "level": "Lv0", "quota": "0.5GiB" },
-        "lv10": { "level": "Lv10", "quota": "1GiB" },
-        "lv120": { "level": "Lv120", "quota": "10GiB" }
+        "lv0": {
+          "level": "Lv0",
+          "quota": "0.5GiB"
+        },
+        "lv10": {
+          "level": "Lv10",
+          "quota": "1GiB"
+        },
+        "lv120": {
+          "level": "Lv120",
+          "quota": "10GiB"
+        }
       }
     }
   },
@@ -1513,7 +1534,9 @@
       "postsEmpty": "这个合集里还没有帖子。",
       "postsFailed": "加载合集失败。",
       "updateFailed": "更新合集失败"
-    }
+    },
+    "options": "帖子选项",
+    "linkCopied": "链接已复制"
   },
   "categories": {
     "title": "分类与标签",
@@ -1522,7 +1545,7 @@
     "noCategories": "没有找到分类",
     "noTags": "没有找到标签",
     "loadMore": "加载更多",
-    "postsCount": "{count} 篇帖子",
+    "postsCount": "{count} 篇",
     "seoTitle": "分类与标签",
     "seoDescription": "浏览 Solar Network 上的分类和标签。"
   },
@@ -1531,7 +1554,10 @@
     "noTags": "没有找到标签",
     "loadMore": "加载更多",
     "seoTitle": "标签",
-    "seoDescription": "浏览 Solar Network 上的标签。"
+    "seoDescription": "浏览 Solar Network 上的标签。",
+    "subscribe": "订阅",
+    "unsubscribe": "取消订阅",
+    "noPosts": "这个标签下还没有内容。"
   },
   "publisher": {
     "loading": "正在加载发布者...",

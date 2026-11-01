@@ -1,120 +1,95 @@
 <template>
   <NuxtLayout name="app">
-    <div class="feed-layout">
-      <!-- Main Content -->
-      <div class="space-y-4 min-w-0">
-        <div class="flex items-center justify-between">
-          <h1 class="text-2xl font-bold">Categories & Tags</h1>
-        </div>
+    <PageHeader
+      :title="t('categories.title')"
+      :description="t('categories.seoDescription')"
+    />
 
-        <!-- Tabs -->
-        <div class="search-tabs">
-          <button
-            class="search-tabs__item"
-            :class="{ 'search-tabs__item--active': activeTab === 'categories' }"
-            @click="selectTab('categories')"
-          >
-            <IconFolder class="w-4 h-4 mr-2" />
-            Categories
-          </button>
-          <button
-            class="search-tabs__item"
-            :class="{ 'search-tabs__item--active': activeTab === 'tags' }"
-            @click="selectTab('tags')"
-          >
-            <IconTag class="w-4 h-4 mr-2" />
-            Tags
-          </button>
-        </div>
+    <div class="grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
+      <div class="min-w-0">
+        <TabBox :tabs="tabs" :active="activeTab" :label="t('categories.title')" @select="selectTab" />
 
-        <!-- Categories Tab -->
-        <div v-if="activeTab === 'categories'">
-          <div v-if="isLoadingCategories" class="flex justify-center py-12">
-            <IconLoader class="w-8 h-8 animate-spin text-primary" />
-          </div>
+        <ConsolePanel v-if="activeTab === 'categories'" :note="isLoadingCategories ? undefined : String(totalCategories)">
+          <LoadingSkeleton v-if="isLoadingCategories && categories.length === 0" variant="rows" :rows="5" />
 
-          <div v-else-if="categories.length === 0" class="text-center py-12">
-            <IconFolder class="w-12 h-12 mx-auto mb-4 text-base-content/30" />
-            <p class="text-base-content/60">No categories found</p>
-          </div>
+          <p v-else-if="categories.length === 0" class="voice py-6">
+            {{ t("categories.noCategories") }}
+          </p>
 
-          <div v-else class="space-y-2">
-            <NuxtLink
-              v-for="category in categories"
-              :key="category.id"
-              :to="`/categories/${category.slug}`"
-              class="search-result-row cursor-pointer"
-            >
-              <div class="card-body p-4">
-                <div class="flex items-center gap-3">
-                  <div
-                    class="flex h-10 w-10 items-center justify-center rounded-lg bg-base-200 text-primary"
-                  >
-                    <IconFolder class="w-5 h-5" />
-                  </div>
-                  <div class="flex-1 min-w-0">
-                    <h3 class="font-semibold truncate">{{ category.name }}</h3>
-                    <p v-if="category.description" class="text-sm text-base-content/60 truncate">
-                      {{ category.description }}
-                    </p>
-                  </div>
-                  <div class="text-sm text-base-content/50">
-                    {{ category.usage }} posts
-                  </div>
-                </div>
-              </div>
-            </NuxtLink>
-          </div>
+          <ul v-else class="-mx-2 divide-y divide-line-soft">
+            <li v-for="category in categories" :key="category.id">
+              <NuxtLink
+                :to="`/categories/${category.slug}`"
+                class="-mx-2 flex items-center gap-3 rounded-control px-2 py-2.5 transition-colors hover:bg-base-200/60"
+              >
+                <span
+                  class="grid size-8 shrink-0 place-items-center rounded-chip border border-line"
+                  :style="{ color: category.color || 'var(--color-primary)' }"
+                >
+                  <IconFolder class="size-4" aria-hidden="true" />
+                </span>
+                <span class="min-w-0 flex-1">
+                  <span class="block truncate text-[13px] font-semibold text-base-content">
+                    {{ category.name }}
+                  </span>
+                  <span v-if="category.description" class="block truncate text-2xs text-faint">
+                    {{ category.description }}
+                  </span>
+                </span>
+                <span class="mono-id shrink-0">
+                  {{ t("categories.postsCount", { count: category.usage }) }}
+                </span>
+              </NuxtLink>
+            </li>
+          </ul>
 
-          <!-- Load More -->
-          <div
-            v-if="hasMoreCategories && !isLoadingCategories"
-            class="flex justify-center mt-6"
-          >
-            <button class="btn btn-outline" @click="loadMoreCategories">
-              Load More
-            </button>
-          </div>
-        </div>
+          <template #footer>
+            <div class="flex justify-center">
+              <span v-if="isLoadingCategories" class="mono-id">{{ t("common.loading") }}</span>
+              <button
+                v-else-if="hasMoreCategories"
+                type="button"
+                class="btn btn-quiet btn-xs"
+                @click="loadMoreCategories"
+              >
+                {{ t("categories.loadMore") }}
+              </button>
+            </div>
+          </template>
+        </ConsolePanel>
 
-        <!-- Tags Tab -->
-        <div v-if="activeTab === 'tags'">
-          <div v-if="isLoadingTags" class="flex justify-center py-12">
-            <IconLoader class="w-8 h-8 animate-spin text-primary" />
-          </div>
+        <ConsolePanel v-else :note="isLoadingTags ? undefined : String(totalTags)">
+          <LoadingSkeleton v-if="isLoadingTags && tags.length === 0" variant="rows" :rows="5" />
 
-          <div v-else-if="tags.length === 0" class="text-center py-12">
-            <IconTag class="w-12 h-12 mx-auto mb-4 text-base-content/30" />
-            <p class="text-base-content/60">No tags found</p>
-          </div>
+          <p v-else-if="tags.length === 0" class="voice py-6">{{ t("categories.noTags") }}</p>
 
-          <div v-else class="flex flex-wrap gap-2">
-            <NuxtLink
-              v-for="tag in tags"
-              :key="tag.id"
-              :to="`/tags/${tag.slug}`"
-              class="badge badge-lg badge-outline hover:badge-primary transition-colors cursor-pointer"
-            >
+          <div v-else class="flex flex-wrap gap-1.5">
+            <NuxtLink v-for="tag in tags" :key="tag.id" :to="`/tags/${tag.slug}`" class="chip">
               #{{ tag.name || tag.slug }}
-              <span class="ml-1 opacity-60">({{ tag.usage }})</span>
+              <span class="chip-count">{{ tag.usage }}</span>
             </NuxtLink>
           </div>
 
-          <!-- Load More -->
-          <div
-            v-if="hasMoreTags && !isLoadingTags"
-            class="flex justify-center mt-6"
-          >
-            <button class="btn btn-outline" @click="loadMoreTags">
-              Load More
-            </button>
-          </div>
-        </div>
+          <template #footer>
+            <div class="flex justify-center">
+              <span v-if="isLoadingTags" class="mono-id">{{ t("common.loading") }}</span>
+              <button
+                v-else-if="hasMoreTags"
+                type="button"
+                class="btn btn-quiet btn-xs"
+                @click="loadMoreTags"
+              >
+                {{ t("categories.loadMore") }}
+              </button>
+            </div>
+          </template>
+        </ConsolePanel>
       </div>
 
-      <!-- Right Sidebar (Desktop only) -->
-      <aside class="feed-sidebar">
-        <ExploreSidebar />
+      <aside class="hidden min-w-0 lg:block">
+        <div class="sticky top-20">
+          <ExploreDiscovery />
+        </div>
       </aside>
     </div>
   </NuxtLayout>
@@ -127,11 +102,7 @@ import {
   type PostCategory,
   type PostTag,
 } from '~/utils/api'
-import {
-  IconFolder,
-  IconTag,
-  IconLoader,
-} from '#components'
+import { IconFolder } from "#components"
 
 defineOgImage('UniOgImage', { title: 'Categories & Tags', description: 'Browse categories and tags on Solar Network.' })
 
@@ -139,6 +110,13 @@ useSolarSeo({
   title: 'Categories & Tags',
   description: 'Browse categories and tags on Solar Network.',
 })
+
+const { t } = useI18n()
+
+const tabs = computed(() => [
+  { key: "categories", label: t("categories.categoriesTab") },
+  { key: "tags", label: t("categories.tagsTab") },
+])
 
 const route = useRoute()
 const activeTab = ref<'categories' | 'tags'>(
@@ -152,7 +130,8 @@ watch(
   },
 )
 
-function selectTab(tab: 'categories' | 'tags') {
+function selectTab(key: string) {
+  const tab = key === 'tags' ? 'tags' : 'categories'
   activeTab.value = tab
   void navigateTo(
     { query: tab === 'tags' ? { tab } : {} },

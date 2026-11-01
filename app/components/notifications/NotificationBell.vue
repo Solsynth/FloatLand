@@ -16,7 +16,7 @@
 
 <script setup lang="ts">
 const { t } = useI18n()
-const { collapsed } = useSidebar()
+
 const { unreadCount, openDrawer } = useNotifications()
 
 const displayCount = computed(() => {

@@ -1,96 +1,89 @@
 <template>
   <NuxtLayout name="app">
-    <div class="grid min-w-0 xl:grid-cols-[minmax(0,1fr)_20rem] xl:gap-x-6">
+    <div class="grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
       <div class="min-w-0">
         <!-- Header -->
-        <div
-          class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
-        >
-          <div class="min-w-0">
-            <h1 class="text-xl font-bold sm:text-2xl">{{ t("realms.title") }}</h1>
-            <p class="text-sm text-base-content/50">{{ t("realms.subtitle") }}</p>
-          </div>
-          <div class="flex items-center gap-2">
+        <PageHeader :title="t('realms.title')" :description="t('realms.subtitle')">
+          <template #actions>
             <div
               v-if="auth.isAuthenticated.value && realms.length > 0"
-              class="join rounded-box bg-base-200 p-0.5"
+              class="flex items-center gap-0.5 rounded-card border border-line bg-base-200/30 p-1"
             >
               <button
                 type="button"
-                class="btn btn-sm join-item btn-ghost"
-                :class="{ 'bg-base-200': displayMode === 'card' }"
+                class="btn btn-xs px-1.5"
+                :class="displayMode === 'card' ? 'bg-base-300 text-base-content' : 'btn-quiet'"
                 :title="t('common.gridView')"
+                :aria-pressed="displayMode === 'card'"
                 @click="setDisplayMode('card')"
               >
-                <IconLayoutGrid class="h-4 w-4" />
+                <IconLayoutGrid class="size-3.5" aria-hidden="true" />
               </button>
               <button
                 type="button"
-                class="btn btn-sm join-item btn-ghost"
-                :class="{ 'bg-base-200': displayMode === 'list' }"
+                class="btn btn-xs px-1.5"
+                :class="displayMode === 'list' ? 'bg-base-300 text-base-content' : 'btn-quiet'"
                 :title="t('common.listView')"
+                :aria-pressed="displayMode === 'list'"
                 @click="setDisplayMode('list')"
               >
-                <IconList class="h-4 w-4" />
+                <IconList class="size-3.5" aria-hidden="true" />
               </button>
             </div>
             <button
               v-if="auth.isAuthenticated.value"
               type="button"
-              class="btn btn-primary btn-sm"
+              class="btn btn-primary btn-xs"
               @click="showCreateModal = true"
             >
-              <IconPlus class="h-4 w-4" />
+              <IconPlus class="size-3.5" aria-hidden="true" />
               {{ t("realms.createRealm") }}
             </button>
-          </div>
-        </div>
+          </template>
+        </PageHeader>
 
         <!-- Auth required -->
         <div
           v-if="requiresAuth || !auth.isAuthenticated.value"
-          class="overflow-hidden rounded-box bg-base-100"
+          class="plate overflow-hidden"
         >
-          <div class="flex flex-col items-center gap-3 px-4 py-14 text-center">
+          <div class="flex flex-col items-center gap-3 px-6 py-14 text-center">
             <div
-              class="flex h-12 w-12 items-center justify-center rounded-full bg-base-200"
+              class="grid size-10 place-items-center rounded-chip border border-line bg-base-200/40"
             >
-              <IconLogIn class="h-6 w-6 text-base-content/40" />
+              <IconLogIn class="size-5 text-faint" aria-hidden="true" />
             </div>
-            <p class="text-sm font-medium text-base-content/75">
+            <p class="text-[13px] font-semibold text-base-content">
               {{ t("realms.signInToView") }}
             </p>
-            <p class="max-w-sm text-xs leading-relaxed text-base-content/45">
+            <p class="voice max-w-sm text-[12.5px]">
               {{ t("realms.signInToViewDesc") }}
             </p>
-            <NuxtLink to="/auth/login" class="btn btn-primary btn-sm mt-1">
-              <IconLogIn class="h-4 w-4" />
+            <a :href="signInUrl('/realms')" class="btn btn-primary btn-xs mt-1">
+              <IconLogIn class="size-3.5" aria-hidden="true" />
               {{ t("nav.signIn") }}
-            </NuxtLink>
+            </a>
           </div>
         </div>
 
         <!-- Loading -->
-        <div
-          v-else-if="status === 'pending' && realms.length === 0"
-          class="flex justify-center py-16"
-        >
-          <ConfuseSpinner :message="t('realms.loading')" />
-        </div>
+        <ConsolePanel v-else-if="status === 'pending' && realms.length === 0" flush>
+          <LoadingSkeleton variant="rows" :rows="5" />
+        </ConsolePanel>
 
         <!-- Error -->
         <div
           v-else-if="error"
-          class="flex flex-col items-center gap-3 rounded-box bg-base-100 px-4 py-12 text-center"
+          class="plate flex flex-col items-center gap-3 px-6 py-12 text-center"
         >
-          <IconAlertCircle class="h-5 w-5 text-error" />
+          <IconAlertCircle class="size-4 text-error" aria-hidden="true" />
           <p class="text-sm text-base-content/70">{{ error }}</p>
         </div>
 
         <!-- Realms list shell -->
         <div
           v-else-if="realms.length > 0"
-          class="overflow-hidden rounded-box bg-base-100"
+          class="plate overflow-hidden"
         >
           <!-- Card grid -->
           <div
@@ -117,34 +110,36 @@
         <!-- Empty -->
         <div
           v-else
-          class="overflow-hidden rounded-box bg-base-100"
+          class="plate overflow-hidden"
         >
-          <div class="flex flex-col items-center gap-3 px-4 py-14 text-center">
+          <div class="flex flex-col items-center gap-3 px-6 py-14 text-center">
             <div
-              class="flex h-12 w-12 items-center justify-center rounded-full bg-base-200"
+              class="grid size-10 place-items-center rounded-chip border border-line bg-base-200/40"
             >
-              <IconUsers class="h-6 w-6 text-base-content/40" />
+              <IconUsers class="size-5 text-faint" aria-hidden="true" />
             </div>
-            <p class="text-sm font-medium text-base-content/75">
+            <p class="text-[13px] font-semibold text-base-content">
               {{ t("realms.emptyTitle") }}
             </p>
-            <p class="max-w-sm text-xs leading-relaxed text-base-content/45">
+            <p class="voice max-w-sm text-[12.5px]">
               {{ t("realms.emptyDesc") }}
             </p>
             <button
               type="button"
-              class="btn btn-primary btn-sm mt-1"
+              class="btn btn-primary btn-xs mt-1"
               @click="showCreateModal = true"
             >
-              <IconPlus class="h-4 w-4" />
+              <IconPlus class="size-3.5" aria-hidden="true" />
               {{ t("realms.createYourFirst") }}
             </button>
           </div>
         </div>
       </div>
 
-      <aside class="hidden w-full self-start sticky top-20 xl:block">
-        <ExploreSidebar />
+      <aside class="hidden min-w-0 lg:block">
+        <div class="sticky top-20">
+          <ExploreDiscovery />
+        </div>
       </aside>
 
       <RealmCreateModal
@@ -157,7 +152,7 @@
 
 <script setup lang="ts">
 import type { Realm } from "~/types/realm";
-import { fetchRealms } from "~/utils/api";
+import { fetchRealms, signInUrl } from "~/utils/api";
 import {
   IconPlus,
   IconLogIn,

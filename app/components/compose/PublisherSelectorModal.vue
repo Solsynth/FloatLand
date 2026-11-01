@@ -28,13 +28,15 @@
           <p class="text-sm text-base-content/60">
             {{ t('compose.publishersEmptyDescription') }}
           </p>
-          <NuxtLink
-            :to="'/creators'"
+          <a
+            href="https://solian.app"
+            target="_blank"
+            rel="noopener noreferrer"
             class="btn btn-primary btn-sm mt-3"
             @click="open = false"
           >
-            {{ t('creator.createPublisher') }}
-          </NuxtLink>
+            {{ t('compose.createPublisherInApp') }}
+          </a>
         </div>
 
         <!-- Publisher list (mirrors Flutter ListTiles) -->

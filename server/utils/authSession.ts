@@ -1,319 +1,157 @@
-import { randomBytes } from "node:crypto";
 import type { H3Event } from "h3";
-import { getCookie, setCookie, deleteCookie, getRequestIP, getRequestHeader } from "h3";
+import { deleteCookie, getRequestHeader, setCookie } from "h3";
 
 /**
- * Unified auth session store.
+ * Session handling, adopted from Stargate's own cookie model.
  *
- * The Nitro server is the trust boundary. It holds the backend token pair in a
- * shared storage backend (`useStorage('auth')` — Redis in prod, fs in dev) and
- * exposes it to the browser only through an opaque HttpOnly `sid` cookie. All
- * authenticated backend traffic flows through the same-origin proxy, which
- * injects `Authorization: Bearer <access>` from the store.
- */
-
-export interface StoredPair {
-  token: string;
-  refreshToken?: string;
-  expiresAt?: string;
-  refreshExpiresAt?: string;
-}
-
-interface AuthRuntimeConfig {
-  canonicalHost: string;
-  cookieName: string;
-  cookieSecure: boolean;
-  sessionTtl: number;
-}
-
-function authConfig(event: H3Event): AuthRuntimeConfig {
-  return useRuntimeConfig(event).auth as AuthRuntimeConfig;
-}
-
-/** Decode the JWT `exp` claim (unix seconds) into a Date, or null if absent. */
-export function decodeJwtExpiry(token: string): Date | null {
-  const parts = token.split(".");
-  if (parts.length < 2) return null;
-  try {
-    if (!parts[1]) return null;
-    const normalized = parts[1].replace(/-/g, "+").replace(/_/g, "/");
-    const payload = JSON.parse(Buffer.from(normalized, "base64").toString());
-    if (payload.exp && typeof payload.exp === "number") {
-      return new Date(payload.exp * 1000);
-    }
-  } catch {
-    return null;
-  }
-  return null;
-}
-
-/** Compute a Date `expiresIn` seconds from now, ISO string. */
-function isoFromNow(seconds?: number): string | undefined {
-  if (!seconds || typeof seconds !== "number") return undefined;
-  return new Date(Date.now() + seconds * 1000).toISOString();
-}
-
-// Known multi-part public suffixes the app hosts on. A registrable domain is
-// the public suffix plus the label before it (e.g. `solarpass.one`). We only
-// ever host on `solian.app`, `solsynth.dev`, and `solarpass.one`, so this small
-// case list is sufficient; anything else falls back to a registrable-domain
-// heuristic (last two labels).
-const MULTI_PART_PUBLIC_SUFFIXES = [
-  "co.uk",
-  "com.au",
-  "co.jp",
-  "com.br",
-  "co.nz",
-  "org.uk",
-  "co.za",
-  "net.au",
-  "com.sg",
-];
-
-function isIpOrLocalhost(host: string): boolean {
-  if (!host) return true;
-  return (
-    host === "localhost" ||
-    host === "127.0.0.1" ||
-    host === "::1" ||
-    /^\d{1,3}(\.\d{1,3}){3}$/.test(host)
-  );
-}
-
-/**
- * Resolve the registrable domain (e.g. `solarpass.one`) for a cookie `Domain`
- * attribute from the request Host header, INCLUDING the apex so the cookie is
- * sent to `example.com` and every `*.example.com`. Returns undefined for
- * localhost/IP hosts (where a Domain attribute would break the cookie) so the
- * cookie stays host-only in dev.
- */
-export function cookieDomainFor(event: H3Event): string | undefined {
-  const host = String(event.node?.req?.headers?.host ?? "")
-    .split(":")[0]
-    .trim()
-    .toLowerCase();
-  if (!host || isIpOrLocalhost(host)) return undefined;
-  const labels = host.split(".");
-  if (labels.length < 2) return host;
-  const lastTwo = labels.slice(-2).join(".");
-  const publicSuffixIsMultiPart = MULTI_PART_PUBLIC_SUFFIXES.some((suffix) =>
-    host.endsWith(`.${suffix}`),
-  );
-  // Registrable domain = public suffix + the single label preceding it.
-  const takeLabels = publicSuffixIsMultiPart ? 3 : 2;
-  return labels.slice(-takeLabels).join(".");
-}
-
-export function cookieOptions(event: H3Event) {
-  const cfg = authConfig(event);
-  const domain = cookieDomainFor(event);
-  return {
-    httpOnly: true,
-    secure: cfg.cookieSecure,
-    sameSite: "lax" as const,
-    path: "/",
-    maxAge: cfg.sessionTtl,
-    ...(domain ? { domain } : {}),
-  };
-}
-
-export function sidCookieName(event: H3Event): string {
-  return authConfig(event).cookieName;
-}
-
-/**
- * Standard reverse-proxy client-IP headers for server-to-backend calls.
+ * Stargate authenticates a request from `Authorization: Bearer`, a `tk` query
+ * parameter, or — the browser case — the `AuthToken` cookie, and rotates an
+ * expired access token from `RefreshToken`. Those are the two names the whole
+ * network uses, and a host under Stargate's `[auth] cookieDomain` is signed in
+ * by the browser simply presenting them.
  *
- * FloatLand proxies request to the main API on the same host, so the backend
- * would otherwise see FloatLand's IP. Forward the real client IP via the
- * conventional `X-Forwarded-For` (leftmost, client-controlled value first) and
- * `X-Real-IP` so login endpoints rate-limit and audit the actual user.
+ * FloatLand therefore does not mint its own session. It proxies to Stargate and
+ * forwards the browser's `AuthToken`/`RefreshToken` cookies upstream unchanged,
+ * so:
+ *
+ *  - a reader signed in on any other host under the same cookie domain arrives
+ *    already authenticated, with nothing to exchange;
+ *  - Stargate's auto-renew middleware rotates the pair and answers with fresh
+ *    `Set-Cookie` headers, which this proxy relays to the browser;
+ *  - signing out is Stargate clearing those cookies, not a local table.
+ *
+ * No token is ever stored server-side, so the proxy holds no session state and
+ * a restart cannot sign anyone out.
  */
-export function clientIpHeaders(event: H3Event): Record<string, string> {
-  const headers: Record<string, string> = {};
-  const forwardedFor = getRequestHeader(event, "x-forwarded-for");
-  const clientIp =
-    (getRequestIP(event, { xForwardedFor: true }) ?? "").trim() ||
-    (getRequestHeader(event, "x-real-ip") ?? "").trim();
-  if (clientIp) {
-    // Preserve an existing forwarded chain (e.g. a CDN/load balancer in front);
-    // the client IP goes leftmost so the last hop (FloatLand) stays visible.
-    const forwarded = forwardedFor?.trim();
-    headers["x-forwarded-for"] =
-      forwarded && !forwarded.split(",")[0]?.trim().startsWith(clientIp)
-        ? `${clientIp}, ${forwarded}`
-        : clientIp;
-    headers["x-real-ip"] = clientIp;
-  }
-  return headers;
-}
+
+/** The cookies Stargate reads and writes. Order matters: access first. */
+const SESSION_COOKIES = ["AuthToken", "RefreshToken"] as const;
+
+export type SessionCookieName = (typeof SESSION_COOKIES)[number];
 
 /**
- * Create (or overwrite) a server-side session for a token pair and set the
- * opaque `sid` cookie on the response. Returns the sid.
+ * All `name=value` pairs for a cookie name in a raw `Cookie` header, in order.
+ * A host-only cookie and a `Domain`-scoped one can coexist in a browser jar and
+ * both are sent, so the caller decides which to trust rather than relying on a
+ * `getCookie` that keeps only the first.
  */
-export async function createSession(event: H3Event, pair: StoredPair): Promise<{ sid: string }> {
-  const cfg = authConfig(event);
-  const sid = randomBytes(24).toString("base64url");
-  await useStorage("auth").setItem(sid, { ...pair }, { ttl: cfg.sessionTtl });
-  setCookie(event, cfg.cookieName, sid, cookieOptions(event));
-  return { sid };
-}
-
-/** Read a session pair by sid, or null when missing/expired. */
-export async function getAuthSession(sid: string): Promise<StoredPair | null> {
-  if (!sid) return null;
-  const value = await useStorage("auth").getItem<StoredPair>(sid);
-  return value ?? null;
-}
-
-/**
- * All `name=value` cookie values for `name` in a raw cookie header, in order.
- * (A host-only `sid` and a `Domain`-scoped `sid` can coexist in the browser
- * jar; browsers send BOTH, oldest-first, so a stale one may precede a valid
- * one. h3's `getCookie` keeps the FIRST occurrence and would pick the stale.)
- */
-export function getCookieValues(rawCookie: string, name: string): string[] {
+export function cookieValues(rawCookie: string, name: string): string[] {
   const out: string[] = [];
   if (!rawCookie) return out;
   for (const part of rawCookie.split(";")) {
     const eq = part.indexOf("=");
     if (eq === -1) continue;
-    const key = part.slice(0, eq).trim();
-    if (key !== name) continue;
+    if (part.slice(0, eq).trim() !== name) continue;
     const value = part.slice(eq + 1).trim();
     if (value) out.push(value);
   }
   return out;
 }
 
-export function getAllSids(event: H3Event): string[] {
-  return getCookieValues(event.node?.req?.headers?.cookie ?? "", sidCookieName(event));
-}
-
-/**
- * Resolve the browser's session by scanning every `sid` cookie (not just the
- * first, per h3's `getCookie`) and returning the first sid that actually holds
- * a valid session. Falls back to the single `getCookie` value for a clean
- * request. Returns `{ sid, pair }` or `{ sid: "", pair: null }`.
- */
-export async function resolveAuthSession(
-  event: H3Event,
-): Promise<{ sid: string; pair: StoredPair | null }> {
-  const sids = getAllSids(event);
-  if (sids.length === 0) return { sid: "", pair: null };
-  for (const sid of sids) {
-    const pair = await getAuthSession(sid);
-    if (pair) return { sid, pair };
-  }
-  // No valid session. Surface the LAST `sid` value (the most recently set) so
-  // logout/refresh target the current cookie rather than a stale host-only one.
-  return { sid: sids[sids.length - 1], pair: null };
-}
-
-/**
- * Rotate the stored token pair via the backend refresh endpoint. Preserves the
- * existing sid. Returns true on success, false (and deletes the session) when
- * the refresh token is missing/expired or the backend rejects the refresh.
- */
-export async function refreshSession(event: H3Event, sid: string): Promise<boolean> {
-  const cfg = authConfig(event);
-  const runtime = useRuntimeConfig(event);
-  const apiProxiedUrl = (runtime.apiProxiedUrl ?? runtime.apiServerUrl) as string;
-  const pair = await getAuthSession(sid);
-  if (!pair) return false;
-
-  if (!pair.refreshToken) {
-    await deleteSession(event, sid);
-    return false;
-  }
-  if (
-    pair.refreshExpiresAt &&
-    new Date(pair.refreshExpiresAt).getTime() <= Date.now()
-  ) {
-    await deleteSession(event, sid);
-    return false;
-  }
-
-  try {
-    const data = await $fetch<{
-      token: string;
-      refresh_token?: string;
-      expires_in?: number;
-      refresh_expires_in?: number;
-    }>(`${apiProxiedUrl}/stargate/auth/token`, {
-      method: "POST",
-      headers: { ...clientIpHeaders(event) },
-      body: {
-        grant_type: "refresh_token",
-        refresh_token: pair.refreshToken,
-      },
+/** The `Cookie` header to forward upstream, or undefined when there is none. */
+export function forwardedCookieHeader(event: H3Event): string | undefined {
+  const raw = getRequestHeader(event, "cookie");
+  if (!raw) return undefined;
+  const kept = raw
+    .split(";")
+    .map((part) => part.trim())
+    .filter((part) => {
+      const eq = part.indexOf("=");
+      if (eq === -1) return false;
+      const name = part.slice(0, eq).trim();
+      // Only the session pair travels to the backend; everything else in the
+      // jar belongs to this origin.
+      return (SESSION_COOKIES as readonly string[]).includes(name);
     });
-
-    if (!data?.token) {
-      await deleteSession(event, sid);
-      return false;
-    }
-
-    await useStorage("auth").setItem(
-      sid,
-      {
-        token: data.token,
-        refreshToken: data.refresh_token ?? pair.refreshToken,
-        expiresAt: isoFromNow(data.expires_in) ?? pair.expiresAt,
-        refreshExpiresAt:
-          isoFromNow(data.refresh_expires_in) ?? pair.refreshExpiresAt,
-      },
-      { ttl: cfg.sessionTtl },
-    );
-    return true;
-  } catch {
-    await deleteSession(event, sid);
-    return false;
-  }
+  return kept.length ? kept.join("; ") : undefined;
 }
 
-/** Delete the server-side session and clear the `sid` cookie. */
-export async function deleteSession(event: H3Event, sid: string): Promise<void> {
-  const cfg = authConfig(event);
-  if (sid) {
-    await useStorage("auth").removeItem(sid);
-  }
-  clearSessionCookies(event, cfg.cookieName);
+/** Whether the request carries an access token the backend can act on. */
+export function hasSessionCookie(event: H3Event): boolean {
+  return Boolean(forwardedCookieHeader(event));
 }
 
 /**
- * Clear the `sid` cookie in BOTH scopes a browser may have stored it.
+ * Standard reverse-proxy client-IP headers for server-to-backend calls.
  *
- * A stale host-only `sid` (no `Domain` attribute, from a login performed before
- * the cookie-domain logic applied a `Domain`, or when it returned `undefined`
- * for IP/localhost hosts) and the current `Domain`-scoped `sid` can coexist in
- * the browser jar. A deletion cookie only matches a cookie with the SAME
- * domain+path+name, so we must delete both the host-only and the Domain cookie
- * or the stale one lingers and keeps breaking `getCookie` (which returns the
- * first, oldest occurrence).
+ * FloatLand proxies to the API on the same host, so the backend would otherwise
+ * see FloatLand's IP. Forward the real client IP via the conventional
+ * `X-Forwarded-For` (leftmost, client-controlled value first) and `X-Real-IP`
+ * so login endpoints rate-limit and audit the actual user.
  */
-export function clearSessionCookies(event: H3Event, cookieName: string): void {
-  const opts = cookieOptions(event);
-  // Domain-scoped cookie.
-  deleteCookie(event, cookieName, opts);
-  // Host-only cookie (no Domain attribute). `domain: undefined` must be set
-  // explicitly to override the domain resolved in `cookieOptions`.
-  deleteCookie(event, cookieName, { ...opts, domain: undefined });
+export function clientIpHeaders(event: H3Event): Record<string, string> {
+  const headers: Record<string, string> = {};
+  const forwardedFor = getRequestHeader(event, "x-forwarded-for");
+  const clientIp =
+    (getRequestHeader(event, "x-real-ip") ?? "").trim() ||
+    (forwardedFor ?? "").split(",")[0]?.trim() ||
+    "";
+  if (!clientIp) return headers;
+  // Preserve an existing forwarded chain (a CDN in front), with the client IP
+  // leftmost so the last hop (FloatLand) stays visible.
+  const forwarded = forwardedFor?.trim();
+  headers["x-forwarded-for"] =
+    forwarded && !forwarded.split(",")[0]?.trim().startsWith(clientIp)
+      ? `${clientIp}, ${forwarded}`
+      : clientIp;
+  headers["x-real-ip"] = clientIp;
+  return headers;
 }
 
-/** Mint a single-use cross-host sync ticket mapping to `sid` (5 min TTL). */
-export async function createSyncTicket(sid: string): Promise<string> {
-  const ticket = randomBytes(24).toString("base64url");
-  await useStorage("auth").setItem(`tkt:${ticket}`, sid, { ttl: 300 });
-  return ticket;
-}
+/**
+ * Relay one upstream `Set-Cookie` to the browser, re-scoped to this origin.
+ *
+ * Stargate sets the pair on its own cookie domain with its own `Secure` and
+ * `SameSite` attributes. Forwarding that header verbatim would write a cookie
+ * for a domain the browser may reject, so the attributes that decide *where*
+ * the cookie is valid are rewritten here and everything else (name, value,
+ * expiry, HttpOnly) is preserved from upstream.
+ *
+ * Returns false when the header is not one of the session pair, so the caller
+ * can drop it: any other cookie Stargate sets belongs to Stargate's origin.
+ */
+export function relaySessionCookie(event: H3Event, header: string): boolean {
+  const [pairPart] = header.split(";");
+  const eq = pairPart?.indexOf("=") ?? -1;
+  if (!pairPart || eq === -1) return false;
+  const name = pairPart.slice(0, eq).trim();
+  if (!(SESSION_COOKIES as readonly string[]).includes(name)) return false;
+  const value = pairPart.slice(eq + 1).trim();
 
-/** Redeem a sync ticket; returns the sid and consumes the ticket (single use). */
-export async function exchangeSyncTicket(ticket: string): Promise<string | null> {
-  if (!ticket) return null;
-  const sid = await useStorage("auth").getItem<string>(`tkt:${ticket}`);
-  if (!sid) return null;
-  await useStorage("auth").removeItem(`tkt:${ticket}`);
-  return sid;
+  const attributes: Record<string, string> = {};
+  for (const raw of header.split(";").slice(1)) {
+    const attribute = raw.trim();
+    if (!attribute) continue;
+    const at = attribute.indexOf("=");
+    if (at === -1) attributes[attribute.toLowerCase()] = "";
+    else attributes[attribute.slice(0, at).toLowerCase()] = attribute.slice(at + 1).trim();
+  }
+
+  // A clearing cookie (empty value or an expiry in the past) must stay a
+  // clearing cookie, or signing out upstream would leave the browser signed in.
+  const maxAge = Number(attributes["max-age"] ?? "");
+  const expires = attributes.expires;
+  const clearing =
+    value === "" ||
+    (Number.isFinite(maxAge) && maxAge <= 0) ||
+    (expires ? new Date(expires).getTime() <= Date.now() : false);
+
+  if (clearing) {
+    deleteCookie(event, name, { path: "/" });
+    return true;
+  }
+
+  const runtime = useRuntimeConfig(event).auth as { cookieSecure: boolean };
+  const maxAgeSeconds = Number.isFinite(maxAge) && maxAge > 0 ? maxAge : undefined;
+  const expiresAt = expires ? new Date(expires) : undefined;
+
+  setCookie(event, name, value, {
+    httpOnly: true,
+    secure: runtime.cookieSecure,
+    sameSite: "lax",
+    path: "/",
+    ...(maxAgeSeconds ? { maxAge: maxAgeSeconds } : {}),
+    ...(expiresAt && !Number.isNaN(expiresAt.getTime()) ? { expires: expiresAt } : {}),
+  });
+  return true;
 }

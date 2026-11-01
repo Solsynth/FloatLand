@@ -1,20 +1,17 @@
 <template>
   <NuxtLayout name="app">
-    <ConfuseSpinner
-      v-if="accountStatus === 'pending'"
-      message="Loading account..."
-    />
+    <ConsolePanel v-if="accountStatus === 'pending'" flush>
+      <LoadingSkeleton variant="feed" :rows="3" />
+    </ConsolePanel>
 
     <!-- Not Found State -->
     <div v-else-if="notFound" class="mx-auto max-w-2xl p-6">
-      <div class="card">
-        <div class="card-body items-center text-center">
-          <IconUserX class="text-base-content/50 w-10 h-10" />
+      <div class="plate flex flex-col items-center gap-2 p-8 text-center">
+          <IconUserX class="text-dim w-10 h-10" />
           <h1 class="text-xl font-bold">Account not found</h1>
-          <p class="text-base-content/60">
+          <p class="voice text-[13px]">
             The profile you requested does not exist.
           </p>
-        </div>
       </div>
     </div>
 
@@ -28,9 +25,9 @@
     <!-- Account Profile -->
     <div v-else-if="account" class="mx-auto min-w-0">
       <!-- Header Section -->
-      <section class="relative overflow-hidden px-4 pt-4 lg:px-6">
+      <section class="relative overflow-hidden">
         <div
-          class="h-40 w-full overflow-hidden rounded-box bg-base-200 sm:h-52"
+          class="h-36 w-full overflow-hidden bg-base-200 sm:h-44"
         >
           <FileImage
             v-if="backgroundUrl"
@@ -40,40 +37,40 @@
           />
         </div>
         <div
-          class="mx-auto -mt-12 flex max-w-5xl flex-col gap-3 px-4 pb-4 sm:-mt-20 sm:flex-row sm:items-end sm:gap-4"
+          class="flex flex-col gap-3 pb-4 sm:flex-row sm:items-end sm:gap-4"
         >
           <div class="shrink-0">
             <div v-if="avatarUrl" class="avatar">
               <div
-                class="h-24 w-24 rounded-full ring ring-base-300 ring-offset-2 ring-offset-base-100 sm:h-28 sm:w-28 sm:mb-8"
+                class="-mt-12 h-20 w-20 rounded-full border-4 border-base-100 bg-base-300 sm:h-24 sm:w-24"
               >
                 <FileImage :file="avatarUrl" :alt="displayName" />
               </div>
             </div>
             <div v-else class="avatar avatar-placeholder">
               <div
-                class="h-24 w-24 rounded-box bg-primary text-primary-content ring ring-base-300 ring-offset-2 ring-offset-base-100 sm:h-28 sm:w-28 sm:mb-8"
+                class="-mt-12 grid h-20 w-20 place-items-center rounded-full border-4 border-base-100 bg-base-300 text-dim sm:h-24 sm:w-24"
               >
-                <span class="text-2xl font-semibold">
+                <span class="text-lg font-semibold">
                   {{ getInitials(displayName) }}
                 </span>
               </div>
             </div>
           </div>
-          <div class="min-w-0 flex-1 sm:pt-24">
+          <div class="min-w-0 flex-1">
             <div class="flex flex-wrap items-center gap-2 min-w-0">
-              <h1 class="truncate text-2xl font-black sm:text-3xl">
+              <h1 class="title truncate text-2xl text-base-content">
                 {{ displayName }}
               </h1>
               <span
                 v-if="account.profile?.verification"
-                class="badge gap-1 badge-primary"
+                class="chip chip-active gap-1"
               >
-                <IconShieldCheck class="w-3 h-3" />
+                <IconShieldCheck class="size-3" />
                 {{ account.profile.verification.title || "Verified" }}
               </span>
             </div>
-            <p class="truncate text-sm text-base-content/60">
+            <p class="mono-id truncate">
               @{{ account.name }}
             </p>
             <ActivityPresence :account="account" class="mt-2" />
@@ -87,7 +84,7 @@
                 class="btn btn-primary gap-2"
                 disabled
               >
-                <IconUserCheck class="w-4 h-4" />
+                <IconUserCheck class="size-3.5" />
                 Friends
               </button>
               <button
@@ -100,7 +97,7 @@
                   v-if="isActionLoading"
                   class="w-4 h-4 animate-spin"
                 />
-                <IconUserPlus v-else class="w-4 h-4" />
+                <IconUserPlus v-else class="size-3.5" />
                 Add Friend
               </button>
               <button
@@ -109,7 +106,7 @@
                 :disabled="isActionLoading"
                 @click="unblock"
               >
-                <IconUserX class="w-4 h-4" />
+                <IconUserX class="size-3.5" />
                 Unblock
               </button>
               <button
@@ -118,7 +115,7 @@
                 :disabled="isActionLoading"
                 @click="block"
               >
-                <IconBan class="w-4 h-4" />
+                <IconBan class="size-3.5" />
                 Block
               </button>
               <button
@@ -126,23 +123,13 @@
                 :disabled="isActionLoading"
                 @click="sendMessage"
               >
-                <IconMessageCircle class="w-4 h-4" />
+                <IconMessageCircle class="size-3.5" />
                 Message
               </button>
             </template>
 
-            <template v-if="isCurrentUser">
-              <NuxtLink
-                to="/accounts/me/settings"
-                class="btn btn-primary gap-2"
-              >
-                <IconSettings class="w-4 h-4" />
-                Edit Profile
-              </NuxtLink>
-            </template>
-
             <button class="btn btn-ghost btn-square bg-base-200" @click="shareProfile">
-              <IconShare2 class="w-4 h-4" />
+              <IconShare2 class="size-3.5" />
             </button>
 
             <button
@@ -150,7 +137,7 @@
               class="btn btn-ghost btn-square text-error"
               @click="reportUser"
             >
-              <IconFlag class="w-4 h-4" />
+              <IconFlag class="size-3.5" />
             </button>
           </div>
         </div>
@@ -185,7 +172,7 @@
           <div v-show="activeTab === 'board'" class="space-y-3 w-full min-w-0">
             <div
               v-if="boardLoading"
-              class="flex items-center gap-2 text-sm text-base-content/60 py-4"
+              class="flex items-center gap-2 text-sm text-dim py-4"
             >
               <IconLoader class="w-3.5 h-3.5 animate-spin" />
               <span>Loading board...</span>
@@ -204,7 +191,7 @@
           <section v-show="activeTab === 'activity'" class="space-y-3 w-full min-w-0">
             <div
               v-if="isLoadingTimeline && timelineItems.length === 0"
-              class="flex items-center gap-2 text-sm text-base-content/60"
+              class="flex items-center gap-2 text-sm text-dim"
             >
               <IconLoader class="w-3.5 h-3.5 animate-spin" />
               <span>Loading activity...</span>
@@ -236,12 +223,12 @@
                 />
                 <span>Load more</span>
               </button>
-              <p v-else class="text-xs text-base-content/50">No more activity</p>
+              <p v-else class="mono-id">No more activity</p>
             </div>
 
             <div
               v-else-if="!isLoadingTimeline"
-              class="py-8 text-center text-sm text-base-content/50"
+              class="py-8 text-center text-sm text-dim"
             >
               No activity yet.
             </div>
@@ -253,11 +240,11 @@
           class="order-1 lg:order-2 space-y-3 w-full min-w-0 lg:sticky lg:top-20 lg:self-start"
         >
           <div v-if="account.profile?.bio" class="card">
-            <div class="card-body p-4">
+            <div class="p-4">
               <div class="flex items-start justify-between gap-2">
                 <template v-if="isBioExpanded">
                   <div
-                    class="prose prose-sm max-w-none break-words flex-1 prose-a:text-primary prose-a:no-underline hover:prose-a:underline"
+                    class="markdown markdown-compact min-w-0 flex-1"
                     v-html="bioHtml"
                     @click="handleMarkdownClick"
                   />
@@ -275,8 +262,8 @@
             </div>
           </div>
 
-          <div v-if="botDeveloper?.publisher" class="card bg-base-200">
-            <div class="card-body p-4">
+          <div v-if="botDeveloper?.publisher" class="plate">
+            <div class="p-4">
               <div class="flex items-center gap-2">
                 <IconBot class="w-4 h-4 text-primary shrink-0" />
                 <span class="text-sm">
@@ -294,17 +281,17 @@
             </div>
           </div>
 
-          <div v-if="punishment" class="card bg-error/5 shadow-sm">
-            <div class="card-body p-4">
+          <div v-if="punishment" class="plate border-error/40">
+            <div class="p-4">
               <div class="flex items-center gap-3">
                 <div
-                  class="w-10 h-10 rounded-box bg-error/10 flex items-center justify-center shrink-0"
+                  class="w-10 h-10 rounded-card bg-error/10 flex items-center justify-center shrink-0"
                 >
                   <IconAlertTriangle class="w-5 h-5 text-error" />
                 </div>
                 <div class="min-w-0 flex-1">
                   <h3 class="text-sm font-semibold">Account Restrictions</h3>
-                  <p class="text-xs text-base-content/50">
+                  <p class="mono-id">
                     This account has active restrictions
                   </p>
                 </div>
@@ -345,6 +332,15 @@ const route = useRoute();
 const auth = useAuth();
 const { notify, confirm } = useAlert();
 const accountName = computed(() => route.params.name as string);
+
+// `/accounts/me` has no page of its own here: this explorer reads other
+// people's content, so a signed-in reader is sent to their own public profile
+// rather than shown an "account not found" page for the literal name `me`.
+watchEffect(() => {
+  if (accountName.value !== "me") return;
+  const own = useAuth().user.value?.name;
+  void navigateTo(own ? `/accounts/${encodeURIComponent(own)}` : "/", { replace: true });
+});
 
 const account = ref<SnAccount | null>(null);
 const publishers = ref<Publisher[]>([]);

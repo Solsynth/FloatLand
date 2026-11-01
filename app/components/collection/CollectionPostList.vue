@@ -1,6 +1,6 @@
 <template>
   <div class="space-y-3">
-    <ConfuseSpinner v-if="status === 'pending'" />
+    <LoadingSkeleton v-if="status === 'pending'" variant="feed" :rows="3" />
 
     <div v-else-if="status === 'error'" class="alert alert-error text-sm">
       <span>{{ t('post.collections.postsFailed') }}</span>

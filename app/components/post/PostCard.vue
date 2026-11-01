@@ -88,7 +88,7 @@
             <!-- eslint-disable-next-line vue/no-v-html -->
             <div
               v-if="referencePost.content"
-              class="prose prose-xs line-clamp-3 max-w-none break-words text-xs prose-a:text-primary prose-a:no-underline prose-headings:mb-1 prose-headings:mt-1 prose-p:my-0.5"
+              class="markdown markdown-compact line-clamp-3"
               v-html="renderedReferenceContent"
             />
             <div
@@ -171,7 +171,7 @@
         <!-- Menu -->
         <div ref="menuWrapper" class="relative shrink-0">
           <button
-            class="btn btn-circle btn-ghost btn-sm"
+            class="btn btn-quiet btn-xs px-1"
             aria-label="Post options"
             @click.stop="showMenu = !showMenu"
           >
@@ -183,59 +183,59 @@
             role="menu"
             @click.stop
           >
-            <ul class="menu w-48 rounded-box bg-base-100 shadow-lg">
+            <ul class="w-48 rounded-card border border-line bg-base-200 p-1.5 text-xs">
               <li v-if="isAuthor">
-                <button @click.stop="handleEdit">
+                <button class="post-menu-row" @click.stop="handleEdit">
                   <IconPencil class="h-4 w-4" /> {{ t("common.edit") }}
                 </button>
               </li>
               <li v-if="isAuthor">
-                <button class="text-error" @click.stop="handleDelete">
+                <button class="post-menu-row text-dim hover:bg-error/10 hover:text-error" @click.stop="handleDelete">
                   <IconTrash class="h-4 w-4" /> {{ t("common.delete") }}
                 </button>
               </li>
               <li v-if="isAuthor">
-                <button @click.stop="openCollections">
+                <button class="post-menu-row" @click.stop="openCollections">
                   <IconFolder class="h-4 w-4" /> {{ t("post.collections.manage") }}
                 </button>
               </li>
-              <li v-if="isAuthor"><div class="divider my-0" /></li>
+              <li v-if="isAuthor"><div class="my-1 border-t border-line-soft" /></li>
               <!-- Chains stay inside one publisher (POST_CHAIN_DIFFERENT_PUBLISHER). -->
               <li v-if="isAuthor">
-                <button @click.stop="handleChain">
+                <button class="post-menu-row" @click.stop="handleChain">
                   <IconLink class="h-4 w-4" /> {{ t("compose.chainPost") }}
                 </button>
               </li>
               <li>
-                <button @click.stop="handleReply">
+                <button class="post-menu-row" @click.stop="handleReply">
                   <IconReply class="h-4 w-4" /> {{ t("post.replyBtn") }}
                 </button>
               </li>
               <li>
-                <button @click.stop="handleForward">
+                <button class="post-menu-row" @click.stop="handleForward">
                   <IconForward class="h-4 w-4" /> {{ t("post.forward") }}
                 </button>
               </li>
               <li>
-                <button @click.stop="handleBoost">
+                <button class="post-menu-row" @click.stop="handleBoost">
                   <IconRepeat2 class="h-4 w-4" />
                   {{ hasBoosted ? t("post.unboost") : t("post.boost") }}
                 </button>
               </li>
-              <li><div class="divider my-0" /></li>
+              <li><div class="my-1 border-t border-line-soft" /></li>
               <li>
-                <button @click.stop="handleCopyLink">
+                <button class="post-menu-row" @click.stop="handleCopyLink">
                   <IconLink class="h-4 w-4" /> {{ t("post.copyLink") }}
                 </button>
               </li>
               <li>
-                <button @click.stop="handleShare">
+                <button class="post-menu-row" @click.stop="handleShare">
                   <IconShare class="h-4 w-4" /> {{ t("post.share") }}
                 </button>
               </li>
-              <li><div class="divider my-0" /></li>
+              <li><div class="my-1 border-t border-line-soft" /></li>
               <li>
-                <button @click.stop="handleReport">
+                <button class="post-menu-row" @click.stop="handleReport">
                   <IconFlag class="h-4 w-4" /> {{ t("post.report") }}
                 </button>
               </li>
@@ -247,11 +247,11 @@
       <!-- Article card (list view) -->
       <div
         v-if="isArticle && !isDetail"
-        class="mt-2 overflow-hidden rounded-lg border border-base-300/70 bg-base-200/40"
+        class="mt-2 overflow-hidden rounded-card border border-line bg-base-200/30"
       >
         <NuxtLink
           :to="`/posts/${post.id}`"
-          class="block transition-colors hover:bg-base-200/50"
+          class="block transition-colors hover:bg-base-200/60"
         >
           <div v-if="thumbnailAttachment" class="aspect-video w-full overflow-hidden">
             <FileImage
@@ -263,7 +263,7 @@
             />
           </div>
           <div class="p-3">
-            <div class="badge badge-primary badge-sm mb-2">{{ t("post.article") }}</div>
+            <div class="chip chip-active mb-2">{{ t("post.article") }}</div>
             <h3 v-if="post.title" class="line-clamp-2 text-base font-bold">
               {{ post.title }}
             </h3>
@@ -280,7 +280,7 @@
       <!-- Body -->
       <div v-if="!isArticle || isDetail" class="mt-2">
         <div v-if="isArticle && isDetail" class="mb-3">
-          <div class="badge badge-primary badge-sm mb-2">{{ t("post.article") }}</div>
+          <div class="chip chip-active mb-2">{{ t("post.article") }}</div>
           <h3 v-if="post.title" class="text-xl font-bold">
             {{ post.title }}
           </h3>
@@ -294,7 +294,7 @@
         <MarkdownContent
           :content="displayContent"
           :embed-posts="isDetail"
-          class="prose prose-sm max-w-none break-words prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-a:break-all prose-blockquote:border-l-4 prose-blockquote:border-primary/30 prose-blockquote:pl-4 prose-blockquote:italic prose-code:bg-base-200 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-primary prose-headings:mb-2 prose-headings:mt-4 prose-ol:my-1.5 prose-p:my-1.5 prose-pre:bg-base-200 prose-pre:overflow-x-auto prose-pre:text-sm prose-ul:my-1.5"
+          class="markdown"
           :class="{ 'prose-lg': isArticle && isDetail }"
           @click="handleMarkdownClick"
         />
@@ -311,14 +311,14 @@
           v-for="tag in displayTags"
           :key="tag.id"
           :to="`/tags/${tag.slug}`"
-          class="badge badge-ghost badge-sm transition-colors hover:badge-primary"
+          class="chip"
           @click.stop
         >
           {{ tag.name ?? "#" + tag.slug }}
         </NuxtLink>
         <span
           v-if="!isDetail && post.tags.length > 3"
-          class="badge badge-ghost badge-sm opacity-60"
+          class="mono-id"
         >
           +{{ post.tags.length - 3 }}
         </span>
@@ -330,7 +330,7 @@
           <button
             v-if="getEmbedType(embed) === 'link'"
             type="button"
-            class="w-full cursor-pointer overflow-hidden rounded-lg border border-base-300/70 bg-base-200/40 text-left transition-colors hover:bg-base-200/65"
+            class="block w-full overflow-hidden rounded-card border border-line bg-base-200/30 text-left transition-colors hover:bg-base-200/60"
             @click.stop="openExternal(getEmbedUrl(embed)!)"
           >
             <div
@@ -373,7 +373,7 @@
 
           <div
             v-else-if="getEmbedType(embed) === 'poll'"
-            class="rounded-lg border border-base-300/70 bg-base-200/40"
+            class="rounded-card border border-line bg-base-200/30"
           >
             <div class="p-3">
               <div class="flex items-center gap-2 text-sm font-medium">
@@ -417,26 +417,29 @@
         class="mt-2"
       />
 
-      <!-- Actions -->
-      <div
-        class="mt-3 flex items-center justify-between"
-        :class="isFeed ? 'pt-2' : 'border-t border-base-200 pt-3'"
-      >
+      <!-- Actions: one quiet row of counts below a hairline, so the post's
+           content and its affordances read as two different things. -->
+      <div class="mt-3 flex items-center justify-between border-t border-line-soft pt-2">
         <div class="flex items-center gap-0.5">
           <button
-            class="btn btn-ghost btn-sm gap-1.5 !pl-0 text-base-content/60 hover:bg-primary/10 hover:text-primary"
+            type="button"
+            class="btn btn-quiet btn-xs gap-1.5 text-faint hover:text-base-content"
+            :aria-label="t('post.replyBtn')"
             @click.stop="handleReply"
           >
-            <IconMessageCircle class="h-4 w-4" />
-            <span class="text-xs tabular-nums">{{ formatNumber(post.repliesCount) }}</span>
+            <IconMessageCircle class="size-3.5" aria-hidden="true" />
+            <span class="numeric">{{ formatNumber(post.repliesCount) }}</span>
           </button>
           <button
-            class="btn btn-ghost btn-sm gap-1.5 text-base-content/60 hover:bg-success/10 hover:text-success"
-            :class="{ 'text-success': hasBoosted }"
+            type="button"
+            class="btn btn-quiet btn-xs gap-1.5"
+            :class="hasBoosted ? 'text-primary' : 'text-faint hover:text-base-content'"
+            :aria-pressed="hasBoosted"
+            :aria-label="t('post.boost')"
             @click.stop="handleBoost"
           >
-            <IconRepeat2 class="h-4 w-4" />
-            <span class="text-xs tabular-nums">{{ formatNumber(boostedCount) }}</span>
+            <IconRepeat2 class="size-3.5" aria-hidden="true" />
+            <span class="numeric">{{ formatNumber(boostedCount) }}</span>
           </button>
         </div>
       </div>
@@ -558,14 +561,12 @@ const railBelow = computed(
 );
 
 const rootClass = computed(() => {
-  if (isFeed.value) return "feed-post";
-  if (props.embedded) return "card bg-base-200 transition-shadow";
-  return "card bg-base-100 shadow-sm transition-shadow hover:shadow-md";
+  if (isFeed.value) return "block border-b border-line-soft last:border-0 transition-colors";
+  if (props.embedded) return "plate transition-colors";
+  return "plate transition-colors";
 });
 
-const bodyClass = computed(() =>
-  isFeed.value ? "px-4 py-3.5" : "card-body p-4",
-);
+const bodyClass = computed(() => (isFeed.value ? "px-4 py-4" : "p-5"));
 
 const emit = defineEmits<{
   boost: [post: Post];
@@ -1102,17 +1103,3 @@ async function handleRemoveReaction(symbol: string) {
   await toggleReaction(symbol, 0);
 }
 </script>
-<style scoped>
-/* Pixel-perfect left alignment of footer controls with the content edge.
-   DaisyUI `btn` adds 1px border-left + padding, nudging icons right of the
-   prose edge. Pull them back so icon/text start exactly at content edge. */
-.feed-post .btn-ghost {
-  border-left: none;
-  padding-left: 0;
-}
-
-/* Tag / category chips: box flush with content edge, chip padding intact. */
-.feed-post .badge {
-  margin-left: 0;
-}
-</style>

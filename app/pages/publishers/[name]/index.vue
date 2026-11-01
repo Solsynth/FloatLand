@@ -1,20 +1,17 @@
 <template>
   <NuxtLayout name="app">
-    <ConfuseSpinner
-      v-if="status === 'pending'"
-      message="Loading publisher..."
-    />
+    <ConsolePanel v-if="status === 'pending'" flush>
+      <LoadingSkeleton variant="feed" :rows="3" />
+    </ConsolePanel>
 
     <!-- Not Found State -->
     <div v-else-if="notFound" class="mx-auto max-w-2xl p-6">
-      <div class="card">
-        <div class="card-body items-center text-center">
-          <IconUserX class="text-base-content/50 w-10 h-10" />
+      <div class="plate flex flex-col items-center gap-2 p-8 text-center">
+          <IconUserX class="text-dim w-10 h-10" />
           <h1 class="text-xl font-bold">Publisher not found</h1>
-          <p class="text-base-content/60">
+          <p class="voice text-[13px]">
             The publisher you requested does not exist.
           </p>
-        </div>
       </div>
     </div>
 
@@ -28,9 +25,9 @@
     <!-- Publisher Profile -->
     <div v-else-if="publisher" class="mx-auto min-w-0">
       <!-- Header Section -->
-      <section class="relative overflow-hidden px-4 pt-4 lg:px-6">
+      <section class="relative overflow-hidden">
         <div
-          class="h-40 w-full overflow-hidden rounded-box bg-base-200 sm:h-52"
+          class="h-36 w-full overflow-hidden bg-base-200 sm:h-44"
         >
           <FileImage
             v-if="backgroundUrl"
@@ -40,50 +37,50 @@
           />
         </div>
         <div
-          class="mx-auto -mt-20 flex max-w-5xl flex-col gap-4 px-4 pb-4 sm:-mt-20 sm:flex-row sm:items-end"
+          class="flex flex-col gap-3 pb-4 sm:flex-row sm:items-end sm:gap-4"
         >
           <div class="shrink-0">
             <div v-if="avatarUrl" class="avatar">
               <div
-                class="h-24 w-24 rounded-full ring ring-base-300 ring-offset-2 ring-offset-base-100 sm:h-28 sm:w-28 mb-8"
+                class="-mt-12 h-20 w-20 rounded-full border-4 border-base-100 bg-base-300 sm:h-24 sm:w-24"
               >
                 <FileImage :file="avatarUrl" :alt="displayName" />
               </div>
             </div>
             <div v-else class="avatar avatar-placeholder">
               <div
-                class="h-24 w-24 rounded-box bg-primary text-primary-content ring ring-base-300 ring-offset-2 ring-offset-base-100 sm:h-28 sm:w-28"
+                class="-mt-12 grid h-20 w-20 place-items-center rounded-full border-4 border-base-100 bg-base-300 text-dim sm:h-24 sm:w-24"
               >
-                <span class="text-2xl font-semibold">
+                <span class="text-lg font-semibold">
                   {{ getInitials(displayName) }}
                 </span>
               </div>
             </div>
           </div>
-          <div class="min-w-0 flex-1 pt-8">
-            <div class="flex flex-wrap items-center gap-2 pt-18">
-              <h1 class="truncate text-2xl font-black sm:text-3xl">
+          <div class="min-w-0 flex-1">
+            <div class="flex flex-wrap items-center gap-2">
+              <h1 class="title truncate text-2xl text-base-content">
                 {{ displayName }}
               </h1>
               <span
                 v-if="publisher.verification"
-                class="badge gap-1 badge-primary"
+                class="chip chip-active gap-1"
               >
-                <IconShieldCheck class="w-3 h-3" />
+                <IconShieldCheck class="size-3" />
                 {{ publisher.verification.title || "Verified" }}
               </span>
               <!-- Livestream indicator removed -->
             </div>
-            <p class="truncate text-sm text-base-content/60">
+            <p class="mono-id truncate">
               @{{ publisher.name }}
             </p>
             <!-- Account link for personal publishers -->
             <div v-if="publisher.type === 0 && publisher.account" class="mt-2">
               <NuxtLink
                 :to="`/@${publisher.account.name}`"
-                class="inline-flex items-center gap-2 rounded-box bg-primary/10 px-3 py-1.5 text-sm text-primary transition-colors hover:bg-primary/15"
+                class="chip chip-active"
               >
-                <IconUser class="w-4 h-4" />
+                <IconUser class="size-3.5" />
                 <span> Belongs to @{{ publisher.account.name }} </span>
               </NuxtLink>
             </div>
@@ -100,7 +97,7 @@
                 @click="subscribe"
               >
                 <IconLoader v-if="isSubscribing" class="w-4 h-4 animate-spin" />
-                <IconPlusCircle v-else class="w-4 h-4" />
+                <IconPlusCircle v-else class="size-3.5" />
                 Subscribe
               </button>
               <button
@@ -110,7 +107,7 @@
                 @click="unsubscribe"
               >
                 <IconLoader v-if="isSubscribing" class="w-4 h-4 animate-spin" />
-                <IconHourglass v-else class="w-4 h-4" />
+                <IconHourglass v-else class="size-3.5" />
                 Pending
               </button>
               <template v-else>
@@ -123,7 +120,7 @@
                     v-if="isSubscribing"
                     class="w-4 h-4 animate-spin"
                   />
-                  <IconCheckCircle v-else class="w-4 h-4" />
+                  <IconCheckCircle v-else class="size-3.5" />
                   Subscribed
                 </button>
                 <button
@@ -131,7 +128,7 @@
                   :class="
                     subStatus?.subscription?.notify
                       ? 'text-primary'
-                      : 'text-base-content/50'
+                      : 'text-dim'
                   "
                   :title="
                     subStatus?.subscription?.notify
@@ -142,39 +139,39 @@
                 >
                   <IconBell
                     v-if="subStatus?.subscription?.notify"
-                    class="w-5 h-5"
+                    class="size-4"
                   />
-                  <IconBellOff v-else class="w-5 h-5" />
+                  <IconBellOff v-else class="size-4" />
                 </button>
               </template>
             </template>
 
             <button class="btn btn-ghost btn-square bg-base-200" @click="shareProfile">
-              <IconShare2 class="w-4 h-4" />
+              <IconShare2 class="size-3.5" />
             </button>
           </div>
         </div>
       </section>
 
       <!-- Content Grid -->
-      <div class="grid gap-4 px-4 py-4 lg:px-6 lg:grid-cols-3">
+      <div class="grid gap-4 py-4 lg:grid-cols-3">
         <!-- Left Column - Main Content -->
-        <div class="space-y-4 lg:col-span-2 min-w-0">
+        <div class="min-w-0 space-y-4 lg:col-span-2">
           <!-- Bio Section -->
           <div class="card">
-            <div class="card-body p-4">
-              <h2 class="text-sm font-semibold text-base-content/70 mb-2">
+            <div class="p-4">
+              <h2 class="eyebrow mb-2">
                 Bio
               </h2>
               <!-- eslint-disable vue/no-v-html -->
               <div
                 v-if="bioHtml"
-                class="prose prose-sm max-w-none prose-headings:mb-2 prose-headings:mt-4 prose-p:my-1.5 prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-code:text-primary prose-code:bg-base-200 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-base-200 prose-pre:text-sm prose-blockquote:border-l-4 prose-blockquote:border-primary/30 prose-blockquote:pl-4 prose-blockquote:italic prose-ul:my-1.5 prose-ol:my-1.5"
+                class="markdown markdown-compact"
                 v-html="bioHtml"
                 @click="handleMarkdownClick"
               />
               <!-- eslint-enable vue/no-v-html -->
-              <p v-else class="text-sm text-base-content/60">No bio yet.</p>
+              <p v-else class="voice text-[13px]">No bio yet.</p>
             </div>
           </div>
 
@@ -190,18 +187,18 @@
           <section
             v-if="collections.length > 0"
             aria-labelledby="publisher-collections-title"
-            class="overflow-hidden rounded-box bg-base-100 shadow-sm"
+            class="overflow-hidden rounded-card plate"
           >
-            <div class="flex flex-wrap items-end justify-between gap-3 border-b border-base-300/60 px-4 py-4">
+            <div class="flex flex-wrap items-end justify-between gap-3 border-b border-line px-5 py-3.5">
               <div>
-                <p class="text-xs font-bold uppercase tracking-[0.16em] text-primary">
+                <p class="eyebrow">
                   {{ t('publisher.collections') }}
                 </p>
-                <h2 id="publisher-collections-title" class="mt-1 text-lg font-bold">
+                <h2 id="publisher-collections-title" class="title mt-1 text-base text-base-content">
                   {{ t('publisher.collectionsTitle') }}
                 </h2>
               </div>
-              <span class="text-xs text-base-content/45">{{ t('publisher.collectionsHint') }}</span>
+              <span class="text-xs text-faint">{{ t('publisher.collectionsHint') }}</span>
             </div>
             <div class="grid gap-3 p-4 sm:grid-cols-2">
               <CollectionCard
@@ -215,13 +212,13 @@
 
           <!-- Posts Section with Filters -->
           <section aria-labelledby="publisher-feed-title" class="space-y-4">
-            <div class="overflow-hidden rounded-box bg-base-100 shadow-sm">
-              <div class="flex flex-wrap items-end justify-between gap-3 border-b border-base-300/60 px-4 py-4">
+            <div class="overflow-hidden rounded-card plate">
+              <div class="flex flex-wrap items-end justify-between gap-3 border-b border-line px-5 py-3.5">
                 <div>
-                  <p class="text-xs font-bold uppercase tracking-[0.16em] text-primary">Publisher feed</p>
-                  <h2 id="publisher-feed-title" class="mt-1 text-lg font-bold">Posts</h2>
+                  <p class="eyebrow">Publisher feed</p>
+                  <h2 id="publisher-feed-title" class="title mt-1 text-base text-base-content">Posts</h2>
                 </div>
-                <div class="flex items-center gap-2 text-xs text-base-content/45">
+                <div class="flex items-center gap-2 text-xs text-faint">
                   <span v-if="isRefreshing" class="inline-flex items-center gap-1.5">
                     <IconLoader class="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
                     Refreshing
@@ -232,13 +229,13 @@
 
               <div class="space-y-4 p-4">
                 <!-- Content Type Tabs -->
-                <div role="tablist" aria-label="Post content type" class="grid grid-cols-3 rounded-box bg-base-200 p-1">
+                <div role="tablist" aria-label="Post content type" class="grid grid-cols-3 gap-0.5 rounded-card border border-line bg-base-200/30 p-1">
                   <button
                     type="button"
                     role="tab"
                     :aria-selected="contentType === 'all'"
-                    class="btn btn-sm border-0 shadow-none"
-                    :class="contentType === 'all' ? 'bg-base-100 text-primary shadow-sm' : 'bg-transparent text-base-content/55 hover:bg-base-100/60'"
+                    class="btn btn-xs"
+                    :class="contentType === 'all' ? 'bg-base-300 text-base-content' : 'btn-quiet'"
                     @click="setContentType('all')"
                   >
                     All
@@ -247,8 +244,8 @@
                     type="button"
                     role="tab"
                     :aria-selected="contentType === 'posts'"
-                    class="btn btn-sm border-0 shadow-none"
-                    :class="contentType === 'posts' ? 'bg-base-100 text-primary shadow-sm' : 'bg-transparent text-base-content/55 hover:bg-base-100/60'"
+                    class="btn btn-xs"
+                    :class="contentType === 'posts' ? 'bg-base-300 text-base-content' : 'btn-quiet'"
                     @click="setContentType('posts')"
                   >
                     Posts
@@ -257,8 +254,8 @@
                     type="button"
                     role="tab"
                     :aria-selected="contentType === 'articles'"
-                    class="btn btn-sm border-0 shadow-none"
-                    :class="contentType === 'articles' ? 'bg-base-100 text-primary shadow-sm' : 'bg-transparent text-base-content/55 hover:bg-base-100/60'"
+                    class="btn btn-xs"
+                    :class="contentType === 'articles' ? 'bg-base-300 text-base-content' : 'btn-quiet'"
                     @click="setContentType('articles')"
                   >
                     Articles
@@ -269,41 +266,41 @@
                 <div class="grid gap-2 sm:grid-cols-2">
                   <button
                     type="button"
-                    class="btn justify-start bg-base-100 text-base-content shadow-sm hover:bg-base-200"
+                    class="btn btn-quiet btn-xs justify-start"
                     :aria-pressed="includeReplies === true"
                     @click="cycleRepliesFilter"
                   >
-                    <IconMessageCircle class="h-3.5 w-3.5" aria-hidden="true" />
+                    <IconMessageCircle class="size-3.5" aria-hidden="true" />
                     <span>Replies: {{ includeReplies === null ? 'Auto' : includeReplies ? 'On' : 'Off' }}</span>
                   </button>
                   <button
                     type="button"
-                    class="btn justify-start bg-base-100 text-base-content shadow-sm hover:bg-base-200"
+                    class="btn btn-quiet btn-xs justify-start"
                     :aria-pressed="mediaOnly"
                     @click="toggleMediaOnly"
                   >
-                    <IconImage class="h-3.5 w-3.5" aria-hidden="true" />
+                    <IconImage class="size-3.5" aria-hidden="true" />
                     <span>Media only: {{ mediaOnly ? 'On' : 'Off' }}</span>
                   </button>
                   <button
                     type="button"
-                    class="btn justify-start bg-base-100 text-base-content shadow-sm hover:bg-base-200"
+                    class="btn btn-quiet btn-xs justify-start"
                     :aria-pressed="!orderDesc"
                     @click="toggleOrder"
                   >
-                    <IconArrowDownUp class="h-3.5 w-3.5" aria-hidden="true" />
+                    <IconArrowDownUp class="size-3.5" aria-hidden="true" />
                     <span>Order: {{ orderDesc ? 'Newest' : 'Oldest' }}</span>
                   </button>
-                  <form class="join min-w-0" @submit.prevent="reloadWithFilters">
+                  <form class="flex min-w-0 items-center gap-1" @submit.prevent="reloadWithFilters">
                     <input
                       v-model="query"
                       type="search"
-                      class="input input-bordered join-item w-full"
+                      class="input input-sm w-full"
                       placeholder="Search posts"
                       aria-label="Search posts"
                     >
-                    <button type="submit" class="btn join-item btn-primary" aria-label="Search posts">
-                      <IconSearch class="h-3.5 w-3.5" aria-hidden="true" />
+                    <button type="submit" class="btn btn-primary btn-sm" aria-label="Search posts">
+                      <IconSearch class="size-3.5" aria-hidden="true" />
                     </button>
                   </form>
                 </div>
@@ -343,13 +340,13 @@
                 <IconLoader v-if="isLoading" class="h-4 w-4 animate-spin" aria-hidden="true" />
                 <span>Load more</span>
               </button>
-              <p v-else class="text-sm text-base-content/50">{{ posts.length }} shown · No more posts</p>
+              <p v-else class="voice text-[13px]">{{ posts.length }} shown · No more posts</p>
             </div>
 
             <!-- Empty State -->
             <div
               v-else-if="!error"
-              class="rounded-box bg-base-100 px-5 py-10 text-center text-sm text-base-content/60 shadow-sm"
+              class="plate px-5 py-10 text-center text-[13px] text-dim"
             >
               No posts from this publisher with current filters.
             </div>
@@ -363,7 +360,7 @@
 
           <!-- Verification Info -->
           <div v-if="publisher.verification" class="card bg-primary/5">
-            <div class="card-body p-4">
+            <div class="p-4">
               <div class="flex items-center gap-2 mb-2">
                 <IconShieldCheck class="w-5 h-5 text-primary" />
                 <h3 class="font-semibold">
@@ -378,7 +375,7 @@
               </p>
               <p
                 v-if="publisher.verification.verifiedBy"
-                class="text-xs text-base-content/50 mt-2"
+                class="text-xs text-dim mt-2"
               >
                 Verified by {{ publisher.verification.verifiedBy }}
               </p>
@@ -387,22 +384,22 @@
 
           <!-- Publisher Stats -->
           <div class="card">
-            <div class="card-body p-4">
+            <div class="p-4">
               <h3 class="text-sm font-semibold text-base-content/70 mb-3">
                 Stats
               </h3>
               <div class="grid grid-cols-2 gap-4">
-                <div class="rounded-box bg-base-200 p-3 text-center">
+                <div class="well p-3 text-center">
                   <div class="text-2xl font-bold">
                     {{ totalPosts.toLocaleString() }}
                   </div>
-                  <div class="text-xs text-base-content/60">Posts</div>
+                  <div class="mono-id">Posts</div>
                 </div>
-                <div class="rounded-box bg-base-200 p-3 text-center">
+                <div class="well p-3 text-center">
                   <div class="text-2xl font-bold">
                     {{ pinnedPosts.length }}
                   </div>
-                  <div class="text-xs text-base-content/60">Pinned</div>
+                  <div class="mono-id">Pinned</div>
                 </div>
               </div>
             </div>

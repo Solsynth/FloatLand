@@ -1,250 +1,88 @@
-import type { SnAuthFactor, SnAuthChallenge, SnAuthToken, SnAccount } from "~/types/auth";
-import {
-    createChallenge,
-    getFactors,
-    getChallenge,
-    requestFactorCode,
-    verifyChallenge,
-    getToken,
-    getUserInfo,
-    logoutApi,
-} from "~/utils/api";
-import FingerprintJS, { type Agent } from "@fingerprintjs/fingerprintjs";
+import type { SnAccount } from "~/types/auth";
+import { getUserInfo, logoutApi } from "~/utils/api";
 
-let fpPromise: Promise<Agent> | null = null;
-
-async function getFingerprint(): Promise<string> {
-    if (!fpPromise) {
-        fpPromise = FingerprintJS.load();
-    }
-    const fp = await fpPromise;
-    const result = await fp.get();
-    return result.visitorId;
-}
-
-function getDeviceInfo(): Record<string, unknown> {
-    if (import.meta.server) {
-        return { device_id: "", device_name: "Server", platform: 1 };
-    }
-    const ua = navigator.userAgent;
-    const platform = 1; // 1 = web
-
-    const deviceName =
-        ua.includes("Chrome") && !ua.includes("Edg")
-            ? "Chrome Browser"
-            : ua.includes("Edg")
-                ? "Edge Browser"
-                : ua.includes("Firefox")
-                    ? "Firefox Browser"
-                    : ua.includes("Safari") && !ua.includes("Chrome")
-                        ? "Safari Browser"
-                        : "Web Browser";
-
-    return {
-        device_id: "",
-        device_name: deviceName,
-        platform,
-    };
-}
-
+/**
+ * The signed-in reader.
+ *
+ * There is no client-side login flow: signing in happens on Stargate, which
+ * sets the `AuthToken`/`RefreshToken` cookies for the whole cookie domain. This
+ * store only *reads* that session — it asks the API who the cookies belong to,
+ * and exposes the answer — so every surface can render without knowing how the
+ * reader arrived.
+ */
 export const useAuthStore = defineStore("auth", () => {
-    // State
-    const isAuthenticated = ref(false);
-    const isLoading = ref(false);
-    const user = ref<SnAccount | null>(null);
-    const token = ref<SnAuthToken | null>(null);
+  const isLoading = ref(false);
+  const user = ref<SnAccount | null>(null);
 
-    // Login flow state
-    const challenge = ref<SnAuthChallenge | null>(null);
-    const factors = ref<SnAuthFactor[]>([]);
-    const selectedFactor = ref<SnAuthFactor | null>(null);
+  const isAuthenticated = computed(() => user.value !== null);
+  const displayName = computed(() => user.value?.nick || user.value?.name || "");
+  const isSuperuser = computed(() => user.value?.isSuperuser === true);
 
-    // Computed
-    const loginProgress = computed(() => {
-        const ch = challenge.value;
-        if (!ch) return 0;
-        const { stepRemain, stepTotal } = ch;
-        if (!stepTotal || stepTotal <= 0) return 0;
-        if (stepRemain == null) return 0;
-        return Math.max(0, Math.min(1, 1 - stepRemain / stepTotal));
-    });
+  function isValidAccount(value: unknown): value is SnAccount {
+    if (!value || typeof value !== "object") return false;
+    const account = value as Partial<SnAccount>;
+    return (
+      typeof account.id === "string" &&
+      account.id.trim().length > 0 &&
+      typeof account.name === "string" &&
+      account.name.trim().length > 0
+    );
+  }
 
-    const loginStep = computed(() => {
-        const ch = challenge.value;
-        if (!ch) return 0;
-        const { stepRemain, stepTotal } = ch;
-        if (stepTotal == null || stepRemain == null) return 0;
-        return Math.max(0, stepTotal - stepRemain);
-    });
-
-    function isValidAccount(value: unknown): value is SnAccount {
-        if (!value || typeof value !== "object") return false;
-
-        const account = value as Partial<SnAccount>;
-        return (
-            typeof account.id === "string" &&
-            account.id.trim().length > 0 &&
-            typeof account.name === "string" &&
-            account.name.trim().length > 0
-        );
+  function setUser(userData: unknown) {
+    if (!isValidAccount(userData)) {
+      throw new Error("Authenticated user response is missing account identity");
     }
+    user.value = userData;
+  }
 
-    function setAuthenticatedUser(userData: unknown): asserts userData is SnAccount {
-        if (!isValidAccount(userData)) {
-            throw new Error("Authenticated user response is missing account identity");
-        }
-
-        user.value = userData;
-        isAuthenticated.value = true;
+  /**
+   * Resolve the session once per page load. A reader with no cookies, or with
+   * an expired pair Stargate refuses to renew, is simply anonymous — that is
+   * not an error state for an explorer that reads public content.
+   */
+  async function initAuth() {
+    isLoading.value = true;
+    try {
+      setUser(await getUserInfo());
+    } catch {
+      user.value = null;
+    } finally {
+      isLoading.value = false;
     }
+  }
 
-    const displayName = computed(() => user.value?.nick || user.value?.name || "");
-
-    const isSuperuser = computed(() => user.value?.isSuperuser === true);
-
-    // Actions
-    async function initAuth() {
-        isLoading.value = true;
-        try {
-            // Unified server-held session: always resolve the user via the
-            // same-origin proxy (the `sid` cookie authenticates on the client
-            // and is forwarded on SSR).
-            const userData = await getUserInfo();
-            setAuthenticatedUser(userData);
-        } catch {
-            user.value = null;
-            isAuthenticated.value = false;
-            token.value = null;
-        } finally {
-            isLoading.value = false;
-        }
+  async function fetchUser() {
+    isLoading.value = true;
+    try {
+      setUser(await getUserInfo());
+    } finally {
+      isLoading.value = false;
     }
+  }
 
-    async function fetchUser() {
-        try {
-            isLoading.value = true;
-            const userData = await getUserInfo();
-            setAuthenticatedUser(userData);
-        } catch (error) {
-            console.error("Failed to fetch user:", error);
-            user.value = null;
-            isAuthenticated.value = false;
-            token.value = null;
-            throw error;
-        } finally {
-            isLoading.value = false;
-        }
+  /**
+   * Sign out. The backend clears the cookie pair on the shared domain, so the
+   * browser forgets the session for every host under it, not just this one.
+   */
+  async function logout() {
+    try {
+      await logoutApi();
+    } catch {
+      // The local state is cleared regardless: a network failure must not
+      // leave the interface claiming a session the reader asked to end.
     }
+    user.value = null;
+  }
 
-    function setToken(
-        tokenString: string,
-        refreshToken?: string,
-        expiresIn?: number,
-        refreshExpiresIn?: number,
-    ) {
-        // The server holds the full token pair; the client only reflects the
-        // access token as display metadata.
-        if (import.meta.client) {
-            token.value = {
-                token: tokenString,
-                expiresIn,
-                refreshToken,
-                refreshExpiresIn,
-            };
-        }
-        isAuthenticated.value = true;
-    }
-
-    async function logout(): Promise<void> {
-        try {
-            // Unified server-held session: always clear the proxy session.
-            await logoutApi();
-        } catch {
-            // Ignore logout API errors
-        }
-
-        // Clear local state
-        token.value = null;
-        user.value = null;
-        isAuthenticated.value = false;
-        challenge.value = null;
-        factors.value = [];
-        selectedFactor.value = null;
-    }
-
-    // Login flow
-    async function startLogin(account: string) {
-        const deviceId = await getFingerprint();
-        const deviceInfo = { ...getDeviceInfo(), device_id: deviceId };
-        const result = await createChallenge(account, deviceInfo);
-        challenge.value = result;
-        return result;
-    }
-
-    async function loadFactors(challengeId: string) {
-        const result = await getFactors(challengeId);
-        factors.value = result;
-        return result;
-    }
-
-    async function loadChallenge(challengeId: string) {
-        const result = await getChallenge(challengeId);
-        challenge.value = result;
-        return result;
-    }
-
-    async function requestCode(challengeId: string, factorId: string) {
-        return requestFactorCode(challengeId, factorId);
-    }
-
-    async function submitVerification(challengeId: string, factorId: string, password: string) {
-        const result = await verifyChallenge(challengeId, factorId, password);
-        challenge.value = result;
-        return result;
-    }
-
-    async function exchangeToken(code: string) {
-        const result = await getToken(code);
-        setToken(
-            result.token,
-            result.refreshToken,
-            result.expiresIn,
-            result.refreshExpiresIn,
-        );
-        await fetchUser();
-        return result;
-    }
-
-    async function getDeviceId(): Promise<string> {
-        return getFingerprint();
-    }
-
-    return {
-        // State
-        isAuthenticated,
-        isLoading,
-        user,
-        token,
-        challenge,
-        factors,
-        selectedFactor,
-        // Computed
-        loginProgress,
-        loginStep,
-        displayName,
-        isSuperuser,
-        // Actions
-        initAuth,
-        fetchUser,
-        setToken,
-        logout,
-        startLogin,
-        loadFactors,
-        loadChallenge,
-        requestCode,
-        submitVerification,
-        exchangeToken,
-        getDeviceId,
-        getDeviceInfo,
-    };
+  return {
+    isLoading,
+    user,
+    isAuthenticated,
+    displayName,
+    isSuperuser,
+    initAuth,
+    fetchUser,
+    logout,
+  };
 });

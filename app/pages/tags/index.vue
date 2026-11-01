@@ -1,94 +1,87 @@
 <template>
   <NuxtLayout name="app">
-    <div class="grid min-w-0 xl:grid-cols-[minmax(0,1fr)_20rem] xl:gap-x-6">
-      <!-- Main Content -->
-      <div class="space-y-4 min-w-0">
-        <div class="flex items-center justify-between">
-          <h1 class="text-2xl font-bold">Tags</h1>
-        </div>
+    <PageHeader title="Tags" description="Every tag in use on the network, most used first." />
 
-        <!-- Loading State -->
-        <div v-if="isLoading" class="flex justify-center py-12">
-          <IconLoader class="w-8 h-8 animate-spin text-primary" />
-        </div>
+    <div class="grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
+      <div class="min-w-0">
+        <ConsolePanel :title="t('tags.title')" :note="isLoading ? undefined : String(tags.length)">
+          <LoadingSkeleton v-if="isLoading && tags.length === 0" variant="rows" :rows="5" />
 
-        <!-- Empty State -->
-        <div v-else-if="tags.length === 0" class="text-center py-12">
-          <IconTag class="w-12 h-12 mx-auto mb-4 text-base-content/30" />
-          <p class="text-base-content/60">No tags found</p>
-        </div>
+          <p v-else-if="tags.length === 0" class="voice py-6">{{ t("tags.noTags") }}</p>
 
-        <!-- Tags Grid -->
-        <div v-else class="card bg-base-100">
-          <div class="card-body p-6">
-            <div class="flex flex-wrap gap-3">
-              <NuxtLink
-                v-for="tag in tags"
-                :key="tag.id"
-                :to="`/tags/${tag.slug}`"
-                class="badge badge-lg badge-outline hover:badge-primary transition-colors cursor-pointer"
-              >
-                #{{ tag.name || tag.slug }}
-                <span class="ml-1 opacity-60">({{ tag.usage }})</span>
-              </NuxtLink>
-            </div>
+          <div v-else class="flex flex-wrap gap-1.5">
+            <NuxtLink
+              v-for="tag in tags"
+              :key="tag.id"
+              :to="`/tags/${tag.slug}`"
+              class="chip"
+            >
+              #{{ tag.name || tag.slug }}
+              <span class="chip-count">{{ tag.usage }}</span>
+            </NuxtLink>
           </div>
-        </div>
 
-        <!-- Load More -->
-        <div v-if="hasMore && !isLoading" class="flex justify-center">
-          <button class="btn btn-outline" @click="loadMore">
-            Load More
-          </button>
-        </div>
+          <template #footer>
+            <div class="flex justify-center">
+              <span v-if="isLoading" class="mono-id">{{ t("common.loading") }}</span>
+              <button
+                v-else-if="hasMore"
+                type="button"
+                class="btn btn-quiet btn-xs"
+                @click="loadMore"
+              >
+                {{ t("tags.loadMore") }}
+              </button>
+            </div>
+          </template>
+        </ConsolePanel>
       </div>
 
-      <!-- Right Sidebar (Desktop only) -->
-      <aside class="hidden w-full self-start sticky top-20 xl:block">
-        <ExploreSidebar />
+      <aside class="hidden min-w-0 lg:block">
+        <div class="sticky top-20">
+          <ExploreDiscovery />
+        </div>
       </aside>
     </div>
   </NuxtLayout>
 </template>
 
 <script setup lang="ts">
-import { fetchTags, type PostTag } from '~/utils/api'
-import { IconTag, IconLoader } from '#components'
+import { fetchTags, type PostTag } from "~/utils/api";
 
-defineOgImage('UniOgImage', { title: 'Tags', description: 'Browse tags on Solar Network.' })
+const { t } = useI18n();
+
+defineOgImage("UniOgImage", { title: "Tags", description: "Browse tags on Solar Network." });
 
 useSolarSeo({
-  title: 'Tags',
-  description: 'Browse tags on Solar Network.',
-})
+  title: "Tags",
+  description: "Browse tags on Solar Network.",
+});
 
-const tags = ref<PostTag[]>([])
-const offset = ref(0)
-const total = ref(0)
-const isLoading = ref(false)
+const tags = ref<PostTag[]>([]);
+const offset = ref(0);
+const total = ref(0);
+const isLoading = ref(false);
 
-const hasMore = computed(() => tags.value.length < total.value)
+const hasMore = computed(() => tags.value.length < total.value);
 
 async function loadTags() {
-  isLoading.value = true
+  isLoading.value = true;
   try {
-    const result = await fetchTags(50, offset.value)
-    tags.value = [...tags.value, ...result.tags]
-    offset.value += result.tags.length
-    total.value = result.total
+    const result = await fetchTags(50, offset.value);
+    tags.value = [...tags.value, ...result.tags];
+    offset.value += result.tags.length;
+    total.value = result.total;
   } catch (e) {
-    console.error('Failed to load tags:', e)
+    console.error("Failed to load tags:", e);
   } finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
 }
 
 async function loadMore() {
-  await loadTags()
+  await loadTags();
 }
 
-// Load initial data
-onMounted(() => {
-  loadTags()
-})
+onMounted(loadTags);
 </script>

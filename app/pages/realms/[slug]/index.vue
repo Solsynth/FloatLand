@@ -5,9 +5,9 @@
       v-if="notFound"
       class="mx-auto flex max-w-lg flex-col items-center gap-3 px-4 py-16 text-center"
     >
-      <IconUsers class="h-10 w-10 text-base-content/30" />
+      <IconUsers class="h-10 w-10 text-faint" />
       <h1 class="text-lg font-bold">{{ t("realms.notFound") }}</h1>
-      <p class="text-sm text-base-content/50">{{ t("realms.notFoundDesc") }}</p>
+      <p class="text-sm text-dim">{{ t("realms.notFoundDesc") }}</p>
     </div>
 
     <!-- Error / loading skeleton -->
@@ -17,7 +17,7 @@
     >
       <span
         v-if="!error"
-        class="loading loading-spinner loading-md text-base-content/40"
+        class="dot animate-pulse text-faint"
       />
       <div v-else class="alert alert-error max-w-md">
         <span>{{ error || t("realms.failedToLoad") }}</span>
@@ -32,7 +32,7 @@
       <div class="min-w-0 space-y-4">
         <!-- Header card -->
         <section
-          class="overflow-hidden rounded-box bg-base-100"
+          class="overflow-hidden rounded-card bg-base-200/30"
         >
           <div class="relative h-36 w-full bg-base-200 sm:h-44">
             <FileImage
@@ -46,7 +46,7 @@
           <div class="relative px-4 pb-4 pt-0 sm:px-5">
             <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:gap-4">
               <div
-                class="-mt-10 shrink-0 overflow-hidden rounded-box ring-4 ring-base-100 sm:-mt-12"
+                class="-mt-10 shrink-0 overflow-hidden rounded-card ring-4 ring-base-100 sm:-mt-12"
               >
                 <div v-if="avatarUrl" class="avatar">
                   <div class="h-20 w-20 sm:h-24 sm:w-24">
@@ -72,13 +72,13 @@
                   </h1>
                   <span
                     v-if="realm.verification"
-                    class="badge badge-primary badge-sm gap-1"
+                    class="chip chip-active gap-1"
                   >
                     <IconShieldCheck class="h-3 w-3" />
                     {{ t("realms.verified") }}
                   </span>
                 </div>
-                <p class="truncate text-sm text-base-content/50">
+                <p class="truncate text-sm text-dim">
                   @{{ realm.slug }}
                 </p>
               </div>
@@ -86,22 +86,22 @@
               <div class="flex shrink-0 gap-2">
                 <NuxtLink
                   :to="`/realms/${realm.slug}/members`"
-                  class="rounded-box bg-base-200 px-3 py-2 text-center transition-colors hover:bg-base-300"
+                  class="rounded-card bg-base-200 px-3 py-2 text-center transition-colors hover:bg-base-300"
                 >
                   <div class="text-sm font-semibold tabular-nums">
                     {{ memberCount }}
                   </div>
-                  <div class="text-[11px] text-base-content/50">
+                  <div class="text-[11px] text-dim">
                     {{ t("realms.members") }}
                   </div>
                 </NuxtLink>
                 <div
-                  class="rounded-box bg-base-200 px-3 py-2 text-center"
+                  class="rounded-card bg-base-200 px-3 py-2 text-center"
                 >
                   <div class="text-sm font-semibold tabular-nums">
                     {{ total }}
                   </div>
-                  <div class="text-[11px] text-base-content/50">
+                  <div class="text-[11px] text-dim">
                     {{ t("realms.posts") }}
                   </div>
                 </div>
@@ -116,13 +116,13 @@
               >
                 {{ realm.description }}
               </p>
-              <p v-else class="text-sm text-base-content/45">
+              <p v-else class="text-sm text-faint">
                 {{ t("realms.noDescription") }}
               </p>
 
               <div class="flex flex-wrap gap-1.5">
                 <span
-                  class="inline-flex items-center gap-1 rounded-box bg-base-200 px-2 py-0.5 text-[11px] font-medium text-base-content/70"
+                  class="inline-flex items-center gap-1 rounded-card bg-base-200 px-2 py-0.5 text-[11px] font-medium text-base-content/70"
                 >
                   <IconUsers v-if="realm.isCommunity" class="h-3 w-3" />
                   <IconBuilding2 v-else class="h-3 w-3" />
@@ -133,7 +133,7 @@
                   }}
                 </span>
                 <span
-                  class="inline-flex items-center gap-1 rounded-box px-2 py-0.5 text-[11px] font-medium"
+                  class="inline-flex items-center gap-1 rounded-card px-2 py-0.5 text-[11px] font-medium"
                   :class="
                     realm.isPublic
                       ? 'bg-success/12 text-success'
@@ -150,7 +150,7 @@
                 </span>
                 <span
                   v-if="realm.boostLevel > 0"
-                  class="inline-flex items-center gap-1 rounded-box bg-primary/12 px-2 py-0.5 text-[11px] font-medium text-primary"
+                  class="inline-flex items-center gap-1 rounded-card bg-primary/12 px-2 py-0.5 text-[11px] font-medium text-primary"
                 >
                   <IconRocket class="h-3 w-3" />
                   {{ t("realms.lv", { level: realm.boostLevel }) }}
@@ -159,14 +159,14 @@
 
               <div
                 v-if="realm.verification"
-                class="rounded-box bg-primary/10 px-3 py-2"
+                class="rounded-card bg-primary/10 px-3 py-2"
               >
                 <p class="text-sm font-medium text-primary">
                   {{ realm.verification.title || t("realms.verified") }}
                 </p>
                 <p
                   v-if="realm.verification.description"
-                  class="mt-0.5 text-xs text-base-content/60"
+                  class="mt-0.5 text-xs text-dim"
                 >
                   {{ realm.verification.description }}
                 </p>
@@ -201,19 +201,19 @@
 
         <!-- Posts feed -->
         <section
-          class="overflow-hidden rounded-box bg-base-100"
+          class="overflow-hidden rounded-card bg-base-200/30"
         >
           <!-- Filters toolbar -->
           <div class="space-y-3 px-3 py-3 sm:px-4">
             <div
               v-if="isRefreshing"
-              class="flex items-center gap-2 text-xs text-base-content/50"
+              class="flex items-center gap-2 text-xs text-dim"
             >
               <IconLoader class="h-3.5 w-3.5 animate-spin" />
               <span>{{ t("realms.refreshing") }}</span>
             </div>
 
-            <div class="flex rounded-box bg-base-200 p-0.5">
+            <div class="flex rounded-card bg-base-200 p-0.5">
               <button
                 v-for="tab in contentTabs"
                 :key="tab.key"
@@ -222,7 +222,7 @@
                 :class="
                   contentType === tab.key
                     ? 'btn-primary'
-                    : 'btn-ghost text-base-content/60'
+                    : 'btn-ghost text-dim'
                 "
                 @click="setContentType(tab.key)"
               >
@@ -283,7 +283,7 @@
 
           <div
             v-if="error"
-            class="mx-3 rounded-box bg-error/10 px-4 py-3 text-sm text-error sm:mx-4"
+            class="mx-3 rounded-card bg-error/10 px-4 py-3 text-sm text-error sm:mx-4"
           >
             {{ error }}
           </div>
@@ -307,7 +307,7 @@
 
           <div
             v-else-if="!error && !isLoading"
-            class="px-4 py-12 text-center text-sm text-base-content/45"
+            class="px-4 py-12 text-center text-sm text-faint"
           >
             {{ t("realms.noPostsWithFilters") }}
           </div>
@@ -318,9 +318,9 @@
           >
             <div
               v-if="isLoading && posts.length > 0"
-              class="flex items-center gap-2 text-xs text-base-content/45"
+              class="flex items-center gap-2 text-xs text-faint"
             >
-              <span class="loading loading-spinner loading-xs" />
+              <span class="dot animate-pulse" />
               <span>{{ t("common.loading") }}</span>
             </div>
             <button

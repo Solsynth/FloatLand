@@ -104,7 +104,7 @@ const props = withDefaults(
 const isFeed = computed(() => props.variant === "feed");
 const rootClass = computed(() =>
   isFeed.value
-    ? "feed-post"
+    ? "block border-b border-line-soft last:border-0"
     : "card bg-base-100 shadow-sm",
 );
 const bodyClass = computed(() => (isFeed.value ? "px-4 py-3" : "card-body p-3"));

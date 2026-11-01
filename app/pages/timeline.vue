@@ -1,124 +1,69 @@
 <template>
   <NuxtLayout name="app">
-    <div class="feed-layout feed-layout--three-col">
-      <!-- Left column: discovery rail (categories + tags) -->
-      <aside class="feed-sidebar">
-        <ExploreDiscovery />
-      </aside>
-
-      <!-- Main Content -->
+    <div class="grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1fr)_19rem]">
       <div class="min-w-0">
-        <!-- Feed shell: continuous list like Flutter explore -->
-        <div class="feed-stream">
-          <!-- Feed controls: sliding-pill filter tabs + ranking mode (Solian explore parity) -->
-          <div
-            class="flex flex-col gap-2 border-b border-base-300/80 px-4 py-2"
-          >
-            <div class="flex items-center gap-2">
-              <!-- Segmented filter control with sliding highlight -->
-              <div class="relative flex flex-1 items-center rounded-xl bg-base-200/60 p-1">
-                <span
-                  class="absolute bottom-1 top-1 rounded-lg bg-primary/15 transition-[left] duration-200 ease-out"
-                  :style="pillStyle"
-                />
-                <button
-                  v-for="tab in timelineFilterTabs"
-                  :key="tab.value ?? 'explore'"
-                  type="button"
-                  class="relative z-10 flex h-9 w-1/3 items-center justify-center gap-1.5 rounded-lg text-xs transition-colors"
-                  :class="
-                    timelineFilter === tab.value
-                      ? 'font-bold text-primary'
-                      : 'font-medium text-base-content/60 hover:text-base-content'
-                  "
-                  @click="changeTimelineFilter(tab.value)"
-                >
-                  <component :is="tab.icon" class="h-4 w-4" />
-                  {{ tab.label }}
-                </button>
-              </div>
-            </div>
-
-            <!-- Ranking toolbar: shown on the Explore tab only (mirrors Flutter) -->
-            <div
-              v-if="timelineFilter === null"
-              class="flex items-center gap-2.5 rounded-xl border border-base-300/60 bg-base-200/60 px-3 py-2"
+        <!--
+          The feed header is the only chrome above the list: which shelf you are
+          reading, and how it is ordered. Both are chip rows so they weigh the
+          same as a tag, and neither competes with the posts below.
+        -->
+        <div class="mb-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+          <div class="flex flex-wrap items-center gap-1.5">
+            <button
+              v-for="tab in timelineFilterTabs"
+              :key="tab.value ?? 'explore'"
+              type="button"
+              class="chip"
+              :class="timelineFilter === tab.value ? 'chip-active' : ''"
+              :aria-pressed="timelineFilter === tab.value"
+              @click="changeTimelineFilter(tab.value)"
             >
-              <IconSlidersHorizontal class="h-4 w-4 shrink-0 text-base-content/50" />
-              <span class="min-w-0 flex-1 truncate text-sm text-base-content/50">
-                {{ t("home.explorePreferred") }}
-              </span>
-              <select
-                :value="timelineMode"
-                class="select select-ghost select-xs h-7 min-h-7 w-auto pl-2 pr-8 text-xs"
-                :title="t('home.rankingMode')"
-                :aria-label="t('home.rankingMode')"
-                @change="changeTimelineMode"
-              >
-                <option
-                  v-for="mode in timelineModes"
-                  :key="mode.value"
-                  :value="mode.value"
-                >
-                  {{ mode.label }}
-                </option>
-              </select>
-            </div>
+              <component :is="tab.icon" class="size-3 shrink-0" aria-hidden="true" />
+              {{ tab.label }}
+            </button>
           </div>
 
-          <!-- Loading -->
-          <div
-            v-if="
-              (status === 'pending' || status === 'idle') &&
-              timelineEvents.length === 0
-            "
-            class="flex justify-center py-16"
-          >
-            <ConfuseSpinner :message="t('home.loadingPosts')" />
-          </div>
-
-          <!-- Error -->
-          <div
-            v-else-if="error"
-            class="flex flex-col items-center gap-3 px-4 py-12 text-center"
-          >
-            <div
-              class="flex h-10 w-10 items-center justify-center rounded-full bg-error/10 text-error"
+          <div v-if="timelineFilter === null" class="flex items-center gap-2">
+            <IconSlidersHorizontal class="size-3.5 shrink-0 text-faint" aria-hidden="true" />
+            <label class="eyebrow" for="ranking-mode">{{ t("home.rankingMode") }}</label>
+            <select
+              id="ranking-mode"
+              :value="timelineMode"
+              class="select select-xs w-auto border-line bg-transparent text-2xs text-dim"
+              @change="changeTimelineMode"
             >
-              <IconAlertCircle class="h-5 w-5" />
-            </div>
-            <p class="max-w-sm text-sm text-base-content/70">
+              <option v-for="mode in timelineModes" :key="mode.value" :value="mode.value">
+                {{ mode.label }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <ConsolePanel flush>
+          <LoadingSkeleton
+            v-if="(status === 'pending' || status === 'idle') && timelineEvents.length === 0"
+            variant="feed"
+            :rows="5"
+          />
+
+          <div v-else-if="error" class="px-6 py-10 text-center">
+            <p class="note note-error mx-auto max-w-md">
               {{ t("home.loadFailed", { error: String(error) }) }}
             </p>
-            <button class="btn btn-sm btn-ghost" @click="refreshTimeline">
+            <button class="btn btn-quiet btn-xs mt-3" @click="refreshTimeline">
               {{ t("common.retry") }}
             </button>
           </div>
 
-          <!-- Empty -->
-          <div
-            v-else-if="status !== 'pending' && timelineEvents.length === 0"
-            class="flex flex-col items-center gap-2 px-4 py-14 text-center"
-          >
-            <p class="text-sm font-medium text-base-content/75">
-              {{ t("home.emptyTitle") }}
-            </p>
-            <p class="max-w-xs text-xs leading-relaxed text-base-content/45">
-              {{ t("home.emptyDesc") }}
-            </p>
-            <button
-              class="btn btn-sm btn-ghost mt-1"
-              @click="refreshTimeline"
-            >
+          <div v-else-if="timelineEvents.length === 0" class="px-6 py-14 text-center">
+            <p class="text-sm font-semibold text-base-content">{{ t("home.emptyTitle") }}</p>
+            <p class="voice mx-auto mt-1.5 max-w-xs text-[13px]">{{ t("home.emptyDesc") }}</p>
+            <button class="btn btn-quiet btn-xs mt-4" @click="refreshTimeline">
               {{ t("common.refresh") }}
             </button>
           </div>
 
-          <!-- Events (divided list) -->
-          <div
-            v-if="timelineEvents.length > 0"
-            class="divide-y divide-base-300/80"
-          >
+          <div v-else>
             <TimelineEventRenderer
               v-for="event in timelineEvents"
               :key="event.id"
@@ -129,114 +74,79 @@
             />
           </div>
 
-          <!-- Footer / infinite scroll -->
           <div
             ref="loadMoreSentinel"
-            class="feed-footer"
+            class="flex flex-col items-center justify-center gap-2 border-t border-line-soft px-6 py-5"
           >
-            <div
-              v-if="fetchingMore"
-              class="flex items-center gap-2 text-xs text-base-content/45"
-            >
-              <span class="loading loading-spinner loading-xs" />
-              <span>{{ t("common.loading") }}</span>
+            <div v-if="fetchingMore" class="flex items-center gap-2 text-2xs text-faint">
+              <span class="dot animate-pulse bg-primary" aria-hidden="true" />
+              {{ t("common.loading") }}
             </div>
             <button
               v-else-if="hasMore && timelineEvents.length > 0"
               type="button"
-              class="btn btn-ghost btn-sm text-base-content/55"
+              class="btn btn-quiet btn-xs"
               :disabled="fetchingMore"
               @click="loadMore"
             >
               {{ t("common.loadMore") }}
             </button>
-            <p
-              v-else-if="!hasMore && timelineEvents.length > 0"
-              class="text-xs text-base-content/35"
-            >
+            <p v-else-if="timelineEvents.length > 0" class="mono-id">
               {{ t("common.noMore") }}
             </p>
           </div>
-        </div>
+        </ConsolePanel>
       </div>
 
-      <!-- Compose rail: search, inline compose, footer links -->
-      <aside class="feed-sidebar">
-        <div class="flex w-full flex-col gap-5">
-          <!-- Search -->
-          <div class="relative">
-            <input
-              v-model="searchQuery"
-              type="search"
+      <!--
+        The rail holds what a reader reaches *for* while scrolling: a way to
+        look something up, a way to post, and the shelves that are not the one
+        already open.
+      -->
+      <aside class="hidden min-w-0 lg:block">
+        <div class="sticky top-20 flex flex-col gap-4">
+          <NuxtLink to="/search" class="block">
+            <TextField
+              :model-value="''"
               :placeholder="t('common.search')"
               :aria-label="t('common.search')"
-              class="rail-search input w-full pr-10"
-              @keyup.enter="handleSidebarSearch"
+              suffix-icon="IconSearch"
+              bare
+              readonly
+              class="pointer-events-none"
             />
-            <button
-              type="button"
-              :aria-label="t('common.search')"
-              class="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/40 transition-colors hover:text-base-content/70"
-              @click="handleSidebarSearch"
-            >
-              <IconSearch class="h-4 w-4" />
-            </button>
-          </div>
+          </NuxtLink>
 
-          <!-- Inline Compose -->
-          <section
-            v-if="isAuthenticated"
-            class="right-rail-section p-4"
-          >
-            <form
-              class="flex items-start gap-3"
-              @click="attachMenuOpen = false"
-              @submit.prevent="submitInlinePost"
-            >
-              <div class="relative mt-0.5 shrink-0">
-                <button
-                  type="button"
-                  class="avatar block h-9 w-9 rounded-full"
-                  :title="t('compose.selectPublisher')"
-                  @click.stop="publisherModalOpen = true"
-                >
-                  <div
-                    class="h-9 w-9 overflow-hidden rounded-full ring-1 ring-base-300"
-                  >
-                    <FileImage
-                      v-if="publisherAvatar"
-                      :file="publisherAvatar"
-                      :alt="currentPublisher?.nick || userName"
-                      class="block h-full w-full object-cover"
-                    />
-                    <div
-                      v-else
-                      class="flex h-full w-full items-center justify-center bg-primary text-xs font-medium text-primary-content"
-                    >
-                      {{ publisherInitials }}
-                    </div>
-                  </div>
-                </button>
-              </div>
+          <section v-if="isAuthenticated" class="plate p-4">
+            <form class="flex items-start gap-2.5" @submit.prevent="submitInlinePost">
+              <button
+                type="button"
+                class="shrink-0"
+                :title="t('compose.selectPublisher')"
+                :aria-label="t('compose.selectPublisher')"
+                @click="publisherModalOpen = true"
+              >
+                <UserAvatar
+                  :picture-id="currentPublisher?.picture?.id ?? userAvatar?.id"
+                  :name="currentPublisher?.nick || userName"
+                  size="md"
+                />
+              </button>
 
               <div class="min-w-0 flex-1">
                 <div
                   v-if="replyingTo"
-                  class="mb-2 flex items-center gap-2 rounded-lg bg-base-200/60 px-2.5 py-1.5 text-xs"
+                  class="mb-2 flex items-center gap-2 rounded-chip border border-line bg-base-200/60 px-2.5 py-1.5 text-2xs"
                 >
-                  <span class="shrink-0 text-base-content/55">
-                    {{ t("compose.replyingTo") }}
-                  </span>
-                  <span class="min-w-0 flex-1 truncate text-base-content/70">
-                    {{ replyingTo.content }}
-                  </span>
+                  <span class="shrink-0 text-faint">{{ t("compose.replyingTo") }}</span>
+                  <span class="min-w-0 flex-1 truncate text-dim">{{ replyingTo.content }}</span>
                   <button
                     type="button"
-                    class="btn btn-ghost btn-xs btn-circle shrink-0"
+                    class="shrink-0 text-faint transition-colors hover:text-base-content"
                     :aria-label="t('compose.cancel')"
-                    @click.stop="clearInlineReply"
+                    @click="clearInlineReply"
                   >
-                    <IconX class="h-3.5 w-3.5" />
+                    <IconX class="size-3.5" aria-hidden="true" />
                   </button>
                 </div>
 
@@ -245,17 +155,17 @@
                   v-model="composeTitle"
                   type="text"
                   :placeholder="t('compose.titlePlaceholder')"
-                  class="mb-1 w-full border-0 bg-transparent px-0 py-0.5 text-base font-medium outline-none placeholder:text-base-content/35 focus:ring-0"
+                  class="mb-1 w-full border-0 bg-transparent px-0 py-0.5 text-sm font-semibold text-base-content outline-none placeholder:text-faint"
                   :disabled="submitting"
                   @input="compose.markDirty"
-                />
+                >
 
                 <textarea
                   ref="contentRef"
                   v-model="composeContent"
                   :rows="inlineComposeExpanded ? 3 : 1"
-                  class="w-full resize-none overflow-hidden border-0 bg-transparent px-0 py-1 text-sm leading-relaxed outline-none placeholder:text-base-content/40 focus:ring-0"
-                  :class="inlineComposeExpanded ? 'min-h-20' : 'h-9 min-h-9'"
+                  class="w-full resize-none overflow-hidden border-0 bg-transparent px-0 py-1 text-[13px] leading-relaxed text-base-content outline-none placeholder:text-faint"
+                  :class="inlineComposeExpanded ? 'min-h-20' : 'h-7 min-h-7'"
                   :placeholder="t('home.composePlaceholder')"
                   :disabled="submitting"
                   @focus="inlineComposeExpanded = true"
@@ -272,62 +182,37 @@
                   @insert="insertInlineAttachment"
                 />
 
-                <div
-                  v-if="inlineComposeExpanded"
-                  class="mt-1 flex flex-wrap items-center gap-1"
-                >
-                  <div class="relative" @click.stop>
+                <div v-if="inlineComposeExpanded" class="mt-2 flex flex-wrap items-center gap-1">
+                  <div class="relative">
                     <button
                       type="button"
-                      class="btn btn-ghost btn-sm btn-circle"
+                      class="btn btn-quiet btn-xs px-1.5"
                       :title="t('compose.attach')"
                       :disabled="!currentPublisher || submitting"
                       @click="attachMenuOpen = !attachMenuOpen"
                     >
-                      <IconPaperclip class="h-4 w-4" />
+                      <IconPaperclip class="size-3.5" aria-hidden="true" />
                     </button>
                     <div
                       v-if="attachMenuOpen"
-                      class="absolute bottom-10 left-0 z-30 w-44 overflow-hidden rounded-box bg-base-100 py-1 shadow-lg ring-1 ring-base-300"
+                      class="absolute bottom-8 left-0 z-30 w-44 rounded-card border border-line bg-base-200 py-1"
                     >
                       <button
+                        v-for="item in attachOptions"
+                        :key="item.key"
                         type="button"
-                        class="flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-base-200"
-                        @click="pickLocalFiles('image/*')"
+                        class="flex w-full items-center gap-2 px-3 py-1.5 text-left text-2xs text-dim transition-colors hover:bg-base-300 hover:text-base-content"
+                        @click="item.run()"
                       >
-                        <IconImage class="h-4 w-4" />
-                        {{ t("compose.addPhoto") }}
-                      </button>
-                      <button
-                        type="button"
-                        class="flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-base-200"
-                        @click="pickLocalFiles('video/*')"
-                      >
-                        <IconVideo class="h-4 w-4" />
-                        {{ t("compose.addVideo") }}
-                      </button>
-                      <button
-                        type="button"
-                        class="flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-base-200"
-                        @click="pickLocalFiles('*/*')"
-                      >
-                        <IconFile class="h-4 w-4" />
-                        {{ t("compose.uploadFile") }}
-                      </button>
-                      <button
-                        type="button"
-                        class="flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-base-200"
-                        @click="openCloudFilePicker"
-                      >
-                        <IconCloud class="h-4 w-4" />
-                        {{ t("compose.linkCloudFile") }}
+                        <component :is="item.icon" class="size-3.5 shrink-0" aria-hidden="true" />
+                        {{ t(item.labelKey) }}
                       </button>
                     </div>
                   </div>
 
                   <select
                     v-model="visibility"
-                    class="select select-ghost select-xs ml-1 w-auto max-w-28 text-xs"
+                    class="select select-xs ml-1 w-auto max-w-28 border-line bg-transparent text-2xs text-dim"
                     :title="t('compose.visibility')"
                     :disabled="submitting"
                     @change="compose.markDirty"
@@ -338,39 +223,25 @@
                     <option :value="3">{{ t("compose.private") }}</option>
                   </select>
 
-                  <span class="ml-auto text-[11px] text-base-content/35">
-                    {{ composeContent.length }}
-                  </span>
+                  <span class="mono-id ml-auto">{{ composeContent.length }}</span>
+
                   <button
                     type="button"
-                    class="btn btn-ghost btn-sm"
+                    class="btn btn-quiet btn-xs"
                     :disabled="submitting"
                     @click="cancelInlineCompose"
                   >
                     {{ t("compose.cancel") }}
                   </button>
-                  <button
-                    type="submit"
-                    class="btn btn-primary btn-sm gap-1.5"
-                    :disabled="!canSubmit"
-                  >
-                    <IconLoader
-                      v-if="submitting"
-                      class="h-4 w-4 animate-spin"
-                    />
-                    <IconSend v-else class="h-4 w-4" />
+                  <button type="submit" class="btn btn-primary btn-xs" :disabled="!canSubmit">
                     {{ submitting ? t("compose.posting") : t("compose.post") }}
                   </button>
                 </div>
 
-                <p
-                  v-if="inlineComposeError"
-                  class="mt-2 text-xs text-error"
-                >
-                  {{ inlineComposeError }}
-                </p>
+                <p v-if="inlineComposeError" class="note note-error mt-2">{{ inlineComposeError }}</p>
               </div>
             </form>
+
             <input
               ref="localFileInput"
               type="file"
@@ -378,11 +249,13 @@
               :accept="localFileAccept"
               multiple
               @change="onLocalFilesPicked"
-            />
+            >
           </section>
-          <ExploreSidebar :show-search="false" :show-discovery="false" />
+
+          <ExploreDiscovery />
         </div>
       </aside>
+
       <CloudFileDrawer
         v-model:open="filePickerOpen"
         :allow-multiple="true"
@@ -391,7 +264,6 @@
         @select="handleCloudFilesSelected"
       />
 
-      <!-- Publisher selector (mirrors Flutter's PublisherModal bottom sheet) -->
       <ClientOnly>
         <PublisherSelectorModal
           v-model:open="publisherModalOpen"
@@ -416,16 +288,12 @@ import type {
 import { fetchJson, fetchTimeline } from "~/utils/api";
 import { getInitials } from "~/utils/identity";
 import {
-  IconAlertCircle,
   IconCloud,
   IconCompass,
   IconFile,
   IconImage,
-  IconLoader,
   IconPaperclip,
   IconRss,
-  IconSearch,
-  IconSend,
   IconSlidersHorizontal,
   IconUsers,
   IconVideo,
@@ -477,20 +345,6 @@ const timelineFilterTabs = computed(() => [
   { value: "friends", label: t("home.filterFriends"), icon: IconUsers },
 ]);
 
-// Sliding highlight position (mirrors Flutter's AnimatedAlign primaryContainer pill).
-const pillStyle = computed(() => {
-  const idx =
-    timelineFilter.value === "subscriptions"
-      ? 1
-      : timelineFilter.value === "friends"
-        ? 2
-        : 0;
-  return {
-    width: "calc((100% - 0.5rem) / 3)",
-    left: `calc(0.25rem + ${idx} * (100% - 0.5rem) / 3)`,
-  };
-});
-
 function changeTimelineMode(event: Event) {
   timelineMode.value = (event.target as HTMLSelectElement).value;
   cursor.value = null;
@@ -531,12 +385,20 @@ const filePickerOpen = ref(false);
 const localFileAccept = ref("*/*");
 const contentRef = ref<HTMLTextAreaElement | null>(null);
 const localFileInput = ref<HTMLInputElement | null>(null);
-const publisherAvatar = computed(
-  () => currentPublisher.value?.picture ?? userAvatar.value,
-);
+
 const publisherInitials = computed(() =>
   getInitials(currentPublisher.value?.nick || userName.value || "?"),
 );
+
+// The attach menu is one list, so the buttons and the options that call them
+// cannot drift apart as the set of sources changes.
+const attachOptions = [
+  { key: "photo", icon: IconImage, labelKey: "compose.addPhoto", run: () => pickLocalFiles("image/*") },
+  { key: "video", icon: IconVideo, labelKey: "compose.addVideo", run: () => pickLocalFiles("video/*") },
+  { key: "file", icon: IconFile, labelKey: "compose.uploadFile", run: () => pickLocalFiles("*/*") },
+  { key: "cloud", icon: IconCloud, labelKey: "compose.linkCloudFile", run: openCloudFilePicker },
+];
+
 onMounted(() => {
   if (isAuthenticated.value && publishers.value.length === 0) {
     void loadComposePublishers();
@@ -556,13 +418,6 @@ async function loadComposePublishers() {
   }
 }
 
-const searchQuery = ref("");
-
-function handleSidebarSearch() {
-  if (searchQuery.value.trim()) {
-    navigateTo(`/search?q=${encodeURIComponent(searchQuery.value.trim())}`);
-  }
-}
 function selectInlinePublisher(publisher: Publisher) {
   compose.setCurrentPublisher(publisher);
 }

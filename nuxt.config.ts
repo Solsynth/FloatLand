@@ -250,12 +250,12 @@ export default defineNuxtConfig({
       apiBaseUrl: "https://api.solian.app",
       fileBaseUrl: "https://api.solian.app/drive/files",
     },
-    // Private (server-only) auth configuration.
+    // Private (server-only) session configuration. The session itself belongs
+    // to Stargate: it sets `AuthToken`/`RefreshToken` on its own cookie domain
+    // and the proxy relays them, so the only thing this app decides is whether
+    // the relayed cookie carries `Secure`.
     auth: {
-      canonicalHost: process.env.NUXT_AUTH_CANONICAL_HOST ?? "https://solian.app",
-      cookieName: "sid",
       cookieSecure: process.env.NUXT_AUTH_COOKIE_SECURE !== "false",
-      sessionTtl: 60 * 60 * 24 * 30,
     },
     // Internal base URL for server-to-backend proxied calls. FloatLand and the
     // main API share a host, so proxied calls should hit the internal endpoint

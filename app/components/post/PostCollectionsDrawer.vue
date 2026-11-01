@@ -4,7 +4,7 @@
     :title="t('post.collections.manage')"
     @update:open="emit('update:open', $event)"
   >
-    <ConfuseSpinner v-if="loading && collections.length === 0" />
+    <LoadingSkeleton v-if="loading && collections.length === 0" variant="rows" :rows="3" />
 
     <p
       v-else-if="collections.length === 0"

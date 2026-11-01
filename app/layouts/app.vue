@@ -1,442 +1,258 @@
 <template>
-  <div class="min-h-screen bg-base-200">
-    <header
-      class="sticky top-0 z-40 w-full border-b border-base-300 bg-base-100"
+  <div class="flex min-h-dvh flex-col bg-base-100">
+    <a
+      href="#main"
+      class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-chip focus:bg-base-300 focus:px-3 focus:py-2 focus:text-xs"
     >
-      <div class="navbar w-full min-h-16 px-4 lg:px-6 container mx-auto">
-        <!-- Left: Icon + Title -->
-        <div class="navbar-start gap-1">
-          <NuxtLink to="/" class="flex min-w-0 items-center gap-2.5" aria-label="Home">
-            <img src="/favicon.png" alt="Solar Network" class="h-8 w-8 shrink-0" />
-          </NuxtLink>
-        </div>
+      {{ t("nav.skipToContent") }}
+    </a>
 
-        <!-- Center: empty for Google-style minimal navbar -->
-        <div class="navbar-center hidden lg:flex" />
+    <!--
+      The header is the whole persistent chrome: the mark names the product,
+      the tab strip names the shelf you are on, and the right rail holds the two
+      things a reader actually needs at any scroll position — search and the
+      account. Everything else lives on the page it belongs to.
+    -->
+    <header class="sticky top-0 z-40 border-b border-line bg-base-100/85 backdrop-blur">
+      <div
+        class="mx-auto flex h-13 w-full max-w-6xl items-center gap-5 px-page sm:px-page-wide"
+      >
+        <NuxtLink to="/" class="flex shrink-0 items-center gap-2.5" aria-label="Solar Network">
+          <span class="brand-mark h-[21px] w-[21px] shrink-0" aria-hidden="true" />
+          <span class="text-[12.5px] font-bold tracking-[0.14em] text-base-content">
+            EXPLORE
+          </span>
+        </NuxtLink>
 
-        <!-- Right: AppSwitcher + Notifications + Profile -->
-        <div class="navbar-end gap-1">
-          <AppSwitcher v-if="isAuthenticated" />
-          <NotificationBell v-if="isAuthenticated && user" />
-          <div v-if="isAuthenticated && user" class="hidden sm:block">
-            <DropdownMenuRoot v-model:open="profileMenuOpen">
-              <DropdownMenuTrigger as-child>
-                <button
-                  type="button"
-                  class="btn btn-ghost h-auto min-h-10 gap-2 px-2"
-                >
-                  <div v-if="avatarUrl" class="avatar">
-                    <div class="w-8 rounded-full">
-                      <FileImage :file="avatarUrl" :alt="user.name" />
-                    </div>
-                  </div>
-                  <div v-else class="avatar avatar-placeholder">
-                    <div class="w-8 rounded-full bg-primary text-primary-content">
-                      <span class="text-xs font-medium">
-                        {{ (user.name || "?").slice(0, 2).toUpperCase() }}
-                      </span>
-                    </div>
-                  </div>
-                  <span class="hidden max-w-32 truncate text-sm font-medium xl:inline">
-                    {{ displayName }}
-                  </span>
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuPortal>
-                <DropdownMenuContent
-                  align="end"
-                  :side-offset="8"
-                  class="z-50 w-52 rounded-box border border-base-300 bg-base-100 p-2 text-base-content shadow-lg"
-                >
-                  <DropdownMenuItem as-child>
-                    <NuxtLink to="/accounts/me" class="flex items-center gap-2 rounded-box px-2.5 py-2 text-sm outline-none cursor-pointer hover:bg-base-200 data-[highlighted]:bg-base-200">
-                      <IconUser class="h-4 w-4" />
-                      {{ t("nav.account") }}
-                    </NuxtLink>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem as-child>
-                    <NuxtLink to="/wallets" class="flex items-center gap-2 rounded-box px-2.5 py-2 text-sm outline-none cursor-pointer hover:bg-base-200 data-[highlighted]:bg-base-200">
-                      <IconWallet class="h-4 w-4" />
-                      {{ t("nav.wallet") }}
-                    </NuxtLink>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem as-child>
-                    <NuxtLink to="/membership" class="flex items-center gap-2 rounded-box px-2.5 py-2 text-sm outline-none cursor-pointer hover:bg-base-200 data-[highlighted]:bg-base-200">
-                      <IconCreditCard class="h-4 w-4" />
-                      {{ t("nav.membership") }}
-                    </NuxtLink>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem as-child>
-                    <NuxtLink to="/accounts/me/settings" class="flex items-center gap-2 rounded-box px-2.5 py-2 text-sm outline-none cursor-pointer hover:bg-base-200 data-[highlighted]:bg-base-200">
-                      <IconSettings class="h-4 w-4" />
-                      {{ t("nav.settings") }}
-                    </NuxtLink>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem as-child>
-                    <NuxtLink to="/tickets" class="flex items-center gap-2 rounded-box px-2.5 py-2 text-sm outline-none cursor-pointer hover:bg-base-200 data-[highlighted]:bg-base-200">
-                      <IconTicket class="h-4 w-4" />
-                      {{ t("nav.tickets") }}
-                    </NuxtLink>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem as-child>
-                    <button type="button" class="mt-1 flex items-center gap-2 rounded-box px-2.5 py-2 text-sm outline-none cursor-pointer hover:bg-error/10 data-[highlighted]:bg-error/10 text-error" @click="handleLogout">
-                      <IconLogOut class="h-4 w-4" />
-                      {{ t("nav.logout") }}
-                    </button>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenuPortal>
-            </DropdownMenuRoot>
-          </div>
-
+        <nav
+          v-if="showNav"
+          class="scrollbar-none -mx-1 flex min-w-0 flex-1 items-center gap-1 overflow-x-auto px-1"
+          :aria-label="t('nav.primary')"
+        >
           <NuxtLink
-            v-else
-            to="/auth/login"
-            class="btn btn-primary btn-soft btn-sm hidden gap-2 sm:inline-flex"
+            v-for="item in items"
+            :key="item.href"
+            :to="item.href"
+            class="flex shrink-0 items-center gap-1.5 rounded-control px-2.5 py-1.5 text-2xs tracking-[0.02em] transition-colors"
+            :class="
+              isActive(item.match)
+                ? 'bg-base-300 text-base-content'
+                : 'text-faint hover:bg-base-200 hover:text-dim'
+            "
+            :aria-current="isActive(item.match) ? 'page' : undefined"
           >
-            <IconLogIn class="h-4 w-4" />
-            {{ t("nav.signIn") }}
+            <component :is="item.icon" class="size-3.5 shrink-0" aria-hidden="true" />
+            {{ t(item.labelKey) }}
+          </NuxtLink>
+        </nav>
+        <div v-else class="flex-1" />
+
+        <div class="flex shrink-0 items-center gap-1.5">
+          <NuxtLink
+            to="/search"
+            class="btn btn-quiet btn-xs px-1.5"
+            :title="t('common.search')"
+            :aria-label="t('common.search')"
+            :class="route.path.startsWith('/search') ? 'bg-base-300 text-base-content' : ''"
+          >
+            <IconSearch class="size-4" aria-hidden="true" />
           </NuxtLink>
 
-          <div class="lg:hidden">
+          <button
+            type="button"
+            class="btn btn-quiet btn-xs px-1.5"
+            :title="isDark ? t('nav.switchToLight') : t('nav.switchToDark')"
+            :aria-label="isDark ? t('nav.switchToLight') : t('nav.switchToDark')"
+            @click="toggle()"
+          >
+            <IconSun v-if="isDark" class="size-4" aria-hidden="true" />
+            <IconMoon v-else class="size-4" aria-hidden="true" />
+          </button>
+
+          <NotificationBell v-if="isAuthenticated" />
+
+          <div v-if="isAuthenticated && user" ref="menuRoot" class="relative">
             <button
               type="button"
-              class="btn btn-ghost btn-circle btn-sm"
-              aria-label="Menu"
+              class="flex items-center rounded-control p-0.5 transition-colors hover:bg-base-200"
+              :title="displayName"
+              :aria-label="displayName"
+              aria-haspopup="menu"
               :aria-expanded="menuOpen"
-              @click="toggleMenu"
+              @click="menuOpen = !menuOpen"
             >
-              <IconMenu class="h-5 w-5" />
+              <UserAvatar
+                :picture-id="user.profile?.picture?.id"
+                :name="displayName"
+                size="sm"
+                class="pointer-events-none"
+              />
             </button>
+
+            <ul
+              v-if="menuOpen"
+              class="absolute right-0 top-full z-50 mt-2 w-48 rounded-card border border-line bg-base-200 p-1.5 text-xs"
+              role="menu"
+            >
+              <li class="border-b border-line-soft px-2.5 pb-2 pt-1.5">
+                <p class="truncate font-semibold text-base-content">{{ displayName }}</p>
+                <p class="truncate text-2xs text-faint">@{{ user.name }}</p>
+              </li>
+              <li v-for="entry in accountMenu" :key="entry.to">
+                <NuxtLink
+                  :to="entry.to"
+                  class="flex items-center gap-2 rounded-control px-2.5 py-1.5 text-dim transition-colors hover:bg-base-300 hover:text-base-content"
+                  role="menuitem"
+                  @click="menuOpen = false"
+                >
+                  <component :is="entry.icon" class="size-3.5 shrink-0" aria-hidden="true" />
+                  {{ t(entry.labelKey) }}
+                </NuxtLink>
+              </li>
+              <li class="mt-1 border-t border-line-soft pt-1">
+                <button
+                  type="button"
+                  class="flex w-full items-center gap-2 rounded-control px-2.5 py-1.5 text-dim transition-colors hover:bg-error/10 hover:text-error"
+                  role="menuitem"
+                  @click="handleLogout"
+                >
+                  <IconLogOut class="size-3.5 shrink-0" aria-hidden="true" />
+                  {{ t("nav.logout") }}
+                </button>
+              </li>
+            </ul>
           </div>
+
+          <a v-else :href="signInHref" class="btn btn-primary btn-xs">
+            {{ t("nav.signIn") }}
+          </a>
         </div>
       </div>
     </header>
-    <Transition name="drawer-fade">
+
+    <main id="main" class="mx-auto w-full max-w-6xl flex-1 px-page py-6 sm:px-page-wide sm:py-8">
+      <slot />
+    </main>
+
+    <footer class="mx-auto w-full max-w-6xl px-page pb-8 sm:px-page-wide">
       <div
-        v-if="menuOpen"
-        class="fixed inset-x-0 top-[4.0625rem] bottom-0 z-40 bg-black/40 lg:hidden"
-        @click="closeMenu"
-      />
-    </Transition>
-    <Transition name="drawer-slide">
-      <aside
-        v-if="menuOpen"
-        class="fixed right-0 top-[4.0625rem] bottom-0 z-50 w-80 overflow-y-auto border-l border-base-300 bg-base-100 p-4 text-base-content shadow-xl scrollbar-none lg:hidden"
-        @click.stop
+        class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-line pt-4 text-2xs text-faint"
       >
-        <nav aria-label="Mobile" class="menu w-full p-0">
-          <NuxtLink
-            to="/timeline"
-            class="flex h-12 min-h-12 items-center gap-3 rounded-box px-3 py-0 text-base leading-5"
-            :class="isNavActive('/timeline') ? 'bg-primary/10 text-primary' : ''"
-            @click="closeMenu"
-          >
-            <span class="flex h-5 w-5 shrink-0 items-center justify-center">
-              <IconCompass class="h-5 w-5" />
-            </span>
-            <span class="flex h-5 items-center leading-5">{{ t("nav.explore") }}</span>
-          </NuxtLink>
-          <NuxtLink
-            to="/realms"
-            class="flex h-12 min-h-12 items-center gap-3 rounded-box px-3 py-0 text-base leading-5"
-            :class="isNavActive('/realms') ? 'bg-primary/10 text-primary' : ''"
-            @click="closeMenu"
-          >
-            <span class="flex h-5 w-5 shrink-0 items-center justify-center">
-              <IconBuilding class="h-5 w-5" />
-            </span>
-            <span class="flex h-5 items-center leading-5">{{ t("nav.realms") }}</span>
-          </NuxtLink>
+        <span>{{ t("sidebar.copyright", { year: currentYear }) }}</span>
+        <nav class="flex flex-wrap items-center gap-x-4 gap-y-1" :aria-label="t('nav.footer')">
           <a
-            :href="EXTERNAL_APPS.drive"
-            class="flex h-12 min-h-12 items-center gap-3 rounded-box px-3 py-0 text-base leading-5"
-            @click="closeMenu"
+            v-for="link in legalLinks"
+            :key="link.href"
+            :href="link.href"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="transition-colors hover:text-dim"
           >
-            <span class="flex h-5 w-5 shrink-0 items-center justify-center">
-              <IconHardDrive class="h-5 w-5" />
-            </span>
-            <span class="flex h-5 items-center leading-5">{{ t("nav.drive") }}</span>
+            {{ t(link.labelKey) }}
           </a>
-          <a
-            v-if="isAuthenticated"
-            :href="EXTERNAL_APPS.mail"
-            class="flex h-12 min-h-12 items-center gap-3 rounded-box px-3 py-0 text-base leading-5"
-            @click="closeMenu"
-          >
-            <span class="flex h-5 w-5 shrink-0 items-center justify-center">
-              <IconMail class="h-5 w-5" />
-            </span>
-            <span class="flex h-5 items-center leading-5">{{ t("nav.mail") }}</span>
-          </a>
-          <NuxtLink
-            to="/wallets"
-            class="flex h-12 min-h-12 items-center gap-3 rounded-box px-3 py-0 text-base leading-5"
-            :class="isNavActive('/wallets') ? 'bg-primary/10 text-primary' : ''"
-            @click="closeMenu"
-          >
-            <span class="flex h-5 w-5 shrink-0 items-center justify-center">
-              <IconWallet class="h-5 w-5" />
-            </span>
-            <span class="flex h-5 items-center leading-5">{{ t("nav.wallet") }}</span>
-          </NuxtLink>
-          <NuxtLink
-            v-if="isAuthenticated"
-            to="/tickets"
-            class="flex h-12 min-h-12 items-center gap-3 rounded-box px-3 py-0 text-base leading-5"
-            :class="isNavActive('/tickets') ? 'bg-primary/10 text-primary' : ''"
-            @click="closeMenu"
-          >
-            <span class="flex h-5 w-5 shrink-0 items-center justify-center">
-              <IconTicket class="h-5 w-5" />
-            </span>
-            <span class="flex h-5 items-center leading-5">{{ t("nav.tickets") }}</span>
-          </NuxtLink>
-          <div class="divider -mx-4 my-2" />
-          <div class="px-3 py-1 text-xs font-semibold uppercase tracking-wider text-base-content/40">
-            {{ t("nav.backstage") }}
-          </div>
-          <NuxtLink
-            to="/creators"
-            class="flex h-12 min-h-12 items-center gap-3 rounded-box px-3 py-0 text-base leading-5"
-            :class="isNavActive('/creators') ? 'bg-primary/10 text-primary' : ''"
-            @click="closeMenu"
-          >
-            <span class="flex h-5 w-5 shrink-0 items-center justify-center">
-              <IconPalette class="h-5 w-5" />
-            </span>
-            <span class="flex h-5 items-center leading-5">{{ t("nav.creatorHub") }}</span>
-          </NuxtLink>
-          <NuxtLink
-            to="/developers"
-            class="flex h-12 min-h-12 items-center gap-3 rounded-box px-3 py-0 text-base leading-5"
-            :class="isNavActive('/developers') ? 'bg-primary/10 text-primary' : ''"
-            @click="closeMenu"
-          >
-            <span class="flex h-5 w-5 shrink-0 items-center justify-center">
-              <IconCode class="h-5 w-5" />
-            </span>
-            <span class="flex h-5 items-center leading-5">{{ t("nav.developerHub") }}</span>
-          </NuxtLink>
-          <NuxtLink
-            to="/merchants"
-            class="flex h-12 min-h-12 items-center gap-3 rounded-box px-3 py-0 text-base leading-5"
-            :class="isNavActive('/merchants') ? 'bg-primary/10 text-primary' : ''"
-            @click="closeMenu"
-          >
-            <span class="flex h-5 w-5 shrink-0 items-center justify-center">
-              <IconTrendingUp class="h-5 w-5" />
-            </span>
-            <span class="flex h-5 items-center leading-5">{{ t("nav.merchantHub") }}</span>
-          </NuxtLink>
-          <a
-            v-if="isAuthenticated"
-            :href="EXTERNAL_APPS.pet"
-            class="flex h-12 min-h-12 items-center gap-3 rounded-box px-3 py-0 text-base leading-5"
-            @click="closeMenu"
-          >
-            <span class="flex h-5 w-5 shrink-0 items-center justify-center">
-              <IconPawPrint class="h-5 w-5" />
-            </span>
-            <span class="flex h-5 items-center leading-5">{{ t("nav.pet") }}</span>
-          </a>
-          <NuxtLink
-            v-if="isSuperuser"
-            to="/admin"
-            class="flex h-12 min-h-12 items-center gap-3 rounded-box px-3 py-0 text-base leading-5"
-            :class="isNavActive('/admin') ? 'bg-primary/10 text-primary' : ''"
-            @click="closeMenu"
-          >
-            <span class="flex h-5 w-5 shrink-0 items-center justify-center">
-              <IconShield class="h-5 w-5" />
-            </span>
-            <span class="flex h-5 items-center leading-5">{{ t("nav.adminPanel") }}</span>
-          </NuxtLink>
         </nav>
+      </div>
+    </footer>
 
-        <div v-if="isAuthenticated && user" class="divider -mx-4 my-2" />
-        <div
-          v-if="isAuthenticated && user"
-          class="flex items-center gap-3 px-3 py-2"
-        >
-          <div v-if="avatarUrl" class="avatar shrink-0">
-            <div class="w-9 rounded-full">
-              <FileImage :file="avatarUrl" :alt="user.name" />
-            </div>
-          </div>
-          <div v-else class="avatar avatar-placeholder shrink-0">
-            <div class="w-9 rounded-full bg-primary text-primary-content">
-              <span class="text-xs font-medium">
-                {{ (user.name || "?").slice(0, 2).toUpperCase() }}
-              </span>
-            </div>
-          </div>
-          <div class="min-w-0">
-            <p class="truncate font-medium">{{ displayName }}</p>
-            <p class="truncate text-sm text-base-content/60">
-              @{{ user.name }}
-            </p>
-          </div>
-        </div>
-        <ul v-if="isAuthenticated && user" class="menu w-full gap-1 p-0">
-          <li>
-            <NuxtLink to="/accounts/me" class="flex h-12 min-h-12 items-center gap-3 px-3 py-0 text-base leading-5" @click="closeMenu">
-              <span class="flex h-5 w-5 shrink-0 items-center justify-center"><IconUser class="h-5 w-5" /></span>
-              <span class="flex h-5 items-center leading-5">{{ t("nav.account") }}</span>
-            </NuxtLink>
-          </li>
-          <li>
-            <NuxtLink to="/wallets" class="flex h-12 min-h-12 items-center gap-3 px-3 py-0 text-base leading-5" @click="closeMenu">
-              <span class="flex h-5 w-5 shrink-0 items-center justify-center"><IconWallet class="h-5 w-5" /></span>
-              <span class="flex h-5 items-center leading-5">{{ t("nav.wallet") }}</span>
-            </NuxtLink>
-          </li>
-          <li>
-            <NuxtLink to="/membership" class="flex h-12 min-h-12 items-center gap-3 px-3 py-0 text-base leading-5" @click="closeMenu">
-              <span class="flex h-5 w-5 shrink-0 items-center justify-center"><IconCreditCard class="h-5 w-5" /></span>
-              <span class="flex h-5 items-center leading-5">{{ t("nav.membership") }}</span>
-            </NuxtLink>
-          </li>
-          <li>
-            <NuxtLink to="/accounts/me/settings" class="flex h-12 min-h-12 items-center gap-3 px-3 py-0 text-base leading-5" @click="closeMenu">
-              <span class="flex h-5 w-5 shrink-0 items-center justify-center"><IconSettings class="h-5 w-5" /></span>
-              <span class="flex h-5 items-center leading-5">{{ t("nav.settings") }}</span>
-            </NuxtLink>
-          </li>
-          <li>
-            <NuxtLink to="/tickets" class="flex h-12 min-h-12 items-center gap-3 px-3 py-0 text-base leading-5" @click="closeMenu">
-              <span class="flex h-5 w-5 shrink-0 items-center justify-center"><IconTicket class="h-5 w-5" /></span>
-              <span class="flex h-5 items-center leading-5">{{ t("nav.tickets") }}</span>
-            </NuxtLink>
-          </li>
-          <li>
-            <button type="button" class="flex h-12 min-h-12 items-center gap-3 px-3 py-0 text-base leading-5" @click="handleLogout">
-              <span class="flex h-5 w-5 shrink-0 items-center justify-center"><IconLogOut class="h-5 w-5" /></span>
-              <span class="flex h-5 items-center leading-5">{{ t("nav.logout") }}</span>
-            </button>
-          </li>
-        </ul>
-        <NuxtLink
-          v-else
-          to="/auth/login"
-          class="mt-2 flex h-12 min-h-12 items-center gap-3 rounded-box px-3 py-0 text-base leading-5 text-primary hover:bg-base-200"
-          @click="closeMenu"
-        >
-          <span class="flex h-5 w-5 shrink-0 items-center justify-center"><IconLogIn class="h-5 w-5" /></span>
-          <span class="flex h-5 items-center leading-5">{{ t("nav.signIn") }}</span>
-        </NuxtLink>
-      </aside>
-    </Transition>
-    <div
-      class="app-shell"
-      :class="route.path === '/' ? 'w-full' : 'mx-auto max-w-7xl'"
-    >
-
-      <main class="min-h-[calc(100dvh-65px)] px-4 py-4 lg:px-6">
-        <slot />
-      </main>
-
-      <LazyComposeDialog
-        v-if="composeOpen"
-        :open="composeOpen"
-        @close="composeOpen = false"
-        @submit="handleComposeSubmit"
-      />
-
-      <LazyLightboxViewer v-if="lightboxState.isOpen" />
-      <LazyNotificationDrawer v-if="notificationDrawerOpen" />
-      <WebSocketStatus />
-      <ClientOnly>
-        <LazyOnboardingModal />
-      </ClientOnly>
-    </div>
+    <LazyComposeDialog
+      v-if="composeOpen"
+      :open="composeOpen"
+      @close="composeOpen = false"
+      @submit="composeOpen = false"
+    />
+    <LazyLightboxViewer v-if="lightboxState.isOpen" />
+    <LazyNotificationDrawer v-if="notificationDrawerOpen" />
+    <WebSocketStatus />
   </div>
 </template>
 
 <script setup lang="ts">
 import {
-  IconCompass,
-  IconBuilding,
-  IconHardDrive,
-  IconMail,
-  IconWallet,
-  IconTicket,
-  IconPalette,
-  IconCode,
-  IconTrendingUp,
-  IconPawPrint,
-  IconShield,
-  IconCreditCard,
-  IconMenu,
-  IconUser,
-  IconSettings,
+  IconSearch,
+  IconSun,
+  IconMoon,
   IconLogOut,
-  IconLogIn,
+  IconUser,
 } from "#components";
-import {
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuPortal,
-  DropdownMenuRoot,
-  DropdownMenuTrigger,
-} from "reka-ui";
-import AppSwitcher from "~/components/layout/AppSwitcher.vue";
-import { EXTERNAL_APPS } from "~/composables/useMainNav";
+import type { Component } from "vue";
+import { signInUrl } from "~/utils/api";
 
 const { t } = useI18n();
 const route = useRoute();
 
 const auth = useAuth();
-const { isAuthenticated, user, isSuperuser } = auth;
+const { isAuthenticated, user } = auth;
+const { items } = useMainNav();
+const { isDark, toggle } = useTheme();
+
+// Signing in happens on the console that owns the session; this app only sends
+// the browser there and takes it back.
+const signInHref = signInUrl("/");
 
 const menuOpen = ref(false);
+const menuRoot = ref<HTMLElement | null>(null);
 const composeOpen = ref(false);
-const profileMenuOpen = ref(false);
 
 const { state: lightboxState } = useLightbox();
 const { drawerOpen: notificationDrawerOpen } = useNotifications();
 
 const displayName = computed(() => user.value?.nick || user.value?.name || "");
-const avatarUrl = computed(() => user.value?.profile?.picture ?? null);
 
-function isNavActive(path: string) {
-  return route.path === path || (path !== "/" && route.path.startsWith(`${path}/`));
+const currentYear = new Date().getFullYear();
+
+/** The nav names reading surfaces only, so it is shown whenever a reader is
+ * signed in — the explorer reads public content either way, and hiding the
+ * shelf from a guest would leave the header with a lone mark. */
+const showNav = computed(() => !route.path.startsWith("/auth/"));
+
+interface AccountEntry {
+  to: string;
+  labelKey: string;
+  icon: Component;
 }
 
-function toggleMenu() {
-  profileMenuOpen.value = false;
-  menuOpen.value = !menuOpen.value;
-}
+const accountMenu = computed<AccountEntry[]>(() => [
+  { to: `/accounts/${user.value?.name ?? ""}`, labelKey: "nav.account", icon: IconUser },
+]);
 
-function closeMenu() {
-  menuOpen.value = false;
-  profileMenuOpen.value = false;
+const legalLinks = [
+  { href: "https://solsynth.dev/products-solar-network", labelKey: "sidebar.about" },
+  { href: "https://solsynth.dev/legal/privacy-policy", labelKey: "sidebar.privacy" },
+  { href: "https://solsynth.dev/legal/user-agreements", labelKey: "sidebar.terms" },
+  { href: "https://kb.solsynth.dev/solar-network/", labelKey: "sidebar.help" },
+];
+
+const isActive = (match: string) =>
+  route.path === match || route.path.startsWith(`${match}/`);
+
+function closeMenuOutside(event: MouseEvent) {
+  if (menuOpen.value && !menuRoot.value?.contains(event.target as Node)) menuOpen.value = false;
 }
 
 function handleLogout() {
+  menuOpen.value = false;
   auth.logout();
-  closeMenu();
+  void navigateTo("/");
 }
 
-function handleComposeSubmit() {
-  composeOpen.value = false;
-}
-
-function handleOpenComposeEvent() {
+function handleOpenCompose() {
   composeOpen.value = true;
 }
 
-
-watch(() => route.path, () => {
-  closeMenu();
-});
-
 onMounted(() => {
-  window.addEventListener("open-compose", handleOpenComposeEvent);
+  document.addEventListener("click", closeMenuOutside);
+  window.addEventListener("open-compose", handleOpenCompose);
 });
 
-onUnmounted(() => {
-  window.removeEventListener("open-compose", handleOpenComposeEvent);
+onBeforeUnmount(() => {
+  document.removeEventListener("click", closeMenuOutside);
+  window.removeEventListener("open-compose", handleOpenCompose);
 });
 
+watch(
+  () => route.fullPath,
+  () => {
+    menuOpen.value = false;
+  },
+);
 </script>

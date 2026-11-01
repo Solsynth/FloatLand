@@ -4,8 +4,8 @@
     class="feed-insert"
   >
     <div class="feed-insert__header">
-      <component :is="titleIcon" class="h-4 w-4 text-base-content/55" />
-      <h3 class="text-sm font-semibold tracking-wide text-base-content/65">
+      <component :is="titleIcon" class="size-3.5 text-faint" aria-hidden="true" />
+      <h3 class="eyebrow">
         {{ title }}
       </h3>
     </div>
@@ -23,9 +23,9 @@
       <!-- Suggestion reasons (mirrored Flutter: icon + up to 3 reasons below the card) -->
       <p
         v-if="singleReasons.length > 0"
-        class="mt-2 flex items-start gap-1.5 px-2 text-xs leading-relaxed text-base-content/70"
+        class="mt-2 flex items-start gap-1.5 px-2 text-2xs leading-relaxed text-dim"
       >
-        <IconSparkles class="mt-0.5 h-3.5 w-3.5 shrink-0" />
+        <IconSparkles class="mt-0.5 size-3 shrink-0" aria-hidden="true" />
         <span class="flex flex-wrap gap-x-3 gap-y-1">
           <span v-for="(reason, idx) in singleReasons" :key="idx">
             {{ reason }}
