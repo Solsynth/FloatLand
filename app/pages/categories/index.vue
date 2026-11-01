@@ -1,11 +1,11 @@
 <template>
   <NuxtLayout name="app">
-    <PageHeader
-      :title="t('categories.title')"
-      :description="t('categories.seoDescription')"
-    />
+    <div class="page-measure">
+      <PageHeader
+        :title="t('categories.title')"
+        :description="t('categories.seoDescription')"
+      />
 
-    <div class="min-w-0">
       <TabBox :tabs="tabs" :active="activeTab" :label="t('categories.title')" @select="selectTab" />
 
       <ConsolePanel v-if="activeTab === 'categories'" :note="isLoadingCategories ? undefined : String(totalCategories)">

@@ -1,39 +1,41 @@
 <template>
   <NuxtLayout name="app">
-    <PageHeader title="Tags" description="Every tag in use on the network, most used first." />
+    <div class="page-measure">
+      <PageHeader title="Tags" description="Every tag in use on the network, most used first." />
 
-    <div class="min-w-0">
-      <ConsolePanel :title="t('tags.title')" :note="isLoading ? undefined : String(tags.length)">
-        <LoadingSkeleton v-if="isLoading && tags.length === 0" variant="rows" :rows="5" />
+      <div class="min-w-0">
+        <ConsolePanel :title="t('tags.title')" :note="isLoading ? undefined : String(tags.length)">
+          <LoadingSkeleton v-if="isLoading && tags.length === 0" variant="rows" :rows="5" />
 
-        <p v-else-if="tags.length === 0" class="voice py-6">{{ t("tags.noTags") }}</p>
+          <p v-else-if="tags.length === 0" class="voice py-6">{{ t("tags.noTags") }}</p>
 
-        <div v-else class="flex flex-wrap gap-1.5">
-          <NuxtLink
-            v-for="tag in tags"
-            :key="tag.id"
-            :to="`/tags/${tag.slug}`"
-            class="chip"
-          >
-            #{{ tag.name || tag.slug }}
-            <span class="chip-count">{{ tag.usage }}</span>
-          </NuxtLink>
-        </div>
-
-        <template #footer>
-          <div class="flex justify-center">
-            <span v-if="isLoading" class="mono-id">{{ t("common.loading") }}</span>
-            <button
-              v-else-if="hasMore"
-              type="button"
-              class="btn btn-quiet btn-xs"
-              @click="loadMore"
+          <div v-else class="flex flex-wrap gap-1.5">
+            <NuxtLink
+              v-for="tag in tags"
+              :key="tag.id"
+              :to="`/tags/${tag.slug}`"
+              class="chip"
             >
-              {{ t("tags.loadMore") }}
-            </button>
+              #{{ tag.name || tag.slug }}
+              <span class="chip-count">{{ tag.usage }}</span>
+            </NuxtLink>
           </div>
-        </template>
-      </ConsolePanel>
+
+          <template #footer>
+            <div class="flex justify-center">
+              <span v-if="isLoading" class="mono-id">{{ t("common.loading") }}</span>
+              <button
+                v-else-if="hasMore"
+                type="button"
+                class="btn btn-quiet btn-xs"
+                @click="loadMore"
+              >
+                {{ t("tags.loadMore") }}
+              </button>
+            </div>
+          </template>
+        </ConsolePanel>
+      </div>
     </div>
   </NuxtLayout>
 </template>

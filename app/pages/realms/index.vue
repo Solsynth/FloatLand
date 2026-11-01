@@ -1,6 +1,6 @@
 <template>
   <NuxtLayout name="app">
-    <div class="min-w-0">
+    <div class="page-measure min-w-0">
       <!-- Header -->
       <PageHeader :title="t('realms.title')" :description="t('realms.subtitle')">
         <template #actions>

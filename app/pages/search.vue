@@ -1,8 +1,8 @@
 <template>
   <NuxtLayout name="app">
-    <PageHeader :title="t('search.seoTitle')" :description="t('search.seoDescription')" />
+    <div class="page-measure">
+      <PageHeader :title="t('search.seoTitle')" :description="t('search.seoDescription')" />
 
-    <div class="min-w-0">
       <form class="mb-4" role="search" @submit.prevent="onSubmit">
         <TextField
           ref="searchField"

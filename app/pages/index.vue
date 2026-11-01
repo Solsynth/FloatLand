@@ -1,6 +1,6 @@
 <template>
   <NuxtLayout name="app">
-    <div class="min-w-0">
+    <div class="page-measure min-w-0">
 
       <!--
         The composer is the page's one permanent invitation, and it belongs in

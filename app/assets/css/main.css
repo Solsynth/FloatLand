@@ -1328,6 +1328,17 @@ mark.highlight {
   gap: 0.625rem;
 }
 
+/* Pages without a rail read at a narrower measure than the shell allows: one
+   column of prose and cards stops scanning well before 5xl, and the empty
+   right-hand space is what makes a single-column page look unfinished. The
+   shell stays 5xl so rail pages (post detail, publisher, account) keep their
+   column; a reading page caps itself here and centres. */
+.page-measure {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 46rem;
+}
+
 /* A discovery insert: one tinted sheet, so a suggestion reads as a different
    kind of object without a rule around it or a gradient behind it. */
 .feed-insert {

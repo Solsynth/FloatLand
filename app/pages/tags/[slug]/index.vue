@@ -1,6 +1,6 @@
 <template>
   <NuxtLayout name="app">
-    <div class="min-w-0">
+    <div class="page-measure min-w-0">
       <p v-if="error" class="note note-error mb-4">{{ error }}</p>
 
       <div class="mb-5 flex flex-wrap items-start justify-between gap-3">
