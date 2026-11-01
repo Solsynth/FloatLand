@@ -2,6 +2,14 @@ import { z } from "zod";
 import { FileAttachmentSchema } from "./post";
 import { SnAccountSchema } from "./auth";
 
+/**
+ * A realm as `/passport/realms` serializes it.
+ *
+ * `verification` is omitted — not `null` — for an unverified realm, because
+ * the passport service marshals it through Go's `omitempty`. Only verified
+ * realms carry the key at all, so it must be optional rather than merely
+ * nullable or every list response fails validation.
+ */
 export const RealmSchema = z.object({
   id: z.string(),
   slug: z.string(),
@@ -16,11 +24,11 @@ export const RealmSchema = z.object({
   verification: z
     .object({
       type: z.number(),
-      title: z.string().nullable(),
-      description: z.string().nullable(),
-      verifiedBy: z.string().nullable(),
+      title: z.string().nullish(),
+      description: z.string().nullish(),
+      verifiedBy: z.string().nullish(),
     })
-    .nullable(),
+    .nullish(),
 });
 export type Realm = z.infer<typeof RealmSchema>;
 

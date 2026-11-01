@@ -3,14 +3,16 @@ import { z } from "zod";
 /**
  * A Solian file object as embedded in post payloads.
  *
- * The post service serializes the boolean feature flags with Go's
- * `omitempty`, so `has_compression` / `has_thumbnail` are *absent* — not
- * `false` — whenever the flag is unset. Defaults keep the parsed shape
- * uniform while accepting the sparse wire form.
+ * The services serialize through Go's `omitempty`, so a field that happens to
+ * hold its zero value is *absent* rather than false/empty: `has_compression`
+ * and `has_thumbnail` vanish when unset, and `name` vanishes for uploads that
+ * carried no filename (realm icons, avatars, favicons). Defaults keep the
+ * parsed shape uniform while accepting the sparse wire form — a required
+ * `.string()` here rejects a whole response over one absent key.
  */
 export const FileAttachmentSchema = z.object({
   id: z.string(),
-  name: z.string(),
+  name: z.string().default(""),
   url: z.string().nullable().optional(),
   mimeType: z.string(),
   hasCompression: z.boolean().default(false),

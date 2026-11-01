@@ -27,7 +27,7 @@
       <!-- Header Section -->
       <section class="relative overflow-hidden">
         <div
-          class="h-36 w-full overflow-hidden bg-base-200 sm:h-44"
+          class="h-36 w-full overflow-hidden rounded-card bg-base-200 sm:h-44"
         >
           <FileImage
             v-if="backgroundUrl"
@@ -37,7 +37,7 @@
           />
         </div>
         <div
-          class="flex flex-col gap-3 pb-4 sm:flex-row sm:items-end sm:gap-4"
+          class="flex flex-col gap-3 px-4 pb-4 pt-0 sm:flex-row sm:items-end sm:gap-4 sm:px-6"
         >
           <div class="shrink-0">
             <div v-if="avatarUrl" class="avatar">
@@ -57,8 +57,8 @@
               </div>
             </div>
           </div>
-          <div class="min-w-0 flex-1">
-            <div class="flex flex-wrap items-center gap-2 min-w-0">
+          <div class="min-w-0 flex-1 sm:mt-2">
+            <div class="flex flex-wrap items-center gap-2">
               <h1 class="title truncate text-2xl text-base-content">
                 {{ displayName }}
               </h1>
@@ -145,10 +145,10 @@
 
       <!-- Two-column body: board/activity (main) + bio sidebar on desktop -->
       <div
-        class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_18rem] xl:grid-cols-[minmax(0,1fr)_22rem] gap-4 lg:gap-6 px-4 lg:px-6 pb-8 items-start"
+        class="grid grid-cols-1 gap-4 py-4 lg:grid-cols-3 items-start"
       >
         <!-- Main column: tabs + board / activity -->
-        <div class="min-w-0 order-2 lg:order-1 space-y-3">
+        <div class="order-2 min-w-0 space-y-4 lg:order-1 lg:col-span-2">
           <div role="tablist" class="tabs tabs-box w-fit">
             <button
               role="tab"
