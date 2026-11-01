@@ -183,6 +183,8 @@ export const API_BASE = "api.solian.app";
 /** The console that owns sign-in for the whole network. */
 export const SIGN_IN_ORIGIN = "https://solarpass.one";
 export const API_BASE_URL = `https://${API_BASE}`;
+/** Realtime socket. Same host as the API, so the session cookie rides along. */
+export const WS_ENDPOINT = `wss://${API_BASE}/ws`;
 
 // Helper to build API URL
 export function getApiUrl(endpoint: string): string {
@@ -285,10 +287,10 @@ export async function apiFetch(
   options: ApiFetchOptions = {},
 ): Promise<Response> {
   const { skipAuth, ...fetchOptions } = options;
-  // `skipAuth` (pre-auth / anonymous calls) is a no-op now: the proxy
-  // authenticates purely by the presence of a server-held session (`sid`
-  // cookie), and the client never adds auth headers itself. Keep the flag
-  // accepted by callers but it no longer changes transport behavior.
+  // `skipAuth` no longer changes anything on the wire: this app holds no token
+  // of its own, so there is nothing to omit. The session is whatever `AuthToken`
+  // the browser already carries for the API, and a request without one is
+  // simply anonymous.
   void skipAuth;
   const headers: Record<string, string> = {
     ...((fetchOptions.headers as Record<string, string>) || {}),
@@ -303,41 +305,36 @@ export async function apiFetch(
     headers["Content-Type"] = "application/json";
   }
 
-  // SSR has no browser cookie jar. Forward the incoming request's cookie
-  // header explicitly so the browser's `sid` reaches the same-origin proxy.
-  const incomingCookie = import.meta.server
-    ? headers["cookie"] || useRequestHeaders(["cookie"]).cookie
-    : undefined;
-  if (incomingCookie) {
-    headers["cookie"] = incomingCookie;
-  }
-
-  // Build the same-origin proxy URL. On the client a relative URL resolves
-  // against the browser origin; on SSR Node's `fetch` rejects relative URLs,
-  // so reconstruct an absolute URL from the incoming request's host/protocol.
-  const relativeUrl = `/cgi${endpoint}`;
-  let url = relativeUrl;
+  // Calls go straight to the API, never through this server. That keeps the
+  // session exactly where Stargate put it: `AuthToken`/`RefreshToken` are
+  // `Domain=.solian.app` cookies, so the browser already sends them to
+  // `api.solian.app` and receives the rotated pair back as `Set-Cookie` on the
+  // same origin. No hop, no relayed cookie, no server-held token.
+  //
+  // `credentials: "include"` is what makes that work across origins; the API
+  // answers with `Access-Control-Allow-Origin` + `-Credentials`, so a
+  // credentialed cross-origin request is allowed and the cookies flow.
+  //
+  // On SSR there is no browser jar, so the incoming request's `Cookie` header
+  // is forwarded explicitly — the same pair, presented by hand.
   if (import.meta.server) {
-    const event = useRequestEvent();
-    const host = event?.node?.req?.headers?.host ?? "";
-    const proto = String(
-      event?.node?.req?.headers?.["x-forwarded-proto"] ?? "http",
-    )
-      .split(",")[0]
-      .trim() || "http";
-    url = `${proto}://${host}${relativeUrl}`;
+    const incomingCookie = headers["cookie"] || useRequestHeaders(["cookie"]).cookie;
+    if (incomingCookie) headers["cookie"] = incomingCookie;
   }
 
-  // Same-origin proxy with no credentials: the browser sends the `sid` cookie
-  // natively on the client; on SSR the `cookie` header is forwarded above.
-  const response = await fetch(url, { ...fetchOptions, headers });
+  const response = await fetch(getApiUrl(endpoint), {
+    ...fetchOptions,
+    headers,
+    credentials: "include",
+  });
 
-  // The proxy refreshes + retries once; a persistent 401 means the session is
-  // truly expired. Clear local auth state and surface a friendly error.
+  // The API renews an expired access token from `RefreshToken` and retries
+  // internally; a persistent 401 means the session is truly gone.
   if (response.status === 401) {
     if (import.meta.client) {
-      const auth = useAuth();
-      auth.logout();
+      // `clearUser`, never `logout`: this 401 may *be* the logout call, and
+      // `logout` would post to the API again, 401 again, and recurse.
+      useAuth().clearUser();
       throw new Error("Session expired. Please login again.");
     }
   }
@@ -3165,12 +3162,13 @@ export async function uploadDriveFile(
   if (options.applicationType)
     formData.append("application_type", options.applicationType);
 
-  // Same-origin proxy upload: the proxy injects the session Bearer and strips
-  // any backend cookie. The browser sends the `sid` cookie natively.
-  const url = `/cgi/drive/files/upload/direct`;
+  // Uploaded straight to the API; the session cookie rides along because the
+  // request is credentialed (`credentials: "include"`).
+  const url = getApiUrl("/drive/files/upload/direct");
   const response = await fetch(url, {
     method: "POST",
     body: formData,
+    credentials: "include",
   });
 
   if (!response.ok) {

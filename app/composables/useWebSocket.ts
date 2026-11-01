@@ -1,6 +1,7 @@
 import type { WebSocketPacket } from '~/types/websocket'
 import type { SnNotification } from '~/types/notification'
 import { eventBus } from '~/utils/eventBus'
+import { WS_ENDPOINT } from '~/utils/api'
 import { snakeToCamel } from '~/utils/case'
 
 type WSStatus = 'connecting' | 'connected' | 'disconnected' | 'error'
@@ -41,9 +42,12 @@ const options = { ...DEFAULT_OPTIONS }
 export function useWebSocket() {
   const { isAuthenticated } = useAuth()
   function getUrl(): string {
-    // Same-origin websocket proxy at /ws; the Nitro handler opens the backend
-    // socket authenticated with the server-held session token.
-    return '/ws'
+    // The socket connects to the API itself, like every other call this app
+    // makes. The handshake is a credentialed cross-origin request, so the
+    // browser presents the `AuthToken` cookie Stargate set on `.solian.app`
+    // and the API reads it during the upgrade — no token is ever handed to
+    // page script.
+    return WS_ENDPOINT
   }
 
   function addStatus(s: WSStatus) {

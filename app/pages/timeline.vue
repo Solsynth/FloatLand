@@ -285,7 +285,7 @@ import type {
   Publisher,
   SnTimelineEvent,
 } from "~/types/post";
-import { fetchJson, fetchTimeline } from "~/utils/api";
+import { API_BASE_URL, fetchJson, fetchTimeline } from "~/utils/api";
 import { getInitials } from "~/utils/identity";
 import {
   IconCloud,
@@ -532,10 +532,12 @@ async function uploadInlineAttachments(): Promise<ComposeAttachment[]> {
     formData.append("file", attachment.file, attachment.file.name);
 
     compose.updateAttachmentProgress(attachment.id, 0);
-    // Same-origin proxy upload; the browser sends the `sid` cookie.
-    const response = await fetch(`/cgi/drive/files/upload/direct`, {
+    // Straight to the API; the session cookie rides along with the
+    // credentialed request.
+    const response = await fetch(`${API_BASE_URL}/drive/files/upload/direct`, {
       method: "POST",
       body: formData,
+      credentials: "include",
     });
 
     if (!response.ok) {

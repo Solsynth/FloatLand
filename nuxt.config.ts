@@ -245,24 +245,15 @@ export default defineNuxtConfig({
   lucide: {
     namePrefix: "icon",
   },
+  // The API is called directly from the browser, so there is no server-side
+  // session to configure here: no cookie relay, no internal proxy target.
+  // `apiBaseUrl` is the one address everything (requests, OG tags, sitemap)
+  // derives from.
   runtimeConfig: {
     public: {
       apiBaseUrl: "https://api.solian.app",
       fileBaseUrl: "https://api.solian.app/drive/files",
     },
-    // Private (server-only) session configuration. The session itself belongs
-    // to Stargate: it sets `AuthToken`/`RefreshToken` on its own cookie domain
-    // and the proxy relays them, so the only thing this app decides is whether
-    // the relayed cookie carries `Secure`.
-    auth: {
-      cookieSecure: process.env.NUXT_AUTH_COOKIE_SECURE !== "false",
-    },
-    // Internal base URL for server-to-backend proxied calls. FloatLand and the
-    // main API share a host, so proxied calls should hit the internal endpoint
-    // rather than the public hostname. Distinct from the public `apiBaseUrl`,
-    // which is only used for display/OG/curl strings.
-    apiServerUrl: process.env.NUXT_API_SERVER_URL ?? "https://api.solian.app",
-    apiProxiedUrl: process.env.NUXT_API_PROXIED_URL ?? process.env.NUXT_API_SERVER_URL ?? "https://api.solian.app",
   },
   site: {
     url: "https://solian.app",
@@ -332,22 +323,6 @@ export default defineNuxtConfig({
         driver: "fs",
         base: "./.nuxt/cache",
       },
-      auth: {
-        driver:
-          process.env.NITRO_AUTH_DRIVER ??
-          (process.env.REDIS_URL ? "redis" : "fs"),
-        base:
-          process.env.NITRO_AUTH_DRIVER === "redis" ||
-          process.env.REDIS_URL
-            ? "floatland:auth"
-            : "./.data/auth",
-        ...(process.env.NITRO_AUTH_DRIVER === "redis" || process.env.REDIS_URL
-          ? { url: process.env.REDIS_URL }
-          : {}),
-      },
-    },
-    experimental: {
-      websocket: true,
     },
   },
 });

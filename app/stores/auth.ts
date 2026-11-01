@@ -62,6 +62,18 @@ export const useAuthStore = defineStore("auth", () => {
   }
 
   /**
+   * Forget the reader locally, without telling the API.
+   *
+   * This is what a `401` means: the pair the browser presented is already
+   * dead, so asking the API to end a session it has just refused would be a
+   * request that can only fail — and one that, since it is itself a 401, would
+   * call straight back into this path.
+   */
+  function clearUser() {
+    user.value = null;
+  }
+
+  /**
    * Sign out. The backend clears the cookie pair on the shared domain, so the
    * browser forgets the session for every host under it, not just this one.
    */
@@ -72,7 +84,7 @@ export const useAuthStore = defineStore("auth", () => {
       // The local state is cleared regardless: a network failure must not
       // leave the interface claiming a session the reader asked to end.
     }
-    user.value = null;
+    clearUser();
   }
 
   return {
@@ -84,5 +96,6 @@ export const useAuthStore = defineStore("auth", () => {
     initAuth,
     fetchUser,
     logout,
+    clearUser,
   };
 });

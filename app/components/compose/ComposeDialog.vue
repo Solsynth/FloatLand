@@ -1547,10 +1547,12 @@ async function uploadAttachments(): Promise<UploadAttachment[]> {
 
       attachment.progress = 0
 
-      // Same-origin proxy upload; the browser sends the `sid` cookie.
-      const response = await fetch(`/cgi/drive/files/upload/direct`, {
+      // Straight to the API; the session cookie rides along with the
+      // credentialed request.
+      const response = await fetch(`${API_BASE_URL}/drive/files/upload/direct`, {
         method: 'POST',
         body: formData,
+        credentials: 'include',
       })
 
       if (!response.ok) throw new Error(`Upload failed: ${response.status}`)
