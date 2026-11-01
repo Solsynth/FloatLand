@@ -12,13 +12,22 @@
       the tab strip names the shelf you are on, and the right rail holds the two
       things a reader actually needs at any scroll position — search and the
       account. Everything else lives on the page it belongs to.
+
+      The bar is claimed only once the page moves: at rest it is transparent
+      and the content reads straight through it, and from the first scroll it
+      fades a tonal plate in behind the controls. That single change is how the
+      reader knows the page has left its top — no progress bar, no jump.
     -->
-    <header class="sticky top-0 z-40 border-b border-line bg-base-100/85 backdrop-blur">
+    <header class="app-bar" :class="{ 'is-claimed': scrolled }">
       <div
-        class="mx-auto flex h-13 w-full max-w-6xl items-center gap-5 px-page sm:px-page-wide"
+        class="mx-auto flex h-14 w-full max-w-5xl items-center gap-5 px-page sm:px-page-wide"
       >
-        <NuxtLink to="/" class="flex shrink-0 items-center gap-2.5" aria-label="Solar Network">
-          <span class="brand-mark h-[21px] w-[21px] shrink-0" aria-hidden="true" />
+        <NuxtLink
+          to="/"
+          class="group flex shrink-0 items-center gap-2.5"
+          aria-label="Solar Network"
+        >
+          <span class="brand-mark brand-mark-live h-[21px] w-[21px] shrink-0" aria-hidden="true" />
           <span class="text-[12.5px] font-bold tracking-[0.14em] text-base-content">
             EXPLORE
           </span>
@@ -33,12 +42,8 @@
             v-for="item in items"
             :key="item.href"
             :to="item.href"
-            class="flex shrink-0 items-center gap-1.5 rounded-control px-2.5 py-1.5 text-2xs tracking-[0.02em] transition-colors"
-            :class="
-              isActive(item.match)
-                ? 'bg-base-300 text-base-content'
-                : 'text-faint hover:bg-base-200 hover:text-dim'
-            "
+            class="nav-tab"
+            :class="isActive(item.match) ? 'nav-tab-active' : ''"
             :aria-current="isActive(item.match) ? 'page' : undefined"
           >
             <component :is="item.icon" class="size-3.5 shrink-0" aria-hidden="true" />
@@ -91,17 +96,17 @@
 
             <ul
               v-if="menuOpen"
-              class="absolute right-0 top-full z-50 mt-2 w-48 rounded-card border border-line bg-base-200 p-1.5 text-xs"
+              class="menu-plate absolute right-0 top-full z-50 mt-2 w-48 p-1.5 text-xs"
               role="menu"
             >
-              <li class="border-b border-line-soft px-2.5 pb-2 pt-1.5">
+              <li class="px-2.5 pb-2 pt-1.5">
                 <p class="truncate font-semibold text-base-content">{{ displayName }}</p>
                 <p class="truncate text-2xs text-faint">@{{ user.name }}</p>
               </li>
               <li v-for="entry in accountMenu" :key="entry.to">
                 <NuxtLink
                   :to="entry.to"
-                  class="flex items-center gap-2 rounded-control px-2.5 py-1.5 text-dim transition-colors hover:bg-base-300 hover:text-base-content"
+                  class="post-menu-row"
                   role="menuitem"
                   @click="menuOpen = false"
                 >
@@ -109,10 +114,10 @@
                   {{ t(entry.labelKey) }}
                 </NuxtLink>
               </li>
-              <li class="mt-1 border-t border-line-soft pt-1">
+              <li class="mt-1">
                 <button
                   type="button"
-                  class="flex w-full items-center gap-2 rounded-control px-2.5 py-1.5 text-dim transition-colors hover:bg-error/10 hover:text-error"
+                  class="post-menu-row hover:!bg-error/10 hover:!text-error"
                   role="menuitem"
                   @click="handleLogout"
                 >
@@ -130,13 +135,13 @@
       </div>
     </header>
 
-    <main id="main" class="mx-auto w-full max-w-6xl flex-1 px-page py-6 sm:px-page-wide sm:py-8">
+    <main id="main" class="mx-auto w-full max-w-5xl flex-1 px-page py-6 sm:px-page-wide sm:py-8">
       <slot />
     </main>
 
-    <footer class="mx-auto w-full max-w-6xl px-page pb-8 sm:px-page-wide">
+    <footer class="mx-auto w-full max-w-5xl px-page pb-8 pt-4 sm:px-page-wide">
       <div
-        class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-line pt-4 text-2xs text-faint"
+        class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-card bg-base-200/40 px-4 py-3 text-2xs text-faint"
       >
         <span>{{ t("sidebar.copyright", { year: currentYear }) }}</span>
         <nav class="flex flex-wrap items-center gap-x-4 gap-y-1" :aria-label="t('nav.footer')">
@@ -174,6 +179,7 @@ import {
   IconLogOut,
   IconUser,
 } from "#components";
+import { useWindowScroll } from "@vueuse/core";
 import type { Component } from "vue";
 import { signInUrl } from "~/utils/api";
 
@@ -192,6 +198,18 @@ const signInHref = signInUrl("/");
 const menuOpen = ref(false);
 const menuRoot = ref<HTMLElement | null>(null);
 const composeOpen = ref(false);
+
+/**
+ * Whether the page has left its top.
+ *
+ * The bar paints no surface at rest — the first screen of content reads
+ * straight through it — and claims one as soon as the page scrolls, so the
+ * transition itself is the reader's cue that there is content behind them.
+ * `useWindowScroll` is passive, so this costs one boolean flip on a scroll
+ * wheel rather than a listener per frame.
+ */
+const { y: scrollY } = useWindowScroll();
+const scrolled = computed(() => scrollY.value > 4);
 
 const { state: lightboxState } = useLightbox();
 const { drawerOpen: notificationDrawerOpen } = useNotifications();
@@ -222,8 +240,10 @@ const legalLinks = [
   { href: "https://kb.solsynth.dev/solar-network/", labelKey: "sidebar.help" },
 ];
 
+// The feed is `/`, which is a prefix of every other path, so the root match has
+// to be exact — otherwise the feed tab would light up on every page.
 const isActive = (match: string) =>
-  route.path === match || route.path.startsWith(`${match}/`);
+  match === "/" ? route.path === "/" : route.path === match || route.path.startsWith(`${match}/`);
 
 function closeMenuOutside(event: MouseEvent) {
   if (menuOpen.value && !menuRoot.value?.contains(event.target as Node)) menuOpen.value = false;

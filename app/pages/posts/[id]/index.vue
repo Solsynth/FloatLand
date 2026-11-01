@@ -18,17 +18,19 @@
 			</div>
 		</div>
 
-		<div class="grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
-			<!-- Left column: discovery rail (categories + tags) -->
-			<aside class="hidden min-w-0 lg:block">
-				<div class="sticky top-20">
-					<ExploreDiscovery />
-				</div>
-			</aside>
-
+		<!--
+		  Reading width, not feed width: a post is one column of prose plus the
+		  publisher rail, so the pair is capped well inside the layout's 6xl shell
+		  and centred. The main column still owns the free space.
+		-->
+		<div class="mx-auto grid w-full max-w-5xl min-w-0 gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
 			<!-- Main Content -->
 			<div class="min-w-0">
-				<ConsolePanel v-if="postStatus === 'pending'" flush>
+				<!--
+				  Skeleton only for the first load: a refetch of an already rendered
+				  post keeps the card on screen instead of flashing back to placeholders.
+				-->
+				<ConsolePanel v-if="postStatus === 'pending' && !post" flush>
 					<LoadingSkeleton variant="feed" :rows="3" />
 				</ConsolePanel>
 
@@ -68,7 +70,7 @@
 					<div class="mt-6">
 						<TabsRoot default-value="replies" class="w-full">
 							<!-- Tab Bar -->
-							<TabsList class="mb-4 flex w-fit max-w-full gap-0.5 overflow-x-auto rounded-card border border-line bg-base-200/30 p-1 scrollbar-none">
+							<TabsList class="mb-4 flex w-fit max-w-full gap-0.5 overflow-x-auto rounded-card bg-base-200/60 p-1 scrollbar-none">
 								<TabsTrigger
 									v-for="tab in interactionTabs"
 									:key="tab.value"
@@ -306,10 +308,21 @@
 					</div>
 				</template>
 
-				<!-- Error State -->
-				<div v-else class="alert alert-warning">
+				<!--
+				  Only a genuine 404 is "not found". Anything else (network drop,
+				  API 5xx, contract drift) is a load failure the reader can retry,
+				  so we never mislabel a real post as missing.
+				-->
+				<div v-else-if="postMissing" class="alert alert-warning">
 					<IconAlertTriangle class="w-5 h-5" />
 					<span>{{ t('post.notFound') }}</span>
+				</div>
+				<div v-else class="alert alert-error">
+					<IconAlertTriangle class="w-5 h-5" />
+					<span>{{ t('post.loadFailed') }}</span>
+					<button class="btn btn-xs btn-ghost" @click="refreshPost()">
+						{{ t('common.retry') }}
+					</button>
 				</div>
 			</div>
 
@@ -376,8 +389,9 @@ const userInitials = computed(() => {
 // serial network round trips during navigation.
 const [
 	{
-		data: post,
+		data: postData,
 		status: postStatus,
+		error: postError,
 		refresh: refreshPost,
 	},
 	{ data: replies, refresh: refreshReplies },
@@ -420,6 +434,31 @@ const [
 		{ watch: [postId], default: () => [] },
 	),
 ]);
+
+// A failed `refresh()` resets `data` to its default (undefined), so a transient
+// network blip after the post has already rendered would blank the page. Keep
+// the last successfully loaded post for the current id and render that instead.
+const lastLoadedPost = shallowRef<Post | null>(null);
+watch(
+	postData,
+	(value) => {
+		if (value) lastLoadedPost.value = value;
+	},
+	{ immediate: true },
+);
+watch(postId, () => {
+	lastLoadedPost.value = null;
+});
+
+const post = computed(() => postData.value ?? lastLoadedPost.value);
+
+// A 404 from the API is the only signal that the post is truly gone; every
+// other failure (network, 5xx, contract drift) renders as a retryable error.
+const postMissing = computed(() => {
+	const error = postError.value as { status?: number; statusCode?: number } | null;
+	const status = error?.status ?? error?.statusCode;
+	return status === 404;
+});
 
 // Tab configuration
 const { t } = useI18n();
@@ -626,7 +665,7 @@ function handlePostDeleted() {
 	if (typeof window !== 'undefined' && window.history.length > 1) {
 		router.back();
 	} else {
-		router.push('/timeline');
+		router.push('/');
 	}
 }
 

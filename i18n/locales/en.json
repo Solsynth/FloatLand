@@ -1,52 +1,4 @@
 {
-  "landing": {
-    "seoTitle": "A reader for the open network",
-    "seoDescription": "Browse posts, articles, realms and the people writing them. No account needed to read.",
-    "eyebrow": "Post explorer",
-    "heroTitle": "Everything being written on the network, in one feed",
-    "heroDescription": "FloatLand reads Solar Network: posts and articles from every publisher, the realms they belong to, and the tags that tie them together. Read without an account; sign in only when you want to reply.",
-    "getStarted": "Create an account",
-    "signIn": "Sign in",
-    "explore": "Open the feed",
-    "haveAccount": "Already have an account?",
-    "openApp": "Open the feed",
-    "trySolian": "Try Solian the app",
-    "surfacesTitle": "Ways in",
-    "surfacesDescription": "Four shelves, one index. Every post on the network is reachable from each of them.",
-    "surfaces": {
-      "feed": {
-        "title": "Feed",
-        "description": "A continuous stream of posts and articles, ranked For you, Top or Latest, filtered to the people and realms you follow."
-      },
-      "search": {
-        "title": "Search",
-        "description": "One query across posts, people and realms, with results as you type."
-      },
-      "tags": {
-        "title": "Tags",
-        "description": "Every tag in use, most used first, each one a page of everything filed under it."
-      },
-      "realms": {
-        "title": "Realms",
-        "description": "Community spaces with their own members and feeds, browsable as a grid or a compact list."
-      }
-    },
-    "latestTitle": "Recently published",
-    "latestDescription": "The newest posts on the network, whichever realm they came from.",
-    "membershipTitle": "Stellar membership",
-    "membershipDescription": "Membership fees pay for the servers and the ongoing development of Solar Network. Tiers add storage, faster progression and extra account features. Features that are free today stay free.",
-    "membershipCta": "Compare tiers",
-    "footer": {
-      "links": "Links",
-      "membership": "Membership",
-      "realms": "Realms",
-      "developers": "Developers",
-      "support": "Support",
-      "sourceCode": "Source code",
-      "mobile": "Solian",
-      "copyright": "© {year} Solsynth"
-    }
-  },
   "common": {
     "loading": "Loading...",
     "loadMore": "Load more",
@@ -408,7 +360,14 @@
     "explorePreferred": "Preferred",
     "filterExplore": "Explore",
     "filterSubscriptions": "Subscriptions",
-    "filterFriends": "Friends"
+    "filterFriends": "Friends",
+    "appBanner": {
+      "title": "Get the full Solar Network",
+      "body": "The feed reads fine in a browser. The app adds chat, notifications and posting wherever you are.",
+      "download": "Download Solian",
+      "web": "Open the web app",
+      "dismiss": "Dismiss"
+    }
   },
   "presence": {
     "unknown": "Unknown Activity",
@@ -1454,6 +1413,7 @@
     "replyBtn": "Reply",
     "loading": "Loading post...",
     "notFound": "Post not found",
+    "loadFailed": "Couldn't load this post.",
     "tabReplies": "Replies",
     "tabForwards": "Forwards",
     "tabBoosts": "Boosts",

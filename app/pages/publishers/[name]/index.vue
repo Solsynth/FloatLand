@@ -27,7 +27,7 @@
       <!-- Header Section -->
       <section class="relative overflow-hidden">
         <div
-          class="h-36 w-full overflow-hidden bg-base-200 sm:h-44"
+          class="h-36 w-full overflow-hidden rounded-card bg-base-200 sm:h-44"
         >
           <FileImage
             v-if="backgroundUrl"
@@ -37,7 +37,7 @@
           />
         </div>
         <div
-          class="flex flex-col gap-3 pb-4 sm:flex-row sm:items-end sm:gap-4"
+          class="flex flex-col gap-3 px-4 pb-4 pt-0 sm:flex-row sm:items-end sm:gap-4 sm:px-6"
         >
           <div class="shrink-0">
             <div v-if="avatarUrl" class="avatar">
@@ -57,7 +57,7 @@
               </div>
             </div>
           </div>
-          <div class="min-w-0 flex-1">
+          <div class="min-w-0 flex-1 sm:mt-2">
             <div class="flex flex-wrap items-center gap-2">
               <h1 class="title truncate text-2xl text-base-content">
                 {{ displayName }}
@@ -87,7 +87,7 @@
           </div>
 
           <!-- Actions -->
-          <div class="flex flex-wrap items-center gap-2">
+          <div class="flex flex-wrap items-center gap-2 sm:ml-auto">
             <!-- Subscribe/Unsubscribe -->
             <template v-if="isAuthenticated && !isOwnPublisher">
               <button
@@ -189,7 +189,7 @@
             aria-labelledby="publisher-collections-title"
             class="overflow-hidden rounded-card plate"
           >
-            <div class="flex flex-wrap items-end justify-between gap-3 border-b border-line px-5 py-3.5">
+            <div class="flex flex-wrap items-end justify-between gap-3 px-5 py-3.5">
               <div>
                 <p class="eyebrow">
                   {{ t('publisher.collections') }}
@@ -213,7 +213,7 @@
           <!-- Posts Section with Filters -->
           <section aria-labelledby="publisher-feed-title" class="space-y-4">
             <div class="overflow-hidden rounded-card plate">
-              <div class="flex flex-wrap items-end justify-between gap-3 border-b border-line px-5 py-3.5">
+              <div class="flex flex-wrap items-end justify-between gap-3 px-5 py-3.5">
                 <div>
                   <p class="eyebrow">Publisher feed</p>
                   <h2 id="publisher-feed-title" class="title mt-1 text-base text-base-content">Posts</h2>
@@ -229,7 +229,7 @@
 
               <div class="space-y-4 p-4">
                 <!-- Content Type Tabs -->
-                <div role="tablist" aria-label="Post content type" class="grid grid-cols-3 gap-0.5 rounded-card border border-line bg-base-200/30 p-1">
+                <div role="tablist" aria-label="Post content type" class="grid grid-cols-3 gap-0.5 rounded-card bg-base-200/60 p-1">
                   <button
                     type="button"
                     role="tab"

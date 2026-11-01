@@ -42,7 +42,7 @@ const emit = defineEmits<{ confirm: []; cancel: [] }>()
         </h2>
         <p class="voice mt-2">{{ props.body }}</p>
       </div>
-      <footer class="flex items-center justify-end gap-2 border-t border-line px-5 py-3">
+      <footer class="flex items-center justify-end gap-2 bg-base-200/50 px-5 py-3">
         <button
           type="button"
           class="btn btn-quiet btn-xs"

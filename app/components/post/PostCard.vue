@@ -5,20 +5,28 @@
         Thread rails: a post carrying chain members above or below continues the
         chain's rail through its own card, so the whole chain reads as one line.
 
-        They run from the avatar's top edge to the card's, so `top-10` (the 40px
-        avatar, either card variant) hides the seam where they meet it. A post
-        showing a reference block has no rail: the avatar no longer starts the
-        card, and the block's height is content-dependent.
+        The rail runs the full height of the card — that is what makes a chain
+        read as one thread — and it never crosses the content because the
+        content is inset onto the chain column (`chainColumn` below). The gutter
+        is reserved only when this card takes part in a chain, so an unchained
+        post keeps the full measure.
+
+        This mirrors Solian's own post row: the rail is a `Positioned` stretched
+        top-to-bottom, and `bodyInset` (44 px = 32 avatar + 12 gap) shifts every
+        row onto the column the chained children share (`post_item.dart`).
+
+        A post showing a reference block has no rail: the avatar no longer
+        starts the card, so the rail would begin above the thing it points at.
       -->
       <span
         v-if="railAbove"
         aria-hidden="true"
-        class="pointer-events-none absolute top-0 left-9 h-10 w-px bg-base-300/80"
+        class="pointer-events-none absolute top-0 left-9 h-10 w-px bg-line/60"
       />
       <span
         v-if="railBelow"
         aria-hidden="true"
-        class="pointer-events-none absolute top-10 bottom-0 left-9 w-px bg-base-300/80"
+        class="pointer-events-none absolute top-10 bottom-0 left-9 w-px bg-line/60"
       />
 
       <!-- Reference post (reply / forward) -->
@@ -53,7 +61,7 @@
                 <IconUserX class="h-5 w-5" />
               </div>
             </div>
-            <div class="mt-1 min-h-2 w-px flex-1 bg-base-300/80" />
+            <div class="mt-1 min-h-2 w-px flex-1 bg-line/60" />
           </div>
           <div class="min-w-0 pb-2">
             <p class="text-xs italic text-base-content/45">
@@ -73,7 +81,7 @@
               linked
               @click.stop
             />
-            <div class="mt-1 min-h-2 w-px flex-1 bg-base-300/80" />
+            <div class="mt-1 min-h-2 w-px flex-1 bg-line/60" />
           </div>
 
           <div class="min-w-0 cursor-pointer pb-2" @click.stop="navigateToReference">
@@ -183,7 +191,7 @@
             role="menu"
             @click.stop
           >
-            <ul class="w-48 rounded-card border border-line bg-base-200 p-1.5 text-xs">
+            <ul class="menu-plate w-48 p-1 text-xs">
               <li v-if="isAuthor">
                 <button class="post-menu-row" @click.stop="handleEdit">
                   <IconPencil class="h-4 w-4" /> {{ t("common.edit") }}
@@ -199,7 +207,7 @@
                   <IconFolder class="h-4 w-4" /> {{ t("post.collections.manage") }}
                 </button>
               </li>
-              <li v-if="isAuthor"><div class="my-1 border-t border-line-soft" /></li>
+              <li v-if="isAuthor" class="menu-sep" />
               <!-- Chains stay inside one publisher (POST_CHAIN_DIFFERENT_PUBLISHER). -->
               <li v-if="isAuthor">
                 <button class="post-menu-row" @click.stop="handleChain">
@@ -222,7 +230,7 @@
                   {{ hasBoosted ? t("post.unboost") : t("post.boost") }}
                 </button>
               </li>
-              <li><div class="my-1 border-t border-line-soft" /></li>
+              <li class="menu-sep" />
               <li>
                 <button class="post-menu-row" @click.stop="handleCopyLink">
                   <IconLink class="h-4 w-4" /> {{ t("post.copyLink") }}
@@ -233,7 +241,7 @@
                   <IconShare class="h-4 w-4" /> {{ t("post.share") }}
                 </button>
               </li>
-              <li><div class="my-1 border-t border-line-soft" /></li>
+              <li class="menu-sep" />
               <li>
                 <button class="post-menu-row" @click.stop="handleReport">
                   <IconFlag class="h-4 w-4" /> {{ t("post.report") }}
@@ -247,11 +255,12 @@
       <!-- Article card (list view) -->
       <div
         v-if="isArticle && !isDetail"
-        class="mt-2 overflow-hidden rounded-card border border-line bg-base-200/30"
+        class="mt-2 overflow-hidden rounded-card bg-base-300/60"
+        :class="chainColumn"
       >
         <NuxtLink
           :to="`/posts/${post.id}`"
-          class="block transition-colors hover:bg-base-200/60"
+          class="block transition-colors hover:bg-base-200/40"
         >
           <div v-if="thumbnailAttachment" class="aspect-video w-full overflow-hidden">
             <FileImage
@@ -278,7 +287,7 @@
       </div>
 
       <!-- Body -->
-      <div v-if="!isArticle || isDetail" class="mt-2">
+      <div v-if="!isArticle || isDetail" class="mt-2" :class="chainColumn">
         <div v-if="isArticle && isDetail" class="mb-3">
           <div class="chip chip-active mb-2">{{ t("post.article") }}</div>
           <h3 v-if="post.title" class="text-xl font-bold">
@@ -300,13 +309,22 @@
         />
       </div>
 
+      <!-- Attachments are contained cards, not full bleed: a 16 px corner and
+           the body gutter, exactly as Solian's `useContainedAttachments` does.
+           The card edge stays the card's, so an image never squares off the
+           corner it sits inside. -->
       <AttachmentGrid
         v-if="!isArticle && post.attachments.length > 0"
         :attachments="post.attachments"
-        flush
+        class="mt-2"
+        :class="chainColumn"
       />
 
-      <div v-if="post.tags.length > 0" class="mt-3 flex flex-wrap gap-1.5">
+      <div
+        v-if="post.tags.length > 0"
+        class="mt-3 flex flex-wrap gap-1.5"
+        :class="chainColumn"
+      >
         <NuxtLink
           v-for="tag in displayTags"
           :key="tag.id"
@@ -325,12 +343,12 @@
       </div>
 
       <!-- Embeds -->
-      <div v-if="embeds.length > 0" class="mt-3 space-y-2">
+      <div v-if="embeds.length > 0" class="mt-3 space-y-2" :class="chainColumn">
         <div v-for="(embed, idx) in embeds" :key="idx">
           <button
             v-if="getEmbedType(embed) === 'link'"
             type="button"
-            class="block w-full overflow-hidden rounded-card border border-line bg-base-200/30 text-left transition-colors hover:bg-base-200/60"
+            class="lift block w-full overflow-hidden rounded-card bg-base-300/60 text-left"
             @click.stop="openExternal(getEmbedUrl(embed)!)"
           >
             <div
@@ -373,7 +391,7 @@
 
           <div
             v-else-if="getEmbedType(embed) === 'poll'"
-            class="rounded-card border border-line bg-base-200/30"
+            class="rounded-card bg-base-300/60"
           >
             <div class="p-3">
               <div class="flex items-center gap-2 text-sm font-medium">
@@ -391,6 +409,7 @@
       <div
         v-if="metadataItems.length > 0"
         class="mt-2 flex flex-wrap items-center gap-2 text-xs text-base-content/50"
+        :class="chainColumn"
       >
         <span
           v-for="(item, idx) in metadataItems"
@@ -406,6 +425,7 @@
         :reactions="formattedReactions"
         :post-id="post.id"
         class="mt-2"
+        :class="chainColumn"
         @react="handleReact"
         @remove="handleRemoveReaction"
       />
@@ -415,15 +435,18 @@
         :post-id="post.id"
         :total-replies="post.repliesCount"
         class="mt-2"
+        :class="chainColumn"
       />
 
-      <!-- Actions: one quiet row of counts below a hairline, so the post's
-           content and its affordances read as two different things. -->
-      <div class="mt-3 flex items-center justify-between border-t border-line-soft pt-2">
-        <div class="flex items-center gap-0.5">
+      <!-- Actions: each count is its own chip on the card's ground, so the
+           affordances read as objects you can press rather than as a caption
+           under the post. No bar, no rule — just the page tone against the
+           card's raised one. -->
+      <div class="mt-3 flex items-center justify-between" :class="chainColumn">
+        <div class="flex items-center gap-1">
           <button
             type="button"
-            class="btn btn-quiet btn-xs gap-1.5 text-faint hover:text-base-content"
+            class="btn btn-xs gap-1.5 bg-base-100 text-faint hover:text-base-content"
             :aria-label="t('post.replyBtn')"
             @click.stop="handleReply"
           >
@@ -432,7 +455,7 @@
           </button>
           <button
             type="button"
-            class="btn btn-quiet btn-xs gap-1.5"
+            class="btn btn-xs gap-1.5 bg-base-100"
             :class="hasBoosted ? 'text-primary' : 'text-faint hover:text-base-content'"
             :aria-pressed="hasBoosted"
             :aria-label="t('post.boost')"
@@ -447,11 +470,13 @@
       <!--
         Chain members follow the card, in publication order, as one continuous
         thread: they are published after the head and continue its avatar rail.
+        They sit at the card's own gutter (px-4 / p-5), so their 40 px avatar
+        column lands exactly on the header's; any margin here would tilt the
+        thread off the rail.
       -->
       <PostChainThread
         v-if="!isDetail && chainMembers.length > 0"
         :posts="chainMembers"
-        class="ml-1"
       />
     </div>
 
@@ -560,8 +585,32 @@ const railBelow = computed(
     !hasReference.value,
 );
 
+/**
+ * The chain column: content the rail must not cross.
+ *
+ * A card taking part in a chain reserves the avatar column plus the rail's own
+ * gutter, and every row past the header moves onto it, so the line runs down
+ * empty paper. Solian names the same measurement `bodyInset`
+ * (`post_item.dart`): 44 px = a 32 px chained avatar plus the 12 px gap that
+ * separates it from the text.
+ *
+ * A margin, not a padding. The two are identical for a bare paragraph, but
+ * only a margin moves the *box*: an attachment or a reply preview paints its
+ * own rounded surface, and padding would leave that surface starting at the
+ * card edge and running under the rail, so the thread would still be drawn
+ * through a card. Margin starts the card at 44 px and keeps both its corners.
+ *
+ * A post with no chain keeps the full measure — reserving the gutter on every
+ * card would cost a phone 44 of its 358 px and buy nothing.
+ */
+const chainColumn = computed(() =>
+  railAbove.value || railBelow.value ? "ml-11" : "",
+);
+
 const rootClass = computed(() => {
-  if (isFeed.value) return "block border-b border-line-soft last:border-0 transition-colors";
+  // A feed row is a card: the tint, the radius and the gap in the stack are
+  // the whole separation, so it carries no rule of its own.
+  if (isFeed.value) return "feed-post transition-colors";
   if (props.embedded) return "plate transition-colors";
   return "plate transition-colors";
 });

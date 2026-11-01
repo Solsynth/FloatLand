@@ -2,134 +2,126 @@
   <NuxtLayout name="app">
     <PageHeader :title="t('search.seoTitle')" :description="t('search.seoDescription')" />
 
-    <div class="grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
-      <div class="min-w-0">
-        <form class="mb-4" role="search" @submit.prevent="onSubmit">
-          <TextField
-            ref="searchField"
-            v-model="searchQuery"
-            :placeholder="t('search.placeholder')"
-            :aria-label="t('search.placeholder')"
-            type="search"
-            size="md"
-            bare
-            suffix-icon="IconSearch"
-            autocomplete="off"
-            @input="onInput"
-          >
-            <template #action>
-              <button
-                v-if="searchQuery"
-                type="button"
-                class="field-action"
-                :aria-label="t('common.close')"
-                @click="clearSearch"
-              >
-                <IconX class="size-3.5" aria-hidden="true" />
-              </button>
-            </template>
-          </TextField>
-        </form>
-
-        <TabBox :tabs="tabs" :active="activeTab" :label="t('search.seoTitle')" @select="onTabSelect" />
-
-        <div v-if="!debouncedQuery.trim()" class="py-16 text-center">
-          <IconSearch class="mx-auto mb-3 size-6 text-faint" aria-hidden="true" />
-          <p class="voice">{{ t("search.emptyState") }}</p>
-        </div>
-
-        <template v-else-if="activeTab === 'posts'">
-          <LoadingSkeleton v-if="postsLoading && posts.length === 0" variant="feed" :rows="3" />
-
-          <p v-else-if="posts.length === 0" class="voice py-12 text-center">
-            {{ t("search.noPosts") }}
-          </p>
-
-          <template v-else>
-            <div class="flex flex-col gap-3">
-              <PostCard v-for="post in posts" :key="post.id" :post="post" />
-            </div>
-
-            <div class="mt-4 flex justify-center">
-              <span v-if="postsLoading" class="mono-id">{{ t("common.loading") }}</span>
-              <button
-                v-else-if="hasMorePosts"
-                type="button"
-                class="btn btn-quiet btn-xs"
-                @click="loadMorePosts"
-              >
-                {{ t("common.loadMore") }}
-              </button>
-              <p v-else class="mono-id">{{ t("search.noMoreResults") }}</p>
-            </div>
+    <div class="min-w-0">
+      <form class="mb-4" role="search" @submit.prevent="onSubmit">
+        <TextField
+          ref="searchField"
+          v-model="searchQuery"
+          :placeholder="t('search.placeholder')"
+          :aria-label="t('search.placeholder')"
+          type="search"
+          size="md"
+          bare
+          suffix-icon="IconSearch"
+          autocomplete="off"
+          @input="onInput"
+        >
+          <template #action>
+            <button
+              v-if="searchQuery"
+              type="button"
+              class="field-action"
+              :aria-label="t('common.close')"
+              @click="clearSearch"
+            >
+              <IconX class="size-3.5" aria-hidden="true" />
+            </button>
           </template>
-        </template>
+        </TextField>
+      </form>
 
-        <template v-else-if="activeTab === 'accounts'">
-          <LoadingSkeleton v-if="accountsLoading && allAccountResults.length === 0" variant="rows" :rows="4" />
+      <TabBox :tabs="tabs" :active="activeTab" :label="t('search.seoTitle')" @select="onTabSelect" />
 
-          <p v-else-if="allAccountResults.length === 0" class="voice py-12 text-center">
-            {{ t("search.noAccounts") }}
-          </p>
-
-          <ConsolePanel v-else flush>
-            <ul class="divide-y divide-line-soft">
-              <li v-for="result in allAccountResults" :key="`${result.type}-${result.data.id || result.data.name}`">
-                <NuxtLink
-                  :to="
-                    result.type === 'publisher'
-                      ? `/publishers/${result.data.name}`
-                      : `/accounts/${result.data.name}`
-                  "
-                  class="flex items-center gap-3 px-6 py-3 transition-colors hover:bg-base-200/60"
-                >
-                  <UserAvatar
-                    :src="getAvatarUrl(result)"
-                    :name="getDisplayName(result)"
-                    size="md"
-                  />
-                  <div class="min-w-0 flex-1">
-                    <div class="flex items-center gap-1.5">
-                      <span class="truncate text-[13px] font-semibold text-base-content">
-                        {{ getDisplayName(result) }}
-                      </span>
-                      <span v-if="result.type === 'publisher'" class="chip">
-                        {{ t("search.publisherBadge") }}
-                      </span>
-                    </div>
-                    <p class="mono-id truncate">@{{ result.data.name }}</p>
-                    <!-- eslint-disable-next-line vue/no-v-html -->
-                    <div
-                      v-if="getBio(result)"
-                      class="markdown markdown-compact mt-0.5 line-clamp-1 text-faint"
-                      v-html="renderMarkdown(getBio(result))"
-                    />
-                  </div>
-                  <IconChevronRight class="size-3.5 shrink-0 text-faint" aria-hidden="true" />
-                </NuxtLink>
-              </li>
-            </ul>
-          </ConsolePanel>
-        </template>
-
-        <template v-else>
-          <LoadingSkeleton v-if="realmsLoading && realms.length === 0" variant="rows" :rows="4" />
-
-          <p v-else-if="realms.length === 0" class="voice py-12 text-center">
-            {{ t("search.noRealms") }}
-          </p>
-
-          <div v-else class="flex flex-col gap-2">
-            <RealmListTile v-for="realm in realms" :key="realm.id" :realm="realm" />
-          </div>
-        </template>
+      <div v-if="!debouncedQuery.trim()" class="py-16 text-center">
+        <IconSearch class="mx-auto mb-3 size-6 text-faint" aria-hidden="true" />
+        <p class="voice">{{ t("search.emptyState") }}</p>
       </div>
 
-      <aside class="hidden min-w-0 lg:block">
-        <div class="sticky top-20">
-          <ExploreDiscovery />
+      <template v-else-if="activeTab === 'posts'">
+        <LoadingSkeleton v-if="postsLoading && posts.length === 0" variant="feed" :rows="3" />
+
+        <p v-else-if="posts.length === 0" class="voice py-12 text-center">
+          {{ t("search.noPosts") }}
+        </p>
+
+        <template v-else>
+          <div class="flex flex-col gap-3">
+            <PostCard v-for="post in posts" :key="post.id" :post="post" />
+          </div>
+
+          <div class="mt-4 flex justify-center">
+            <span v-if="postsLoading" class="mono-id">{{ t("common.loading") }}</span>
+            <button
+              v-else-if="hasMorePosts"
+              type="button"
+              class="btn btn-quiet btn-xs"
+              @click="loadMorePosts"
+            >
+              {{ t("common.loadMore") }}
+            </button>
+            <p v-else class="mono-id">{{ t("search.noMoreResults") }}</p>
+          </div>
+        </template>
+      </template>
+
+      <template v-else-if="activeTab === 'accounts'">
+        <LoadingSkeleton v-if="accountsLoading && allAccountResults.length === 0" variant="rows" :rows="4" />
+
+        <p v-else-if="allAccountResults.length === 0" class="voice py-12 text-center">
+          {{ t("search.noAccounts") }}
+        </p>
+
+        <ConsolePanel v-else flush>
+          <ul class="space-y-0.5">
+            <li v-for="result in allAccountResults" :key="`${result.type}-${result.data.id || result.data.name}`">
+              <NuxtLink
+                :to="
+                  result.type === 'publisher'
+                    ? `/publishers/${result.data.name}`
+                    : `/accounts/${result.data.name}`
+                "
+                class="flex items-center gap-3 px-6 py-3 transition-colors hover:bg-base-200/60"
+              >
+                <UserAvatar
+                  :src="getAvatarUrl(result)"
+                  :name="getDisplayName(result)"
+                  size="md"
+                />
+                <div class="min-w-0 flex-1">
+                  <div class="flex items-center gap-1.5">
+                    <span class="truncate text-[13px] font-semibold text-base-content">
+                      {{ getDisplayName(result) }}
+                    </span>
+                    <span v-if="result.type === 'publisher'" class="chip">
+                      {{ t("search.publisherBadge") }}
+                    </span>
+                  </div>
+                  <p class="mono-id truncate">@{{ result.data.name }}</p>
+                  <!-- eslint-disable-next-line vue/no-v-html -->
+                  <div
+                    v-if="getBio(result)"
+                    class="markdown markdown-compact mt-0.5 line-clamp-1 text-faint"
+                    v-html="renderMarkdown(getBio(result))"
+                  />
+                </div>
+                <IconChevronRight class="size-3.5 shrink-0 text-faint" aria-hidden="true" />
+              </NuxtLink>
+            </li>
+          </ul>
+        </ConsolePanel>
+      </template>
+
+      <template v-else>
+        <LoadingSkeleton v-if="realmsLoading && realms.length === 0" variant="rows" :rows="4" />
+
+        <p v-else-if="realms.length === 0" class="voice py-12 text-center">
+          {{ t("search.noRealms") }}
+        </p>
+
+        <div v-else class="flex flex-col gap-2">
+          <RealmListTile v-for="realm in realms" :key="realm.id" :realm="realm" />
         </div>
-      </aside>
+      </template>
     </div>
   </NuxtLayout>
 </template>

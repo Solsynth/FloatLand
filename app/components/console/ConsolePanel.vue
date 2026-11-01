@@ -20,7 +20,7 @@ withDefaults(
 </script>
 
 <template>
-  <section class="overflow-hidden rounded-card border border-line bg-base-200/30">
+  <section class="overflow-hidden rounded-card bg-base-200/50">
     <header
       v-if="title || note || $slots.header"
       class="flex flex-wrap items-baseline justify-between gap-2 px-6 pb-1.5 pt-5"

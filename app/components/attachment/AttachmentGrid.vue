@@ -47,7 +47,8 @@
 		<div v-else class="relative group multi-attachment">
 			<div
 				ref="scrollContainer"
-				class="flex gap-2 overflow-x-auto scrollbar-hide snap-x snap-mandatory px-4 scroll-pl-4 scroll-pr-4 pb-1"
+				class="flex gap-2 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-1"
+				:class="flush ? 'px-4 scroll-pl-4 scroll-pr-4' : 'scroll-pl-0 scroll-pr-0'"
 				@scroll="updateScrollState"
 			>
 				<div

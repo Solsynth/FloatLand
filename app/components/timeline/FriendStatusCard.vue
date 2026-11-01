@@ -102,10 +102,10 @@ const props = withDefaults(
 );
 
 const isFeed = computed(() => props.variant === "feed");
+// A status is a small note about someone, so it takes the rose block and the
+// feed's gap rather than a rule beneath it.
 const rootClass = computed(() =>
-  isFeed.value
-    ? "block border-b border-line-soft last:border-0"
-    : "card bg-base-100 shadow-sm",
+  isFeed.value ? "status-card overflow-hidden" : "card overflow-hidden",
 );
 const bodyClass = computed(() => (isFeed.value ? "px-4 py-3" : "card-body p-3"));
 

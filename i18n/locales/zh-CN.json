@@ -1,52 +1,4 @@
 {
-  "landing": {
-    "seoTitle": "开放网络的阅读器",
-    "seoDescription": "浏览帖子、文章、领域以及写下它们的人。阅读无需账号。",
-    "eyebrow": "内容浏览器",
-    "heroTitle": "网络上正在写的一切，都在同一条信息流里",
-    "heroDescription": "FloatLand 用来阅读 Solar Network：来自所有发布者的帖子和文章、它们所属的领域，以及把它们串起来的标签。不登录也能读，只有想回复时才需要账号。",
-    "getStarted": "注册账号",
-    "signIn": "登录",
-    "explore": "打开信息流",
-    "haveAccount": "已经有账号了？",
-    "openApp": "打开信息流",
-    "trySolian": "试试 Solian App",
-    "surfacesTitle": "进入的方式",
-    "surfacesDescription": "四个书架，同一个索引。网络上的每一篇内容都能从其中任何一个到达。",
-    "surfaces": {
-      "feed": {
-        "title": "信息流",
-        "description": "连续的帖子和文章，支持「推荐 / 热门 / 最新」排序，可按你关注的人和领域筛选。"
-      },
-      "search": {
-        "title": "搜索",
-        "description": "一次查询覆盖帖子、用户和领域，边输入边出结果。"
-      },
-      "tags": {
-        "title": "标签",
-        "description": "所有在用的标签，按使用量排序，每个标签都是一页归档。"
-      },
-      "realms": {
-        "title": "领域",
-        "description": "拥有独立成员和信息流的社区空间，可以网格或紧凑列表浏览。"
-      }
-    },
-    "latestTitle": "最近发布",
-    "latestDescription": "网络上最新的帖子，不分领域。",
-    "membershipTitle": "Stellar 会员",
-    "membershipDescription": "会员费用用于支付服务器开销和 Solar Network 的持续开发。等级提供更多存储空间、更快的成长速度和额外的账号功能。今天免费的功能依旧免费。",
-    "membershipCta": "对比等级",
-    "footer": {
-      "links": "链接",
-      "membership": "会员",
-      "realms": "领域",
-      "developers": "开发者",
-      "support": "支持",
-      "sourceCode": "源代码",
-      "mobile": "Solian App",
-      "copyright": "© {year} Solsynth"
-    }
-  },
   "common": {
     "loading": "加载中...",
     "loadMore": "加载更多",
@@ -415,7 +367,14 @@
     "explorePreferred": "算法倾向",
     "filterExplore": "探索",
     "filterSubscriptions": "订阅",
-    "filterFriends": "好友"
+    "filterFriends": "好友",
+    "appBanner": {
+      "title": "使用完整的 Solar Network",
+      "body": "在浏览器里阅读已经足够好用。客户端还提供聊天、通知，以及随时随地发布。",
+      "download": "下载 Solian",
+      "web": "打开网页版",
+      "dismiss": "关闭"
+    }
   },
   "presence": {
     "unknown": "未知活动",
@@ -1452,6 +1411,7 @@
     "replyBtn": "回复",
     "loading": "正在加载帖子...",
     "notFound": "帖子未找到",
+    "loadFailed": "帖子加载失败。",
     "tabReplies": "回复",
     "tabForwards": "转发",
     "tabBoosts": "助推",

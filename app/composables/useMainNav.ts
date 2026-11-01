@@ -16,7 +16,7 @@ export interface PrimaryNavItem {
  */
 export function useMainNav() {
   const items = computed<PrimaryNavItem[]>(() => [
-    { icon: IconCompass, labelKey: "nav.explore", href: "/timeline", match: "/timeline" },
+    { icon: IconCompass, labelKey: "nav.explore", href: "/", match: "/" },
     { icon: IconBuilding, labelKey: "nav.realms", href: "/realms", match: "/realms" },
     { icon: IconFolder, labelKey: "nav.categories", href: "/categories", match: "/categories" },
     { icon: IconTag, labelKey: "nav.tags", href: "/tags", match: "/tags" },

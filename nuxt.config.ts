@@ -295,6 +295,10 @@ export default defineNuxtConfig({
     // land on the product's own domain, whatever the host (solian.app,
     // legacy.solian.app, mail.solarpass.one, …).
     routeRules: {
+      // The feed is the app's root now. `/timeline` was its address for as
+      // long as a landing page owned `/`, so inbound links keep resolving to
+      // the one shelf they always meant.
+      "/timeline": { redirect: { to: "/", statusCode: 301 } },
       "/chat": { redirect: { to: "https://solian.app", statusCode: 301 } },
       "/chat/**": { redirect: { to: "https://solian.app", statusCode: 301 } },
       "/pet": { redirect: { to: "https://pet.solian.app", statusCode: 301 } },

@@ -1,12 +1,20 @@
 import { z } from "zod";
 
+/**
+ * A Solian file object as embedded in post payloads.
+ *
+ * The post service serializes the boolean feature flags with Go's
+ * `omitempty`, so `has_compression` / `has_thumbnail` are *absent* — not
+ * `false` — whenever the flag is unset. Defaults keep the parsed shape
+ * uniform while accepting the sparse wire form.
+ */
 export const FileAttachmentSchema = z.object({
   id: z.string(),
   name: z.string(),
   url: z.string().nullable().optional(),
   mimeType: z.string(),
-  hasCompression: z.boolean(),
-  hasThumbnail: z.boolean(),
+  hasCompression: z.boolean().default(false),
+  hasThumbnail: z.boolean().default(false),
   fileMeta: z.record(z.string(), z.unknown()),
 });
 export type FileAttachment = z.infer<typeof FileAttachmentSchema>;

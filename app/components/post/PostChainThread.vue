@@ -10,8 +10,8 @@
         @click.stop="expanded = true"
         @keydown.enter.stop="expanded = true"
       >
-        <span class="relative flex h-full w-8 shrink-0 justify-center">
-          <span class="absolute inset-y-0 left-4 w-px bg-base-300/80" />
+        <span class="relative flex h-full w-10 shrink-0 justify-center">
+          <span class="absolute inset-y-0 left-5 w-px bg-line/60" />
         </span>
         <span class="btn btn-ghost btn-xs gap-1 text-base-content/55">
           <IconChevronDown class="h-3.5 w-3.5" />
@@ -26,15 +26,15 @@
         into the host post below.
       -->
       <div class="flex cursor-pointer" @click.stop="openPost(member)">
-        <span class="relative flex w-8 shrink-0 justify-center">
+        <span class="relative flex w-10 shrink-0 justify-center">
           <span
             :class="
               isTail(idx)
-                ? 'absolute top-0 left-4 h-4 w-px bg-base-300/80'
-                : 'absolute inset-y-0 left-4 w-px bg-base-300/80'
+                ? 'absolute top-0 left-5 h-5 w-px bg-line/60'
+                : 'absolute inset-y-0 left-5 w-px bg-line/60'
             "
           />
-          <PublisherAvatar :publisher="member.publisher" size="sm" linked />
+          <PublisherAvatar :publisher="member.publisher" size="md" linked />
         </span>
 
         <div class="min-w-0 flex-1 pb-3 pl-3">
@@ -75,8 +75,8 @@
       @click.stop="expanded = true"
       @keydown.enter.stop="expanded = true"
     >
-      <span class="relative flex h-full w-8 shrink-0 justify-center">
-        <span class="absolute inset-y-0 left-4 w-px bg-base-300/80" />
+      <span class="relative flex h-full w-10 shrink-0 justify-center">
+        <span class="absolute inset-y-0 left-5 w-px bg-line/60" />
       </span>
       <span class="btn btn-ghost btn-xs gap-1 text-base-content/55">
         <IconChevronDown class="h-3.5 w-3.5" />

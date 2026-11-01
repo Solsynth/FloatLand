@@ -95,8 +95,8 @@
                                 class="radio radio-primary hidden"
                             >
                             <div
-                                class="card card-compact border-2 cursor-pointer transition-all"
-                                :class="form.isCommunity ? 'border-primary bg-primary/5' : 'border-base-300'"
+                                class="card card-compact cursor-pointer transition-all"
+                                :class="form.isCommunity ? 'bg-tint' : 'bg-base-200'"
                             >
                                 <div class="card-body items-center text-center">
                                     <IconUsers class="w-8 h-8" />
@@ -116,8 +116,8 @@
                                 class="radio radio-primary hidden"
                             >
                             <div
-                                class="card card-compact border-2 cursor-pointer transition-all"
-                                :class="!form.isCommunity ? 'border-primary bg-primary/5' : 'border-base-300'"
+                                class="card card-compact cursor-pointer transition-all"
+                                :class="!form.isCommunity ? 'bg-tint' : 'bg-base-200'"
                             >
                                 <div class="card-body items-center text-center">
                                     <IconBuilding2 class="w-8 h-8" />

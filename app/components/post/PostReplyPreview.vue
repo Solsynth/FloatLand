@@ -2,7 +2,7 @@
   <div
     ref="containerRef"
     v-if="totalReplies > 0"
-    class="rounded-box bg-base-200/50 overflow-hidden"
+    class="overflow-hidden rounded-card bg-base-300/70"
   >
     <!-- Header -->
     <div class="px-3 py-1.5 flex items-center justify-between">
@@ -170,7 +170,7 @@
       <!-- Load more -->
       <button
         v-if="hasMore && !loading"
-        class="w-full px-3 py-1.5 text-xs text-primary hover:bg-base-200/50 transition-colors"
+        class="w-full rounded-b-card px-3 py-1.5 text-xs text-primary transition-colors hover:bg-base-200"
         @click.stop="loadMore"
       >
         Load more replies...
@@ -184,7 +184,7 @@
       <NuxtLink
         v-if="totalReplies > 3"
         :to="`/posts/${postId}`"
-        class="block px-3 py-1.5 text-xs text-primary hover:bg-base-200/50 transition-colors text-center"
+        class="block rounded-b-card px-3 py-1.5 text-center text-xs text-primary transition-colors hover:bg-base-200"
         @click.stop
       >
         View all {{ totalReplies }} replies
@@ -220,7 +220,7 @@ const offset = ref(0);
 const hasMore = ref(true);
 const hasLoaded = ref(false);
 const route = useRoute();
-const isExplorePage = computed(() => route.path === "/timeline");
+const isExplorePage = computed(() => route.path === "/" || route.path === "/timeline");
 
 const displayReplyNodes = computed(() => {
   return replyNodes.value.slice(0, 24);

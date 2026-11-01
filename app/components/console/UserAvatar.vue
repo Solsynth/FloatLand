@@ -66,7 +66,7 @@ watch(resolved, () => {
 
 <template>
   <span
-    class="grid shrink-0 place-items-center overflow-hidden border border-line bg-base-300/40 select-none"
+    class="grid shrink-0 place-items-center overflow-hidden bg-base-300/50 select-none"
     :class="[box, square ? 'rounded-mark' : 'rounded-full', showImage ? '' : 'text-dim']"
   >
     <img

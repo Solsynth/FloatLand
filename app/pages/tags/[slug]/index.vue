@@ -1,67 +1,59 @@
 <template>
   <NuxtLayout name="app">
-    <div class="grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
-      <div class="min-w-0">
-        <p v-if="error" class="note note-error mb-4">{{ error }}</p>
+    <div class="min-w-0">
+      <p v-if="error" class="note note-error mb-4">{{ error }}</p>
 
-        <div class="mb-5 flex flex-wrap items-start justify-between gap-3">
-          <div class="flex min-w-0 items-center gap-3">
-            <span class="grid size-10 shrink-0 place-items-center rounded-chip border border-line bg-base-200/40 text-primary">
-              <IconTag class="size-5" aria-hidden="true" />
-            </span>
-            <div class="min-w-0">
-              <h1 class="title truncate text-xl text-base-content">
-                #{{ tag?.name || slug }}
-              </h1>
-              <p class="voice mt-0.5 text-[13px]">
-                {{ t("tags.seoDescription") }}
-              </p>
-            </div>
+      <div class="mb-5 flex flex-wrap items-start justify-between gap-3">
+        <div class="flex min-w-0 items-center gap-3">
+          <span class="grid size-10 shrink-0 place-items-center rounded-chip bg-base-200/70 text-primary">
+            <IconTag class="size-5" aria-hidden="true" />
+          </span>
+          <div class="min-w-0">
+            <h1 class="title truncate text-xl text-base-content">
+              #{{ tag?.name || slug }}
+            </h1>
+            <p class="voice mt-0.5 text-[13px]">
+              {{ t("tags.seoDescription") }}
+            </p>
           </div>
-
-          <button
-            type="button"
-            class="btn btn-xs"
-            :class="isSubscribed ? 'btn-error' : 'btn-primary'"
-            :disabled="isSubscribing"
-            @click="isSubscribed ? handleUnsubscribe() : handleSubscribe()"
-          >
-            <IconUserMinus v-if="isSubscribed" class="size-3.5" aria-hidden="true" />
-            <IconUserPlus v-else class="size-3.5" aria-hidden="true" />
-            {{ isSubscribed ? t("tags.unsubscribe") : t("tags.subscribe") }}
-          </button>
         </div>
 
-        <ConsolePanel flush>
-          <LoadingSkeleton v-if="isLoading || (isLoadingPosts && posts.length === 0)" variant="feed" :rows="4" />
-
-          <p v-else-if="posts.length === 0" class="voice px-6 py-10 text-center">
-            {{ t("tags.noPosts") }}
-          </p>
-
-          <template v-else>
-            <PostCard v-for="post in posts" :key="post.id" :post="post" variant="feed" />
-
-            <div class="flex justify-center border-t border-line-soft px-6 py-4">
-              <span v-if="isLoadingPosts" class="mono-id">{{ t("common.loading") }}</span>
-              <button
-                v-else-if="hasMorePosts"
-                type="button"
-                class="btn btn-quiet btn-xs"
-                @click="loadMorePosts"
-              >
-                {{ t("tags.loadMore") }}
-              </button>
-            </div>
-          </template>
-        </ConsolePanel>
+        <button
+          type="button"
+          class="btn btn-xs"
+          :class="isSubscribed ? 'btn-error' : 'btn-primary'"
+          :disabled="isSubscribing"
+          @click="isSubscribed ? handleUnsubscribe() : handleSubscribe()"
+        >
+          <IconUserMinus v-if="isSubscribed" class="size-3.5" aria-hidden="true" />
+          <IconUserPlus v-else class="size-3.5" aria-hidden="true" />
+          {{ isSubscribed ? t("tags.unsubscribe") : t("tags.subscribe") }}
+        </button>
       </div>
 
-      <aside class="hidden min-w-0 lg:block">
-        <div class="sticky top-20">
-          <ExploreDiscovery />
+      <ConsolePanel flush>
+        <LoadingSkeleton v-if="isLoading || (isLoadingPosts && posts.length === 0)" variant="feed" :rows="4" />
+
+        <p v-else-if="posts.length === 0" class="voice px-6 py-10 text-center">
+          {{ t("tags.noPosts") }}
+        </p>
+
+        <div v-else class="feed-stack">
+          <PostCard v-for="post in posts" :key="post.id" :post="post" variant="feed" />
+
+          <div class="flex justify-center rounded-card bg-base-200/50 px-6 py-4">
+            <span v-if="isLoadingPosts" class="mono-id">{{ t("common.loading") }}</span>
+            <button
+              v-else-if="hasMorePosts"
+              type="button"
+              class="btn btn-quiet btn-xs"
+              @click="loadMorePosts"
+            >
+              {{ t("tags.loadMore") }}
+            </button>
+          </div>
         </div>
-      </aside>
+      </ConsolePanel>
     </div>
   </NuxtLayout>
 </template>

@@ -73,7 +73,7 @@ onBeforeUnmount(() => resize?.disconnect())
 <template>
   <nav
     ref="root"
-    class="flex w-fit max-w-full gap-0.5 overflow-x-auto rounded-card border border-line bg-base-200/30 p-1 scrollbar-none"
+    class="flex w-fit max-w-full gap-0.5 overflow-x-auto rounded-card bg-base-200/60 p-1 scrollbar-none"
     :class="flush ? '' : 'mb-6'"
     :aria-label="label"
   >

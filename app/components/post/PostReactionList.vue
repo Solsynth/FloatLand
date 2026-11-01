@@ -16,7 +16,7 @@
 
         <PopoverPortal>
           <PopoverContent
-            class="reaction-popover-content z-50 rounded-box border border-base-300/70 bg-base-100 p-3 shadow-lg"
+            class="reaction-popover-content z-50 rounded-card bg-base-100 p-3 shadow-lg"
             :side-offset="8"
             side="top"
             align="start"

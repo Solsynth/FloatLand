@@ -1,6 +1,6 @@
 <template>
   <div
-    class="not-prose my-3 overflow-hidden rounded-box border border-base-300/70 bg-base-200/40"
+    class="not-prose my-3 overflow-hidden rounded-card bg-base-200/60"
   >
     <NuxtLink
       :to="`/posts/${postId}`"

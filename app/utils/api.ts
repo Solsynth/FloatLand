@@ -2542,7 +2542,9 @@ const PostTagSchema = z.object({
   id: z.string(),
   slug: z.string(),
   name: z.string().nullable(),
-  usage: z.number(),
+  // The tag-detail endpoint leaves `usage` unset (`null`) when the counter has
+  // not been denormalized; the list endpoint always sends a number.
+  usage: z.number().nullable().default(0),
   createdAt: z.string(),
   updatedAt: z.string(),
 });

@@ -156,10 +156,12 @@ const props = withDefaults(
 );
 
 const isFeed = computed(() => props.variant === "feed");
+
+// A presence card is not a post: it is a moment about a person, so it wears
+// the teal block instead of the neutral feed tint. In the feed it keeps the
+// stack's gap, which the host already provides.
 const rootClass = computed(() =>
-  isFeed.value
-    ? "block overflow-hidden border-b border-line-soft last:border-0"
-    : "card overflow-hidden bg-base-100 shadow-sm",
+  isFeed.value ? "presence-card overflow-hidden" : "card overflow-hidden",
 );
 const bodyClass = computed(() => (isFeed.value ? "px-4 py-3" : "card-body p-3"));
 
