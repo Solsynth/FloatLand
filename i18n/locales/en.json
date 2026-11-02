@@ -53,6 +53,7 @@
     "previewInViewer": "Preview in viewer"
   },
   "nav": {
+    "marketplace": "Marketplace",
     "membership": "Membership",
     "explore": "Explore",
     "timeline": "Timeline",
@@ -2509,5 +2510,42 @@
       "loadingOrders": "Failed to load orders",
       "settleFailed": "Settlement failed. Please try again."
     }
+  },
+  "catalog": {
+    "title": "Marketplace",
+    "description": "Every product published to this distribution center, newest release first.",
+    "empty": "No products are published here yet.",
+    "emptyBody": "Once a publisher ships its first stable release, the product appears here.",
+    "published": "Published {when}",
+    "unreleased": "No stable release",
+    "sort": "Sort",
+    "sortUpdated": "Recently updated",
+    "sortName": "Name",
+    "sortCreated": "Recently created",
+    "order": "Order",
+    "descending": "Descending",
+    "ascending": "Ascending",
+    "error": "The marketplace did not load.",
+    "total": "{n} products",
+    "latest": "Latest stable"
+  },
+  "product": {
+    "by": "by {publisher}",
+    "noDescription": "This product has no description yet.",
+    "channels": "Channels",
+    "download": "Download",
+    "downloadFor": "Download for {platform}",
+    "downloadVersion": "Download v{version}",
+    "downloadUnavailable": "No download available",
+    "otherPlatforms": "Other platforms",
+    "expired": "Expired",
+    "noReleases": "No published releases yet.",
+    "notes": "Release notes",
+    "backToCatalog": "Back to marketplace",
+    "error": "This product did not load.",
+    "notFound": "No product answers to that address.",
+    "targets": "{n} targets",
+    "forceUpdate": "Force update",
+    "downloads": "Downloads"
   }
 }

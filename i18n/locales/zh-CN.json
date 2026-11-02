@@ -60,6 +60,7 @@
     "previewInViewer": "在查看器中预览"
   },
   "nav": {
+    "marketplace": "市场",
     "membership": "会员",
     "explore": "探索",
     "timeline": "时间线",
@@ -2507,5 +2508,42 @@
       "loadingOrders": "加载订单失败",
       "settleFailed": "结算失败，请重试。"
     }
+  },
+  "catalog": {
+    "title": "市场",
+    "description": "此分发中心发布的全部产品，按最新发布排序。",
+    "empty": "这里还没有发布任何产品。",
+    "emptyBody": "发行者发布第一个稳定版本后，产品就会出现在这里。",
+    "published": "发布于 {when}",
+    "unreleased": "暂无稳定版本",
+    "sort": "排序",
+    "sortUpdated": "最近更新",
+    "sortName": "名称",
+    "sortCreated": "最近创建",
+    "order": "顺序",
+    "descending": "降序",
+    "ascending": "升序",
+    "error": "市场没有加载成功。",
+    "total": "{n} 个产品",
+    "latest": "最新稳定版"
+  },
+  "product": {
+    "by": "由 {publisher} 发布",
+    "noDescription": "此产品还没有描述。",
+    "channels": "渠道",
+    "download": "下载",
+    "downloadFor": "下载 {platform} 版",
+    "downloadVersion": "下载 v{version}",
+    "downloadUnavailable": "暂无可用下载",
+    "otherPlatforms": "其他平台",
+    "expired": "已过期",
+    "noReleases": "还没有已发布的版本。",
+    "notes": "更新说明",
+    "backToCatalog": "返回市场",
+    "error": "产品没有加载成功。",
+    "notFound": "没有与该地址对应的产品。",
+    "targets": "{n} 个目标",
+    "forceUpdate": "强制更新",
+    "downloads": "下载量"
   }
 }

@@ -1,4 +1,4 @@
-import { IconCompass, IconBuilding, IconTag, IconFolder } from "#components";
+import { IconCompass, IconBuilding, IconTag, IconFolder, IconShoppingBag } from "#components";
 import type { Component } from "vue";
 
 export interface PrimaryNavItem {
@@ -20,6 +20,7 @@ export function useMainNav() {
     { icon: IconBuilding, labelKey: "nav.realms", href: "/realms", match: "/realms" },
     { icon: IconFolder, labelKey: "nav.categories", href: "/categories", match: "/categories" },
     { icon: IconTag, labelKey: "nav.tags", href: "/tags", match: "/tags" },
+    { icon: IconShoppingBag, labelKey: "nav.marketplace", href: "/marketplace", match: "/marketplace" },
   ]);
 
   return { items };
