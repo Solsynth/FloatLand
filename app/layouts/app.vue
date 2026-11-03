@@ -74,8 +74,6 @@
             <IconMoon v-else class="size-4" aria-hidden="true" />
           </button>
 
-          <NotificationBell v-if="isAuthenticated" />
-
           <div v-if="isAuthenticated && user" ref="menuRoot" class="relative">
             <button
               type="button"
@@ -166,8 +164,6 @@
       @submit="composeOpen = false"
     />
     <LazyLightboxViewer v-if="lightboxState.isOpen" />
-    <LazyNotificationDrawer v-if="notificationDrawerOpen" />
-    <WebSocketStatus />
   </div>
 </template>
 
@@ -212,7 +208,6 @@ const { y: scrollY } = useWindowScroll();
 const scrolled = computed(() => scrollY.value > 4);
 
 const { state: lightboxState } = useLightbox();
-const { drawerOpen: notificationDrawerOpen } = useNotifications();
 
 const displayName = computed(() => user.value?.nick || user.value?.name || "");
 

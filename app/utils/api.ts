@@ -183,8 +183,6 @@ export const API_BASE = "api.solian.app";
 /** The console that owns sign-in for the whole network. */
 export const SIGN_IN_ORIGIN = "https://solarpass.one";
 export const API_BASE_URL = `https://${API_BASE}`;
-/** Realtime socket. Same host as the API, so the session cookie rides along. */
-export const WS_ENDPOINT = `wss://${API_BASE}/ws`;
 
 // Helper to build API URL
 export function getApiUrl(endpoint: string): string {
@@ -1792,60 +1790,6 @@ export async function activateBadge(badgeId: string): Promise<void> {
   });
 }
 
-// Notifications
-const NotificationSchema = z.object({
-  id: z.string(),
-  topic: z.string(),
-  title: z.string(),
-  subtitle: z.string(),
-  content: z.string(),
-  link: z.string().optional(),
-  meta: z.record(z.string(), z.unknown()),
-  viewedAt: z.string().optional(),
-  createdAt: z.string(),
-});
-export type Notification = z.infer<typeof NotificationSchema>;
-
-export async function fetchNotifications(
-  offset = 0,
-  take = 20,
-): Promise<{ items: Notification[]; total: number; hasMore: boolean }> {
-  const { data, headers } = await fetchJsonZHeaders(
-    `/ring/notifications?offset=${offset}&take=${take}`,
-    NotificationSchema.array(),
-  );
-  const total = parseInt(headers.get("x-total") || "0", 10);
-  return {
-    items: data,
-    total,
-    hasMore: offset + data.length < total,
-  };
-}
-
-export async function fetchNotificationCount(): Promise<number> {
-  try {
-    const response = await apiFetch("/ring/notifications/count");
-    const data = await response.text();
-    return parseInt(data, 10) || 0;
-  } catch {
-    return 0;
-  }
-}
-
-export async function markNotificationRead(
-  notificationId: string,
-): Promise<void> {
-  await apiFetch(`/ring/notifications/${notificationId}/read`, {
-    method: "POST",
-  });
-}
-
-export async function markAllNotificationsRead(): Promise<void> {
-  await apiFetch("/ring/notifications/all/read", {
-    method: "POST",
-  });
-}
-
 // Realm API
 // Workspace API — served by WattEngine Valve, separate from Realm APIs.
 export async function fetchWorkspaces(): Promise<Workspace[]> {
@@ -2443,83 +2387,6 @@ export async function updatePublishingSettings(payload: {
   return fetchJsonZ("/sphere/account/publishing", SnPublishingSettingsSchema, {
     method: "PATCH",
     body: JSON.stringify(camelToSnake(payload)),
-  });
-}
-
-// Settings API - Notification preferences (matches Island notifications API)
-/** 0 = normal, 1 = silent, 2 = reject */
-export type SnNotificationPreferenceLevel = 0 | 1 | 2;
-
-export interface SnNotificationTopic {
-  topic: string;
-  description: string;
-}
-
-const SnNotificationPreferenceSchema = z.object({
-  id: z.string(),
-  accountId: z.string(),
-  topic: z.string(),
-  preference: z.union([z.literal(0), z.literal(1), z.literal(2)]),
-  createdAt: z.string().optional(),
-  updatedAt: z.string().optional(),
-});
-export type SnNotificationPreference = z.infer<typeof SnNotificationPreferenceSchema>;
-
-/** Default topics from Island NotificationsApi._defaultTopics */
-export const DEFAULT_NOTIFICATION_TOPICS: SnNotificationTopic[] = [
-  { topic: "posts.mentions.new", description: "Post mentions" },
-  { topic: "post.replies", description: "Post replies" },
-  { topic: "posts.reactions.new", description: "New reactions" },
-  { topic: "posts.awards.new", description: "Post awards" },
-  {
-    topic: "subscriptions.discontinued_in_app",
-    description: "Subscription discontinued",
-  },
-  { topic: "subscriptions.begun", description: "Subscription started" },
-  { topic: "gifts.claimed", description: "Gift claimed" },
-  { topic: "wallets.transactions", description: "Wallet transactions" },
-  { topic: "auth.verification", description: "Auth verification" },
-  { topic: "invites.realms", description: "Realm invites" },
-];
-
-export async function fetchNotificationPreferences(): Promise<
-  SnNotificationPreference[]
-> {
-  return fetchJsonZ(
-    "/ring/notifications/preferences",
-    SnNotificationPreferenceSchema.array(),
-  );
-}
-
-export async function setNotificationPreference(
-  topic: string,
-  preference: SnNotificationPreferenceLevel,
-): Promise<void> {
-  await apiFetch(
-    `/ring/notifications/preferences/${encodeURIComponent(topic)}`,
-    {
-      method: "PUT",
-      body: JSON.stringify({ preference }),
-    },
-  );
-}
-
-export async function deleteNotificationPreference(
-  topic: string,
-): Promise<void> {
-  await apiFetch(
-    `/ring/notifications/preferences/${encodeURIComponent(topic)}`,
-    { method: "DELETE" },
-  );
-}
-
-export async function addCustomNotificationTopic(
-  topic: string,
-  description: string,
-): Promise<void> {
-  await apiFetch("/ring/notifications/topics", {
-    method: "POST",
-    body: JSON.stringify({ topic, description }),
   });
 }
 

@@ -256,22 +256,6 @@
       "replyFailed": "Failed to send reply"
     }
   },
-  "notifications": {
-    "title": "Notifications",
-    "bellLabel": "Notifications",
-    "markAllRead": "Mark all as read",
-    "refresh": "Refresh",
-    "close": "Close",
-    "empty": "No notifications yet",
-    "endOfList": "You're all caught up!"
-  },
-  "ws": {
-    "connecting": "Connecting...",
-    "connected": "Connected",
-    "disconnected": "Disconnected",
-    "error": "Connection error",
-    "reconnect": "Retry"
-  },
   "account": {
     "seoTitle": "Account",
     "loading": "Loading account...",

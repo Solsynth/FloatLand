@@ -263,22 +263,6 @@
       "replyFailed": "发送回复失败"
     }
   },
-  "notifications": {
-    "title": "通知",
-    "bellLabel": "通知",
-    "markAllRead": "全部标为已读",
-    "refresh": "刷新",
-    "close": "关闭",
-    "empty": "暂无通知",
-    "endOfList": "已显示全部通知"
-  },
-  "ws": {
-    "connecting": "连接中...",
-    "connected": "已连接",
-    "disconnected": "已断开",
-    "error": "连接错误",
-    "reconnect": "重试"
-  },
   "account": {
     "seoTitle": "账户",
     "loading": "正在加载账户...",
