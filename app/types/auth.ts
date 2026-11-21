@@ -666,25 +666,27 @@ export type SpellInfo = z.infer<typeof SpellInfoSchema>;
 
 export const SnAccountStatusSchema = z.object({
   type: z.number(),
-  label: z.string(),
-  symbol: z.string().optional(),
+  label: z.string().nullish(),
+  symbol: z.string().nullish(),
   isOnline: z.boolean(),
   isAutomated: z.boolean(),
-  appIdentifier: z.string().optional(),
+  appIdentifier: z.string().nullish(),
 });
 export type SnAccountStatus = z.infer<typeof SnAccountStatusSchema>;
 
 export const SnAccountActivitySchema = z.object({
-  type: z.number(),
-  manualId: z.string().optional(),
-  title: z.string().optional(),
-  titleUrl: z.string().optional(),
-  subtitle: z.string().optional(),
-  subtitleUrl: z.string().optional(),
-  caption: z.string().optional(),
-  largeImage: z.string().optional(),
-  smallImage: z.string().optional(),
-  meta: z.record(z.string(), z.unknown()).optional(),
+  // Pulsar emits domain slugs ("music", "gaming", …); older payloads used
+  // numeric codes, so accept both.
+  type: z.union([z.string(), z.number()]).optional(),
+  manualId: z.string().nullish(),
+  title: z.string().nullish(),
+  titleUrl: z.string().nullish(),
+  subtitle: z.string().nullish(),
+  subtitleUrl: z.string().nullish(),
+  caption: z.string().nullish(),
+  largeImage: z.string().nullish(),
+  smallImage: z.string().nullish(),
+  meta: z.record(z.string(), z.unknown()).nullish(),
 });
 export type SnAccountActivity = z.infer<typeof SnAccountActivitySchema>;
 

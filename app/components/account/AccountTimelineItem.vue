@@ -161,7 +161,6 @@ import {
   IconEyeOff,
   IconPlay,
   IconMusic,
-  IconHeart,
   IconMoreHorizontal,
   IconBot,
   IconClock,
@@ -274,15 +273,15 @@ const ACTIVITY_LABEL_MAP: Record<string, string> = {
   other: "Activity",
 };
 
-function resolveActivityColor(type: number | undefined): string {
+function resolveActivityColor(type: string | number | undefined): string {
   return ACTIVITY_COLOR_MAP[String(type)] ?? "base-content";
 }
 
-function resolveActivityIcon(type: number | undefined) {
+function resolveActivityIcon(type: string | number | undefined) {
   return ACTIVITY_ICON_MAP[String(type)] ?? IconMoreHorizontal;
 }
 
-function resolveActivityTypeLabel(type: number | undefined): string {
+function resolveActivityTypeLabel(type: string | number | undefined): string {
   return ACTIVITY_LABEL_MAP[String(type)] ?? "Activity";
 }
 
