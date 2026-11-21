@@ -25,9 +25,9 @@
     <!-- Account Profile -->
     <div v-else-if="account" class="mx-auto min-w-0">
       <!-- Header Section -->
-      <section class="relative overflow-hidden">
+      <section class="rise rounded-card bg-raised">
         <div
-          class="h-36 w-full overflow-hidden rounded-card bg-base-200 sm:h-44"
+          class="relative h-40 w-full overflow-hidden rounded-t-card bg-base-200 sm:h-56"
         >
           <FileImage
             v-if="backgroundUrl"
@@ -35,31 +35,46 @@
             :alt="`${displayName} background`"
             class="h-full w-full object-cover"
           />
+          <div
+            v-else
+            class="absolute inset-0 grid place-items-center overflow-hidden bg-tint"
+          >
+            <span
+              class="select-none text-[clamp(96px,14vw,150px)] font-extrabold leading-none tracking-[-0.07em] text-primary/15"
+              aria-hidden="true"
+            >
+              {{ getInitials(displayName) }}
+            </span>
+          </div>
         </div>
+
         <div
-          class="flex flex-col gap-3 px-4 pb-4 pt-0 sm:flex-row sm:items-end sm:gap-4 sm:px-6"
+          class="flex flex-col gap-3 px-4 pb-4 sm:flex-row sm:items-end sm:gap-5 sm:px-6 sm:pb-5"
         >
           <div class="shrink-0">
             <div v-if="avatarUrl" class="avatar">
               <div
-                class="-mt-12 h-20 w-20 rounded-full border-4 border-base-100 bg-base-300 sm:h-24 sm:w-24"
+                class="-mt-10 h-24 w-24 rounded-full border-4 border-raised bg-base-300 sm:-mt-12 sm:h-28 sm:w-28"
               >
                 <FileImage :file="avatarUrl" :alt="displayName" />
               </div>
             </div>
             <div v-else class="avatar avatar-placeholder">
               <div
-                class="-mt-12 grid h-20 w-20 place-items-center rounded-full border-4 border-base-100 bg-base-300 text-dim sm:h-24 sm:w-24"
+                class="-mt-10 grid h-24 w-24 place-items-center rounded-full border-4 border-raised bg-base-300 text-dim sm:-mt-12 sm:h-28 sm:w-28"
               >
-                <span class="text-lg font-semibold">
+                <span class="text-2xl font-semibold">
                   {{ getInitials(displayName) }}
                 </span>
               </div>
             </div>
           </div>
-          <div class="min-w-0 flex-1 sm:mt-2">
+
+          <div class="min-w-0 flex-1 sm:pb-1">
             <div class="flex flex-wrap items-center gap-2">
-              <h1 class="title truncate text-2xl text-base-content">
+              <h1
+                class="title truncate text-[28px] leading-none tracking-[-0.03em] text-base-content sm:text-[34px]"
+              >
                 {{ displayName }}
               </h1>
               <span
@@ -70,25 +85,29 @@
                 {{ account.profile.verification.title || "Verified" }}
               </span>
             </div>
-            <p class="mono-id truncate">
-              @{{ account.name }}
-            </p>
-            <ActivityPresence :account="account" class="mt-2" />
+            <div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
+              <span class="mono-id truncate">@{{ account.name }}</span>
+              <ActivityPresence :account="account" />
+            </div>
           </div>
 
           <!-- Actions -->
-          <div class="flex flex-wrap items-center gap-2">
+          <div class="flex flex-wrap items-center justify-end gap-2 sm:pb-1">
             <template v-if="isAuthenticated && !isCurrentUser">
-              <button
-                v-if="relationship?.isFriend"
-                class="btn btn-primary gap-2"
-                disabled
+              <span v-if="relationship?.isBlocked" class="chip gap-1.5">
+                <IconBan class="size-3" />
+                Blocked
+              </span>
+              <span
+                v-else-if="relationship?.isFriend"
+                class="chip chip-active gap-1.5"
               >
-                <IconUserCheck class="size-3.5" />
+                <IconUserCheck class="size-3" />
                 Friends
-              </button>
+              </span>
               <button
                 v-else
+                type="button"
                 class="btn btn-primary gap-2"
                 :disabled="isActionLoading"
                 @click="addFriend"
@@ -98,28 +117,11 @@
                   class="w-4 h-4 animate-spin"
                 />
                 <IconUserPlus v-else class="size-3.5" />
-                Add Friend
+                Add friend
               </button>
               <button
-                v-if="relationship?.isBlocked"
-                class="btn bg-base-200 gap-2"
-                :disabled="isActionLoading"
-                @click="unblock"
-              >
-                <IconUserX class="size-3.5" />
-                Unblock
-              </button>
-              <button
-                v-else
-                class="btn btn-ghost gap-2 text-error"
-                :disabled="isActionLoading"
-                @click="block"
-              >
-                <IconBan class="size-3.5" />
-                Block
-              </button>
-              <button
-                class="btn btn-primary gap-2"
+                type="button"
+                class="btn btn-ghost gap-2 bg-base-200"
                 :disabled="isActionLoading"
                 @click="sendMessage"
               >
@@ -128,17 +130,62 @@
               </button>
             </template>
 
-            <button class="btn btn-ghost btn-square bg-base-200" @click="shareProfile">
+            <button
+              type="button"
+              class="btn btn-ghost btn-square bg-base-200"
+              aria-label="Share profile"
+              @click="shareProfile"
+            >
               <IconShare2 class="size-3.5" />
             </button>
 
-            <button
+            <details
               v-if="isAuthenticated && !isCurrentUser"
-              class="btn btn-ghost btn-square text-error"
-              @click="reportUser"
+              ref="actionsMenu"
+              class="dropdown dropdown-end"
             >
-              <IconFlag class="size-3.5" />
-            </button>
+              <summary
+                class="btn btn-ghost btn-square list-none bg-base-200 marker:content-none [&::-webkit-details-marker]:hidden"
+                aria-label="More actions"
+              >
+                <IconMoreHorizontal class="size-4" />
+              </summary>
+              <ul
+                class="menu-plate dropdown-content z-50 mt-2 w-44 p-1.5 text-xs"
+                @click="closeActionMenu"
+              >
+                <li>
+                  <button
+                    v-if="relationship?.isBlocked"
+                    type="button"
+                    class="post-menu-row"
+                    @click="unblock"
+                  >
+                    <IconUserCheck class="size-3.5" />
+                    Unblock account
+                  </button>
+                  <button
+                    v-else
+                    type="button"
+                    class="post-menu-row text-error"
+                    @click="block"
+                  >
+                    <IconBan class="size-3.5" />
+                    Block account
+                  </button>
+                </li>
+                <li>
+                  <button
+                    type="button"
+                    class="post-menu-row text-error"
+                    @click="reportUser"
+                  >
+                    <IconFlag class="size-3.5" />
+                    Report account
+                  </button>
+                </li>
+              </ul>
+            </details>
           </div>
         </div>
       </section>
@@ -148,45 +195,65 @@
         class="grid grid-cols-1 gap-4 py-4 lg:grid-cols-3 items-start"
       >
         <!-- Main column: tabs + board / activity -->
-        <div class="order-2 min-w-0 space-y-4 lg:order-1 lg:col-span-2">
-          <div role="tablist" class="tabs tabs-box w-fit">
+        <div
+          class="order-2 min-w-0 space-y-4 lg:order-1"
+          :class="hasSidebar ? 'lg:col-span-2' : 'lg:col-span-3'"
+        >
+          <div
+            role="tablist"
+            aria-label="Profile sections"
+            class="grid grid-cols-3 gap-0.5 rounded-card bg-base-200/60 p-1"
+          >
             <button
+              type="button"
               role="tab"
-              class="tab"
-              :class="{ 'tab-active': activeTab === 'board' }"
+              class="btn btn-sm justify-center gap-1.5"
+              :class="activeTab === 'board' ? 'bg-base-300 text-base-content' : 'btn-quiet'"
+              :aria-selected="activeTab === 'board'"
+              aria-controls="profile-board"
               @click="activeTab = 'board'"
             >
+              <IconLayoutGrid class="size-3.5" aria-hidden="true" />
               Board
             </button>
             <button
+              type="button"
               role="tab"
-              class="tab"
-              :class="{ 'tab-active': activeTab === 'activity' }"
+              class="btn btn-sm justify-center gap-1.5"
+              :class="activeTab === 'activity' ? 'bg-base-300 text-base-content' : 'btn-quiet'"
+              :aria-selected="activeTab === 'activity'"
+              aria-controls="profile-activity"
               @click="activeTab = 'activity'"
             >
+              <IconActivity class="size-3.5" aria-hidden="true" />
               Activity
             </button>
             <button
+              type="button"
               role="tab"
-              class="tab"
-              :class="{ 'tab-active': activeTab === 'media' }"
+              class="btn btn-sm justify-center gap-1.5"
+              :class="activeTab === 'media' ? 'bg-base-300 text-base-content' : 'btn-quiet'"
+              :aria-selected="activeTab === 'media'"
+              aria-controls="profile-media"
               @click="activeTab = 'media'"
             >
+              <IconMusic class="size-3.5" aria-hidden="true" />
               Media
             </button>
           </div>
 
           <!-- Board tab -->
-          <div v-show="activeTab === 'board'" class="space-y-3 w-full min-w-0">
-            <div
-              v-if="boardLoading"
-              class="flex items-center gap-2 text-sm text-dim py-4"
-            >
-              <IconLoader class="w-3.5 h-3.5 animate-spin" />
-              <span>Loading board...</span>
+          <div
+            v-show="activeTab === 'board'"
+            id="profile-board"
+            role="tabpanel"
+            class="w-full min-w-0"
+          >
+            <div v-if="boardLoading" class="space-y-3" aria-busy="true">
+              <LoadingSkeleton variant="feed" :rows="2" />
             </div>
             <AccountBoard
-              v-else
+              v-if="!boardLoading"
               :account="account"
               :items="boardItems"
               :uname="accountName"
@@ -196,13 +263,18 @@
           </div>
 
           <!-- Activity timeline tab -->
-          <section v-show="activeTab === 'activity'" class="space-y-3 w-full min-w-0">
+          <section
+            v-show="activeTab === 'activity'"
+            id="profile-activity"
+            role="tabpanel"
+            class="space-y-3 w-full min-w-0"
+          >
             <div
               v-if="isLoadingTimeline && timelineItems.length === 0"
-              class="flex items-center gap-2 text-sm text-dim"
+              class="space-y-2"
+              aria-busy="true"
             >
-              <IconLoader class="w-3.5 h-3.5 animate-spin" />
-              <span>Loading activity...</span>
+              <LoadingSkeleton variant="rows" :rows="3" />
             </div>
 
             <div
@@ -221,6 +293,7 @@
             <div v-if="timelineItems.length > 0" class="py-2 text-center">
               <button
                 v-if="hasMoreTimeline"
+                type="button"
                 class="btn btn-ghost btn-sm bg-base-200"
                 :disabled="isLoadingTimeline"
                 @click="loadMoreTimeline"
@@ -236,78 +309,87 @@
 
             <div
               v-else-if="!isLoadingTimeline"
-              class="py-8 text-center text-sm text-dim"
+              class="plate px-4 py-10 text-center"
             >
-              No activity yet.
+              <p class="text-sm font-semibold">No activity yet</p>
+              <p class="mt-1 text-xs text-dim">
+                Status changes and media scrobbles will appear here.
+              </p>
             </div>
           </section>
 
           <!-- Media / Pulsar tab -->
-          <section v-if="activeTab === 'media'" class="w-full min-w-0">
+          <section
+            v-if="activeTab === 'media'"
+            id="profile-media"
+            role="tabpanel"
+            class="w-full min-w-0"
+          >
             <PulsarProfileTab :username="account.name" />
           </section>
         </div>
 
         <!-- Sidebar: bio + meta (right on desktop, above content on mobile) -->
         <aside
+          v-if="hasSidebar"
           class="order-1 lg:order-2 space-y-3 w-full min-w-0 lg:sticky lg:top-20 lg:self-start"
         >
-          <div v-if="account.profile?.bio" class="card">
-            <div class="p-4">
-              <div class="flex items-start justify-between gap-2">
-                <template v-if="isBioExpanded">
-                  <div
-                    class="markdown markdown-compact min-w-0 flex-1"
-                    v-html="bioHtml"
-                    @click="handleMarkdownClick"
-                  />
-                </template>
-                <p v-else class="text-sm text-base-content/80 flex-1">
-                  {{ bioFirstLine }}
+          <div v-if="account.profile?.bio" class="plate p-4">
+            <div
+              v-if="!isBioExpanded"
+              class="markdown markdown-compact line-clamp-3"
+              @click="handleMarkdownClick"
+              v-html="bioHtml"
+            />
+            <div
+              v-else
+              class="markdown markdown-compact"
+              @click="handleMarkdownClick"
+              v-html="bioHtml"
+            />
+            <button
+              v-if="bioNeedsExpand"
+              type="button"
+              class="mt-2 text-xs font-semibold text-primary hover:underline"
+              @click="isBioExpanded = !isBioExpanded"
+            >
+              {{ isBioExpanded ? "Show less" : "Read more" }}
+            </button>
+          </div>
+
+          <div v-if="botDeveloper?.publisher" class="plate p-4">
+            <div class="flex items-center gap-3">
+              <div
+                class="grid size-9 shrink-0 place-items-center rounded-full bg-primary/12 text-primary"
+              >
+                <IconBot class="size-4" />
+              </div>
+              <p class="min-w-0 text-sm text-dim">
+                Automated by
+                <NuxtLink
+                  :to="`/publishers/${botDeveloper.publisher.name}`"
+                  class="font-semibold text-base-content link link-hover"
+                >
+                  {{
+                    botDeveloper.publisher.nick || botDeveloper.publisher.name
+                  }}
+                </NuxtLink>
+              </p>
+            </div>
+          </div>
+
+          <div v-if="punishment" class="rounded-card bg-error/8 p-4">
+            <div class="flex items-start gap-3">
+              <div
+                class="grid size-9 shrink-0 place-items-center rounded-full bg-error/12 text-error"
+              >
+                <IconAlertTriangle class="size-4" />
+              </div>
+              <div class="min-w-0">
+                <h2 class="text-sm font-semibold">Account restrictions</h2>
+                <p class="mt-0.5 text-xs leading-relaxed text-dim">
+                  This account has active restrictions.
                 </p>
-                <button
-                  class="btn btn-ghost btn-xs text-primary shrink-0"
-                  @click="isBioExpanded = !isBioExpanded"
-                >
-                  {{ isBioExpanded ? "Collapse" : "Expand" }}
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div v-if="botDeveloper?.publisher" class="plate">
-            <div class="p-4">
-              <div class="flex items-center gap-2">
-                <IconBot class="w-4 h-4 text-primary shrink-0" />
-                <span class="text-sm">
-                  Automated by
-                  <NuxtLink
-                    :to="`/publishers/${botDeveloper.publisher.name}`"
-                    class="font-semibold link link-hover"
-                  >
-                    {{
-                      botDeveloper.publisher.nick || botDeveloper.publisher.name
-                    }}
-                  </NuxtLink>
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div v-if="punishment" class="plate border-error/40">
-            <div class="p-4">
-              <div class="flex items-center gap-3">
-                <div
-                  class="w-10 h-10 rounded-card bg-error/10 flex items-center justify-center shrink-0"
-                >
-                  <IconAlertTriangle class="w-5 h-5 text-error" />
-                </div>
-                <div class="min-w-0 flex-1">
-                  <h3 class="text-sm font-semibold">Account Restrictions</h3>
-                  <p class="mono-id">
-                    This account has active restrictions
-                  </p>
-                </div>
               </div>
             </div>
           </div>
@@ -372,6 +454,7 @@ const isActionLoading = ref(false);
 const timelineOffset = ref(0);
 const hasMoreTimeline = ref(false);
 const isBioExpanded = ref(false);
+const actionsMenu = ref<HTMLDetailsElement | null>(null);
 const botDeveloper = ref<{
   publisher?: { name: string; nick?: string };
 } | null>(null);
@@ -398,11 +481,18 @@ const bioHtml = computed(() => {
   if (!account.value?.profile?.bio) return "";
   return renderMarkdown(account.value.profile.bio);
 });
-const bioFirstLine = computed(() => {
-  if (!account.value?.profile?.bio) return "No bio yet.";
-  const lines = account.value.profile.bio.split("\n");
-  return lines[0]?.trim() || "No bio yet.";
+const bioNeedsExpand = computed(() => {
+  const bio = account.value?.profile?.bio?.trim();
+  if (!bio) return false;
+  return bio.length > 180 || bio.includes("\n");
 });
+
+const hasSidebar = computed(
+  () =>
+    Boolean(account.value?.profile?.bio) ||
+    Boolean(botDeveloper.value?.publisher) ||
+    Boolean(punishment.value),
+);
 
 const {
   data: accountData,
@@ -477,6 +567,17 @@ function getInitials(name: string): string {
       .slice(0, 2)
       .join("") || "?"
   );
+}
+
+function closeActionMenu() {
+  if (actionsMenu.value) actionsMenu.value.open = false;
+}
+
+function handleActionMenuOutside(e: PointerEvent) {
+  const menu = actionsMenu.value;
+  if (!menu?.open) return;
+  if (e.target instanceof Node && menu.contains(e.target)) return;
+  menu.open = false;
 }
 
 function handleMarkdownClick(e: MouseEvent) {
@@ -701,15 +802,22 @@ watch(activeTab, (tab) => {
 
 onMounted(() => {
   badgeManifestStore.fetchManifest().catch(() => {});
+  document.addEventListener("pointerdown", handleActionMenuOutside);
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener("pointerdown", handleActionMenuOutside);
 });
 
 // Reload board when account name changes
 watch(
   accountName,
-  async () => {
+  async (_name, previousName) => {
     timelineItems.value = [];
     timelineOffset.value = 0;
-    activeTab.value = "board";
+    // Keep the tab from the URL on first paint; a real account switch starts
+    // at the board so stale timeline entries never linger.
+    if (previousName !== undefined) activeTab.value = "board";
     try {
       await Promise.all([loadBoard(), loadPunishment()]);
     } catch (err) {

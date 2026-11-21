@@ -12,11 +12,11 @@
         <div class="flex flex-wrap items-center gap-4">
           <div class="rounded-xl bg-base-200/80 px-4 py-2.5 text-center">
             <div class="text-lg font-extrabold tabular-nums">{{ stats.total_scrobbles }}</div>
-            <div class="text-[11px] uppercase tracking-wider text-dim">Scrobbles</div>
+            <div class="text-[11px] text-dim">Scrobbles</div>
           </div>
           <div class="rounded-xl bg-base-200/80 px-4 py-2.5 text-center">
             <div class="text-lg font-extrabold tabular-nums">{{ formatDuration(stats.total_seconds) }}</div>
-            <div class="text-[11px] uppercase tracking-wider text-dim">Time</div>
+            <div class="text-[11px] text-dim">Time</div>
           </div>
         </div>
 
@@ -79,7 +79,7 @@
 
       <!-- Now Playing -->
       <section v-if="nowPlaying" class="space-y-2">
-        <h3 class="text-xs font-semibold uppercase tracking-wider text-dim">Now Playing</h3>
+        <h3 class="text-sm font-semibold text-dim">Now playing</h3>
         <div class="plate p-4 flex items-center gap-4">
           <FileImage
             v-if="nowPlaying.artwork_url"
@@ -88,7 +88,7 @@
             class="h-14 w-14 rounded-xl object-cover shrink-0 bg-base-300"
           />
           <div class="min-w-0 flex-1 space-y-1">
-            <span class="badge badge-xs badge-primary uppercase">{{ domainLabel(nowPlaying.domain) }}</span>
+            <span class="badge badge-xs badge-primary">{{ domainLabel(nowPlaying.domain) }}</span>
             <div class="font-semibold truncate">{{ nowPlaying.title }}</div>
             <div v-if="nowPlaying.subtitle" class="text-xs text-dim truncate">{{ nowPlaying.subtitle }}</div>
           </div>
@@ -97,11 +97,11 @@
 
       <!-- Works & Statuses (Poster Shelves) -->
       <section v-if="shelves.length" class="space-y-5">
-        <h3 class="text-xs font-semibold uppercase tracking-wider text-dim">Works &amp; Statuses</h3>
+        <h3 class="text-sm font-semibold text-dim">Works &amp; statuses</h3>
         <div v-for="shelf in shelves" :key="shelf.id" class="space-y-2.5">
           <div class="flex items-center justify-between gap-2">
             <div class="flex items-center gap-2 min-w-0">
-              <span class="badge badge-xs badge-ghost uppercase">{{ domainLabel(shelf.domain) }}</span>
+              <span class="badge badge-xs badge-ghost">{{ domainLabel(shelf.domain) }}</span>
               <h4 class="font-semibold text-sm truncate">{{ shelf.name }}</h4>
               <span class="text-xs font-mono text-dim">{{ shelf.items?.length || 0 }}</span>
             </div>
@@ -181,7 +181,7 @@
       <!-- Unified Scrobble History -->
       <section class="space-y-3">
         <div class="flex flex-wrap items-center justify-between gap-2">
-          <h3 class="text-xs font-semibold uppercase tracking-wider text-dim">Scrobble History</h3>
+          <h3 class="text-sm font-semibold text-dim">Scrobble history</h3>
           <div class="flex flex-wrap items-center gap-1.5">
             <button
               v-for="d in domains"
@@ -214,7 +214,7 @@
 
             <div class="min-w-0 flex-1">
               <div class="flex items-center gap-2">
-                <span class="badge badge-xs badge-ghost uppercase shrink-0">{{ domainLabel(item.domain) }}</span>
+                <span class="badge badge-xs badge-ghost shrink-0">{{ domainLabel(item.domain) }}</span>
                 <span class="text-sm font-semibold truncate">{{ item.title }}</span>
               </div>
               <div v-if="item.subtitle" class="text-xs text-dim truncate">{{ item.subtitle }}</div>
