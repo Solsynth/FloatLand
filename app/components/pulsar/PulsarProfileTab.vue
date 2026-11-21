@@ -136,13 +136,15 @@
                 </span>
 
                 <!-- Note indicator top-right -->
-                <span
+                <button
                   v-if="entry.note"
-                  class="absolute top-1.5 right-1.5 grid h-5 w-5 place-items-center rounded-md bg-black/70 text-white backdrop-blur-sm"
-                  :title="entry.note"
+                  type="button"
+                  class="absolute top-1.5 right-1.5 grid h-5 w-5 cursor-pointer place-items-center rounded-md bg-black/70 text-white backdrop-blur-sm transition hover:bg-black/85"
+                  aria-label="View full note"
+                  @click.stop="openNote(entry)"
                 >
                   <IconMessageSquare class="size-3" />
-                </span>
+                </button>
 
                 <!-- Status pill bottom-left -->
                 <span
@@ -161,9 +163,15 @@
                 <div v-if="entry.catalog_item?.subtitle" class="text-[11px] text-dim line-clamp-1">
                   {{ entry.catalog_item.subtitle }}
                 </div>
-                <p v-if="entry.note" class="text-[11px] text-base-content/70 line-clamp-2 italic">
+                <button
+                  v-if="entry.note"
+                  type="button"
+                  class="w-full cursor-pointer text-left text-[11px] text-base-content/70 line-clamp-2 italic hover:text-base-content"
+                  aria-label="View full note"
+                  @click.stop="openNote(entry)"
+                >
                   “{{ entry.note }}”
-                </p>
+                </button>
               </div>
             </div>
           </div>
@@ -232,12 +240,60 @@
           </button>
         </div>
       </section>
+
+      <!-- Full note dialog -->
+      <dialog
+        ref="noteDialog"
+        class="modal modal-bottom sm:modal-middle"
+        aria-labelledby="note-dialog-title"
+      >
+        <div v-if="activeNoteEntry" class="modal-box max-w-lg">
+          <div class="flex items-start gap-3">
+            <FileImage
+              v-if="activeNoteEntry.catalog_item?.artwork_url"
+              :src="activeNoteEntry.catalog_item.artwork_url"
+              :alt="activeNoteEntry.catalog_item?.title || 'Work cover'"
+              class="h-16 w-12 shrink-0 rounded-lg bg-base-300 object-cover"
+            />
+            <div class="min-w-0 flex-1">
+              <h3 id="note-dialog-title" class="text-base font-semibold leading-snug">
+                {{ activeNoteEntry.catalog_item?.title || 'Untitled' }}
+              </h3>
+              <p v-if="activeNoteEntry.catalog_item?.subtitle" class="text-xs text-dim">
+                {{ activeNoteEntry.catalog_item.subtitle }}
+              </p>
+              <div class="mt-1 flex flex-wrap items-center gap-1.5">
+                <span v-if="activeNoteEntry.rating" class="badge badge-xs badge-warning">
+                  ★ {{ activeNoteEntry.rating }}
+                </span>
+                <span v-if="activeNoteEntry.status" class="badge badge-xs badge-ghost">
+                  {{ statusLabel(activeNoteEntry.status) }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <p class="mt-4 whitespace-pre-wrap break-words text-sm leading-relaxed text-base-content/90">
+            {{ activeNoteEntry.note }}
+          </p>
+
+          <div class="modal-action">
+            <form method="dialog">
+              <button class="btn btn-ghost btn-sm">Close</button>
+            </form>
+          </div>
+        </div>
+        <form method="dialog" class="modal-backdrop">
+          <button aria-label="Close note">close</button>
+        </form>
+      </dialog>
     </template>
   </div>
 </template>
 
 <script setup lang="ts">
 import type {
+  PulsarCollectionItem,
   PulsarRewind,
   PulsarScrobble,
   PulsarSession,
@@ -263,10 +319,19 @@ const rewindOpen = ref(false)
 const rewindLoading = ref(false)
 const rewind = ref<PulsarRewind | null>(null)
 
+const noteDialog = ref<HTMLDialogElement | null>(null)
+const activeNoteEntry = ref<PulsarCollectionItem | null>(null)
+
 const historyDomain = ref('')
 const historyItems = ref<PulsarScrobble[]>([])
 const historyTotal = ref(0)
 const historyLoadingMore = ref(false)
+
+function openNote(entry: PulsarCollectionItem) {
+  if (!entry.note) return
+  activeNoteEntry.value = entry
+  noteDialog.value?.showModal()
+}
 
 const domains = [
   { value: '', label: 'All' },
