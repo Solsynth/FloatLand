@@ -67,8 +67,11 @@ export interface PulsarScrobble {
   caption?: string | null
   artwork_url?: string | null
   duration_seconds?: number | null
-  scrobbled_at: string
+  listened_seconds?: number | null
+  played_at?: string | null
+  scrobbled_at?: string | null
   catalog_id?: string | null
+  catalog_item?: PulsarCatalogItem | null
 }
 
 export interface PulsarRewindTopItem {

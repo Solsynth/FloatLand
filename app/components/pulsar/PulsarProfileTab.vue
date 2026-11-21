@@ -203,12 +203,12 @@
             class="flex items-center gap-3 p-3"
           >
             <FileImage
-              v-if="item.artwork_url"
-              :src="item.artwork_url"
+              v-if="scrobbleArtwork(item)"
+              :src="scrobbleArtwork(item)"
               :alt="item.title"
-              class="h-11 w-11 rounded-lg object-cover shrink-0 bg-base-300"
+              class="h-12 w-12 rounded-xl object-cover shrink-0 bg-base-300"
             />
-            <div v-else class="grid h-11 w-11 place-items-center rounded-lg bg-base-200 text-xs font-bold text-dim shrink-0">
+            <div v-else class="grid h-12 w-12 place-items-center rounded-xl bg-base-200 text-xs font-bold text-dim shrink-0">
               {{ domainLabel(item.domain).slice(0, 1) }}
             </div>
 
@@ -221,7 +221,7 @@
             </div>
 
             <span class="text-xs font-mono text-dim shrink-0">
-              {{ formatScrobbleTime(item.scrobbled_at) }}
+              {{ scrobbleTime(item) }}
             </span>
           </div>
         </div>
@@ -466,5 +466,13 @@ function formatScrobbleTime(iso: string): string {
   const d = new Date(iso)
   if (Number.isNaN(d.getTime())) return ''
   return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+}
+
+function scrobbleArtwork(item: PulsarScrobble): string {
+  return item.catalog_item?.artwork_url || item.artwork_url || ''
+}
+
+function scrobbleTime(item: PulsarScrobble): string {
+  return formatScrobbleTime(item.played_at || item.scrobbled_at || '')
 }
 </script>
