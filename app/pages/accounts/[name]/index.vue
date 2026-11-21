@@ -166,6 +166,14 @@
             >
               Activity
             </button>
+            <button
+              role="tab"
+              class="tab"
+              :class="{ 'tab-active': activeTab === 'media' }"
+              @click="activeTab = 'media'"
+            >
+              Media
+            </button>
           </div>
 
           <!-- Board tab -->
@@ -232,6 +240,11 @@
             >
               No activity yet.
             </div>
+          </section>
+
+          <!-- Media / Pulsar tab -->
+          <section v-if="activeTab === 'media'" class="w-full min-w-0">
+            <PulsarProfileTab :username="account.name" />
           </section>
         </div>
 
@@ -364,7 +377,9 @@ const botDeveloper = ref<{
 } | null>(null);
 const punishment = ref<SnAccountPunishment | null>(null);
 const badgeManifestStore = useBadgeManifestStore();
-const activeTab = ref<"board" | "activity">("board");
+const activeTab = ref<"board" | "activity" | "media">(
+  route.query.tab === "media" ? "media" : route.query.tab === "activity" ? "activity" : "board",
+);
 
 const accountStatus = computed(() =>
   account.value ? "success" : error.value ? "error" : "pending",

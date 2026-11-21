@@ -3159,3 +3159,76 @@ export async function getPublicApp(slug: string): Promise<PublicApp> {
     skipAuth: true,
   });
 }
+
+// ─────────────────────────── Pulsar (Media & Library) ───────────────────────────
+
+import type {
+  PulsarRewind,
+  PulsarScrobble,
+  PulsarSession,
+  PulsarShelf,
+  PulsarStats,
+} from "~/types/pulsar";
+
+export async function fetchPulsarUserStats(name: string): Promise<PulsarStats | null> {
+  try {
+    const res = await apiFetch(`/pulsar/users/${encodeURIComponent(name)}/stats`, { skipAuth: true });
+    return (await res.json()) as PulsarStats;
+  } catch {
+    return null;
+  }
+}
+
+export async function fetchPulsarUserNowPlaying(name: string): Promise<PulsarSession | null> {
+  try {
+    const res = await apiFetch(`/pulsar/users/${encodeURIComponent(name)}/now-playing`, { skipAuth: true });
+    const data = await res.json();
+    return data && typeof data === "object" && "title" in data ? (data as PulsarSession) : null;
+  } catch {
+    return null;
+  }
+}
+
+export async function fetchPulsarUserShelves(name: string): Promise<PulsarShelf[]> {
+  try {
+    const res = await apiFetch(`/pulsar/users/${encodeURIComponent(name)}/shelves`, { skipAuth: true });
+    const data = await res.json();
+    return Array.isArray(data) ? (data as PulsarShelf[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+export async function fetchPulsarUserHistory(
+  name: string,
+  params: { domain?: string; offset?: number; take?: number } = {},
+): Promise<{ items: PulsarScrobble[]; total: number }> {
+  try {
+    const qs = new URLSearchParams();
+    if (params.domain) qs.set("domain", params.domain);
+    if (params.offset !== undefined) qs.set("offset", String(params.offset));
+    if (params.take !== undefined) qs.set("take", String(params.take));
+    const query = qs.toString();
+    const res = await apiFetch(
+      `/pulsar/users/${encodeURIComponent(name)}/history${query ? `?${query}` : ""}`,
+      { skipAuth: true },
+    );
+    const total = Number(res.headers.get("X-Total") || 0);
+    const data = await res.json();
+    const items = Array.isArray(data) ? (data as PulsarScrobble[]) : [];
+    return { items, total: total || items.length };
+  } catch {
+    return { items: [], total: 0 };
+  }
+}
+
+export async function fetchPulsarUserRewind(name: string, year: number): Promise<PulsarRewind | null> {
+  try {
+    const res = await apiFetch(`/pulsar/users/${encodeURIComponent(name)}/rewind/${year}`, {
+      skipAuth: true,
+    });
+    return (await res.json()) as PulsarRewind;
+  } catch {
+    return null;
+  }
+}
