@@ -72,6 +72,7 @@ import {
   BoostSchema,
   PublisherSubscriptionStatusSchema,
   HeatmapDataSchema,
+  SurveyWithStatsSchema,
 } from "~/types/post";
 import {
   RealmSchema,
@@ -147,6 +148,7 @@ import type {
   Reaction,
   PublisherSubscriptionStatus,
   ThreadedReplyNode,
+  SurveyWithStats,
 } from "~/types/post";
 import type {
   Realm,
@@ -3231,4 +3233,28 @@ export async function fetchPulsarUserRewind(name: string, year: number): Promise
   } catch {
     return null;
   }
+}
+
+export async function fetchSurvey(surveyId: string): Promise<SurveyWithStats> {
+  return fetchJsonZ(`/survey/surveys/${encodeURIComponent(surveyId)}`, SurveyWithStatsSchema);
+}
+
+export async function submitSurveyAnswer(
+  surveyId: string,
+  answer: Record<string, unknown>,
+): Promise<void> {
+  await apiFetch(`/survey/surveys/${encodeURIComponent(surveyId)}/answers`, {
+    method: "POST",
+    body: JSON.stringify({ answer }),
+  });
+}
+
+export async function fetchCalendarEventById(
+  eventId: string,
+  username = "unknown",
+): Promise<CalendarEvent> {
+  return fetchJsonZ(
+    `/passport/accounts/${encodeURIComponent(username)}/calendar/events/${encodeURIComponent(eventId)}`,
+    CalendarEventSchema,
+  );
 }

@@ -342,68 +342,22 @@
         </span>
       </div>
 
-      <!-- Embeds -->
-      <div v-if="embeds.length > 0" class="mt-3 space-y-2" :class="chainColumn">
-        <div v-for="(embed, idx) in embeds" :key="idx">
-          <button
-            v-if="getEmbedType(embed) === 'link'"
-            type="button"
-            class="lift block w-full overflow-hidden rounded-card bg-base-300/60 text-left"
-            @click.stop="openExternal(getEmbedUrl(embed)!)"
-          >
-            <div
-              v-if="getEmbedImage(embed)"
-              class="aspect-video w-full overflow-hidden rounded-t-xl"
-            >
-              <img
-                :src="resolveAssetUrl(getEmbedUrl(embed)!, getEmbedImage(embed)!)"
-                :alt="getEmbedTitle(embed) || 'Link preview'"
-                class="h-full w-full object-cover"
-                loading="lazy"
-              />
-            </div>
-            <div class="card-body gap-1 p-3">
-              <div class="flex items-center gap-2 text-xs text-base-content/60">
-                <img
-                  v-if="getEmbedFavicon(embed)"
-                  :src="resolveAssetUrl(getEmbedUrl(embed)!, getEmbedFavicon(embed)!)"
-                  alt="Site icon"
-                  class="h-4 w-4 rounded object-cover"
-                  loading="lazy"
-                />
-                <IconLink v-else class="h-3.5 w-3.5" />
-                <span class="truncate">
-                  {{ getEmbedSiteName(embed) || getHost(getEmbedUrl(embed)!) }}
-                </span>
-                <IconExternalLink class="ml-auto h-3.5 w-3.5" />
-              </div>
-              <div v-if="getEmbedTitle(embed)" class="line-clamp-2 text-sm font-semibold">
-                {{ getEmbedTitle(embed) }}
-              </div>
-              <div
-                v-if="getEmbedDescription(embed)"
-                class="line-clamp-2 text-xs text-base-content/75"
-              >
-                {{ getEmbedDescription(embed) }}
-              </div>
-            </div>
-          </button>
+      <!-- Embed View (interactive webView/iframe embed) -->
+      <PostEmbedView
+        v-if="post.embedView"
+        :embed-view="post.embedView"
+        class="mt-3"
+        :class="chainColumn"
+      />
 
-          <div
-            v-else-if="getEmbedType(embed) === 'poll'"
-            class="rounded-card bg-base-300/60"
-          >
-            <div class="p-3">
-              <div class="flex items-center gap-2 text-sm font-medium">
-                <IconVote class="h-4 w-4" /> Poll
-              </div>
-              <div v-if="getEmbedTitle(embed)" class="text-sm text-base-content/80">
-                {{ getEmbedTitle(embed) }}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <!-- Embeds -->
+      <PostEmbedList
+        v-if="visibleEmbeds.length > 0"
+        :embeds="visibleEmbeds"
+        :interactive="!embedded"
+        class="mt-3"
+        :class="chainColumn"
+      />
 
       <!-- Metadata -->
       <div
@@ -512,8 +466,6 @@ import {
   IconPencil,
   IconTrash,
   IconFolder,
-  IconExternalLink,
-  IconVote,
   IconUsers,
   IconEyeOff,
   IconLock,
@@ -802,11 +754,38 @@ const displayTags = computed(() => {
   return props.post.tags.slice(0, 3);
 });
 
-// Embeds
-const embeds = computed(() => {
+// Embeds (mirrors Solian's _getVisibleEmbeds)
+function urlsMatch(left?: string | null, right?: string | null): boolean {
+  if (!left || !right) return false;
+  const a = left.trim();
+  const b = right.trim();
+  try {
+    const ua = new URL(a);
+    const ub = new URL(b);
+    const normPath = (p: string) => (p.length > 1 && p.endsWith("/") ? p.slice(0, -1) : p || "/");
+    return (
+      ua.protocol === ub.protocol &&
+      ua.host === ub.host &&
+      normPath(ua.pathname) === normPath(ub.pathname) &&
+      ua.search === ub.search
+    );
+  } catch {
+    return a === b;
+  }
+}
+
+const visibleEmbeds = computed(() => {
   const raw = props.post.meta?.embeds ?? props.post.metadata?.embeds;
   if (!Array.isArray(raw)) return [];
-  return raw.filter((e): e is EmbedItem => typeof e === "object" && e !== null);
+  const items = raw.filter(
+    (e): e is EmbedItem => typeof e === "object" && e !== null,
+  );
+  if (props.post.type !== 2 || !props.post.content) return items;
+  return items.filter((embed) => {
+    if (embed.type !== "link") return true;
+    const url = typeof embed.url === "string" ? embed.url : null;
+    return !urlsMatch(url, props.post.content);
+  });
 });
 
 // Metadata items
@@ -842,68 +821,7 @@ const metadataItems = computed(() => {
   return items;
 });
 
-// Embed helpers
-function getEmbedType(embed: EmbedItem): string {
-  return typeof embed.type === "string" ? embed.type.toLowerCase() : "unknown";
-}
-
-function getEmbedString(embed: EmbedItem, keys: string[]): string | null {
-  for (const key of keys) {
-    const value = embed[key];
-    if (typeof value === "string" && value.trim() !== "") return value;
-  }
-  return null;
-}
-
-function getEmbedUrl(embed: EmbedItem): string | null {
-  return getEmbedString(embed, ["url", "uri", "href"]);
-}
-
-function getEmbedTitle(embed: EmbedItem): string | null {
-  return getEmbedString(embed, ["title"]);
-}
-
-function getEmbedDescription(embed: EmbedItem): string | null {
-  return getEmbedString(embed, ["description"]);
-}
-
-function getEmbedSiteName(embed: EmbedItem): string | null {
-  return getEmbedString(embed, ["siteName", "site_name"]);
-}
-
-function getEmbedFavicon(embed: EmbedItem): string | null {
-  return getEmbedString(embed, ["faviconUrl", "favicon_url"]);
-}
-
-function getEmbedImage(embed: EmbedItem): string | null {
-  return getEmbedString(embed, ["imageUrl", "image_url"]);
-}
-
 // Helpers
-function getHost(url: string): string {
-  try {
-    return new URL(url).host;
-  } catch {
-    return url;
-  }
-}
-
-function resolveAssetUrl(baseUrl: string, rawUrl: string): string {
-  if (rawUrl.startsWith("//")) return `https:${rawUrl}`;
-  if (rawUrl.startsWith("/")) {
-    try {
-      const parsed = new URL(baseUrl);
-      return `${parsed.protocol}//${parsed.host}${rawUrl}`;
-    } catch {
-      return rawUrl;
-    }
-  }
-  return rawUrl;
-}
-
-function openExternal(url: string): void {
-  window.open(url, "_blank", "noopener,noreferrer");
-}
 
 function formatNumber(num: number): string {
   if (num >= 1_000_000) return (num / 1_000_000).toFixed(1) + "M";

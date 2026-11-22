@@ -100,6 +100,55 @@ export const CategorySchema = z.object({
 });
 export type Category = z.infer<typeof CategorySchema>;
 
+export const PostEmbedViewSchema = z.object({
+  uri: z.string(),
+  aspectRatio: z.number().nullable().optional(),
+  renderer: z.number().optional().default(0),
+});
+export type PostEmbedView = z.infer<typeof PostEmbedViewSchema>;
+
+export const SurveyOptionSchema = z.object({
+  id: z.string(),
+  label: z.string(),
+  description: z.string().nullable().optional(),
+  order: z.number().optional().default(0),
+});
+export type SurveyOption = z.infer<typeof SurveyOptionSchema>;
+
+export const SurveyQuestionSchema = z.object({
+  id: z.string(),
+  type: z.number(),
+  options: z.array(SurveyOptionSchema).nullable().optional(),
+  title: z.string(),
+  description: z.string().nullable().optional(),
+  order: z.number().optional().default(0),
+  isRequired: z.boolean().optional().default(false),
+  maxSelections: z.number().nullable().optional(),
+  maxLength: z.number().nullable().optional(),
+  minValue: z.number().nullable().optional(),
+  maxValue: z.number().nullable().optional(),
+});
+export type SurveyQuestion = z.infer<typeof SurveyQuestionSchema>;
+
+export const SurveyAnswerSchema = z.object({
+  id: z.string().optional(),
+  answer: z.record(z.string(), z.unknown()).optional().default({}),
+});
+export type SurveyAnswer = z.infer<typeof SurveyAnswerSchema>;
+
+export const SurveyWithStatsSchema = z.object({
+  id: z.string(),
+  title: z.string().nullable().optional(),
+  description: z.string().nullable().optional(),
+  endedAt: z.string().nullable().optional(),
+  publisherId: z.string().optional(),
+  status: z.number().optional().default(1),
+  questions: z.array(SurveyQuestionSchema).optional().default([]),
+  userAnswer: SurveyAnswerSchema.nullable().optional(),
+  stats: z.record(z.string(), z.unknown()).optional().default({}),
+});
+export type SurveyWithStats = z.infer<typeof SurveyWithStatsSchema>;
+
 export interface Post {
   id: string
   title: string | null
@@ -168,6 +217,7 @@ export interface Post {
     embeds?: unknown[]
     [key: string]: unknown
   } | null
+  embedView?: PostEmbedView | null
   resourceIdentifier: string
   createdAt: string
   editedAt: string | null
@@ -230,6 +280,7 @@ export const PostSchema: z.ZodType<Post> = z.lazy(() =>
       .catchall(z.unknown())
       .nullable()
       .optional(),
+    embedView: PostEmbedViewSchema.nullable().optional(),
     resourceIdentifier: z.string(),
     createdAt: z.string(),
     editedAt: z.string().nullable(),
