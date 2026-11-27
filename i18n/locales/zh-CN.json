@@ -298,7 +298,17 @@
     "verifiedBy": "认证方",
     "loadingActivity": "正在加载动态...",
     "automated": "自动化账号",
-    "membership": "会员"
+    "membership": "会员",
+    "timelineEvent": {
+      "generic": "动态",
+      "profileUpdated": "更新了个人资料",
+      "realmCreated": "创建了一个领域",
+      "realmJoined": "加入了一个领域",
+      "nameChanged": "更改了昵称",
+      "scrobbleCreated": "听了音乐",
+      "workReviewed": "评价了一个作品",
+      "workReviewDeleted": "删除了一条评价"
+    }
   },
   "activation": {
     "title": "账户激活",

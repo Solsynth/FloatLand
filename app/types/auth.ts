@@ -690,11 +690,25 @@ export const SnAccountActivitySchema = z.object({
 });
 export type SnAccountActivity = z.infer<typeof SnAccountActivitySchema>;
 
+/** One persisted service event from the account timeline event log. */
+export const SnAccountServiceEventSchema = z.object({
+  id: z.string(),
+  createdAt: z.string(),
+  /** e.g. `profile.updated`, `realm.created`, `work.reviewed`. */
+  eventType: z.string(),
+  source: z.string(),
+  payload: z.record(z.string(), z.unknown()).nullish(),
+});
+export type SnAccountServiceEvent = z.infer<typeof SnAccountServiceEventSchema>;
+
 export const SnAccountTimelineItemSchema = z.object({
   id: z.string(),
   eventType: z.number(),
   createdAt: z.string(),
   status: SnAccountStatusSchema.optional(),
   activity: SnAccountActivitySchema.optional(),
+  /** Set when eventType is 2 (service event) and the client declared the
+   * `timeline.service-events` capability via `X-Client-Capabilities`. */
+  event: SnAccountServiceEventSchema.optional(),
 });
 export type SnAccountTimelineItem = z.infer<typeof SnAccountTimelineItemSchema>;

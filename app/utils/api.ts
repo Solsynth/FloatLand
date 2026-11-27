@@ -1312,7 +1312,9 @@ export async function fetchAccountTimeline(
   return { posts: data, total };
 }
 
-// Account activity timeline (status updates, activities, etc.)
+// Account activity timeline (status updates, activities, service events).
+// Declares the `timeline.service-events` capability so the server includes
+// `TimelineServiceEvent` items (event type 2) this client renders.
 export async function fetchAccountActivityTimeline(
   accountName: string,
   take = 20,
@@ -1326,7 +1328,10 @@ export async function fetchAccountActivityTimeline(
   const { data, headers } = await fetchJsonZHeaders(
     `/passport/accounts/${encodeURIComponent(accountName)}/timeline?${params.toString()}`,
     SnAccountTimelineItemSchema.array(),
-    { skipAuth: true },
+    {
+      skipAuth: true,
+      headers: { "X-Client-Capabilities": "timeline.service-events" },
+    },
   );
 
   const total = parseInt(headers.get("x-total") || "0", 10);

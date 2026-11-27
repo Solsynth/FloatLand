@@ -291,7 +291,17 @@
     "verifiedBy": "Verified by",
     "loadingActivity": "Loading activity...",
     "automated": "Automated account",
-    "membership": "Membership"
+    "membership": "Membership",
+    "timelineEvent": {
+      "generic": "Activity",
+      "profileUpdated": "Updated their profile",
+      "realmCreated": "Created a realm",
+      "realmJoined": "Joined a realm",
+      "nameChanged": "Changed their name",
+      "scrobbleCreated": "Listened to music",
+      "workReviewed": "Reviewed a work",
+      "workReviewDeleted": "Removed a review"
+    }
   },
   "activation": {
     "title": "Account activation",

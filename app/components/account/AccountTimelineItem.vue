@@ -149,6 +149,38 @@
         </div>
       </div>
     </template>
+
+    <!-- Service Event (persisted timeline event log) -->
+    <template v-else-if="item.eventType === 2">
+      <div class="p-3 flex items-center gap-3">
+        <div
+          class="w-10 h-10 rounded-full flex items-center justify-center bg-primary/15"
+        >
+          <component
+            :is="serviceEventIcon"
+            class="w-5 h-5 text-primary"
+          />
+        </div>
+        <div class="flex-1 min-w-0">
+          <span class="text-sm font-medium truncate block">
+            {{ serviceEventLabel }}
+          </span>
+          <div class="flex items-center gap-1.5 text-xs text-base-content/50">
+            <span>{{ formatRelativeTime(item.createdAt) }}</span>
+            <span>·</span>
+            <span>{{ formatDateTime(item.createdAt) }}</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <div
+            v-if="duplicateCount && duplicateCount > 1"
+            class="badge badge-sm badge-primary"
+          >
+            x{{ duplicateCount }}
+          </div>
+        </div>
+      </div>
+    </template>
     </div>
   </div>
 </template>
@@ -180,7 +212,14 @@ import {
   IconFilm,
   IconGrid,
   IconDumbbell,
+  IconUserRoundPen,
+  IconBadgeCheck,
+  IconAudioLines,
+  IconStar,
+  IconStarOff,
+  IconSparkles,
 } from "#components";
+import { useI18n } from "vue-i18n";
 
 const props = defineProps<{
   item: SnAccountTimelineItem;
@@ -188,10 +227,44 @@ const props = defineProps<{
   duration?: number; // duration in milliseconds
 }>();
 
+const { t } = useI18n();
+
 const isSpotify = computed(() => props.item.activity?.manualId === "spotify");
 const isSteam = computed(() => props.item.activity?.manualId === "steam");
 const steamBgLoaded = ref(false);
 const steamBgError = ref(false);
+
+// --- Service event (timeline event log) display properties ---
+// The fleet timeline protocol's known event types; unknown future types
+// degrade to a generic activity label and icon.
+const SERVICE_EVENT_ICONS: Record<string, unknown> = {
+  "profile.updated": IconUserRoundPen,
+  "realm.created": IconUsers,
+  "realm.joined": IconUsers,
+  "name.changed": IconBadgeCheck,
+  "scrobble.created": IconAudioLines,
+  "work.reviewed": IconStar,
+  "work.review_deleted": IconStarOff,
+};
+
+const SERVICE_EVENT_LABELS: Record<string, string> = {
+  "profile.updated": "account.timelineEvent.profileUpdated",
+  "realm.created": "account.timelineEvent.realmCreated",
+  "realm.joined": "account.timelineEvent.realmJoined",
+  "name.changed": "account.timelineEvent.nameChanged",
+  "scrobble.created": "account.timelineEvent.scrobbleCreated",
+  "work.reviewed": "account.timelineEvent.workReviewed",
+  "work.review_deleted": "account.timelineEvent.workReviewDeleted",
+};
+
+const serviceEventIcon = computed(
+  () => SERVICE_EVENT_ICONS[props.item.event?.eventType ?? ""] ?? IconSparkles,
+);
+
+const serviceEventLabel = computed(() => {
+  const key = SERVICE_EVENT_LABELS[props.item.event?.eventType ?? ""];
+  return key ? t(key) : t("account.timelineEvent.generic");
+});
 
 // --- Activity type → icon/color/label lookup maps (Solian pattern) ---
 // Maps numeric activity types (and manualId variants) to display properties.
