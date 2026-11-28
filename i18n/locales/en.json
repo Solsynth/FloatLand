@@ -300,7 +300,15 @@
       "nameChanged": "Changed their name",
       "scrobbleCreated": "Listened to music",
       "workReviewed": "Reviewed a work",
-      "workReviewDeleted": "Removed a review"
+      "workReviewDeleted": "Removed a review",
+      "workStatusUpdated": "Updated a work's status",
+      "workStatus": {
+        "plan_to_watch": "Plan to watch",
+        "watching": "In progress",
+        "completed": "Completed",
+        "on_hold": "On hold",
+        "dropped": "Dropped"
+      }
     }
   },
   "activation": {

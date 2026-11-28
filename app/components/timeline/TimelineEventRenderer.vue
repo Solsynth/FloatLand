@@ -22,6 +22,7 @@ import TimelinePostItem from "~/components/timeline/TimelinePostItem.vue";
 import DiscoveryActivityBlock from "~/components/timeline/DiscoveryActivityBlock.vue";
 import FriendPresenceCard from "~/components/timeline/FriendPresenceCard.vue";
 import FriendStatusCard from "~/components/timeline/FriendStatusCard.vue";
+import ServiceEventCard from "~/components/timeline/ServiceEventCard.vue";
 
 const props = defineProps<{
   event: SnTimelineEvent;
@@ -44,6 +45,7 @@ const isDiscoveryEvent = computed(
 );
 const isPresenceEvent = computed(() => props.event.type === "presence.friend");
 const isStatusEvent = computed(() => props.event.type === "status.friend");
+const isServiceEvent = computed(() => props.event.type === "service.event");
 
 function eventData<T>(): T | null {
   if (props.event.data == null || typeof props.event.data !== "object") return null;
@@ -55,6 +57,7 @@ const renderer = computed<Component | null>(() => {
   if (isDiscoveryEvent.value) return DiscoveryActivityBlock;
   if (isPresenceEvent.value && presenceActivity.value) return FriendPresenceCard;
   if (isStatusEvent.value && statusData.value) return FriendStatusCard;
+  if (isServiceEvent.value) return ServiceEventCard;
   return null;
 });
 
@@ -80,6 +83,8 @@ const rendererProps = computed(() => {
       return { activity: presenceActivity.value, rawData: presenceRawData.value, variant: "feed" };
     case FriendStatusCard:
       return { status: statusData.value, createdAt: props.event.createdAt, variant: "feed" };
+    case ServiceEventCard:
+      return { event: props.event };
     default:
       return {};
   }

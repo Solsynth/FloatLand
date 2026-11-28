@@ -245,6 +245,7 @@ const SERVICE_EVENT_ICONS: Record<string, unknown> = {
   "scrobble.created": IconAudioLines,
   "work.reviewed": IconStar,
   "work.review_deleted": IconStarOff,
+  "work.status_updated": IconBadgeCheck,
 };
 
 const SERVICE_EVENT_LABELS: Record<string, string> = {
@@ -255,6 +256,7 @@ const SERVICE_EVENT_LABELS: Record<string, string> = {
   "scrobble.created": "account.timelineEvent.scrobbleCreated",
   "work.reviewed": "account.timelineEvent.workReviewed",
   "work.review_deleted": "account.timelineEvent.workReviewDeleted",
+  "work.status_updated": "account.timelineEvent.workStatusUpdated",
 };
 
 const serviceEventIcon = computed(

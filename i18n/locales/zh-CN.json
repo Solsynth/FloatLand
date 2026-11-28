@@ -307,7 +307,15 @@
       "nameChanged": "更改了昵称",
       "scrobbleCreated": "听了音乐",
       "workReviewed": "评价了一个作品",
-      "workReviewDeleted": "删除了一条评价"
+      "workReviewDeleted": "删除了一条评价",
+      "workStatusUpdated": "更新了作品状态",
+      "workStatus": {
+        "plan_to_watch": "计划中",
+        "watching": "进行中",
+        "completed": "已完成",
+        "on_hold": "搁置",
+        "dropped": "放弃"
+      }
     }
   },
   "activation": {
